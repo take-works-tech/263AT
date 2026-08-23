@@ -107,8 +107,29 @@ INPUT_TO_SOURCE = {
     "SELF_positions": "SELF", "SELF": "SELF",
     # LLM
     "LLM": "LLM",
-    # 業種分類は spec SP-03/SP-04 が未解決。手作業が要る
-    "sector_classification": "手", "industry": "手",
+    # 上の表に無い入力名は保守的に「手」扱いになる。
+    # **その保守性が優先順位を歪めていたので、実体が明らかなものを追記する。**
+    # （2026-08-23、build_priority.py のボトルネック分析を1周させて判明した）
+    "market_return": "PX", "market_cap": "FIN", "liquidity": "PX",
+    "EV": "FIN", "TL": "FIN", "TAXR": "FIN", "INTEREST": "FIN",
+    "EPS_actual": "FIN", "segment_profit": "FIN", "segment_assets": "FIN",
+    "buyback_execution": "TD", "insider_transactions": "SEC",
+    "earnings_date": "TD", "earnings_datetime": "TD", "GUIDE_CO": "TD",
+    "margin_long": "JQ", "margin_short": "JQ", "float_shares": "JQ",
+    "option_iv": "OPT", "option_volume": "OPT", "option_oi": "OPT",
+    "appraisal_value": "EDI", "customer_disclosure": "EDI",
+    "index_criteria": "手", "index_valuation": "手", "replacement_cost": "手",
+    # 推定量・自分の状態・設計上のパラメータは追加のデータ源を要さない
+    "mu_hat": "CALC", "growth_rate": "CALC", "growth_assumptions": "CALC",
+    "h_star": "CALC", "available_at": "CALC", "CAC_estimate": "LLM",
+    "target_position": "SELF", "target_position_jpy": "SELF",
+    "SELF_entry_date": "SELF",
+    # 業種分類。**spec §4.1（2026-08-23）で確定した。**
+    #   日本 = 東証33業種（JPX の銘柄一覧。J-Quants でも取れる）
+    #   米国 = Fama-French 49業種（SEC filing の SIC + Ken French の対応表）
+    # → 以前は SP-03/SP-04 が未解決だったので "手" にしており、
+    #   **それが最大のボトルネックとして検出された**（§1.9.9）。
+    "sector_classification": "JQ", "industry": "JQ",
 }
 
 
