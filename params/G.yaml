@@ -849,13 +849,13 @@
     pit_lag_days: default
     accounting_standard_note: override
     zero_denominator_policy: override
-    evidence_tier: override
-    references: override
     formula: override
     inputs: override
     missing_bias: override
     correlated_with: override
     economic_rationale: override
+    evidence_tier: override
+    references: override
     markets: override
   review:
     status: verified

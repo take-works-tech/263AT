@@ -176,6 +176,56 @@ def main() -> int:
     print("  縮小は重複を潰しきれていない。")
     print("  ただし131本すべてに等しく重みを置く等加重（OOS Sharpe -0.050 で失敗）よりは")
     print("  遥かに良い（ridge 0.755）。**縮小は不完全だが機能している。**")
+
+    print()
+    print("=" * 72)
+    print("追試(3) 各パラメータは「塊の他のメンバー」を控除しても生き残るか")
+    print("=" * 72)
+    print("G07 で確立した手順を、n_eff が小さく出た塊すべてに機械的に適用する。")
+    print("**相関で候補を挙げ、回帰で判定する。**")
+    print()
+    print("  raw_t    : 素の L/S の t")
+    print("  alpha_t  : 同じ塊の他メンバー全部を控除した後の alpha の t")
+    print("  判定     : alpha_t の絶対値が 2.0 未満なら「塊に吸収される」")
+    print()
+
+    from analyze_correlation import HYPOTHESIZED
+    surv = []
+    for label, ids in HYPOTHESIZED.items():
+        present = [i for i in ids if i in Q.columns]
+        if len(present) < 3:
+            continue
+        print("--- %s（n=%d）" % (label, len(present)))
+        for pid in present:
+            others = [c for c in present if c != pid]
+            sub = Q[[pid] + others].dropna()
+            if len(sub) < 120:
+                continue
+            rt, rm, rn = tstat(sub[pid])
+            b, t, r2 = ols(sub[pid].values, sub[others].values)
+            keep = abs(t[0]) >= 2.0
+            surv.append({"cluster": label, "id": pid, "raw_t": rt,
+                         "alpha": b[0], "alpha_t": t[0], "r2": r2,
+                         "n": len(sub), "survives": keep})
+            print("   %-5s raw_t=%6.2f  alpha=%+.3f%%  alpha_t=%6.2f  R^2=%.2f  %s"
+                  % (pid, rt, b[0], t[0], r2,
+                     "残る" if keep else "**吸収される**"))
+        print()
+
+    if surv:
+        df = pd.DataFrame(surv)
+        df.to_csv(ROOT / "research" / "z12_survival.csv", index=False, encoding="utf-8")
+        n_abs = int((~df["survives"]).sum())
+        print("→ %d/%d が塊に吸収される（独立した情報を持たない）"
+              % (n_abs, len(df)))
+        print("→ research/z12_survival.csv")
+        print()
+        print("**注意: これは「削除せよ」という意味ではない。**")
+        print("§1.9 の方針は選択せず縮小することなので、吸収されるものも残す。")
+        print("意味があるのは **buy_class / sell_class の格付けと、")
+        print("パイプライン構築の優先順位（§1.9 の priority_k）**である。")
+        print("実装コストを払う価値があるのは、生き残った方。")
+
     return 0
 
 

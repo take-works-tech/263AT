@@ -116,7 +116,11 @@ def main():
         for a in best[:3]:
             r = doc.loc[a]
             t = pd.to_numeric(r.get("T-Stat"), errors="coerce")
-            refs.append("OSAP %s — %s %s, %s（OSAP再現 t=%s, 月次%s%%, 品質=%s, 予測力=%s）"
+            # **T-Stat 列は「原論文が報告した t」であって OSAP の再現値ではない。**
+            # signal_doc の SampleStartYear/EndYear が原論文の期間になっていることで確認できる。
+            # 実測（等加重デシル L/S, 1963-）では 22% が t<2.0、5% は符号すら逆になる。
+            # → tools/analyze_z12_followup.py と research/oap_pub_vs_replicated.csv を参照。
+            refs.append("OSAP %s — %s %s, %s（**原論文** t=%s, 月次%s%%, 再現品質=%s, 予測力=%s）"
                         % (a, r.get("Authors"), r.get("Year"), r.get("Journal"),
                            ("%.1f" % abs(t)) if pd.notna(t) else "n/a",
                            r.get("Return"), r.get("Signal Rep Quality"),

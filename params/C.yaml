@@ -1277,14 +1277,14 @@
     period_convention: override
     pit_lag_days: default
     zero_denominator_policy: override
-    evidence_tier: override
-    references: override
     formula: override
     inputs: override
     accounting_standard_note: override
     missing_bias: override
     correlated_with: override
     economic_rationale: override
+    evidence_tier: override
+    references: override
     markets: override
   review:
     status: verified
