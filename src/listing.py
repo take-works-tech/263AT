@@ -164,6 +164,65 @@ def fetch_us(use_cache: bool = True) -> list[Listing]:
     return out
 
 
+class SicAsOf:
+    """**SIC を as-of で引く。** spec §9 の落とし穴14（業種分類の遡及適用）。
+
+    企業は事業転換で SIC を変える（繊維メーカーが電子部品になる等）。
+    **現在の SIC で過去を分類すると、当時の同業と比較していないことになる。**
+
+    DERA の `sub.txt` には `filed` があるので **as-of 化は可能である。**
+    Phase 1 の煙テストでは「最新の提出のものを使う」と簡略化して明記していたが、
+    やっていなかっただけなので、ここで解消する。
+
+    **JPX の銘柄一覧には過去分が無い**ので、日本側は今日から
+    月次スナップショットを蓄積するしかない（`listing.py` の冒頭に記載）。
+    """
+
+    def __init__(self, records: list[tuple[int, str, str]]):
+        """`records` は (cik, filed, sic) の並び。"""
+        self._idx: dict[int, list[tuple[str, str]]] = {}
+        for cik, filed, sic in records:
+            self._idx.setdefault(int(cik), []).append((str(filed)[:10], str(sic)))
+        for k in self._idx:
+            self._idx[k].sort()
+
+    def get(self, cik: int, t: str) -> str | None:
+        """時点 t で有効だった SIC。**t までに提出されたうち最新のもの。**"""
+        import bisect
+        rows = self._idx.get(int(cik))
+        if not rows:
+            return None
+        i = bisect.bisect_right([f for f, _ in rows], t[:10])
+        return rows[i - 1][1] if i else None
+
+    def changes(self) -> list[dict]:
+        """**SIC が変わった企業を列挙する。**
+
+        変わらないなら as-of 化の効果はゼロなので、
+        **まず「どれだけ変わるのか」を測る。**
+        """
+        out = []
+        for cik, rows in self._idx.items():
+            vals = [s for _, s in rows]
+            uniq = sorted(set(vals))
+            if len(uniq) > 1:
+                out.append({"cik": cik, "n_values": len(uniq),
+                            "first": vals[0], "last": vals[-1],
+                            "first_filed": rows[0][0], "last_filed": rows[-1][0]})
+        return out
+
+    @classmethod
+    def from_dera(cls, subs_dir=None) -> "SicAsOf":
+        import pandas as pd
+        d = pathlib.Path(subs_dir or (ROOT / "data" / "pit" / "subs"))
+        recs = []
+        for f in sorted(d.glob("*.parquet")):
+            df = pd.read_parquet(f)[["cik", "filed", "sic"]].dropna()
+            for r in df.itertuples(index=False):
+                recs.append((int(r.cik), str(r.filed)[:10], str(r.sic)))
+        return cls(recs)
+
+
 def attach_us_sectors(rows: list[Listing], sic_by_cik: dict[str, str | int]
                       ) -> list[Listing]:
     """SEC の SIC を FF49 に変換して US 銘柄に付ける（spec §4.1）。
@@ -245,6 +304,20 @@ def _test() -> int:
           "鉱業" in SMALL_TSE33 and len(SMALL_TSE33) == 9)
     check("SEC は連絡先つき UA を使う", "contact:" in UA["User-Agent"])
 
+    # SIC の as-of（spec §9 の落とし穴14）
+    sa = SicAsOf([(1, "2020-05-01", "2200"), (1, "2023-05-01", "3674"),
+                  (2, "2020-05-01", "7372")])
+    check("**過去の時点では当時の SIC を返す**", sa.get(1, "2021-01-01") == "2200")
+    check("**変更後は新しい SIC**", sa.get(1, "2024-01-01") == "3674")
+    check("**最初の提出より前は None（現在の値で埋めない）**",
+          sa.get(1, "2019-01-01") is None)
+    check("提出日当日は取れる", sa.get(1, "2020-05-01") == "2200")
+    check("存在しない企業は None", sa.get(999, "2024-01-01") is None)
+    ch = sa.changes()
+    check("**SIC が変わった企業を検出する**",
+          len(ch) == 1 and ch[0]["cik"] == 1 and ch[0]["n_values"] == 2)
+    check("変わっていない企業は挙げない", all(c["cik"] != 2 for c in ch))
+
     # SIC → FF49 の紐付け（ff49 の定義が未取得ならスキップする）
     try:
         import ff49 as _ff
@@ -267,7 +340,7 @@ def _test() -> int:
             check("ff49 が読めない", False)
 
     print("-" * 70)
-    print("%d/%d 通過" % (11 - len(fails), 11))
+    print("%d/%d 通過" % (18 - len(fails), 18))
     return 1 if fails else 0
 
 

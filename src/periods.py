@@ -88,7 +88,41 @@ def quarter_series(asof: AsOf, cik: int, code: str, t: str,
         if f is not None:
             got[ddate] = f
 
-    # 通期（qtrs=4）から Q4 を復元する
+    # --- 累計（YTD）報告からの分解 -------------------------------------------
+    #
+    # **キャッシュフロー計算書は累計で報告される。**
+    # 実測（2026-08-23、DERA 17四半期）:
+    #   CFO  qtrs=1: 55,645 / qtrs=2: 55,450 / qtrs=3: 54,451  ← ほぼ同数
+    #   NI   qtrs=1: 268,338 / qtrs=2: 56,884                  ← 単体が主
+    # CFO/DA は 3ヶ月・6ヶ月・9ヶ月・12ヶ月がそれぞれ同じくらいある。
+    # つまり**四半期単体は第1四半期にしか存在しない。**
+    #
+    # → 累計を使わないと CFO の TTM は作れない。
+    #   実際、E01（アクルーアル）は **665社中5社（1%）**しか作れなかった。
+    #
+    # 分解の規約:
+    #   ある末日 D の四半期単体 = 累計(k ヶ月, D) − 累計(k−3 ヶ月, D の3ヶ月前)
+    # **どちらかが欠けていれば作らない。** 推測で埋めない。
+    for k in (2, 3, 4):
+        for ddate in asof._by_series.get((cik, code, k), ())[:6]:
+            if ddate in got:
+                continue
+            cum = asof.get(cik, code, ddate, k, t)
+            if cum is None:
+                continue
+            # 3ヶ月前を末日とする、1つ短い累計を探す
+            prev_end = [d for d in asof._by_series.get((cik, code, k - 1), ())
+                        if _months_between(d, ddate) == 3]
+            if not prev_end:
+                continue
+            prev = asof.get(cik, code, prev_end[0], k - 1, t)
+            if prev is None:
+                continue
+            got[ddate] = dataclasses.replace(
+                cum, value=cum.value - prev.value,
+                tag=cum.tag + "[derived from YTD %d-%d]" % (k, k - 1))
+
+    # 通期（qtrs=4）から Q4 を復元する（**四半期単体しか無い企業向け**）
     for ddate in asof._by_series.get((cik, code, 4), ())[:4]:
         fy = asof.get(cik, code, ddate, 4, t)
         if fy is None or ddate in got:
@@ -125,7 +159,7 @@ def ttm(asof: AsOf, cik: int, code: str, t: str) -> Composed | None:
         value=sum(f.value for f in qs),
         periods=tuple(sorted(f.ddate for f in qs)),      # ← 昇順に揃える
 
-        derived_q4=any("[derived Q4]" in f.tag for f in qs),
+        derived_q4=any("[derived" in f.tag for f in qs),
         as_of=t,
         latest_filed=max(f.filed for f in qs),
     )
@@ -261,6 +295,32 @@ def _test() -> int:
     # **通期が提出される前は復元しない**
     check("通期の提出前は Q4 を作らない", ttm(b, 2, "REV", "2025-01-01") is None)
 
+    # **累計（YTD）からの分解。** CFO はこの形でしか来ない
+    ytd = [
+        _f(4, "CFO", "2024-03-31", 1, 10.0, "2024-05-01"),   # Q1 単体（3ヶ月）
+        _f(4, "CFO", "2024-06-30", 2, 25.0, "2024-08-01"),   # 6ヶ月累計
+        _f(4, "CFO", "2024-09-30", 3, 45.0, "2024-11-01"),   # 9ヶ月累計
+        _f(4, "CFO", "2024-12-31", 4, 70.0, "2025-03-01"),   # 通期
+    ]
+    e = AsOf(ytd)
+    qser = quarter_series(e, 4, "CFO", "2025-04-01")
+    check("**累計から四半期単体を4つ復元する**", len(qser) == 4)
+    vals = {f.ddate: f.value for f in qser}
+    check("Q2 = 6ヶ月累計 25 − Q1 10 = 15", abs(vals["2024-06-30"] - 15.0) < 1e-9)
+    check("Q3 = 9ヶ月累計 45 − 6ヶ月 25 = 20", abs(vals["2024-09-30"] - 20.0) < 1e-9)
+    check("Q4 = 通期 70 − 9ヶ月 45 = 25", abs(vals["2024-12-31"] - 25.0) < 1e-9)
+    cy = ttm(e, 4, "CFO", "2025-04-01")
+    check("**累計しか無い項目でも TTM が作れる（= 通期の 70）**",
+          cy is not None and abs(cy.value - 70.0) < 1e-9)
+    check("復元したことを記録する", cy is not None and cy.derived_q4 is True)
+    check("**復元したタグに由来が残る**",
+          any("derived from YTD" in f.tag for f in qser))
+    # 片方が欠けていれば作らない
+    e2 = AsOf([f for f in ytd if f.qtrs != 2])
+    q2 = quarter_series(e2, 4, "CFO", "2025-04-01")
+    check("**6ヶ月累計が無ければ Q2 を作らない（推測で埋めない）**",
+          all(f.ddate != "2024-06-30" for f in q2))
+
     # AVG
     bs = [_f(3, "TA", "2023-06-30", 0, 100.0, "2023-08-01"),
           _f(3, "TA", "2024-06-30", 0, 200.0, "2024-08-01")]
@@ -291,7 +351,7 @@ def _test() -> int:
     check("**TTM と AVG が同じ期末を指していれば整合する**", aligned(c, av))
 
     print("-" * 76)
-    total = 22
+    total = 29
     print("%d/%d 通過" % (total - len(fails), total))
     return 1 if fails else 0
 
