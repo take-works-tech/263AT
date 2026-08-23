@@ -2826,7 +2826,7 @@
   references:
   - https://www.openassetpricing.com/
   - OSAP DelEqu — Change in equity to assets, t=6.2
-  notes: OSAP DelEqu t=6.2
+  notes: OSAP DelEqu t=6.2。D02（自己資本比率の水準）はゲートとして高い方が良いのに、その変化は高い方が悪いという符号の逆転。 増資で比率が上がる場合が多いためと解釈できる。誤実装を誘発しやすいので Phase 1 で必ず実測確認する
   notes_extra: null
   provenance:
     name_ja: catalog
