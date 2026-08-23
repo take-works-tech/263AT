@@ -124,9 +124,22 @@ def build_one(t: str, series, by_ticker, sic_asof, asof, bars_by_ticker,
         m = by_ticker.get(tk)
         if not m or not m.cik:
             continue
-        snap = PR.snapshot(s, t)
-        if snap is None:
+        # **PR.snapshot を使わない。**
+        # あれは呼ばれるたびに `bars.adjust` で全系列を再調整し、
+        # さらに `adv` / `zero_volume_days` を**全日付ぶん**計算して
+        # 末尾だけ取る。1,383銘柄 × 173ヶ月 = **24万回**やると終わらない。
+        # ここでは調整済みの行を使い回し、**末尾の窓だけ**を数える。
+        rows_t = bars_by_ticker.get(tk)
+        i_t = _index_at(rows_t, t) if rows_t else None
+        if i_t is None or i_t + 1 < 60:
             continue
+        snap = {
+            "close": rows_t[i_t]["close"],
+            "adv20": sum(x["turnover"]
+                         for x in rows_t[i_t - 19: i_t + 1]) / 20.0,
+            "zero_vol_60": sum(1 for x in rows_t[i_t - 59: i_t + 1]
+                               if x["volume"] <= 0),
+        }
         cik = int(m.cik)
         sh = asof.latest_period(cik, "SHARES", 0, t, max_lag_days=400)
         mcap = sh.value * snap["close"] * FX if sh else None
@@ -140,12 +153,9 @@ def build_one(t: str, series, by_ticker, sic_asof, asof, bars_by_ticker,
         v = PU.compute(asof, cik, t, mcap)
         vals = {k: x.value for k, x in v.items() if x.value is not None}
         # **価格系を足す。** 財務が無い銘柄でも価格系だけで行が立つ
-        br = bars_by_ticker.get(tk)
-        i_t = _index_at(br, t) if br else None
-        if i_t is not None:
-            for k, x in PX.compute_all(br, i_t).items():
-                if x.value is not None and k in SIGN:
-                    vals[k] = x.value
+        for k, x in PX.compute_all(rows_t, i_t).items():
+            if x.value is not None and k in SIGN:
+                vals[k] = x.value
         if len(vals) < 3:
             continue
         raw.append({"ticker": tk, "sector": ff49.industry(sic_asof.get(cik, t)),
@@ -193,7 +203,11 @@ def main() -> int:
     by_ticker = {r.ticker: r for r in LS.fetch_us(use_cache=True)}
     sic_asof = LS.SicAsOf.from_dera()
     bars_by_ticker = {t: BR.adjust(s.bars) for t, s in series.items()}
-    print("価格 %d 銘柄" % len(series))
+    # **価格を持っている銘柄の CIK だけ読む。**
+    # DERA は 5,000-8,000 社ぶんあるが、使うのは 1,383 銘柄。
+    need_ciks = {int(by_ticker[t].cik) for t in series
+                 if by_ticker.get(t) and by_ticker[t].cik}
+    print("価格 %d 銘柄 / 勘定を読む CIK %d" % (len(series), len(need_ciks)))
 
     # **勘定データは年ごとに窓を切って読む。**
     # 69四半期を一度に持つと 2,462万ファクトになり、
@@ -216,7 +230,7 @@ def main() -> int:
         y = int(t[:4])
         if y != cur_year:
             qs = quarters_for(y)
-            fs = FA.load(qs)
+            fs = FA.load(qs, ciks=need_ciks)
             asof = FA.AsOf(fs)
             cur_year = y
             print("  --- %d年: 勘定 %d 件（%s 〜 %s）"

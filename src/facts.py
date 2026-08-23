@@ -168,8 +168,17 @@ def resolve_tags(df):
     return df.sort_values("tag_rank").drop_duplicates(subset=key, keep="first")
 
 
-def load(quarters: list[str] | None = None) -> list[Fact]:
-    """`data/pit/facts/*.parquet` を読む（tools/build_pit_fundamentals.py が作る）。"""
+def load(quarters: list[str] | None = None,
+         ciks: set[int] | None = None) -> list[Fact]:
+    """`data/pit/facts/*.parquet` を読む（tools/build_pit_fundamentals.py が作る）。
+
+    `ciks` を渡すと**その企業だけ**を読む。
+
+    **これは速度のためだけの絞り込みで、意味は変えない。**
+    DERA には 5,000〜8,000 社が入っているが、263AT が価格を持っているのは
+    1,383 銘柄しかない。全部を Python オブジェクトにすると
+    **16四半期で 65秒を超え、年ごとに読み直す構成では終わらなかった。**
+    """
     import pandas as pd
 
     d = PIT / "facts"
@@ -181,6 +190,9 @@ def load(quarters: list[str] | None = None) -> list[Fact]:
     out: list[Fact] = []
     for f in files:
         df = pd.read_parquet(f)
+        if ciks:
+            # **オブジェクトにする前に落とす。** 後で捨てても速くならない
+            df = df[df["cik"].isin(ciks)]
         df = resolve_tags(df)
         for r in df.itertuples(index=False):
             out.append(Fact(
