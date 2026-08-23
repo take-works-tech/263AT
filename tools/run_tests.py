@@ -13,7 +13,7 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-MODULES = ["guard.py", "bars.py", "universe.py", "normalize.py", "listing.py"]
+MODULES = ["guard.py", "bars.py", "universe.py", "normalize.py", "listing.py", "ff49.py"]
 
 if hasattr(sys.stdout, "reconfigure"):
     try:

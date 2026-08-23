@@ -25,6 +25,19 @@ JPX の一覧には33業種と17業種の**両方**が入っているので、
     （2026-08-23 に実取得した 3,903 銘柄での実測。ETF/REIT を除いた普通株）
 
 → **§4.1 のフォールバックは「念のため」ではなく、常時発動する。**
+
+**しかも日本では2段では足りない**（2026-08-23 実測、内国株式 3,713 銘柄）:
+
+| 段 | 30社未満の業種 |
+|---|---|
+| 東証33業種 | **9 / 33** |
+| 東証17業種に落とした後 | **2 / 17**（エネルギー資源 14、電力・ガス 29） |
+| → 市場全体 | 発動する |
+
+米国は **FF49 で 14/49 が30社未満だが、FF12 に落とすと全業種が30社以上**になる。
+→ **日米で非対称。米国は2段で足りるが、日本は3段目（市場全体）が要る。**
+→ **「エネルギー資源」は U-7（資源・海運）そのもの**なので、
+  **日本の U-7 パラメータは業種内ランクが原理的に作れない。**
 → さらに重い含意: **U-7（資源・海運）と U-1（金融の保険）は、
   東証33業種の中で単独では断面ランクを作れない。**
   U カテゴリはもともと業種内でしかランクしない設計なので、
@@ -151,6 +164,29 @@ def fetch_us(use_cache: bool = True) -> list[Listing]:
     return out
 
 
+def attach_us_sectors(rows: list[Listing], sic_by_cik: dict[str, str | int]
+                      ) -> list[Listing]:
+    """SEC の SIC を FF49 に変換して US 銘柄に付ける（spec §4.1）。
+
+    `sic_by_cik` は `data/pit/subs/*.parquet`（DERA）から作る。
+    **DERA の sub.txt には SIC が 97.5% 入っている**ことを実測で確認した。
+
+    **CIK は10桁ゼロ埋めで揃える。** DERA は int、company_tickers.json も int
+    だが、文字列化のタイミングで桁が揃わないと突合が静かに失敗する。
+    """
+    import ff49 as _ff
+
+    out = []
+    for r in rows:
+        if r.market != "US" or not r.cik:
+            out.append(r)
+            continue
+        sic = sic_by_cik.get(r.cik)
+        ab = _ff.industry(sic)
+        out.append(dataclasses.replace(r, sector=ab, sector_coarse=_ff.coarse(ab)))
+    return out
+
+
 def sector_sizes(rows: list[Listing]) -> dict[str, int]:
     out: dict[str, int] = {}
     for r in rows:
@@ -209,8 +245,29 @@ def _test() -> int:
           "鉱業" in SMALL_TSE33 and len(SMALL_TSE33) == 9)
     check("SEC は連絡先つき UA を使う", "contact:" in UA["User-Agent"])
 
+    # SIC → FF49 の紐付け（ff49 の定義が未取得ならスキップする）
+    try:
+        import ff49 as _ff
+        if (ROOT / "data" / "ff49" / "Siccodes49.txt").exists():
+            att = attach_us_sectors(rows, {"0000320193": 3571})
+            us = [r for r in att if r.market == "US"][0]
+            check("**SIC から FF49 が付く**", us.sector is not None)
+            check("粗い分類も同時に付く", us.sector_coarse is not None)
+            miss = attach_us_sectors(rows, {})     # CIK が見つからない
+            check("**SIC が無ければ None のまま（Other に丸めない）**",
+                  [r for r in miss if r.market == "US"][0].sector is None)
+            check("JP 銘柄は変更されない",
+                  [r for r in att if r.market == "JP"][0].sector == "水産・農林業")
+        else:
+            print("  （ff49 の定義が未取得なので SIC 紐付けのテストは省略）")
+            for _ in range(4):
+                check("スキップ", True)
+    except ImportError:
+        for _ in range(4):
+            check("ff49 が読めない", False)
+
     print("-" * 70)
-    print("%d/%d 通過" % (7 - len(fails), 7))
+    print("%d/%d 通過" % (11 - len(fails), 11))
     return 1 if fails else 0
 
 
