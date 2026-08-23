@@ -66,6 +66,20 @@ class Thresholds:
     max_zero_volume_days: int = 0           # J10
     min_mcap_jpy: float = 3_000_000_000.0   # 30億円
 
+    # **上場期間のゲートを明示的に無効化できるようにする。**
+    #
+    # 実データで踏んだ（2026-08-23）: 上場後経過月数を
+    # 「取得できた価格のバー数 ÷ 21」で概算していたところ、
+    # **2年分しか価格を落としていないので、2024年11月時点では
+    # 全銘柄が「上場3.3ヶ月」に見えて全滅した**（181/181 が TOO_YOUNG）。
+    #
+    # **データの取得範囲を、銘柄の属性と取り違えていた。**
+    #
+    # 上場日が本当に取れないなら、**偽の近似で埋めるのではなく
+    # ゲートを明示的に切る。** そうすれば除外内訳に現れないので、
+    # 「このゲートは効いていない」ことが読む人に分かる。
+    require_age: bool = True
+
     @classmethod
     def for_rho(cls, rho: float) -> "Thresholds":
         """rho で流動性・サイズの下限を動かす。
@@ -81,6 +95,7 @@ class Thresholds:
             min_adv_jpy=cls.min_adv_jpy / rho,
             max_zero_volume_days=cls.max_zero_volume_days,
             min_mcap_jpy=cls.min_mcap_jpy / rho,
+            require_age=cls.require_age,
         )
 
 
@@ -109,10 +124,11 @@ def judge(c: Candidate, th: Thresholds) -> list[Exclusion]:
     out: list[Exclusion] = []
     if not c.listed:
         out.append(Exclusion.NOT_LISTED)
-    if c.months_listed is None:
-        out.append(Exclusion.MISSING_DATA)
-    elif c.months_listed < th.min_months_listed:
-        out.append(Exclusion.TOO_YOUNG)
+    if th.require_age:
+        if c.months_listed is None:
+            out.append(Exclusion.MISSING_DATA)
+        elif c.months_listed < th.min_months_listed:
+            out.append(Exclusion.TOO_YOUNG)
     if c.adv_jpy is None:
         out.append(Exclusion.MISSING_DATA)
     elif c.adv_jpy < th.min_adv_jpy:
@@ -213,6 +229,16 @@ def _test() -> int:
           Exclusion.AUDIT_OPINION in judge(_ok(audit_clean=False), th))
     check("**監査意見が未取得（None）を『適正』に丸めない**",
           Exclusion.MISSING_DATA in judge(_ok(audit_clean=None), th))
+    # **上場期間のゲートは明示的に切れる。**（上場日が取れないデータ源のため）
+    no_age = Thresholds(require_age=False)
+    check("**require_age=False なら上場期間で落とさない**",
+          judge(_ok(months_listed=1.0), no_age) == [])
+    check("**上場日が未取得でも落とさない（ゲートを切っているので）**",
+          judge(_ok(months_listed=None), no_age) == [])
+    check("既定では落とす", Exclusion.TOO_YOUNG in judge(_ok(months_listed=1.0), th))
+    check("**他のゲートは切らない**",
+          Exclusion.ILLIQUID in judge(_ok(months_listed=1.0, adv_jpy=1.0), no_age))
+
     check("**除外理由を全部返す（最初の1つで打ち切らない）**",
           len(judge(_ok(listed=False, supervised=True, audit_clean=False), th)) >= 3)
 
@@ -241,7 +267,7 @@ def _test() -> int:
     check("report が読める形を出す", "UNIVERSE(t)" in report([_ok("A")]))
 
     print("-" * 70)
-    total = 20
+    total = 24
     print("%d/%d 通過" % (total - len(fails), total))
     return 1 if fails else 0
 

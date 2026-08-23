@@ -65,6 +65,24 @@ class Candidate:
     adv_jpy: float | None = None   # 平均売買代金。**建てられる上限を決める**
 
 
+def select_top(cands: list[Candidate], n_target: int) -> list[Candidate]:
+    """**スコア上位 N 本を選んでからサイジングする。**
+
+    §1.8 の N_target。**ユニバース全体に Kelly を配ってはいけない。**
+
+    実データで踏んだ（2026-08-23）: 619銘柄にそのまま配ると
+    各 0.16% になり、**最小ポジション 2% を全員が下回って
+    保有が2〜3銘柄まで落ちた。**
+
+    §1.8 の議論（Bessembinder: 4%の銘柄が全リターンを作る）は
+    「N を小さくしすぎるな」と言うが、**大きくしすぎても
+    最小ポジションの制約で結局少数しか持てない。**
+    → **N は明示的に選ぶ。** 選ばないと制約が勝手に決めてしまう。
+    """
+    return sorted([c for c in cands if c.score > 0],
+                  key=lambda c: -c.score)[:n_target]
+
+
 def kelly_weights(cands: list[Candidate], fraction: float = 0.25,
                   min_vol: float = 0.10) -> dict[str, float]:
     """スコアをボラで割った比例配分（**分数 Kelly**）。
@@ -201,7 +219,8 @@ def cap_by_liquidity(weights: dict[str, float], cands: list[Candidate],
 
 def target_positions(cands: list[Candidate], capital_jpy: float,
                      limits: RiskLimits, fraction: float = 0.25,
-                     participation: float = 0.10, days: int = 3
+                     participation: float = 0.10, days: int = 3,
+                     n_target: int | None = None
                      ) -> tuple[dict[str, float], list[str]]:
     """入口。**Kelly → 流動性 → 上限 の順で適用する。**
 
@@ -211,10 +230,21 @@ def target_positions(cands: list[Candidate], capital_jpy: float,
 
     → **流動性で削ってから上限を当て、上限で削った分は現金にする。**
     """
+    notes0 = []
+    if n_target is None:
+        # **明示されなければ、最小ポジションから逆算した上限を使う。**
+        # 投資比率 90% ÷ 最小 2% = 45銘柄が構造的な上限。
+        # これを超えて配ると、按分後に最小を下回って落ちるだけ。
+        n_target = int(limits.max_invested / limits.min_position)
+        notes0.append("n_target を最小ポジションから逆算した: %d 銘柄" % n_target)
+    picked = select_top(cands, n_target)
+    if len(picked) < len(cands):
+        notes0.append("スコア上位 %d / %d 銘柄を選んだ" % (len(picked), len(cands)))
+    cands = picked
     w = kelly_weights(cands, fraction=fraction)
     w, n1 = cap_by_liquidity(w, cands, capital_jpy, participation, days)
     w, n2 = apply_limits(w, cands, limits)
-    return w, n1 + n2
+    return w, notes0 + n1 + n2
 
 
 # ---------------------------------------------------------------- self-test
@@ -323,8 +353,26 @@ def _test() -> int:
 
     check("候補が空なら空を返す", target_positions([], 3_000_000, L)[0] == {})
 
+    # **上位 N 本の選択。** これが無いと最小ポジションで全滅する
+    huge = [_c("T%03d" % i, "S%d" % (i % 30), 1.0 + i * 0.001) for i in range(600)]
+    w_no = apply_limits(kelly_weights(huge), huge, L)
+    check("**600銘柄にそのまま配ると最小ポジションでほぼ全滅する**",
+          len(w_no[0]) < 20)
+    w_top, n_top = target_positions(huge, 3_000_000, L)
+    check("**上位 N を選べば実際に保有できる本数になる**", 20 <= len(w_top) <= 45)
+    check("選んだことを記録する", any("上位" in x for x in n_top))
+    check("**n_target は最小ポジションから逆算される（90% / 2% = 45）**",
+          any("45 銘柄" in x for x in n_top))
+    check("スコアの高い順に選ばれる",
+          "T599" in select_top(huge, 5)[0].ticker or
+          select_top(huge, 5)[0].score >= select_top(huge, 5)[-1].score)
+    check("明示した n_target が優先される",
+          len(target_positions(huge, 3_000_000, L, n_target=10)[0]) <= 10)
+    check("スコアが正のものだけ選ぶ",
+          all(c.score > 0 for c in select_top(huge + [_c("X", "S", -1.0)], 999)))
+
     print("-" * 78)
-    total = 25
+    total = 31
     print("%d/%d 通過" % (total - len(fails), total))
     return 1 if fails else 0
 
