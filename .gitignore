@@ -7,14 +7,12 @@ credentials.json
 secrets/
 config.local.*
 
-# --- data (large / licensed) ---
-data/raw/
-data/interim/
-data/cache/
-data/*.parquet
-data/*.csv
-data/*.db
-data/*.sqlite*
+# --- data (large / licensed / 実データ) ---
+# **data/ 配下は丸ごと除外する。**
+# tools/security_check.py が data/ 全体をコミット禁止として扱うので、
+# .gitignore 側も揃える。片方だけだと、フックが毎回ブロックして
+# 「なぜコミットできないのか」を毎回調べることになる（実際にそうなった）。
+data/
 *.h5
 
 # --- python ---
