@@ -12,8 +12,10 @@
   category_name: 収益性・クオリティ
   subsection: null
   definition: 純利益 / 自己資本
-  formula: null
-  inputs: null
+  formula: NI_TTM / EQ_AVG
+  inputs:
+  - NI
+  - EQ
   sign: positive
   buy_class: main
   sell_class: useful
@@ -31,22 +33,29 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: AVG
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**分母は期首期末平均（AVG）。** 増資・自社株買いで期中に自己資本が大きく動く企業では、 期末値を使うと ROE が歪む。日本基準はのれん償却後の NI なので IFRS 企業より低く出る。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**EQ<=0（債務超過）では ROE が意味を失う。** 負の自己資本で負の利益だと ROE が正になる という符号の逆転が起きるため、EQ<=0 は必ず欠損にする。D02 のゲートでも除外されるが、 スコア計算側でも二重に防ぐ。'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 債務超過企業で欠損。つまり欠損自体が強いネガティブ情報を持つ（Z01 で拾う）。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - B02
+  - B03
+  - B05
+  - B16
+  - B40
+  - C09
+  - A34
+  economic_rationale: 株主資本1円あたりいくら稼ぐか。**ただしレバレッジで水増しできる**のが最大の弱点で、 B05（デュポン分解）で利益率・回転率・レバレッジに分けないと、 借金を増やしただけの企業を「高クオリティ」と誤判定する。 B03（ROIC）が資本構成に中立なのに対し、B01 は株主目線という違いがある。両方持つ。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP RoE — Haugen and Baker 1996, JFE（OSAP再現 t=4.5, 月次nan%, 品質=2_fair, 予測力=2_likely）
+  - OSAP RoE t=4.5
+  - http://www.econ.yale.edu/~shiller/behfin/2013_04-10/asness-frazzini-pedersen.pdf
   notes: レバレッジで水増しできる。B05 で分解して確認
   notes_extra: null
   provenance:
@@ -60,23 +69,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: B02
   name_ja: ROA
@@ -156,8 +166,13 @@
   category_name: 収益性・クオリティ
   subsection: null
   definition: NOPAT / 投下資本、NOPAT = EBIT*(1-実効税率)
-  formula: null
-  inputs: null
+  formula: EBIT_TTM * (1 - TAXR) / IC_AVG
+  inputs:
+  - EBIT
+  - TAXR
+  - IBD
+  - EQ
+  - CASH
   sign: positive
   buy_class: main
   sell_class: useful
@@ -170,24 +185,35 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: AVG
+  consolidation: consolidated
+  accounting_standard_note: '**ROIC は定義の揺れが最も大きい指標。** IC を「IBD + EQ - CASH」に固定する（spec §2）。 「超過現金のみ控除」版も別に持って比較する（spec §2 の注）。 IFRS16 でリース負債が IBD に入ると IC が膨らみ ROIC が下がるので、Z07 の年は注意。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**IC がゼロ・負になる企業が実在する**（ネットキャッシュが自己資本を超える）。 その場合 ROIC は意味を失うので欠損にし、A16/A17（実質PER）で評価する。'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: ネットキャッシュ潤沢な小型株で欠損しやすい。**それは 263AT が狙う銘柄と重なる**。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B01
+  - B04
+  - B12
+  - B13
+  - B40
+  - C08
+  - A14
+  - A42
+  economic_rationale: '**長期複利の本体。** `長期リターン ≈ ROIC × 再投資率`（C08、LAW-43）の第1項。 資本構成に中立なので、B01 と違ってレバレッジで水増しできない。 Buffett の超過収益が QMJ で説明できる（LAW-119）という実証も、 突き詰めれば「高 ROIC を安く買う」に還元される。'
+  references:
+  - http://www.econ.yale.edu/~shiller/behfin/2013_04-10/asness-frazzini-pedersen.pdf
+  - https://www.nber.org/system/files/working_papers/w19681/w19681.pdf
+  - https://mysimon.rochester.edu/novy-marx/research/OSoV.pdf
   notes: 本命指標。定義の揺れが大きいので計算方法を1つに固定して記録する
   notes_extra: null
   provenance:
@@ -201,22 +227,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: B04
   name_ja: ROIC - WACC
@@ -224,8 +252,10 @@
   category_name: 収益性・クオリティ
   subsection: null
   definition: エコノミックスプレッド
-  formula: null
-  inputs: null
+  formula: B03 - WACC
+  inputs:
+  - B03
+  - WACC
   sign: positive
   buy_class: main
   sell_class: main
@@ -238,24 +268,33 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: AVG
+  consolidation: consolidated
+  accounting_standard_note: B03 の会計基準差を継承。WACC の推定にはベータ（I05）が要るので株価データにも依存する。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（差分）。WACC の推定が不能なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**WACC の推定が最大の不確実性。** ベータ・株式リスクプレミアム・負債コストの どれも推定値で、業種平均で代用すると個社の実態から離れる。 日本は東証が「資本コストを意識した経営」を要請しており、**企業自身が開示した WACC がある場合は それを優先する**（F22 と連携）。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B03
+  - B12
+  - C07
+  - C08
+  - C39
+  - A42
+  - F22
+  economic_rationale: '**正なら成長が価値を生み、負なら成長するほど価値を壊す。** C カテゴリ（成長性）の符号を決める条件変数であり、 **成長率を単独で加点してはいけない理由そのもの。** C07（再投資率）、C39（投資/売上）、 N33（大型設備投資）はすべて B04 との交互作用で符号が変わる。 LAW-32（資産成長アノマリー）が「投資しすぎは劣後」を示すのは、 平均的な企業の B04 が小さいからだと解釈できる。'
+  references:
+  - https://images.aqr.com/-/media/AQR/Documents/Insights/Journal-Article/The-Limits-to-Arbitrage-Revisited-The-Accrual-and-Asset-Growth-Anomalies.pdf
+  - https://www.jpx.co.jp/english/equities/follow-up/02.html
   notes: 正 = 価値創造、負 = 成長するほど価値破壊。負の企業は成長を減点材料にする
   notes_extra: null
   provenance:
@@ -269,22 +308,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: B05
   name_ja: デュポン分解
@@ -577,8 +618,11 @@
   category_name: 収益性・クオリティ
   subsection: null
   definition: (営業CF - 設備投資) / 売上
-  formula: null
-  inputs: null
+  formula: (CFO_TTM - CAPEX_TTM) / REV_TTM
+  inputs:
+  - CFO
+  - CAPEX
+  - REV
   sign: positive
   buy_class: main
   sell_class: useful
@@ -597,21 +641,26 @@
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: IFRS16 適用企業はリース料が CFO から財務CFへ移り FCF が嵩上げされる。 基準変更年（Z07）は不連続。A09（FCF利回り）と同じ注意。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: REV<=0（売上ゼロのバイオ等）は欠損。C16/U34 で評価する。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 四半期CF開示のない企業で欠損。日本の小型株にやや偏る。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - A09
+  - B10
+  - B28
+  - C05
+  - B08
+  economic_rationale: 売上1円からいくら現金が残るか。**利益率（B08）が会計上の概念なのに対し、これは現金。** 成長投資期の企業では低く出るので、C07（再投資率）と B04 とセットで解釈しないと 優良な成長企業を排除する（A09 と同じ注意）。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP CBOperProf — Ball et al. 2016, JFE（OSAP再現 t=3.2, 月次0.47%, 品質=1_good, 予測力=1_clear）
+  - OSAP CBOperProf — Cash-based operating profitability, t=3.2
+  - https://mysimon.rochester.edu/novy-marx/research/OSoV.pdf
   notes: 現金を生む力そのもの
   notes_extra: null
   provenance:
@@ -625,23 +674,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: B10
   name_ja: 利益の現金化率
@@ -797,8 +847,13 @@
   category_name: 収益性・クオリティ
   subsection: null
   definition: delta_NOPAT / delta_IC（3年移動）
-  formula: null
-  inputs: null
+  formula: (NOPAT_t - NOPAT_{t-3}) / (IC_t - IC_{t-3})
+  inputs:
+  - EBIT
+  - TAXR
+  - IBD
+  - EQ
+  - CASH
   sign: positive
   buy_class: main
   sell_class: main
@@ -811,24 +866,32 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: B03 の会計基準差を継承。3年差分なので Z06/Z07 のフラグ年を跨ぐと壊れる。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**分母（IC の3年変化）がゼロ近傍だと発散する。** 投資をしていない企業で頻発する。 `abs(delta_IC) < 総資産の1%` なら欠損にする。これを忘れると無投資企業が異常値で上位に来る。'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 上場3年未満で欠損。M&A で IC が跳ねた企業では意味を持たない（C10/C28 と併読）。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B03
+  - B04
+  - B29
+  - C07
+  - C08
+  - C36
+  economic_rationale: '**最も前向きなクオリティ指標。** B03（平均 ROIC）は過去の蓄積を含むが、 B12 は**直近に投じた資本の生産性**を測る。高 ROIC 企業が新規投資で稼げなくなっている場合、 B03 は高いまま B12 が落ちる。C08（ROIC × 再投資率）の第1項を「限界」で見る版。 ノイズが大きいので3年移動で平滑化する。'
+  references:
+  - https://www.forbes.com/sites/bill_stone/2026/06/13/how-to-find-multibagger-stocks-before-they-soar/
+  - 実務家の指標であり、査読論文での直接の実証は確認できていない
   notes: 最も前向きなクオリティ指標。直近投じた資本の生産性。ノイズが大きいので平滑化必須
   notes_extra: null
   provenance:
@@ -842,22 +905,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: B13
   name_ja: ROICの持続性
@@ -865,8 +930,9 @@
   category_name: 収益性・クオリティ
   subsection: null
   definition: mean(ROIC, 5y) - k*sd(ROIC, 5y)
-  formula: null
-  inputs: null
+  formula: mean(ROIC, 5y) - k * sd(ROIC, 5y)、k は 0.5 を暫定
+  inputs:
+  - B03
   sign: positive
   buy_class: main
   sell_class: useful
@@ -879,24 +945,31 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: B03 を継承。5年間に会計基準変更（Z07）があると分散が過大になる。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 5年分の ROIC が3期未満しか計算できない場合は欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**5年の履歴が要るので、上場5年未満の企業が丸ごと欠損する。** F02 と同じ問題で、ユニバースが暗黙に成熟企業へ偏る（Z03 で監視）。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B03
+  - B14
+  - B16
+  - B39
+  - B40
+  economic_rationale: '**経済的堀（LAW-43、T14）の定量的な裏取り。** 高 ROIC が続くのは競争優位がある証拠で、 続かないのは一時的な追い風だったということ。T14（LLM による堀の採点）と突合し、 **矛盾したら LLM の物語ではなく実測を信じる**（catalog §8-5 の「物語への過剰適合」対策）。 k の値は暫定で、Phase 1 で較正する。'
+  references:
+  - http://www.econ.yale.edu/~shiller/behfin/2013_04-10/asness-frazzini-pedersen.pdf
+  - https://www.nber.org/system/files/working_papers/w19681/w19681.pdf
   notes: 高くて安定を評価。堀の実証的な裏取り（LAW-43）
   notes_extra: null
   provenance:
@@ -910,22 +983,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: B14
   name_ja: 利益率の安定性
@@ -1162,8 +1237,16 @@
   category_name: 収益性・クオリティ
   subsection: null
   definition: 9項目の0/1合計（収益性4・レバレッジ流動性3・効率性2）
-  formula: null
-  inputs: null
+  formula: 9項目の 0/1 合計（収益性4・レバレッジ流動性3・効率性2）
+  inputs:
+  - NI
+  - CFO
+  - TA
+  - IBD
+  - EQ
+  - REV
+  - GP
+  - SHARES
   sign: positive
   buy_class: main
   sell_class: useful
@@ -1176,27 +1259,35 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T2
+  evidence_tier: T1
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: 9項目のうち複数が前期比を取るため、**決算期変更（Z06）・会計基準変更（Z07）の年は スコアが無意味になる。** 該当年は欠損にする。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 各項目の判定はブール値なので発散しないが、比率の分母がゼロの項目は0点として扱わず欠損にする。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 2期分のデータが要るので上場2年未満で欠損。9項目のうち3項目以上が計算不能なら全体を欠損。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - B16
+  - B41
+  - B39
+  - D23
+  - E01
+  - F01
+  - A03
+  economic_rationale: '**低PBR群の中で財務が改善している企業を選ぶ。** 単体で全銘柄に適用すると効果が薄まり、 A03（低B/P）で絞ってから使うと最大化するというのが原論文の設計。 「安い株の中から、安い理由が解消しつつあるものを選ぶ」というバリュートラップ回避の古典。 **B41（Mohanram G-score）が成長株向けなのに対し、こちらはバリュー株向け**で用途が違う。'
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP PS — Piotroski 2000, JAR（OSAP再現 t=5.6, 月次1.958333333%, 品質=2_fair, 予測力=1_clear）
+  - OSAP PS — Piotroski F-score, t=5.6
+  - https://link.springer.com/article/10.1007/s11156-024-01331-y
   notes: 低PBR群に絞ってから使うと効果が最大。全体に適用すると薄まる（LAW-41）
   notes_extra: null
   provenance:
@@ -1210,23 +1301,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: B18
   name_ja: 粗利率トレンド
@@ -1234,8 +1326,10 @@
   category_name: 収益性・クオリティ
   subsection: null
   definition: 粗利率(t) - mean(粗利率, t-1..t-3)
-  formula: null
-  inputs: null
+  formula: GP_TTM/REV_TTM - mean(GP/REV, t-1..t-3)
+  inputs:
+  - GP
+  - REV
   sign: positive
   buy_class: main
   sell_class: main
@@ -1248,24 +1342,32 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: 売上原価と販管費の区分変更があると粗利率が不連続になる。 **区分変更は会計方針の変更（E21）として開示されるので、そのフラグが立つ年は欠損にする。**
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: REV<=0 は欠損。過去3年の平均が計算できない場合も欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 上場4年未満で欠損。金融業は粗利率の概念が無いので常に欠損（U カテゴリで代替）。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B06
+  - B07
+  - B31
+  - B36
+  - B44
+  - C25
+  economic_rationale: '**水準（B07）より方向が効く**という、このカテゴリで繰り返し現れる構図。 粗利率の改善は価格決定力の向上か原価低減の成功を意味し、どちらも持続しやすい。 逆に悪化は競争激化の早期警告で、**売り判定で特に価値が高い**（sell=main にしている理由）。 B36（価格転嫁力）と組み合わせると、改善が値上げ由来かコスト由来かを分離できる。'
+  references:
+  - https://mysimon.rochester.edu/novy-marx/research/OSoV.pdf
+  - https://www.openassetpricing.com/
   notes: 改善方向が水準より効くことが多い。売り判定で特に重要
   notes_extra: null
   provenance:
@@ -1279,22 +1381,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: B19
   name_ja: 営業レバレッジ
@@ -1936,8 +2040,11 @@
   category_name: 収益性・クオリティ
   subsection: null
   definition: mean(FCF/純利益, 過去5年)
-  formula: null
-  inputs: null
+  formula: mean(FCF_t / NI_t, 過去5年)
+  inputs:
+  - CFO
+  - CAPEX
+  - NI
   sign: positive
   buy_class: main
   sell_class: useful
@@ -1950,24 +2057,32 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: A09/B09 と同じ IFRS16 の注意。5年間に基準変更があると比較不能。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**NI<=0 の年が含まれると比率が壊れる。** 各年の比率を計算してから平均するのではなく、 **5年合計の FCF / 5年合計の NI** で計算する。5年合計 NI<=0 なら欠損。'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 上場5年未満で欠損（B13 と同じ偏り）。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - A09
+  - B09
+  - B10
+  - E01
+  - E10
+  - D23
+  economic_rationale: '**B10（単年の現金化率）の長期版。** 単年は運転資本の振れで大きく動くが、 5年平均で1を超える企業は本当に現金を生んでいる。 E01（アクルーアル）が「利益の質が低い」を検出するのに対し、 これは「利益の質が高い」を長期で確認する。長期保有（6M〜5Y）の設計と相性が良い。'
+  references:
+  - https://images.aqr.com/-/media/AQR/Documents/Insights/Journal-Article/The-Limits-to-Arbitrage-Revisited-The-Accrual-and-Asset-Growth-Anomalies.pdf
+  - https://www.openassetpricing.com/
   notes: B10 の長期版。5年平均で1を超える企業は本物
   notes_extra: null
   provenance:
@@ -1981,22 +2096,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: B29
   name_ja: ROICのトレンド
@@ -2004,8 +2121,9 @@
   category_name: 収益性・クオリティ
   subsection: null
   definition: slope(ROIC, 過去5年)
-  formula: null
-  inputs: null
+  formula: slope( ROIC, 過去5年 )
+  inputs:
+  - B03
   sign: positive
   buy_class: main
   sell_class: main
@@ -2018,24 +2136,30 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: B03 を継承。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 5年分の ROIC が3期未満なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: B13 と同じ（上場5年未満で欠損）。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B03
+  - B12
+  - B13
+  - B44
+  - C06
+  economic_rationale: B13（水準と安定性）と直交する情報を持つ。**平均が高くても下降トレンドなら堀が崩れつつある。** B12（増分ROIC）が「直近の投資の生産性」を測るのに対し、B29 は全体の趨勢。 ★1（実証が限定的）なので、§1.9 の事前スケール 0.15 で強く縮小される。 **強い証拠がなければ 0 から動かない設計になっているので、残しても害は小さい。**
+  references:
+  - 構造的判断。B13（ROIC持続性）の実証から派生した仮説であり、この形での直接の実証は無い
   notes: 水準より方向。B13（安定性）と直交する情報
   notes_extra: null
   provenance:
@@ -2049,22 +2173,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: B30
   name_ja: 粗利の絶対額成長
@@ -2823,8 +2949,15 @@
   category_name: 収益性・クオリティ
   subsection: null
   definition: 8項目の 0/1 合計（収益性・CF・成長の安定性・R&D/設備投資/広告の集約度）
-  formula: null
-  inputs: null
+  formula: 8項目の 0/1 合計（ROA・CFO/TA・アクルーアル・収益の安定性・成長の安定性・R&D/TA・設備投資/TA・広告/TA）
+  inputs:
+  - NI
+  - CFO
+  - TA
+  - REV
+  - RD
+  - CAPEX
+  - AdExp
   sign: positive
   buy_class: main
   sell_class: useful
@@ -2837,27 +2970,33 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T2
+  evidence_tier: T1
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: R&D と広告費を独立開示しない企業が多く、**日本は特に広告費の開示が少ない。** 8項目のうち3項目が計算できない銘柄が日本では多数出る。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: TA>0。計算可能な項目が5項目未満なら全体を欠損にする。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**R&D・広告を開示する企業に偏る。** 日本の小型製造業では R&D 開示が薄く、 B17（Piotroski）は計算できるが B41 は計算できない、という非対称が起きる。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - B16
+  - B17
+  - B06
+  - B25
+  - C33
+  - B39
+  economic_rationale: '**B17 が低PBR（バリュー）群向けなのに対し、B41 は高PBR（成長）群向け。** 成長株は現在の収益性が低いことが多く、Piotroski の基準では全滅する。 G-score は代わりに「成長の安定性」と「無形投資の水準」を評価する。 OSAP で t=9.1 と、複合会計指標では最上位。 **バリューとグロースで別の品質指標を使うという発想自体が、263AT に欠けていた視点。**'
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP MS — Mohanram 2005, RAS（OSAP再現 t=9.1, 月次1.575%, 品質=2_fair, 予測力=1_clear）
+  - OSAP MS — Mohanram G-score, t=9.1
   notes: OSAP MS t=9.1。B17 Piotroski が低PBR株向けなのに対し、G-score は高PBR（成長）株向け。両方持って使い分ける
   notes_extra: null
   provenance:
@@ -2871,23 +3010,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: B42
   name_ja: キャッシュ生産性
@@ -3039,8 +3179,10 @@
   category_name: 収益性・クオリティ
   subsection: null
   definition: delta_(売上/総資産)
-  formula: null
-  inputs: null
+  formula: REV_TTM/TA_AVG - REV_{TTM,t-1}/TA_{AVG,t-1}
+  inputs:
+  - REV
+  - TA
   sign: positive
   buy_class: main
   sell_class: main
@@ -3058,22 +3200,28 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: AVG
+  consolidation: consolidated
+  accounting_standard_note: IFRS16 でリース資産が TA に乗ると回転率が下がるので、**基準変更年は必ず不連続になる**。 Z07 のフラグ年は欠損にする。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: TA>0。前期の回転率が計算できない場合は欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 上場2年未満で欠損。M&A で TA が跳ねた年は意味を持たない（C10 と併読）。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - B11
+  - B18
+  - B29
+  - B34
+  - B35
+  - C36
+  economic_rationale: '**B11（水準）は業種特性に支配されるが、変化は個社の実力を反映する。** 資産効率の改善は、既存資産からより多くの売上を上げているということで、 追加投資なしの成長を意味する。B18（粗利率トレンド）と組み合わせると、 デュポン分解（B05）の2成分の変化を同時に見られる。OSAP `ChAssetTurnover` t=5.1。'
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP ChAssetTurnover — Soliman 2008, AR（OSAP再現 t=5.1, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - OSAP ChAssetTurnover — Change in Asset Turnover, t=5.1
   notes: OSAP ChAssetTurnover t=5.1。B11 は水準だけだった。変化の方が効く（B18/B29 と同じ構図）
   notes_extra: null
   provenance:
@@ -3087,23 +3235,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: B45
   name_ja: 売上成長 / 在庫成長
