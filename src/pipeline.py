@@ -89,7 +89,7 @@ def ratio(asof: FA.AsOf, cik: int, num_code: str, den_code: str, t: str,
 
 def build(t: str, candidates: list[dict], asof: FA.AsOf,
           num_code: str, den_code: str, rho: float = 1.0,
-          compute_excluded: bool = False) -> list[Row]:
+          compute_excluded: bool = False, sic_asof=None) -> list[Row]:
     """時点 t のスコア断面を作る。
 
     `candidates` は1銘柄あたり次を持つ dict:
@@ -120,9 +120,17 @@ def build(t: str, candidates: list[dict], asof: FA.AsOf,
         )
         ex = UV.judge(cand, th)
 
-        # **業種は市場で決め方が違う**（spec §4.1）
+        # **業種は市場で決め方が違う**（spec §4.1）。
+        # US は `sic_asof` があれば **時点 t の SIC** を使う（spec §9 の落とし穴14）。
+        # 無ければ候補が持っている固定の SIC を使うが、
+        # **それは現在の業種で過去を分類していることになる**ので、
+        # 実測では 7.1% の企業で FF49 業種が変わる。
         if c["market"] == "US":
-            sec = ff49.industry(c.get("sic"))
+            sic = (sic_asof.get(int(c["cik"]), t)
+                   if (sic_asof is not None and c.get("cik")) else None)
+            if sic is None:
+                sic = c.get("sic")
+            sec = ff49.industry(sic)
             coarse = ff49.coarse(sec)
         else:
             sec, coarse = c.get("sector"), c.get("sector_coarse")
@@ -247,11 +255,24 @@ def _test() -> int:
     check("**提出前の時点では誰も計算できない**",
           all(r.raw is None for r in rows4))
 
+    # **SIC の as-of**（spec §9 の落とし穴14）
+    import listing as LSx
+    sa = LSx.SicAsOf([(1000, "2020-01-01", "2834"),      # Drugs
+                      (1000, "2024-01-01", "3674")])     # Chips に変更
+    r_old = build("2024-09-30", [cand(0)], asof, "NI", "TA", sic_asof=sa)
+    check("**as-of の SIC で業種が決まる（変更後なので Chips）**",
+          r_old[0].sector == "Chips")
+    r_hist = build("2023-06-30", [cand(0)], asof, "NI", "TA", sic_asof=sa)
+    check("**過去の時点では当時の業種（Drugs）**", r_hist[0].sector == "Drugs")
+    r_none = build("2024-09-30", [dict(cand(0), sic=2834)], asof, "NI", "TA")
+    check("sic_asof を渡さなければ候補の固定 SIC を使う",
+          r_none[0].sector == "Drugs")
+
     s = summary(rows2)
     check("要約が出る", "ユニバース内" in s and "除外理由" in s)
 
     print("-" * 78)
-    total = 16
+    total = 19
     print("%d/%d 通過" % (total - len(fails), total))
     return 1 if fails else 0
 
