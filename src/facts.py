@@ -74,6 +74,16 @@ class AsOf:
             v.sort(key=lambda f: f.filed)
             self._idx[k] = ([f.filed for f in v], v)
 
+        # **二次インデックス: (cik, code, qtrs) → その企業の期間の一覧（ddate 降順）。**
+        # これが無いと latest_period() が毎回 100万キーを線形走査し、
+        # 数千社 × 数コードで実質終わらない（実際に踏んだ）。
+        # **正しさには影響しないが、無いと動かないので必須。**
+        self._by_series: dict[tuple, list[tuple]] = {}
+        for (c, cd, ddate, q) in self._idx:
+            self._by_series.setdefault((c, cd, q), []).append(ddate)
+        for k in self._by_series:
+            self._by_series[k].sort(reverse=True)
+
     def get(self, cik: int, code: str, ddate: str, qtrs: int, t: str) -> Fact | None:
         """時点 t で入手できた値。**無ければ None。0 で埋めない。**"""
         e = self._idx.get((cik, code, ddate, qtrs))
@@ -92,21 +102,17 @@ class AsOf:
         2年前の決算を「直近」として使うと、
         **上場廃止直前の企業が生きているように見える。**
         """
-        best: Fact | None = None
-        for (c, cd, ddate, q), (filed, rows) in self._idx.items():
-            if c != cik or cd != code or q != qtrs:
-                continue
+        # ddate 降順で見て、**t までに提出されている最初の期間**を返す。
+        # 新しい期間から順に見るので、見つかった時点で打ち切れる。
+        for ddate in self._by_series.get((cik, code, qtrs), ()):
+            filed, rows = self._idx[(cik, code, ddate, qtrs)]
             i = bisect.bisect_right(filed, t)
             if not i:
-                continue
-            f = rows[i - 1]
-            if best is None or f.ddate > best.ddate:
-                best = f
-        if best is None:
-            return None
-        if _days(best.ddate, t) > max_lag_days:
-            return None
-        return best
+                continue                       # この期間はまだ提出されていない
+            if _days(ddate, t) > max_lag_days:
+                return None                    # これ以上古い期間しか無い
+            return rows[i - 1]
+        return None
 
     def restatements(self, min_rel_diff: float = 0.01) -> list[dict]:
         """**値が変わった (企業, コード, 期間) を列挙する。**
