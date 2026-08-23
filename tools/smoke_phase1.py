@@ -222,6 +222,52 @@ def main() -> int:
         print("  **この %d 社は、訂正後データを使うと違うスコアになる。**" % changed)
         print("  as-of を使わなければ、その差がそのままバックテストの成績に乗る。")
 
+    # --- **問題1 の修正を実測する** -------------------------------------------
+    print()
+    print("=" * 74)
+    print("**問題1 の修正 — periods.ttm / avg_bs を使うとどうなるか**")
+    print("=" * 74)
+    from src import periods as P
+
+    ok_ttm = ok_avg = ok_align = 0
+    made = []
+    ciks = sorted({f.cik for f in fs})
+    for c in ciks:
+        n = P.ttm(a, c, "NI", args.asof)
+        d = P.avg_bs(a, c, "TA", args.asof)
+        if n is not None:
+            ok_ttm += 1
+        if d is not None:
+            ok_avg += 1
+        if P.aligned(n, d) and d is not None and d.value > 0:
+            ok_align += 1
+            made.append({"cik": c, "roa": n.value / d.value,
+                         "derived_q4": n.derived_q4})
+    print("  NI の TTM を作れた企業      %d / %d" % (ok_ttm, len(ciks)))
+    print("  TA の AVG を作れた企業      %d / %d" % (ok_avg, len(ciks)))
+    print("  **両方揃って期間も整合した   %d 社**" % ok_align)
+    print()
+    print("  近似版（通期 NI / 時点 TA）: %d 社、うち期間ずれ %d 社（81%%）"
+          % (len(rows), len(mism)))
+    print("  **厳密版: %d 社、期間ずれ 0 社（aligned() が弾く）**" % len(made))
+    print("  → **厳密にした方が社数が多い（%.0f%%）。**"
+          % (100 * len(made) / max(len(rows), 1)))
+    print("     近似版は「450日以内の通期 NI」を要求するので、")
+    print("     **四半期を積み上げる方がむしろカバーが広い。**")
+    print("     妥協が精度も網羅も両方失っていた、という珍しい例。")
+    if made:
+        dq = sum(1 for m in made if m["derived_q4"])
+        print("  **Q4 を通期から復元した企業: %d 社（%.0f%%）**"
+              % (dq, 100 * dq / len(made)))
+        print("     → **10-K は通期しか出さないので、Q4 単体はほぼ存在しない。**")
+        print("        復元しなければ TTM は %d%% の企業で作れなかった。"
+              % (100 * dq / len(made)))
+        ex2 = [m for m in made if abs(m["roa"]) > 1.0]
+        print("  |ROA|>1 は %d 社（%.1f%%）— 近似版の 12.6%% とほぼ同じ。"
+              % (len(ex2), 100 * len(ex2) / len(made)))
+        print("     → **予想通り、シェル企業の問題は期間を直しても残る。**")
+        print("        これはユニバースゲート（§6）の仕事であって、期間合成の仕事ではない。")
+
     print()
     print("=" * 74)
     print("この煙テストが確認したこと / していないこと")
