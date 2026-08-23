@@ -2655,6 +2655,7 @@ C11:
     決算に出る前に業績の方向が分かる。OSAP `OrderBacklog` t=2.4、
     `OrderBacklogChg` も収録されている。
     **U21（受注残/月商）に正規化した方が企業規模の影響を除ける。**
+    **【再現測定 2026-08-23】再現 t=-1.06 で符号が逆（原論文 2.38）。買 ◎→○（§1.9.8）。**
   evidence_tier: T1
   references:
     - "https://www.openassetpricing.com/"
@@ -2680,6 +2681,7 @@ C12:
     契約負債の増加は、まだ売上になっていない将来の収益が積み上がっているということ。
     OSAP `DelDRC`（Deferred Revenue）t=3.6。
     B21（負の CCC）と同じく、前受金モデルの強さの現れでもある。
+    **【再現測定 2026-08-23】再現 t=-0.07 で符号が逆（原論文 3.59）。買 ◎→○（§1.9.8）。**
   evidence_tier: T2
   references:
     - "https://www.openassetpricing.com/"
@@ -3937,6 +3939,7 @@ L03:
     データ源が価格のみなので**欠損しない**という決定的な利点があり、
     O01 の62%欠損問題を完全に回避してネグレクトを定量化できる。
     **263AT の O カテゴリの実質的な代替になりうる。**
+    **【再現測定 2026-08-23】原論文 t=7.7 に対し、等加重デシル L/S（1963-）の再現は t=1.32。L04 との相関も 0.98 で実質同一。買 ◎→○ に格下げした（§1.9.8）。**
   evidence_tier: T1
   references: ["https://www.openassetpricing.com/", "OSAP PriceDelaySlope t=7.7"]
   markets: [JP, US]
@@ -3956,6 +3959,7 @@ L04:
     ノイズの多い銘柄の遅延を過大評価しない。**L03/L04/L05 は同じ現象の3通りの測り方**で
     相関が非常に高いはずなので、Z12 の主成分分析で1本にまとまる可能性が高い。
     §1.9 の方針に従い統合せず3本とも残す。
+    **【再現測定 2026-08-23】再現 t=1.37（原論文 7.39）。L03 とほぼ同一。買 ◎→○（§1.9.8）。**
   evidence_tier: T1
   references: ["https://www.openassetpricing.com/", "OSAP PriceDelayTstat t=7.4"]
   markets: [JP, US]
@@ -3997,6 +4001,7 @@ L06:
     OSAP `iomom_supp` t=5.0。仕入先の株価が動くのは、その業界の需給が変化したから。
     それが自社のコストに転嫁されるのは数四半期後。B36（価格転嫁力）が
     転嫁できるかを測るのに対し、L06 は転嫁圧力の発生を先読みする。
+    **【再現測定 2026-08-23】再現 t=1.40（原論文 5.03）。買 ◎→○（§1.9.8）。**
   evidence_tier: T1
   references: ["https://www.openassetpricing.com/", "OSAP iomom_supp t=5.0"]
   markets: [JP, US]
@@ -4019,6 +4024,7 @@ L07:
     N21（顧客の業績変化）がファンダメンタルで捉える現象を価格で捉える版で、
     価格の方が速い。X15（主要顧客の株価）と同一概念なので統合候補だが、
     §1.9 に従い両方残す。
+    **【再現測定 2026-08-23】再現 t=1.66（原論文 4.11）。買 ◎→○。X15 の検証で「X カテゴリで唯一 T1、最初に実装すべき」と書いたが、その根拠は原論文の t だった。L01（再現 t=9.93）を先に実装する（§1.9.8）。**
   evidence_tier: T1
   references: ["https://www.openassetpricing.com/", "OSAP iomom_cust t=4.1 / CustomerMomentum t=3.8"]
   markets: [JP, US]
@@ -15419,6 +15425,7 @@ E26:
     I29（残差歪度）と同じく、
     「説明できる部分を除いた残りが本体」というパターン**が
     E でも成り立つ。**263AT の設計全体に通底する構造。**
+    **【再現測定 2026-08-23】再現 t=1.67（原論文 8.43）。「E01 より t が高い」と書いたのは原論文の比較で、実測では E01 4.59 / E26 1.67 と逆。E01/E02/E27 に吸収される。買 ◎→○（§1.9.8）。**
   evidence_tier: T1
   references: ["https://www.openassetpricing.com/", "Dechow-Sloan-Sweeney (TAR 1995) Detecting Earnings Management", "OSAP AbnormalAccruals t=8.4"]
   markets: [JP, US]
@@ -16992,6 +16999,7 @@ H13:
     **このパターンが 263AT の全カテゴリに現れる**のは、
     **どのシグナルも「既知の要因で説明できない部分」に
     情報があるという共通構造による。**
+    **【再現測定 2026-08-23】再現 t=1.70（原論文 3.99）。H14-H16 に吸収される。買 ◎→○（§1.9.8）。**
   evidence_tier: T1
   references: ["https://www.openassetpricing.com/", "Daniel-Titman (JF 2006) Market Reactions to Tangible and Intangible Information", "OSAP IntanBM t=4.0"]
   markets: [JP, US]

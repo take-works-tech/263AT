@@ -74,6 +74,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     notes_extra: override
     formula: override
     inputs: override
@@ -85,6 +86,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      RealizedVol: 2.96
+    t_original_paper: 2.86
+    t_replicated: 2.96
 - id: I02
   name_ja: ヒストリカルボラ(252日)
   category: I
@@ -312,6 +320,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -322,6 +331,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IdioVol3F: 4.05
+      IdioVolAHT: 2.15
+    t_original_paper: 3.1
+    t_replicated: 4.05
 - id: I05
   name_ja: 市場ベータ
   category: I
@@ -390,6 +407,7 @@
     accounting_standard_note: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     zero_denominator_policy: override
@@ -401,6 +419,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Beta: 0.9
+    t_original_paper: 2.57
+    t_replicated: 0.9
 - id: I06
   name_ja: MAX効果
   category: I
@@ -468,6 +494,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -478,6 +505,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MaxRet: 2.46
+    t_original_paper: 2.83
+    t_replicated: 2.46
 - id: I07
   name_ja: MAX(5)効果
   category: I
@@ -626,6 +660,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -636,6 +671,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ReturnSkew: 4.29
+      ReturnSkew3F: 2.87
+    t_original_paper: 4.01
+    t_replicated: 4.29
 - id: I09
   name_ja: 尖度
   category: I
@@ -2035,6 +2078,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -2045,6 +2089,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: '**再現 t の符号が原論文と逆。** 構成の違いか、公表後の消失か、対応の誤りかを個別に確認する必要がある'
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      BetaFP: -1.19
+    t_original_paper: 7.12
+    t_replicated: -1.19
 - id: I27
   name_ja: 共歪度
   category: I
@@ -2115,6 +2167,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -2125,6 +2178,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Coskewness: 3.08
+    t_original_paper: 1.96
+    t_replicated: 3.08
 - id: I28
   name_ja: テールリスク・ベータ
   category: I
@@ -2194,6 +2254,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -2204,6 +2265,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      BetaTailRisk: 3.15
+    t_original_paper: 2.48
+    t_replicated: 3.15
 - id: I29
   name_ja: 3ファクター残差歪度
   category: I
@@ -2273,6 +2341,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -2283,6 +2352,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ReturnSkew3F: 2.87
+    t_original_paper: 4.35
+    t_replicated: 2.87
 - id: I30
   name_ja: VIX 感応度
   category: I
@@ -2353,6 +2429,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -2363,6 +2440,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      betaVIX: 3.17
+    t_original_paper: 3.9
+    t_replicated: 3.17
 - id: I31
   name_ja: 実現ボラティリティ（総合）
   category: I
@@ -2432,6 +2516,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -2442,3 +2527,10 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      RealizedVol: 2.96
+    t_original_paper: 2.86
+    t_replicated: 2.96

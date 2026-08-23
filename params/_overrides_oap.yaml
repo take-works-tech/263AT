@@ -13,6 +13,13 @@ A01:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP EP — Basu 1977, JF（**原論文** t=n/a, 月次0.58%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      EP: 2.15
+    t_original_paper: null
+    t_replicated: 2.15
 A03:
   evidence_tier: T1
   references:
@@ -20,12 +27,27 @@ A03:
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP BM — Stattman 1980, Other（**原論文** t=n/a, 月次nan%, 再現品質=1_good, 予測力=1_clear）
   - OSAP BMdec — Fama and French 1992, JF（**原論文** t=5.7, 月次0.5%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      BM: 4.43
+      BMdec: 5.92
+    t_original_paper: null
+    t_replicated: 4.43
 A04:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP SP — Barbee, Mukherji and Raines 1996, FAJ（**原論文** t=2.5, 月次nan%, 再現品質=1_good, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      SP: 5.45
+    t_original_paper: 2.52
+    t_replicated: 5.45
 A05:
   evidence_tier: T1
   references:
@@ -33,12 +55,27 @@ A05:
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP cfp — Desai, Rajgopal, Venkatachalam 2004, AR（**原論文** t=2.8, 月次1.275%, 再現品質=1_good, 予測力=1_clear）
   - OSAP CF — Lakonishok, Shleifer, Vishny 1994, JF（**原論文** t=3.4, 月次0.658333333%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      CF: 2.61
+      cfp: 2.97
+    t_original_paper: 2.77
+    t_replicated: 2.97
 A06:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP EntMult — Loughran and Wellman 2011, JFQA（**原論文** t=6.5, 月次0.95%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      EntMult: 5.13
+    t_original_paper: 6.54
+    t_replicated: 5.13
 A10:
   evidence_tier: T2
   references:
@@ -46,6 +83,14 @@ A10:
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP NetPayoutYield — Boudoukh et al. 2007, JF（**原論文** t=2.8, 月次0.37%, 再現品質=2_fair, 予測力=1_clear）
   - OSAP PayoutYield — Boudoukh et al. 2007, JF（**原論文** t=3.9, 月次0.28%, 再現品質=2_fair, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      NetPayoutYield: 5.48
+      PayoutYield: 2.28
+    t_original_paper: 2.83
+    t_replicated: 5.48
 A11:
   evidence_tier: T2
   references:
@@ -58,36 +103,78 @@ A14:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP EBM — Penman, Richardson and Tuna 2007, JAR（**原論文** t=3.0, 月次0.12%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      EBM: 3.89
+    t_original_paper: 3.0
+    t_replicated: 3.89
 A16:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Cash — Palazzo 2012, JFE（**原論文** t=2.1, 月次0.69%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Cash: 2.3
+    t_original_paper: 2.14
+    t_replicated: 2.3
 A26:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP sfe — Elgers, Lo and Pfeiffer 2001, AR（**原論文** t=5.0, 月次1.466666667%, 再現品質=2_fair, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      sfe: 2.11
+    t_original_paper: 4.99
+    t_replicated: 2.11
 A44:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP AM — Fama and French 1992, JF（**原論文** t=5.7, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      AM: 3.52
+    t_original_paper: 5.69
+    t_replicated: 3.52
 A45:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP EquityDuration — Dechow, Sloan and Soliman 2004, RAS（**原論文** t=4.4, 月次0.5%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      EquityDuration: 4.61
+    t_original_paper: 4.37
+    t_replicated: 4.61
 A46:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Frontier — Nguyen and Swanson 2009, JFQA（**原論文** t=4.9, 月次0.96%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Frontier: 6.18
+    t_original_paper: 4.86
+    t_replicated: 6.18
 A47:
   evidence_tier: T1
   references:
@@ -100,48 +187,104 @@ A48:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP BPEBM — Penman, Richardson and Tuna 2007, JAR（**原論文** t=4.1, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      BPEBM: 2.15
+    t_original_paper: 4.1
+    t_replicated: 2.15
 B01:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP RoE — Haugen and Baker 1996, JFE（**原論文** t=4.5, 月次nan%, 再現品質=2_fair, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      RoE: 2.08
+    t_original_paper: 4.5
+    t_replicated: 2.08
 B02:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP roaq — Balakrishnan, Bartov and Faurel 2010, JAE（**原論文** t=6.5, 月次0.841666667%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      roaq: 5.69
+    t_original_paper: 6.45
+    t_replicated: 5.69
 B06:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP GP — Novy-Marx 2013, JFE（**原論文** t=2.5, 月次0.31%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      GP: 3.0
+    t_original_paper: 2.49
+    t_replicated: 3.0
 B09:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP CBOperProf — Ball et al. 2016, JFE（**原論文** t=3.2, 月次0.47%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      CBOperProf: 3.46
+    t_original_paper: 3.17
+    t_replicated: 3.46
 B10:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP OperProf — Fama and French 2006, JFE（**原論文** t=2.5, 月次nan%, 再現品質=1_good, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      OperProf: 3.76
+    t_original_paper: 2.55
+    t_replicated: 3.76
 B17:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP PS — Piotroski 2000, JAR（**原論文** t=5.6, 月次1.958333333%, 再現品質=2_fair, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      PS: 2.51
+    t_original_paper: 5.59
+    t_replicated: 2.51
 B19:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP OPLeverage — Novy-Marx 2011, ROF（**原論文** t=3.4, 月次0.51%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      OPLeverage: 2.02
+    t_original_paper: 3.38
+    t_replicated: 2.02
 B22:
   evidence_tier: T1
   references:
@@ -149,6 +292,14 @@ B22:
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP ChInv — Thomas and Zhang 2002, RAS（**原論文** t=n/a, 月次0.949166667%, 再現品質=1_good, 予測力=1_clear）
   - OSAP InvGrowth — Belo and Lin 2012, RFS（**原論文** t=6.6, 月次0.89%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ChInv: 7.56
+      InvGrowth: 7.52
+    t_original_paper: null
+    t_replicated: 7.56
 B25:
   evidence_tier: T1
   references:
@@ -156,12 +307,28 @@ B25:
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP RD — Chan, Lakonishok and Sougiannis 2001, JF（**原論文** t=n/a, 月次0.8875%, 再現品質=1_good, 予測力=1_clear）
   - OSAP RDcap — Li 2011, RFS（**原論文** t=2.6, 月次0.69%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      RD: 4.09
+      RDcap: 0.72
+    t_original_paper: null
+    t_replicated: 4.09
 B26:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP RDAbility — Cohen, Diether and Malloy 2013, RFS（**原論文** t=2.6, 月次1.35%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      RDAbility: 0.62
+    t_original_paper: 2.61
+    t_replicated: 0.62
 B41:
   evidence_tier: T2
   references:
@@ -174,126 +341,278 @@ B42:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP CashProd — Chandrashekar and Rao 2009, WP（**原論文** t=3.6, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      CashProd: 3.04
+    t_original_paper: 3.6
+    t_replicated: 3.04
 B43:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP OrgCap — Eisfeldt and Papanikolaou 2013, JF（**原論文** t=2.9, 月次0.385833333%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      OrgCap: 4.23
+    t_original_paper: 2.85
+    t_replicated: 4.23
 B44:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP ChAssetTurnover — Soliman 2008, AR（**原論文** t=5.1, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ChAssetTurnover: 3.17
+    t_original_paper: 5.12
+    t_replicated: 3.17
 B45:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP GrSaleToGrInv — Abarbanell and Bushee 1998, AR（**原論文** t=2.4, 月次nan%, 再現品質=1_good, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      GrSaleToGrInv: 2.52
+    t_original_paper: 2.37
+    t_replicated: 2.52
 B46:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP GrSaleToGrOverhead — Abarbanell and Bushee 1998, AR（**原論文** t=2.1, 月次nan%, 再現品質=1_good, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: '**再現 t の符号が原論文と逆。** 構成の違いか、公表後の消失か、対応の誤りかを個別に確認する必要がある'
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      GrSaleToGrOverhead: -1.12
+    t_original_paper: 2.07
+    t_replicated: -1.12
 B47:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP tang — Hahn and Lee 2009, JF（**原論文** t=3.4, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      tang: 3.2
+    t_original_paper: 3.37
+    t_replicated: 3.2
 C02:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP MeanRankRevGrowth — Lakonishok, Shleifer, Vishny 1994, JF（**原論文** t=n/a, 月次nan%, 再現品質=2_fair, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MeanRankRevGrowth: 3.69
+    t_original_paper: null
+    t_replicated: 3.69
 C11:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP OrderBacklog — Rajgopal, Shevlin, Venkatachalam 2003, RAS（**原論文** t=2.4, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: '**再現 t の符号が原論文と逆。** 構成の違いか、公表後の消失か、対応の誤りかを個別に確認する必要がある'
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      OrderBacklog: -1.06
+    t_original_paper: 2.38
+    t_replicated: -1.06
 C12:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP DelDRC — Prakash and Sinha 2013, CAR（**原論文** t=3.6, 月次nan%, 再現品質=1_good, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: '**再現 t の符号が原論文と逆。** 構成の違いか、公表後の消失か、対応の誤りかを個別に確認する必要がある'
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      DelDRC: -0.07
+    t_original_paper: 3.59
+    t_replicated: -0.07
 C29:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP grcapx — Anderson and Garcia-Feijoo 2006, JF（**原論文** t=5.0, 月次0.57%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      grcapx: 5.75
+    t_original_paper: 5.05
+    t_replicated: 5.75
 C30:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP grcapx3y — Anderson and Garcia-Feijoo 2006, JF（**原論文** t=4.7, 月次0.6%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      grcapx3y: 4.83
+    t_original_paper: 4.71
+    t_replicated: 4.83
 C31:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP ChInvIA — Abarbanell and Bushee 1998, AR（**原論文** t=2.9, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ChInvIA: 5.7
+    t_original_paper: 2.91
+    t_replicated: 5.7
 C32:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP hire — Bazdresch, Belo and Lin 2014, JPE（**原論文** t=5.8, 月次0.87%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      hire: 6.26
+    t_original_paper: 5.78
+    t_replicated: 6.26
 C33:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP GrAdExp — Lou 2014, RFS（**原論文** t=3.5, 月次0.58%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      GrAdExp: 1.58
+    t_original_paper: 3.54
+    t_replicated: 1.58
 C34:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP BrandInvest — Belo, Lin and Vitorino 2014, RED（**原論文** t=2.0, 月次0.435%, 再現品質=1_good, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      BrandInvest: 0.24
+    t_original_paper: 2.01
+    t_replicated: 0.24
 C35:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP AssetGrowth — Cooper, Gulen and Schill 2008, JF（**原論文** t=8.4, 月次1.73%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      AssetGrowth: 7.61
+    t_original_paper: 8.45
+    t_replicated: 7.61
 C36:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP InvestPPEInv — Lyandres, Sun and Zhang 2008, RFS（**原論文** t=7.1, 月次0.57%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      InvestPPEInv: 9.76
+    t_original_paper: 7.13
+    t_replicated: 9.76
 C37:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP ChEQ — Lockwood and Prombutr 2010, JFR（**原論文** t=5.4, 月次0.8%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ChEQ: 4.92
+    t_original_paper: 5.38
+    t_replicated: 4.92
 C38:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP DelEqu — Richardson et al. 2005, JAE（**原論文** t=6.2, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      DelEqu: 4.67
+    t_original_paper: 6.25
+    t_replicated: 4.67
 C39:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Investment — Titman, Wei and Xie 2004, JFQA（**原論文** t=2.9, 月次0.168333333%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Investment: 2.53
+    t_original_paper: 2.86
+    t_replicated: 2.53
 C40:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP DelLTI — Richardson et al. 2005, JAE（**原論文** t=3.4, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      DelLTI: 4.49
+    t_original_paper: 3.38
+    t_replicated: 4.49
 C41:
   evidence_tier: T1
   references:
@@ -306,6 +625,14 @@ D01:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP BookLeverage — Fama and French 1992, JF（**原論文** t=5.3, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: '**再現 t の符号が原論文と逆。** 構成の違いか、公表後の消失か、対応の誤りかを個別に確認する必要がある'
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      BookLeverage: -0.31
+    t_original_paper: 5.34
+    t_replicated: -0.31
 D03:
   evidence_tier: T1
   references:
@@ -313,6 +640,14 @@ D03:
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Leverage — Bhandari 1988, JF（**原論文** t=3.9, 月次nan%, 再現品質=1_good, 予測力=1_clear）
   - OSAP NetDebtPrice — Penman, Richardson and Tuna 2007, JAR（**原論文** t=2.3, 月次0.658333333%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Leverage: 2.8
+      NetDebtPrice: 3.62
+    t_original_paper: 3.93
+    t_replicated: 2.8
 D09:
   evidence_tier: T1
   references:
@@ -325,6 +660,14 @@ D18:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP FR — Franzoni and Marin 2006, JF（**原論文** t=n/a, 月次0.4875%, 再現品質=2_fair, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      FR: -0.62
+    t_original_paper: null
+    t_replicated: -0.62
 D26:
   evidence_tier: T3
   references:
@@ -337,6 +680,13 @@ E01:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Accruals — Sloan 1996, AR（**原論文** t=4.7, 月次0.866666667%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Accruals: 5.85
+    t_original_paper: 4.71
+    t_replicated: 5.85
 E02:
   evidence_tier: T1
   references:
@@ -344,6 +694,14 @@ E02:
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP ChNWC — Soliman 2008, AR（**原論文** t=4.6, 月次nan%, 再現品質=1_good, 予測力=1_clear）
   - OSAP DelCOA — Richardson et al. 2005, JAE（**原論文** t=8.7, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ChNWC: 3.1
+      DelCOA: 7.47
+    t_original_paper: 4.61
+    t_replicated: 3.1
 E03:
   evidence_tier: T1
   references:
@@ -351,78 +709,173 @@ E03:
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP NOA — Hirshleifer et al. 2004, JAE（**原論文** t=8.4, 月次1.48%, 再現品質=1_good, 予測力=1_clear）
   - OSAP dNoa — Hirshleifer, Hou, Teoh, Zhang 2004, JAE（**原論文** t=8.8, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      NOA: 6.12
+      dNoa: 9.39
+    t_original_paper: 8.45
+    t_replicated: 6.12
 E07:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP ExclExp — Doyle, Lundholm and Soliman 2003, RAS（**原論文** t=6.8, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ExclExp: 0.83
+    t_original_paper: 6.78
+    t_replicated: 0.83
 E26:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP AbnormalAccruals — Xie 2001, AR（**原論文** t=8.4, 月次0.916666667%, 再現品質=2_fair, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      AbnormalAccruals: 1.67
+    t_original_paper: 8.43
+    t_replicated: 1.67
 E27:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP PctAcc — Hafzalla, Lundholm, Van Winkle 2011, AR（**原論文** t=3.3, 月次0.97%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      PctAcc: 4.77
+    t_original_paper: 3.29
+    t_replicated: 4.77
 E28:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP RDS — Landsman et al. 2011, AR（**原論文** t=5.8, 月次0.333333333%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      RDS: 0.83
+    t_original_paper: 5.84
+    t_replicated: 0.83
 E29:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP ChTax — Thomas and Zhang 2011, JAR（**原論文** t=11.3, 月次1.3%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ChTax: 10.35
+    t_original_paper: 11.26
+    t_replicated: 10.35
 E30:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Tax — Lev and Nissim 2004, AR（**原論文** t=3.9, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Tax: 4.65
+    t_original_paper: 3.85
+    t_replicated: 4.65
 E31:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP TotalAccruals — Richardson et al. 2005, JAE（**原論文** t=6.4, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      TotalAccruals: 2.35
+    t_original_paper: 6.38
+    t_replicated: 2.35
 E32:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP DelNetFin — Richardson et al. 2005, JAE（**原論文** t=5.8, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      DelNetFin: 4.85
+    t_original_paper: 5.85
+    t_replicated: 4.85
 E33:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP ChNNCOA — Soliman 2008, AR（**原論文** t=5.3, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ChNNCOA: 3.8
+    t_original_paper: 5.26
+    t_replicated: 3.8
 E34:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP DelCOL — Richardson et al. 2005, JAE（**原論文** t=4.5, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      DelCOL: 5.67
+    t_original_paper: 4.49
+    t_replicated: 5.67
 F01:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP ShareIss1Y — Pontiff and Woodgate 2008, JF（**原論文** t=7.1, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ShareIss1Y: 7.17
+    t_original_paper: 7.08
+    t_replicated: 7.17
 F02:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP ShareIss5Y — Daniel and Titman 2006, JF（**原論文** t=4.4, 月次nan%, 再現品質=2_fair, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ShareIss5Y: 6.27
+    t_original_paper: 4.39
+    t_replicated: 6.27
 F03:
   evidence_tier: T3
   references:
@@ -441,30 +894,65 @@ F23:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP CompositeDebtIssuance — Lyandres, Sun and Zhang 2008, RFS（**原論文** t=8.6, 月次0.523%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      CompositeDebtIssuance: 4.35
+    t_original_paper: 8.59
+    t_replicated: 4.35
 F24:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP DelFINL — Richardson et al. 2005, JAE（**原論文** t=8.0, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      DelFINL: 9.96
+    t_original_paper: 8.01
+    t_replicated: 9.96
 F25:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP NetDebtFinance — Bradshaw, Richardson, Sloan 2006, JAE（**原論文** t=6.9, 月次0.675%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      NetDebtFinance: 8.58
+    t_original_paper: 6.91
+    t_replicated: 8.58
 F26:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP XFIN — Bradshaw, Richardson, Sloan 2006, JAE（**原論文** t=5.7, 月次1.29%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      XFIN: 5.88
+    t_original_paper: 5.7
+    t_replicated: 5.88
 F27:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP CompEquIss — Daniel and Titman 2006, JF（**原論文** t=4.4, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      CompEquIss: 3.67
+    t_original_paper: 4.39
+    t_replicated: 3.67
 F28:
   evidence_tier: T1
   references:
@@ -489,48 +977,105 @@ F31:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP NetEquityFinance — Bradshaw, Richardson, Sloan 2006, JAE（**原論文** t=3.8, 月次0.93%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      NetEquityFinance: 4.2
+    t_original_paper: 3.82
+    t_replicated: 4.2
 G01:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Mom12m — Jegadeesh and Titman 1993, JF（**原論文** t=3.7, 月次1.31%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Mom12m: 3.8
+    t_original_paper: 3.74
+    t_replicated: 3.8
 G02:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Mom6m — Jegadeesh and Titman 1993, JF（**原論文** t=2.4, 月次0.84%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Mom6m: 3.55
+    t_original_paper: 2.44
+    t_replicated: 3.55
 G04:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP STreversal — Jegadeesh 1990, JF（**原論文** t=12.4, 月次1.99%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      STreversal: 9.29
+    t_original_paper: 12.44
+    t_replicated: 9.29
 G07:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP High52 — George and Hwang 2004, JF（**原論文** t=2.0, 月次0.45%, 再現品質=1_good, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      High52: 1.56
+    t_original_paper: 2.0
+    t_replicated: 1.56
 G10:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP ResidualMomentum — Blitz, Huij and Martens 2011, JEmpFin（**原論文** t=8.2, 月次0.933333333%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ResidualMomentum: 7.91
+    t_original_paper: 8.22
+    t_replicated: 7.91
 G31:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP TrendFactor — Han, Zhou, Zhu 2016, JFE（**原論文** t=15.0, 月次1.63%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      TrendFactor: 9.77
+    t_original_paper: 15.0
+    t_replicated: 9.77
 G32:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP IntMom — Novy-Marx 2012, JFE（**原論文** t=5.8, 月次1.2%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IntMom: 6.06
+    t_original_paper: 5.79
+    t_replicated: 6.06
 G33:
   evidence_tier: T1
   references:
@@ -543,102 +1088,222 @@ G34:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP FirmAgeMom — Zhang 2006, JF（**原論文** t=7.2, 月次2.9%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      FirmAgeMom: 7.84
+    t_original_paper: 7.21
+    t_replicated: 7.84
 G35:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Mom6mJunk — Avramov et al 2007, JF（**原論文** t=4.3, 月次2.12%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Mom6mJunk: 5.3
+    t_original_paper: 4.29
+    t_replicated: 5.3
 G36:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP IndMom — Grinblatt and Moskowitz 1999, JF（**原論文** t=4.7, 月次0.43%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IndMom: 2.63
+    t_original_paper: 4.65
+    t_replicated: 2.63
 G37:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP EarningsStreak — Loh and Warachka 2012, MS（**原論文** t=9.5, 月次0.957%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      EarningsStreak: 9.23
+    t_original_paper: 9.51
+    t_replicated: 9.23
 G38:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP MomSeasonShort — Heston and Sadka 2008, JFE（**原論文** t=7.6, 月次1.15%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MomSeasonShort: 6.45
+    t_original_paper: 7.6
+    t_replicated: 6.45
 G39:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP MomSeason — Heston and Sadka 2008, JFE（**原論文** t=5.3, 月次0.67%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MomSeason: 4.61
+    t_original_paper: 5.35
+    t_replicated: 4.61
 G40:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP MomSeason06YrPlus — Heston and Sadka 2008, JFE（**原論文** t=6.2, 月次0.68%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MomSeason06YrPlus: 4.9
+    t_original_paper: 6.15
+    t_replicated: 4.9
 G41:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP MomSeason11YrPlus — Heston and Sadka 2008, JFE（**原論文** t=6.4, 月次0.66%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MomSeason11YrPlus: 6.08
+    t_original_paper: 6.43
+    t_replicated: 6.08
 G42:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP MomOffSeason — Heston and Sadka 2008, JFE（**原論文** t=5.6, 月次1.25%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MomOffSeason: 4.53
+    t_original_paper: 5.6
+    t_replicated: 4.53
 G43:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Mom12mOffSeason — Heston and Sadka 2008, JFE（**原論文** t=4.2, 月次1.17%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Mom12mOffSeason: 4.85
+    t_original_paper: 4.2
+    t_replicated: 4.85
 G44:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP MomSeason16YrPlus — Heston and Sadka 2008, JFE（**原論文** t=4.6, 月次0.52%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MomSeason16YrPlus: 5.85
+    t_original_paper: 4.58
+    t_replicated: 5.85
 G45:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP MomOffSeason06YrPlus — Heston and Sadka 2008, JFE（**原論文** t=4.6, 月次0.55%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MomOffSeason06YrPlus: 5.57
+    t_original_paper: 4.62
+    t_replicated: 5.57
 H01:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP LRreversal — De Bondt and Thaler 1985, JF（**原論文** t=3.3, 月次0.105%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      LRreversal: 2.48
+    t_original_paper: 3.29
+    t_replicated: 2.48
 H13:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP IntanBM — Daniel and Titman 2006, JF（**原論文** t=4.0, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IntanBM: 1.7
+    t_original_paper: 3.99
+    t_replicated: 1.7
 H14:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP IntanCFP — Daniel and Titman 2006, JF（**原論文** t=4.9, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IntanCFP: 2.33
+    t_original_paper: 4.89
+    t_replicated: 2.33
 H15:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP IntanEP — Daniel and Titman 2006, JF（**原論文** t=4.6, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IntanEP: 2.54
+    t_original_paper: 4.64
+    t_replicated: 2.54
 H16:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP IntanSP — Daniel and Titman 2006, JF（**原論文** t=4.2, 月次nan%, 再現品質=2_fair, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IntanSP: 2.57
+    t_original_paper: 4.24
+    t_replicated: 2.57
 H17:
   evidence_tier: T1
   references:
@@ -651,12 +1316,26 @@ H18:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP MRreversal — De Bondt and Thaler 1985, JF（**原論文** t=n/a, 月次0.75%, 再現品質=3_distant, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MRreversal: 2.21
+    t_original_paper: null
+    t_replicated: 2.21
 I01:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP RealizedVol — Ang et al. 2006, JF（**原論文** t=2.9, 月次0.97%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      RealizedVol: 2.96
+    t_original_paper: 2.86
+    t_replicated: 2.96
 I04:
   evidence_tier: T1
   references:
@@ -664,18 +1343,41 @@ I04:
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP IdioVol3F — Ang et al. 2006, JF（**原論文** t=3.1, 月次1.06%, 再現品質=1_good, 予測力=1_clear）
   - OSAP IdioVolAHT — Ali, Hwang, and Trombley 2003, JFE（**原論文** t=2.7, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IdioVol3F: 4.05
+      IdioVolAHT: 2.15
+    t_original_paper: 3.1
+    t_replicated: 4.05
 I05:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Beta — Fama and MacBeth 1973, JPE（**原論文** t=2.6, 月次nan%, 再現品質=1_good, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Beta: 0.9
+    t_original_paper: 2.57
+    t_replicated: 0.9
 I06:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP MaxRet — Bali, Cakici, and Whitelaw 2011, JFE（**原論文** t=2.8, 月次1.03%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MaxRet: 2.46
+    t_original_paper: 2.83
+    t_replicated: 2.46
 I08:
   evidence_tier: T1
   references:
@@ -683,66 +1385,146 @@ I08:
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP ReturnSkew — Bali, Engle and Murray 2015, Book（**原論文** t=4.0, 月次0.47%, 再現品質=1_good, 予測力=1_clear）
   - OSAP ReturnSkew3F — Bali, Engle and Murray 2015, Book（**原論文** t=4.3, 月次0.45%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ReturnSkew: 4.29
+      ReturnSkew3F: 2.87
+    t_original_paper: 4.01
+    t_replicated: 4.29
 I26:
   evidence_tier: T3
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP BetaFP — Frazzini and Pedersen 2014, JFE（**原論文** t=7.1, 月次0.7%, 再現品質=3_distant, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: '**再現 t の符号が原論文と逆。** 構成の違いか、公表後の消失か、対応の誤りかを個別に確認する必要がある'
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      BetaFP: -1.19
+    t_original_paper: 7.12
+    t_replicated: -1.19
 I27:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Coskewness — Harvey and Siddique 2000, JF（**原論文** t=2.0, 月次0.3%, 再現品質=1_good, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Coskewness: 3.08
+    t_original_paper: 1.96
+    t_replicated: 3.08
 I28:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP BetaTailRisk — Kelly and Jiang 2014, RFS（**原論文** t=2.5, 月次0.33%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      BetaTailRisk: 3.15
+    t_original_paper: 2.48
+    t_replicated: 3.15
 I29:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP ReturnSkew3F — Bali, Engle and Murray 2015, Book（**原論文** t=4.3, 月次0.45%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ReturnSkew3F: 2.87
+    t_original_paper: 4.35
+    t_replicated: 2.87
 I30:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP betaVIX — Ang et al. 2006, JF（**原論文** t=3.9, 月次1.04%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      betaVIX: 3.17
+    t_original_paper: 3.9
+    t_replicated: 3.17
 I31:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP RealizedVol — Ang et al. 2006, JF（**原論文** t=2.9, 月次0.97%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      RealizedVol: 2.96
+    t_original_paper: 2.86
+    t_replicated: 2.96
 J01:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP DolVol — Brennan, Chordia, Subra 1998, JFE（**原論文** t=2.9, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      DolVol: 3.88
+    t_original_paper: 2.86
+    t_replicated: 3.88
 J03:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Illiquidity — Amihud 2002, JFM（**原論文** t=6.6, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Illiquidity: 2.89
+    t_original_paper: 6.6
+    t_replicated: 2.89
 J04:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP BidAskSpread — Amihud and Mendelson 1986, JFE（**原論文** t=n/a, 月次nan%, 再現品質=2_fair, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      BidAskSpread: 0.92
+    t_original_paper: null
+    t_replicated: 0.92
 J05:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Size — Banz 1981, JFE（**原論文** t=3.1, 月次1.01%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Size: 3.48
+    t_original_paper: 3.07
+    t_replicated: 3.48
 J08:
   evidence_tier: T1
   references:
@@ -750,6 +1532,14 @@ J08:
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP std_turn — Chordia, Subra, Anshuman 2001, JFE（**原論文** t=3.7, 月次nan%, 再現品質=1_good, 予測力=1_clear）
   - OSAP VolSD — Chordia, Subra, Anshuman 2001, JFE（**原論文** t=3.6, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      VolSD: 1.36
+      std_turn: 2.36
+    t_original_paper: 3.74
+    t_replicated: 2.36
 J09:
   evidence_tier: T1
   references:
@@ -764,162 +1554,361 @@ J10:
   - OSAP zerotrade1M — Liu 2006, JFE（**原論文** t=3.5, 月次0.56%, 再現品質=1_good, 予測力=1_clear）
   - OSAP zerotrade6M — Liu 2006, JFE（**原論文** t=4.1, 月次0.806%, 再現品質=1_good, 予測力=1_clear）
   - OSAP zerotrade12M — Liu 2006, JFE（**原論文** t=4.4, 月次0.846%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      zerotrade12M: 2.46
+      zerotrade1M: 2.88
+      zerotrade6M: 2.57
+    t_original_paper: 3.46
+    t_replicated: 2.88
 J21:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP ProbInformedTrading — Easley, Hvidkjaer and O'Hara 2002, JF（**原論文** t=2.5, 月次nan%, 再現品質=1_good, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ProbInformedTrading: 0.55
+    t_original_paper: 2.5
+    t_replicated: 0.55
 J22:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP VolumeTrend — Haugen and Baker 1996, JFE（**原論文** t=3.0, 月次nan%, 再現品質=2_fair, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      VolumeTrend: 6.27
+    t_original_paper: 3.0
+    t_replicated: 6.27
 J23:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP VolMkt — Haugen and Baker 1996, JFE（**原論文** t=4.0, 月次nan%, 再現品質=2_fair, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      VolMkt: 2.97
+    t_original_paper: 4.0
+    t_replicated: 2.97
 J24:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP std_turn — Chordia, Subra, Anshuman 2001, JFE（**原論文** t=3.7, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      std_turn: 2.36
+    t_original_paper: 3.74
+    t_replicated: 2.36
 J25:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Price — Blume and Husic 1973, JF（**原論文** t=2.9, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Price: 3.0
+    t_original_paper: 2.9
+    t_replicated: 3.0
 K19:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP ShortInterest — Dechow et al. 2001, JFE（**原論文** t=n/a, 月次0.35%, 再現品質=2_fair, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ShortInterest: 6.11
+    t_original_paper: null
+    t_replicated: 6.11
 K28:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP CPVolSpread — Bali and Hovakimian 2009, MS（**原論文** t=4.2, 月次1.045%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      CPVolSpread: 6.02
+    t_original_paper: 4.2
+    t_replicated: 6.02
 K29:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP OptionVolume1 — Johnson and So 2012, JFE（**原論文** t=3.5, 月次0.916%, 再現品質=2_fair, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      OptionVolume1: 2.45
+    t_original_paper: 3.45
+    t_replicated: 2.45
 K51:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP DelBreadth — Chen, Hong and Stein 2002, JFE（**原論文** t=4.0, 月次0.673333333%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      DelBreadth: 3.14
+    t_original_paper: 3.96
+    t_replicated: 3.14
 K52:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP IO_ShortInterest — Asquith Pathak and Ritter 2005, JFE（**原論文** t=n/a, 月次0.98%, 再現品質=1_good, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IO_ShortInterest: 3.59
+    t_original_paper: null
+    t_replicated: 3.59
 K53:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP SmileSlope — Yan 2011, JFE（**原論文** t=8.2, 月次1.8%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      SmileSlope: 10.55
+    t_original_paper: 8.17
+    t_replicated: 10.55
 K54:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP dCPVolSpread — An, Ang, Bali, Cakici 2014, JF（**原論文** t=6.8, 月次-1.68%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      dCPVolSpread: 8.03
+    t_original_paper: 6.77
+    t_replicated: 8.03
 K55:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP RIVolSpread — Bali and Hovakimian 2009, MS（**原論文** t=2.9, 月次0.732%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      RIVolSpread: 1.49
+    t_original_paper: 2.9
+    t_replicated: 1.49
 K56:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP OptionVolume1 — Johnson and So 2012, JFE（**原論文** t=3.5, 月次0.916%, 再現品質=2_fair, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      OptionVolume1: 2.45
+    t_original_paper: 3.45
+    t_replicated: 2.45
 K57:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP dVolCall — An, Ang, Bali, Cakici 2014, JF（**原論文** t=3.5, 月次1.09%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      dVolCall: 3.44
+    t_original_paper: 3.45
+    t_replicated: 3.44
 K58:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP dVolPut — An, Ang, Bali, Cakici 2014, JF（**原論文** t=2.0, 月次0.42%, 再現品質=1_good, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      dVolPut: 1.75
+    t_original_paper: 2.03
+    t_replicated: 1.75
 L01:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP IndRetBig — Hou 2007, RFS（**原論文** t=11.0, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IndRetBig: 9.93
+    t_original_paper: 11.0
+    t_replicated: 9.93
 L02:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP EarnSupBig — Hou 2007, RFS（**原論文** t=8.9, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      EarnSupBig: 3.21
+    t_original_paper: 8.91
+    t_replicated: 3.21
 L03:
   evidence_tier: T3
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP PriceDelaySlope — Hou and Moskowitz 2005, RFS（**原論文** t=7.7, 月次1.21%, 再現品質=3_distant, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      PriceDelaySlope: 1.32
+    t_original_paper: 7.7
+    t_replicated: 1.32
 L04:
   evidence_tier: T3
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP PriceDelayTstat — Hou and Moskowitz 2005, RFS（**原論文** t=7.4, 月次1.1%, 再現品質=3_distant, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      PriceDelayTstat: 1.37
+    t_original_paper: 7.39
+    t_replicated: 1.37
 L05:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP PriceDelayRsq — Hou and Moskowitz 2005, RFS（**原論文** t=3.4, 月次0.31%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      PriceDelayRsq: 2.27
+    t_original_paper: 3.4
+    t_replicated: 2.27
 L06:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP iomom_supp — Menzly and Ozbas 2010, JF（**原論文** t=5.0, 月次nan%, 再現品質=2_fair, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      iomom_supp: 1.4
+    t_original_paper: 5.03
+    t_replicated: 1.4
 L07:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP iomom_cust — Menzly and Ozbas 2010, JF（**原論文** t=4.1, 月次nan%, 再現品質=2_fair, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      iomom_cust: 1.66
+    t_original_paper: 4.11
+    t_replicated: 1.66
 L08:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP retConglomerate — Cohen and Lou 2012, JFE（**原論文** t=5.5, 月次1.18%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      retConglomerate: 6.48
+    t_original_paper: 5.51
+    t_replicated: 6.48
 M08:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Activism2 — Cremers and Nair 2005, JF（**原論文** t=2.0, 月次0.661666667%, 再現品質=1_good, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Activism2: 2.51
+    t_original_paper: 2.0
+    t_replicated: 2.51
 M10:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Activism1 — Cremers and Nair 2005, JF（**原論文** t=3.1, 月次0.9025%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Activism1: 0.71
+    t_original_paper: 3.13
+    t_replicated: 0.71
 M12:
   evidence_tier: T1
   references:
@@ -932,18 +1921,39 @@ N02:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP EarningsSurprise — Foster, Olsen and Shevlin 1984, AR（**原論文** t=n/a, 月次2.975%, 再現品質=2_fair, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      EarningsSurprise: 9.32
+    t_original_paper: null
+    t_replicated: 9.32
 N03:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP RevenueSurprise — Jegadeesh and Livnat 2006, JAE（**原論文** t=n/a, 月次nan%, 再現品質=2_fair, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      RevenueSurprise: 8.77
+    t_original_paper: null
+    t_replicated: 8.77
 N04:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP AnnouncementReturn — Chan, Jegadeesh and Lakonishok 1996, JF（**原論文** t=9.2, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      AnnouncementReturn: 13.69
+    t_original_paper: 9.25
+    t_replicated: 13.69
 N08:
   evidence_tier: T2
   references:
@@ -951,6 +1961,14 @@ N08:
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP EarningsConsistency — Alwathainani 2009, BAR（**原論文** t=2.7, 月次0.360833333%, 再現品質=2_fair, 予測力=1_clear）
   - OSAP NumEarnIncrease — Loh and Warachka 2012, MS（**原論文** t=n/a, 月次nan%, 再現品質=3_distant, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      EarningsConsistency: 2.95
+      NumEarnIncrease: 7.29
+    t_original_paper: 2.67
+    t_replicated: 2.95
 N10:
   evidence_tier: T1
   references:
@@ -958,12 +1976,27 @@ N10:
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP REV6 — Chan, Jegadeesh and Lakonishok 1996, JF（**原論文** t=4.1, 月次nan%, 再現品質=1_good, 予測力=1_clear）
   - OSAP AnalystRevision — Hawkins, Chamberlin, Daniel 1984, FAJ（**原論文** t=3.2, 月次0.460583333%, 再現品質=2_fair, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      AnalystRevision: 8.69
+      REV6: 7.51
+    t_original_paper: 4.07
+    t_replicated: 7.51
 N11:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP ForecastDispersion — Diether, Malloy and Scherbina 2002, JF（**原論文** t=2.9, 月次0.79%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ForecastDispersion: 3.56
+    t_original_paper: 2.88
+    t_replicated: 3.56
 N12:
   evidence_tier: T2
   references:
@@ -971,6 +2004,15 @@ N12:
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP AnalystValue — Frankel and Lee 1998, JAE（**原論文** t=n/a, 月次0.258333333%, 再現品質=2_fair, 予測力=2_likely）
   - OSAP AOP — Frankel and Lee 1998, JAE（**原論文** t=n/a, 月次0.275%, 再現品質=2_fair, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      AOP: 1.78
+      AnalystValue: 0.91
+    t_original_paper: null
+    t_replicated: 0.91
 N15:
   evidence_tier: T3
   references:
@@ -990,18 +2032,40 @@ N24:
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP AgeIPO — Ritter 1991, JF（**原論文** t=n/a, 月次0.972222222%, 再現品質=2_fair, 予測力=2_likely）
   - OSAP IndIPO — Ritter 1991, JF（**原論文** t=4.0, 月次0.8525%, 再現品質=2_fair, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      AgeIPO: 3.87
+    t_original_paper: null
+    t_replicated: 3.87
 N46:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP EarningsForecastDisparity — Da and Warachka 2011, JFE（**原論文** t=5.1, 月次0.48%, 再現品質=2_fair, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      EarningsForecastDisparity: 4.28
+    t_original_paper: 5.08
+    t_replicated: 4.28
 N47:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP fgr5yrLag — La Porta 1996, JF（**原論文** t=4.9, 月次nan%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      fgr5yrLag: 0.61
+    t_original_paper: 4.9
+    t_replicated: 0.61
 N48:
   evidence_tier: T3
   references:
@@ -1050,24 +2114,56 @@ O24:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP FirmAge — Barry and Brown 1984, JFE（**原論文** t=2.5, 月次nan%, 再現品質=4_lack_data, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: '**再現 t の符号が原論文と逆。** 構成の違いか、公表後の消失か、対応の誤りかを個別に確認する必要がある'
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      FirmAge: -1.07
+    t_original_paper: 2.48
+    t_replicated: -1.07
 V13:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP Herf — Hou and Robinson 2006, JF（**原論文** t=2.1, 月次0.26%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: '**再現 t の符号が原論文と逆。** 構成の違いか、公表後の消失か、対応の誤りかを個別に確認する必要がある'
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Herf: -0.53
+    t_original_paper: 2.14
+    t_replicated: -0.53
 V14:
   evidence_tier: T2
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP HerfAsset — Hou and Robinson 2006, JF（**原論文** t=2.1, 月次0.2%, 再現品質=1_good, 予測力=2_likely）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      HerfAsset: 0.38
+    t_original_paper: 2.12
+    t_replicated: 0.38
 V15:
   evidence_tier: T1
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP HerfBE — Hou and Robinson 2006, JF（**原論文** t=2.5, 月次0.24%, 再現品質=1_good, 予測力=1_clear）
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      HerfBE: 0.73
+    t_original_paper: 2.52
+    t_replicated: 0.73
 X07:
   evidence_tier: T2
   references:

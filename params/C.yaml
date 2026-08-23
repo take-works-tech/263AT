@@ -152,6 +152,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -164,6 +165,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MeanRankRevGrowth: 3.69
+    t_original_paper: null
+    t_replicated: 3.69
 - id: C03
   name_ja: EPS成長率
   category: C
@@ -819,7 +827,7 @@
   inputs:
   - order_backlog
   sign: positive
-  buy_class: main
+  buy_class: useful
   sell_class: main
   gate_policy: null
   horizon:
@@ -853,11 +861,11 @@
   - U22
   - U44
   - N16
-  economic_rationale: '**開示している業種では最強クラスの先行指標。** 受注は売上に先行するので、 決算に出る前に業績の方向が分かる。OSAP `OrderBacklog` t=2.4、 `OrderBacklogChg` も収録されている。 **U21（受注残/月商）に正規化した方が企業規模の影響を除ける。**'
+  economic_rationale: '**開示している業種では最強クラスの先行指標。** 受注は売上に先行するので、 決算に出る前に業績の方向が分かる。OSAP `OrderBacklog` t=2.4、 `OrderBacklogChg` も収録されている。 **U21（受注残/月商）に正規化した方が企業規模の影響を除ける。** **【再現測定 2026-08-23】再現 t=-1.06 で符号が逆（原論文 2.38）。買 ◎→○（§1.9.8）。**'
   references:
   - https://www.openassetpricing.com/
   - OSAP OrderBacklog t=2.4 / OrderBacklogChg
-  notes: 開示している業種では最強の先行指標（機械・建設・IT）
+  notes: 開示している業種では最強の先行指標（機械・建設・IT） 【再現測定 2026-08-23】買 ◎→○。再現 t=-1.06（原論文 2.38）。符号が逆（§1.9.8）
   notes_extra: null
   provenance:
     name_ja: catalog
@@ -877,6 +885,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -889,6 +898,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: '**再現 t の符号が原論文と逆。** 構成の違いか、公表後の消失か、対応の誤りかを個別に確認する必要がある'
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      OrderBacklog: -1.06
+    t_original_paper: 2.38
+    t_replicated: -1.06
 - id: C12
   name_ja: 前受収益 / 契約負債の成長率
   category: C
@@ -899,7 +916,7 @@
   inputs:
   - deferred_revenue
   sign: positive
-  buy_class: main
+  buy_class: useful
   sell_class: main
   gate_policy: null
   horizon:
@@ -932,11 +949,11 @@
   - U27
   - U28
   - U29
-  economic_rationale: '**売上計上に先行して現金が入る**ビジネスモデルの成長を捉える。 契約負債の増加は、まだ売上になっていない将来の収益が積み上がっているということ。 OSAP `DelDRC`（Deferred Revenue）t=3.6。 B21（負の CCC）と同じく、前受金モデルの強さの現れでもある。'
+  economic_rationale: '**売上計上に先行して現金が入る**ビジネスモデルの成長を捉える。 契約負債の増加は、まだ売上になっていない将来の収益が積み上がっているということ。 OSAP `DelDRC`（Deferred Revenue）t=3.6。 B21（負の CCC）と同じく、前受金モデルの強さの現れでもある。 **【再現測定 2026-08-23】再現 t=-0.07 で符号が逆（原論文 3.59）。買 ◎→○（§1.9.8）。**'
   references:
   - https://www.openassetpricing.com/
   - OSAP DelDRC — Deferred Revenue, t=3.6
-  notes: SaaS・サブスクの先行指標。売上に先行する
+  notes: SaaS・サブスクの先行指標。売上に先行する 【再現測定 2026-08-23】買 ◎→○。再現 t=-0.07（原論文 3.59）。符号が逆（§1.9.8）
   notes_extra: null
   provenance:
     name_ja: catalog
@@ -956,6 +973,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -968,6 +986,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: '**再現 t の符号が原論文と逆。** 構成の違いか、公表後の消失か、対応の誤りかを個別に確認する必要がある'
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      DelDRC: -0.07
+    t_original_paper: 3.59
+    t_replicated: -0.07
 - id: C13
   name_ja: 既存店売上成長率
   category: C
@@ -2311,6 +2337,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -2323,6 +2350,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      grcapx: 5.75
+    t_original_paper: 5.05
+    t_replicated: 5.75
 - id: C30
   name_ja: 設備投資成長（3年）
   category: C
@@ -2391,6 +2425,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -2403,6 +2438,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      grcapx3y: 4.83
+    t_original_paper: 4.71
+    t_replicated: 4.83
 - id: C31
   name_ja: 業種調整済み設備投資変化
   category: C
@@ -2472,6 +2514,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -2484,6 +2527,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ChInvIA: 5.7
+    t_original_paper: 2.91
+    t_replicated: 5.7
 - id: C32
   name_ja: 従業員数成長率
   category: C
@@ -2551,6 +2601,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -2563,6 +2614,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      hire: 6.26
+    t_original_paper: 5.78
+    t_replicated: 6.26
 - id: C33
   name_ja: 広告費の成長率
   category: C
@@ -2631,6 +2689,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -2643,6 +2702,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      GrAdExp: 1.58
+    t_original_paper: 3.54
+    t_replicated: 1.58
 - id: C34
   name_ja: ブランド資本投資
   category: C
@@ -2712,6 +2779,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -2724,6 +2792,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      BrandInvest: 0.24
+    t_original_paper: 2.01
+    t_replicated: 0.24
 - id: C35
   name_ja: 総資産成長率
   category: C
@@ -2798,6 +2874,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -2810,6 +2887,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      AssetGrowth: 7.61
+    t_original_paper: 8.45
+    t_replicated: 7.61
 - id: C36
   name_ja: 有形固定資産＋在庫の変化
   category: C
@@ -2879,6 +2963,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -2891,6 +2976,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      InvestPPEInv: 9.76
+    t_original_paper: 7.13
+    t_replicated: 9.76
 - id: C37
   name_ja: 自己資本の成長
   category: C
@@ -2957,6 +3049,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -2969,6 +3062,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ChEQ: 4.92
+    t_original_paper: 5.38
+    t_replicated: 4.92
 - id: C38
   name_ja: 自己資本比率の変化
   category: C
@@ -3036,6 +3136,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -3048,6 +3149,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      DelEqu: 4.67
+    t_original_paper: 6.25
+    t_replicated: 4.67
 - id: C39
   name_ja: 投資 / 売上
   category: C
@@ -3118,6 +3226,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -3130,6 +3239,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Investment: 2.53
+    t_original_paper: 2.86
+    t_replicated: 2.53
 - id: C40
   name_ja: 長期投資の変化
   category: C
@@ -3200,6 +3316,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -3212,6 +3329,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      DelLTI: 4.49
+    t_original_paper: 3.38
+    t_replicated: 4.49
 - id: C41
   name_ja: 予想外の R&D 増加
   category: C

@@ -76,6 +76,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     gate_policy: override
     formula: override
     inputs: override
@@ -87,6 +88,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      DolVol: 3.88
+    t_original_paper: 2.86
+    t_replicated: 3.88
 - id: J02
   name_ja: 流動化日数
   category: J
@@ -235,6 +243,7 @@
     accounting_standard_note: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     zero_denominator_policy: override
@@ -246,6 +255,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Illiquidity: 2.89
+    t_original_paper: 6.6
+    t_replicated: 2.89
 - id: J04
   name_ja: 実効スプレッド
   category: J
@@ -313,6 +329,7 @@
     accounting_standard_note: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     zero_denominator_policy: override
@@ -324,6 +341,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      BidAskSpread: 0.92
+    t_original_paper: null
+    t_replicated: 0.92
 - id: J05
   name_ja: 時価総額
   category: J
@@ -394,6 +419,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -404,6 +430,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Size: 3.48
+    t_original_paper: 3.07
+    t_replicated: 3.48
 - id: J06
   name_ja: 浮動株時価総額
   category: J
@@ -630,6 +663,7 @@
     accounting_standard_note: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     zero_denominator_policy: override
@@ -641,6 +675,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      VolSD: 1.36
+      std_turn: 2.36
+    t_original_paper: 3.74
+    t_replicated: 2.36
 - id: J09
   name_ja: 出来高急増率
   category: J
@@ -787,6 +829,7 @@
     accounting_standard_note: override
     evidence_tier: override
     references: override
+    replication: override
     gate_policy: override
     formula: override
     inputs: override
@@ -799,6 +842,15 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      zerotrade12M: 2.46
+      zerotrade1M: 2.88
+      zerotrade6M: 2.57
+    t_original_paper: 3.46
+    t_replicated: 2.88
 - id: J11
   name_ja: 値幅制限張り付き頻度
   category: J
@@ -1640,6 +1692,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -1650,6 +1703,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ProbInformedTrading: 0.55
+    t_original_paper: 2.5
+    t_replicated: 0.55
 - id: J22
   name_ja: 出来高トレンド
   category: J
@@ -1718,6 +1779,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -1728,6 +1790,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      VolumeTrend: 6.27
+    t_original_paper: 3.0
+    t_replicated: 6.27
 - id: J23
   name_ja: 出来高 / 時価総額
   category: J
@@ -1799,6 +1868,7 @@
     accounting_standard_note: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     zero_denominator_policy: override
@@ -1810,6 +1880,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      VolMkt: 2.97
+    t_original_paper: 4.0
+    t_replicated: 2.97
 - id: J24
   name_ja: 回転率のボラティリティ
   category: J
@@ -1880,6 +1957,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -1890,6 +1968,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      std_turn: 2.36
+    t_original_paper: 3.74
+    t_replicated: 2.36
 - id: J25
   name_ja: 株価水準
   category: J
@@ -1958,6 +2043,7 @@
     accounting_standard_note: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     zero_denominator_policy: override
@@ -1969,3 +2055,10 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Price: 3.0
+    t_original_paper: 2.9
+    t_replicated: 3.0

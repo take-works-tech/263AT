@@ -76,6 +76,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -86,6 +87,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      LRreversal: 2.48
+    t_original_paper: 3.29
+    t_replicated: 2.48
 - id: H02
   name_ja: 業種内相対リバーサル
   category: H
@@ -963,7 +971,7 @@
   - PRICE_adj
   - EQ
   sign: negative
-  buy_class: main
+  buy_class: useful
   sell_class: useful
   gate_policy: null
   horizon:
@@ -996,12 +1004,12 @@
   - H16
   - A03
   - C26
-  economic_rationale: '**OSAP IntanBM t=4.0。H01 の長期リバーサルを 「ファンダメンタルで説明できない部分」に限定する。** Daniel-Titman (JF 2006) の intangible return。 → **これが H カテゴリの核心。** **H01（素の長期リバーサル）は A03（B/P）と強く相関して二重計上になる**が、 **H13 は簿価の変化で説明できる部分を除く**ので、 **A03 と独立した情報だけが残る。** → **「説明できる部分を除いた残りが本体」という パターンの H 版**（G10 / C31 / E26 / H02 と同じ）。 **このパターンが 263AT の全カテゴリに現れる**のは、 **どのシグナルも「既知の要因で説明できない部分」に 情報があるという共通構造による。**'
+  economic_rationale: '**OSAP IntanBM t=4.0。H01 の長期リバーサルを 「ファンダメンタルで説明できない部分」に限定する。** Daniel-Titman (JF 2006) の intangible return。 → **これが H カテゴリの核心。** **H01（素の長期リバーサル）は A03（B/P）と強く相関して二重計上になる**が、 **H13 は簿価の変化で説明できる部分を除く**ので、 **A03 と独立した情報だけが残る。** → **「説明できる部分を除いた残りが本体」という パターンの H 版**（G10 / C31 / E26 / H02 と同じ）。 **このパターンが 263AT の全カテゴリに現れる**のは、 **どのシグナルも「既知の要因で説明できない部分」に 情報があるという共通構造による。** **【再現測定 2026-08-23】再現 t=1.70（原論文 3.99）。H14-H16 に吸収される。買 ◎→○（§1.9.8）。**'
   references:
   - https://www.openassetpricing.com/
   - Daniel-Titman (JF 2006) Market Reactions to Tangible and Intangible Information
   - OSAP IntanBM t=4.0
-  notes: OSAP IntanBM t=4.0。H01 の長期リバーサルを「ファンダメンタルで説明できない部分」に絞った版。本プロジェクトのホライズンに直撃
+  notes: OSAP IntanBM t=4.0。H01 の長期リバーサルを「ファンダメンタルで説明できない部分」に絞った版。本プロジェクトのホライズンに直撃 【再現測定 2026-08-23】買 ◎→○。再現 t=1.70（原論文 3.99）。H14-H16 に吸収される（§1.9.8）
   notes_extra: null
   provenance:
     name_ja: catalog
@@ -1023,6 +1031,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -1033,6 +1042,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IntanBM: 1.7
+    t_original_paper: 3.99
+    t_replicated: 1.7
 - id: H14
   name_ja: 無形リターン（CF/P基準）
   category: H
@@ -1104,6 +1121,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -1114,6 +1132,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IntanCFP: 2.33
+    t_original_paper: 4.89
+    t_replicated: 2.33
 - id: H15
   name_ja: 無形リターン（E/P基準）
   category: H
@@ -1185,6 +1210,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -1195,6 +1221,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IntanEP: 2.54
+    t_original_paper: 4.64
+    t_replicated: 2.54
 - id: H16
   name_ja: 無形リターン（S/P基準）
   category: H
@@ -1265,6 +1298,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -1275,6 +1309,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IntanSP: 2.57
+    t_original_paper: 4.24
+    t_replicated: 2.57
 - id: H17
   name_ja: モメンタムと長期リバーサルの複合
   category: H
@@ -1424,6 +1465,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -1434,3 +1476,10 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MRreversal: 2.21
+    t_original_paper: null
+    t_replicated: 2.21

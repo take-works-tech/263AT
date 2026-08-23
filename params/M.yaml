@@ -639,6 +639,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -649,6 +650,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Activism2: 2.51
+    t_original_paper: 2.0
+    t_replicated: 2.51
 - id: M09
   name_ja: 「重要提案行為」の記載
   category: M
@@ -806,6 +814,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -816,6 +825,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Activism1: 0.71
+    t_original_paper: 3.13
+    t_replicated: 0.71
 - id: M11
   name_ja: 保有報告の追加取得
   category: M

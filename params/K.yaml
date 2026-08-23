@@ -1463,6 +1463,7 @@
     markets: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     zero_denominator_policy: override
@@ -1473,6 +1474,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ShortInterest: 6.11
+    t_original_paper: null
+    t_replicated: 6.11
 - id: K20
   name_ja: Days to Cover
   category: K
@@ -2154,6 +2162,7 @@
     markets: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -2163,6 +2172,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      CPVolSpread: 6.02
+    t_original_paper: 4.2
+    t_replicated: 6.02
 - id: K29
   name_ja: オプション建玉の集中
   category: K
@@ -2229,6 +2245,7 @@
     markets: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -2238,6 +2255,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      OptionVolume1: 2.45
+    t_original_paper: 3.45
+    t_replicated: 2.45
 - id: K30
   name_ja: 異常なオプション出来高
   category: K
@@ -3921,6 +3945,7 @@
     markets: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -3930,6 +3955,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      DelBreadth: 3.14
+    t_original_paper: 3.96
+    t_replicated: 3.14
 - id: K52
   name_ja: 空売り残高 × 機関保有
   category: K
@@ -3999,6 +4031,7 @@
     markets: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -4008,6 +4041,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IO_ShortInterest: 3.59
+    t_original_paper: null
+    t_replicated: 3.59
 - id: K53
   name_ja: プット・コール IV スプレッド
   category: K
@@ -4077,6 +4117,7 @@
     markets: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -4086,6 +4127,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      SmileSlope: 10.55
+    t_original_paper: 8.17
+    t_replicated: 10.55
 - id: K54
   name_ja: プット・コール IV スプレッドの変化
   category: K
@@ -4153,6 +4201,7 @@
     markets: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -4162,6 +4211,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      dCPVolSpread: 8.03
+    t_original_paper: 6.77
+    t_replicated: 8.03
 - id: K55
   name_ja: 実現ボラ - IV スプレッド
   category: K
@@ -4230,6 +4286,7 @@
     markets: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -4239,6 +4296,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      RIVolSpread: 1.49
+    t_original_paper: 2.9
+    t_replicated: 1.49
 - id: K56
   name_ja: オプション出来高 / 株式出来高
   category: K
@@ -4307,6 +4372,7 @@
     markets: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     zero_denominator_policy: override
@@ -4317,6 +4383,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      OptionVolume1: 2.45
+    t_original_paper: 3.45
+    t_replicated: 2.45
 - id: K57
   name_ja: コール IV の変化
   category: K
@@ -4385,6 +4458,7 @@
     markets: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -4394,6 +4468,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      dVolCall: 3.44
+    t_original_paper: 3.45
+    t_replicated: 3.44
 - id: K58
   name_ja: プット IV の変化
   category: K
@@ -4462,6 +4543,7 @@
     markets: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -4471,3 +4553,11 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      dVolPut: 1.75
+    t_original_paper: 2.03
+    t_replicated: 1.75

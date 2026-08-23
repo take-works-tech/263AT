@@ -58,6 +58,44 @@ def tier_of(row):
     return "T3"
 
 
+def replicated_t(start="1963-07-01"):
+    """OSAP の等加重デシルから 10-1 の L/S を作り、実測 t を返す。
+
+    **signal_doc の T-Stat は原論文が報告した値であって再現値ではない**
+    （SampleStartYear/EndYear が原論文の期間になっていることで確認できる）。
+    §0 の「証拠の質を見る」という方針からすると、
+    **自分の構成で再現した t を持つ方が遥かに意味がある。**
+
+    実測すると 22% が t<2.0、5% は符号すら逆になる（§1.9.7）。
+    ポートフォリオが無い場合は空の dict を返す（q11 の生成自体は続行する）。
+    """
+    ports = ROOT / "research" / "oap_cache" / "port_deciles_ew.parquet"
+    if not ports.exists():
+        return {}
+    try:
+        import numpy as np
+        df = pd.read_parquet(ports)
+    except Exception as e:                     # pyarrow が無い等
+        print("  ⚠ 再現 t を計算できない: %s" % e)
+        return {}
+
+    df["pn"] = pd.to_numeric(df["port"].astype(str).str.strip(), errors="coerce")
+    df = df[df["pn"].notna()]
+    out = {}
+    for sig, g in df.groupby("signalname"):
+        lo, hi = g["pn"].min(), g["pn"].max()
+        if lo == hi:
+            continue
+        a = g[g["pn"] == hi].set_index("date")["ret"]
+        b = g[g["pn"] == lo].set_index("date")["ret"]
+        s = (a - b).dropna()
+        s = s[s.index >= pd.Timestamp(start)]
+        if len(s) < 120:
+            continue
+        out[sig] = float(s.mean() / (s.std(ddof=1) / np.sqrt(len(s))))
+    return out
+
+
 def load_params():
     rows = []
     for f in sorted((ROOT / "params").glob("[A-Z].yaml")):
@@ -72,6 +110,10 @@ def main():
 
     doc = pd.read_parquet(DOC).set_index("Acronym")
     params = load_params()
+    rep_t = replicated_t()
+    if rep_t:
+        print("### 再現 t を計算した OSAP シグナル: %d 本（等加重デシル L/S, 1963-）"
+              % len(rep_t))
 
     # --- 1. 注意点欄からの自動対応 ------------------------------------------
     auto = {}
@@ -125,7 +167,31 @@ def main():
                            ("%.1f" % abs(t)) if pd.notna(t) else "n/a",
                            r.get("Return"), r.get("Signal Rep Quality"),
                            r.get("Predictability in OP")))
-        ov[pid] = {"evidence_tier": tier, "references": refs}
+        entry = {"evidence_tier": tier, "references": refs}
+
+        # **再現 t をレジストリに持たせる。** 公表 t（原論文）と並べて記録し、
+        # §1.9 の priority_k には**再現 t の方**を使う（§1.9.7 の結論3）。
+        rt = {a: rep_t[a] for a in best[:3] if a in rep_t}
+        if rt:
+            pub = pd.to_numeric(doc.loc[best[0]].get("T-Stat"), errors="coerce")
+            main_t = rt.get(best[0])
+            entry["replication"] = {
+                "signals": {a: round(v, 2) for a, v in rt.items()},
+                "t_replicated": round(main_t, 2) if main_t is not None else None,
+                "t_original_paper": round(abs(float(pub)), 2) if pd.notna(pub) else None,
+                "construction": "OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S",
+                "note": ("**t_original_paper は原論文が報告した値。**"
+                         " 自分の構成での再現は t_replicated を見る（§1.9.7）"),
+            }
+            if main_t is not None and abs(main_t) < 2.0:
+                entry["replication"]["flag"] = (
+                    "再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって"
+                    "「自分の構成で効くか」ではない**（§0）。実装優先度は下げる")
+            if main_t is not None and pd.notna(pub) and main_t * float(pub) < 0:
+                entry["replication"]["flag"] = (
+                    "**再現 t の符号が原論文と逆。** 構成の違いか、"
+                    "公表後の消失か、対応の誤りかを個別に確認する必要がある")
+        ov[pid] = entry
         # カタログの★と OSAP の判定が食い違うもの
         stars = params[pid].get("evidence_stars")
         if stars == 3 and tier != "T1":

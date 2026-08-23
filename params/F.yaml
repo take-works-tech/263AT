@@ -73,6 +73,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -85,6 +86,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ShareIss1Y: 7.17
+    t_original_paper: 7.08
+    t_replicated: 7.17
 - id: F02
   name_ja: 純株式発行率(5年)
   category: F
@@ -148,6 +156,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -160,6 +169,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ShareIss5Y: 6.27
+    t_original_paper: 4.39
+    t_replicated: 6.27
 - id: F03
   name_ja: 自社株買い発表
   category: F
@@ -1804,6 +1820,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -1815,6 +1832,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      CompositeDebtIssuance: 4.35
+    t_original_paper: 8.59
+    t_replicated: 4.35
 - id: F24
   name_ja: 金融負債の変化
   category: F
@@ -1884,6 +1908,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -1896,6 +1921,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      DelFINL: 9.96
+    t_original_paper: 8.01
+    t_replicated: 9.96
 - id: F25
   name_ja: 純負債調達
   category: F
@@ -1964,6 +1996,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -1976,6 +2009,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      NetDebtFinance: 8.58
+    t_original_paper: 6.91
+    t_replicated: 8.58
 - id: F26
   name_ja: 純外部資金調達
   category: F
@@ -2047,6 +2087,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -2058,6 +2099,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      XFIN: 5.88
+    t_original_paper: 5.7
+    t_replicated: 5.88
 - id: F27
   name_ja: 複合株式発行
   category: F
@@ -2127,6 +2175,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -2138,6 +2187,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      CompEquIss: 3.67
+    t_original_paper: 4.39
+    t_replicated: 3.67
 - id: F28
   name_ja: 転換社債の有無
   category: F
@@ -2444,6 +2500,7 @@
     pit_lag_days: default
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -2456,3 +2513,10 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      NetEquityFinance: 4.2
+    t_original_paper: 3.82
+    t_replicated: 4.2

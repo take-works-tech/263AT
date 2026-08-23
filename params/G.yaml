@@ -77,6 +77,7 @@
     accounting_standard_note: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     zero_denominator_policy: override
@@ -88,6 +89,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Mom12m: 3.8
+    t_original_paper: 3.74
+    t_replicated: 3.8
 - id: G02
   name_ja: 6-1モメンタム
   category: G
@@ -154,6 +162,7 @@
     accounting_standard_note: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     zero_denominator_policy: override
@@ -165,6 +174,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Mom6m: 3.55
+    t_original_paper: 2.44
+    t_replicated: 3.55
 - id: G03
   name_ja: 3-1モメンタム
   category: G
@@ -308,6 +324,7 @@
     accounting_standard_note: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     zero_denominator_policy: override
@@ -319,6 +336,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      STreversal: 9.29
+    t_original_paper: 12.44
+    t_replicated: 9.29
 - id: G05
   name_ja: 移動平均乖離(50日)
   category: G
@@ -542,6 +566,7 @@
     accounting_standard_note: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     zero_denominator_policy: override
@@ -553,6 +578,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      High52: 1.56
+    t_original_paper: 2.0
+    t_replicated: 1.56
 - id: G08
   name_ja: 52週安値からの乖離
   category: G
@@ -774,6 +807,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -784,6 +818,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      ResidualMomentum: 7.91
+    t_original_paper: 8.22
+    t_replicated: 7.91
 - id: G11
   name_ja: 業種内相対モメンタム
   category: G
@@ -2390,6 +2431,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -2400,6 +2442,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      TrendFactor: 9.77
+    t_original_paper: 15.0
+    t_replicated: 9.77
 - id: G32
   name_ja: 中間モメンタム
   category: G
@@ -2467,6 +2516,7 @@
     accounting_standard_note: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     zero_denominator_policy: override
@@ -2478,6 +2528,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IntMom: 6.06
+    t_original_paper: 5.79
+    t_replicated: 6.06
 - id: G33
   name_ja: 出来高を伴うモメンタム
   category: G
@@ -2626,6 +2683,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -2636,6 +2694,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      FirmAgeMom: 7.84
+    t_original_paper: 7.21
+    t_replicated: 7.84
 - id: G35
   name_ja: 低クオリティ株のモメンタム
   category: G
@@ -2707,6 +2772,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -2717,6 +2783,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Mom6mJunk: 5.3
+    t_original_paper: 4.29
+    t_replicated: 5.3
 - id: G36
   name_ja: 業種モメンタム
   category: G
@@ -2786,6 +2859,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -2796,6 +2870,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IndMom: 2.63
+    t_original_paper: 4.65
+    t_replicated: 2.63
 - id: G37
   name_ja: 収益サプライズの連続性
   category: G
@@ -2865,6 +2946,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -2875,6 +2957,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      EarningsStreak: 9.23
+    t_original_paper: 9.51
+    t_replicated: 9.23
 - id: G38
   name_ja: 季節性リターン（前年同月）
   category: G
@@ -2947,6 +3036,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -2957,6 +3047,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MomSeasonShort: 6.45
+    t_original_paper: 7.6
+    t_replicated: 6.45
 - id: G39
   name_ja: 季節性リターン（2〜5年前の同月）
   category: G
@@ -3025,6 +3122,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -3035,6 +3133,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MomSeason: 4.61
+    t_original_paper: 5.35
+    t_replicated: 4.61
 - id: G40
   name_ja: 季節性リターン（6〜10年前の同月）
   category: G
@@ -3103,6 +3208,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -3113,6 +3219,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MomSeason06YrPlus: 4.9
+    t_original_paper: 6.15
+    t_replicated: 4.9
 - id: G41
   name_ja: 季節性リターン（11〜15年前）
   category: G
@@ -3180,6 +3293,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -3190,6 +3304,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MomSeason11YrPlus: 6.08
+    t_original_paper: 6.43
+    t_replicated: 6.08
 - id: G42
   name_ja: オフシーズン・モメンタム
   category: G
@@ -3256,6 +3377,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -3266,6 +3388,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MomOffSeason: 4.53
+    t_original_paper: 5.6
+    t_replicated: 4.53
 - id: G43
   name_ja: 季節性を除いたモメンタム
   category: G
@@ -3334,6 +3463,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -3344,6 +3474,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      Mom12mOffSeason: 4.85
+    t_original_paper: 4.2
+    t_replicated: 4.85
 - id: G44
   name_ja: 季節性リターン（16〜20年前）
   category: G
@@ -3411,6 +3548,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -3421,6 +3559,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MomSeason16YrPlus: 5.85
+    t_original_paper: 4.58
+    t_replicated: 5.85
 - id: G45
   name_ja: オフシーズン反転（6〜10年）
   category: G
@@ -3487,6 +3632,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -3497,3 +3643,10 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      MomOffSeason06YrPlus: 5.57
+    t_original_paper: 4.62
+    t_replicated: 5.57

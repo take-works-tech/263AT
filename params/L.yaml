@@ -77,6 +77,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -87,6 +88,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      IndRetBig: 9.93
+    t_original_paper: 11.0
+    t_replicated: 9.93
 - id: L02
   name_ja: 同業大型株の決算サプライズ
   category: L
@@ -158,6 +166,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -168,6 +177,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      EarnSupBig: 3.21
+    t_original_paper: 8.91
+    t_replicated: 3.21
 - id: L03
   name_ja: 価格遅延（回帰係数）
   category: L
@@ -179,7 +195,7 @@
   - PRICE
   - market_return
   sign: positive
-  buy_class: main
+  buy_class: useful
   sell_class: useful
   gate_policy: null
   horizon:
@@ -213,11 +229,11 @@
   - O03
   - J03
   - I05
-  economic_rationale: OSAP `PriceDelaySlope` t=7.7。**「情報が遅れて価格に入る度合い」を価格だけで直接測る。** O カテゴリが情報の供給側（アナリスト・機関）を測るのに対し、これは結果を測る。 データ源が価格のみなので**欠損しない**という決定的な利点があり、 O01 の62%欠損問題を完全に回避してネグレクトを定量化できる。 **263AT の O カテゴリの実質的な代替になりうる。**
+  economic_rationale: OSAP `PriceDelaySlope` t=7.7。**「情報が遅れて価格に入る度合い」を価格だけで直接測る。** O カテゴリが情報の供給側（アナリスト・機関）を測るのに対し、これは結果を測る。 データ源が価格のみなので**欠損しない**という決定的な利点があり、 O01 の62%欠損問題を完全に回避してネグレクトを定量化できる。 **263AT の O カテゴリの実質的な代替になりうる。** **【再現測定 2026-08-23】原論文 t=7.7 に対し、等加重デシル L/S（1963-）の再現は t=1.32。L04 との相関も 0.98 で実質同一。買 ◎→○ に格下げした（§1.9.8）。**
   references:
   - https://www.openassetpricing.com/
   - OSAP PriceDelaySlope t=7.7
-  notes: OSAP PriceDelaySlope t=7.7。「情報が遅れて価格に入る度合い」の直接測定
+  notes: OSAP PriceDelaySlope t=7.7。「情報が遅れて価格に入る度合い」の直接測定 【再現測定 2026-08-23】買 ◎→○。再現 t=1.32（原論文 7.7）。L04 とも相関 0.98（§1.9.8）
   notes_extra: null
   provenance:
     name_ja: catalog
@@ -238,6 +254,7 @@
     accounting_standard_note: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     zero_denominator_policy: override
@@ -249,6 +266,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      PriceDelaySlope: 1.32
+    t_original_paper: 7.7
+    t_replicated: 1.32
 - id: L04
   name_ja: 価格遅延（t値調整）
   category: L
@@ -260,7 +285,7 @@
   - PRICE
   - market_return
   sign: positive
-  buy_class: main
+  buy_class: useful
   sell_class: useful
   gate_policy: null
   horizon:
@@ -290,11 +315,11 @@
   - L03
   - L05
   - L09
-  economic_rationale: OSAP `PriceDelayTstat` t=7.4。L03 の推定精度を織り込んだ版で、 ノイズの多い銘柄の遅延を過大評価しない。**L03/L04/L05 は同じ現象の3通りの測り方**で 相関が非常に高いはずなので、Z12 の主成分分析で1本にまとまる可能性が高い。 §1.9 の方針に従い統合せず3本とも残す。
+  economic_rationale: OSAP `PriceDelayTstat` t=7.4。L03 の推定精度を織り込んだ版で、 ノイズの多い銘柄の遅延を過大評価しない。**L03/L04/L05 は同じ現象の3通りの測り方**で 相関が非常に高いはずなので、Z12 の主成分分析で1本にまとまる可能性が高い。 §1.9 の方針に従い統合せず3本とも残す。 **【再現測定 2026-08-23】再現 t=1.37（原論文 7.39）。L03 とほぼ同一。買 ◎→○（§1.9.8）。**
   references:
   - https://www.openassetpricing.com/
   - OSAP PriceDelayTstat t=7.4
-  notes: OSAP PriceDelayTstat t=7.4
+  notes: OSAP PriceDelayTstat t=7.4 【再現測定 2026-08-23】買 ◎→○。再現 t=1.37（原論文 7.39）。L03 とほぼ同一（§1.9.8）
   notes_extra: null
   provenance:
     name_ja: catalog
@@ -316,6 +341,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -326,6 +352,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      PriceDelayTstat: 1.37
+    t_original_paper: 7.39
+    t_replicated: 1.37
 - id: L05
   name_ja: 価格遅延（R²ベース）
   category: L
@@ -394,6 +428,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -404,6 +439,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      PriceDelayRsq: 2.27
+    t_original_paper: 3.4
+    t_replicated: 2.27
 - id: L06
   name_ja: 仕入先モメンタム
   category: L
@@ -416,7 +458,7 @@
   - supplier_disclosure
   - PRICE
   sign: positive
-  buy_class: main
+  buy_class: useful
   sell_class: main
   gate_policy: null
   horizon:
@@ -450,11 +492,11 @@
   - X15
   - T19
   - Q16
-  economic_rationale: OSAP `iomom_supp` t=5.0。仕入先の株価が動くのは、その業界の需給が変化したから。 それが自社のコストに転嫁されるのは数四半期後。B36（価格転嫁力）が 転嫁できるかを測るのに対し、L06 は転嫁圧力の発生を先読みする。
+  economic_rationale: OSAP `iomom_supp` t=5.0。仕入先の株価が動くのは、その業界の需給が変化したから。 それが自社のコストに転嫁されるのは数四半期後。B36（価格転嫁力）が 転嫁できるかを測るのに対し、L06 は転嫁圧力の発生を先読みする。 **【再現測定 2026-08-23】再現 t=1.40（原論文 5.03）。買 ◎→○（§1.9.8）。**
   references:
   - https://www.openassetpricing.com/
   - OSAP iomom_supp t=5.0
-  notes: OSAP iomom_supp t=5.0。産業連関表または LLM でサプライチェーンを特定する
+  notes: OSAP iomom_supp t=5.0。産業連関表または LLM でサプライチェーンを特定する 【再現測定 2026-08-23】買 ◎→○。再現 t=1.40（原論文 5.03）（§1.9.8）
   notes_extra: null
   provenance:
     name_ja: catalog
@@ -476,6 +518,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -486,6 +529,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      iomom_supp: 1.4
+    t_original_paper: 5.03
+    t_replicated: 1.4
 - id: L07
   name_ja: 顧客モメンタム
   category: L
@@ -498,7 +549,7 @@
   - customer_disclosure
   - PRICE
   sign: positive
-  buy_class: main
+  buy_class: useful
   sell_class: main
   gate_policy: null
   horizon:
@@ -533,11 +584,11 @@
   - X15
   - I25
   - T18
-  economic_rationale: OSAP `iomom_cust` t=4.1 / `CustomerMomentum` t=3.8。 **顧客の需要変化が自社の受注に反映されるまでのラグを取りに行く。** N21（顧客の業績変化）がファンダメンタルで捉える現象を価格で捉える版で、 価格の方が速い。X15（主要顧客の株価）と同一概念なので統合候補だが、 §1.9 に従い両方残す。
+  economic_rationale: OSAP `iomom_cust` t=4.1 / `CustomerMomentum` t=3.8。 **顧客の需要変化が自社の受注に反映されるまでのラグを取りに行く。** N21（顧客の業績変化）がファンダメンタルで捉える現象を価格で捉える版で、 価格の方が速い。X15（主要顧客の株価）と同一概念なので統合候補だが、 §1.9 に従い両方残す。 **【再現測定 2026-08-23】再現 t=1.66（原論文 4.11）。買 ◎→○。X15 の検証で「X カテゴリで唯一 T1、最初に実装すべき」と書いたが、その根拠は原論文の t だった。L01（再現 t=9.93）を先に実装する（§1.9.8）。**
   references:
   - https://www.openassetpricing.com/
   - OSAP iomom_cust t=4.1 / CustomerMomentum t=3.8
-  notes: OSAP iomom_cust t=4.1 / CustomerMomentum t=3.8。X15 の定量版。日本は有報の主要顧客開示から作れる
+  notes: OSAP iomom_cust t=4.1 / CustomerMomentum t=3.8。X15 の定量版。日本は有報の主要顧客開示から作れる 【再現測定 2026-08-23】買 ◎→○。再現 t=1.66（原論文 4.11）（§1.9.8）
   notes_extra: null
   provenance:
     name_ja: catalog
@@ -559,6 +610,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -569,6 +621,14 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    flag: 再現 t が 2.0 未満。**実証度 T1〜T3 は証拠の質の格付けであって「自分の構成で効くか」ではない**（§0）。実装優先度は下げる
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      iomom_cust: 1.66
+    t_original_paper: 4.11
+    t_replicated: 1.66
 - id: L08
   name_ja: コングロマリット・リターン
   category: L
@@ -640,6 +700,7 @@
     zero_denominator_policy: override
     evidence_tier: override
     references: override
+    replication: override
     formula: override
     inputs: override
     missing_bias: override
@@ -650,6 +711,13 @@
     status: verified
     pending: []
   version: 1
+  replication:
+    construction: OSAP 等加重デシル 10-1、1963-07 以降の月次 L/S
+    note: '**t_original_paper は原論文が報告した値。** 自分の構成での再現は t_replicated を見る（§1.9.7）'
+    signals:
+      retConglomerate: 6.48
+    t_original_paper: 5.51
+    t_replicated: 6.48
 - id: L09
   name_ja: 業種内の情報伝播順位
   category: L
