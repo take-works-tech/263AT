@@ -12,8 +12,9 @@
   category_name: オルタナデータ
   subsection: null
   definition: 推定訪問者数
-  formula: null
-  inputs: null
+  formula: 推定月間訪問者数
+  inputs:
+  - web_traffic_data
   sign: positive
   buy_class: main
   sell_class: main
@@ -26,7 +27,7 @@
   - 手
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -35,15 +36,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（カウント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**推定値であり、実測ではない。** パネルベースの推定なので 小規模サイトほど誤差が大きい。**過去に遡れない**（有料サービスは遡れるが高額）。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - X02
+  - X03
+  - U20
+  - C01
+  - C16
+  - O05
+  economic_rationale: '**EC・ネット企業の売上の直接的な先行指標。** 訪問者数 × 転換率 × 客単価 = 売上 なので、訪問者数の変化は売上に機械的に効く。 **U20（EC比率）が開示に依存するのに対し、X01 は外部から取れる** という点で、開示バイアス（Z03）を回避できる稀な変数。'
+  references:
+  - 構造的判断。オルタナデータの実務利用は広いが公開実証は限定的
   notes: EC・ネット企業の売上の直接的な先行指標
   notes_extra: null
   provenance:
@@ -57,21 +65,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: X02
   name_ja: Web訪問者数の成長率
@@ -79,8 +90,9 @@
   category_name: オルタナデータ
   subsection: null
   definition: YoY / MoM
-  formula: null
-  inputs: null
+  formula: X01 の YoY / MoM
+  inputs:
+  - X01
   sign: positive
   buy_class: main
   sell_class: main
@@ -93,7 +105,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -101,16 +113,21 @@
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: null
+  pit_lag_days: 3
+  zero_denominator_policy: 前期がゼロなら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: X01 を継承。推定手法の変更で不連続になる。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - X01
+  - C01
+  - C21
+  - U20
+  economic_rationale: '**水準より変化。** X01 の絶対値は企業規模に依存するが、 変化率は成長を直接測る。**四半期決算より速く、しかも月次で取れる**ので、 C21（季節調整済み四半期成長）より解像度が高い。'
+  references:
+  - 構造的判断
   notes: 水準より成長率。U20（EC比率）と突合
   notes_extra: null
   provenance:
@@ -124,21 +141,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: X03
   name_ja: アプリのDL数・ランキング
@@ -146,8 +166,9 @@
   category_name: オルタナデータ
   subsection: null
   definition: App Store / Google Play
-  formula: null
-  inputs: null
+  formula: アプリのダウンロード数推定とストアランキング
+  inputs:
+  - app_store_data
   sign: positive
   buy_class: main
   sell_class: main
@@ -160,7 +181,7 @@
   - 手
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -169,15 +190,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: null
+  zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: アプリを持つ企業のみ。ランキングは相対値なので市場全体の変化と混同しやすい。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - X04
+  - X05
+  - U33
+  - C16
+  - C15
+  economic_rationale: '**ゲーム・アプリ企業では売上に直結する。** 新作リリース直後のランキングが、その四半期の売上をほぼ決める。 **決算を待たずに業績が分かる稀な業種**で、U33（DAU/MAU）と 組み合わせると継続率まで推定できる。'
+  references:
+  - 構造的判断
   notes: ゲーム・アプリ企業では売上に直結
   notes_extra: null
   provenance:
@@ -191,21 +218,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: X04
   name_ja: アプリのレビュー数と評価
@@ -213,8 +243,9 @@
   category_name: オルタナデータ
   subsection: null
   definition: 件数と平均点の推移
-  formula: null
-  inputs: null
+  formula: アプリのレビュー件数と平均評点の推移
+  inputs:
+  - app_store_reviews
   sign: positive
   buy_class: useful
   sell_class: main
@@ -228,7 +259,7 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -237,15 +268,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: レビュー数が50未満なら評点が不安定。欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: X03 と同じ。**評点は不満を持った利用者が書きやすい**ので下方に偏る。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - X03
+  - X11
+  - U29
+  - U33
+  - W11
+  economic_rationale: '**評点の急落は不具合・改悪のサイン。** 課金仕様の変更で ユーザーが離反する事例は多く、U29（解約率）の先行指標になる。 W11（従業員クチコミ）と同じく、**外部の声を定量化する**という発想。'
+  references:
+  - 構造的判断
   notes: 評価の急落は不具合・改悪のサイン
   notes_extra: null
   provenance:
@@ -259,21 +296,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: X05
   name_ja: Google Trends
@@ -281,8 +321,9 @@
   category_name: オルタナデータ
   subsection: null
   definition: 企業名 / 製品名の検索ボリューム
-  formula: null
-  inputs: null
+  formula: Google Trends の企業名・製品名それぞれの検索ボリューム
+  inputs:
+  - search_trends
   sign: cap
   buy_class: useful
   sell_class: main
@@ -295,7 +336,7 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -304,15 +345,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: null
+  zero_denominator_policy: 指数がゼロ固定なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: O05 と同じ。指数は相対値で銘柄間比較ができない。小型株はゼロ固定になりやすい。
   normalization: rank_all
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - O05
+  - O06
+  - X01
+  - X03
+  - X11
+  economic_rationale: ∩型。**企業名検索は過熱の逆指標、製品名検索は需要の先行指標。** 符号が逆なので**必ず分けて持つ。** 混ぜると打ち消し合う。 O05 が企業名側を扱うのに対し、X05 は製品名側を主に扱う。
+  references:
+  - 構造的判断
   notes: 企業名検索は過熱の逆指標、製品名検索は需要の先行指標。分けて持つ
   notes_extra: null
   provenance:
@@ -326,23 +373,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
+    period_convention: override
+    pit_lag_days: override
+    nonlinear: override
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: X06
   name_ja: 求人数（W09 と同一）
@@ -350,8 +399,9 @@
   category_name: オルタナデータ
   subsection: null
   definition: —
-  formula: null
-  inputs: null
+  formula: W09 と同一（求人掲載数）
+  inputs:
+  - job_postings
   sign: positive
   buy_class: main
   sell_class: main
@@ -364,7 +414,7 @@
   - 手
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -373,15 +423,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（カウント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: W09 と同一。過去に遡れないので forward_log で記録対象。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - W09
+  - W10
+  - C32
+  - C01
+  economic_rationale: W09 と同一の量。**オルタナデータで最も実用的。** ただし C32（従業員数の成長は劣後）と符号が衝突するので、 W10（職種構成）と W06（離職率）で「成長のための採用」と 「離職の補充」を分離する必要がある。
+  references:
+  - 構造的判断
   notes: W カテゴリとの相互参照
   notes_extra: null
   provenance:
@@ -395,21 +450,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: X07
   name_ja: 特許出願数の推移
@@ -417,8 +475,9 @@
   category_name: オルタナデータ
   subsection: null
   definition: 年間出願件数
-  formula: null
-  inputs: null
+  formula: 年間の特許出願件数
+  inputs:
+  - patent_office_data
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -431,27 +490,32 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: T2
+  evidence_tier: T1
   markets:
   - JP
   - US
   industries: null
-  period_convention: POINT
-  consolidation: na
+  period_convention: FY
+  consolidation: consolidated
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（カウント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**特許は出願から公開まで18ヶ月かかる**ので、直近の出願は観測できない。 構造的に1.5年遅れる指標。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - X08
+  - X09
+  - B25
+  - B26
+  - U37
+  - C41
+  economic_rationale: B25（R&D集約度）が投入を測るのに対し、X07 は産出を測る。 **ただし件数は質を表さない**ので、X08（被引用数）と併せて見ないと 「防衛的な出願を大量にしているだけ」の企業を高評価してしまう。 OSAP `PatentsRD` t=4.1 は R&D 費で正規化した形。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP PatentsRD — Hirschleifer, Hsu and Li 2013, JFE（OSAP再現 t=4.1, 月次0.41%, 品質=2_fair, 予測力=1_clear）
+  - OSAP PatentsRD t=4.1
   notes: イノベーション投資の実態。B25/B26 の裏取り
   notes_extra: null
   provenance:
@@ -465,22 +529,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: X08
   name_ja: 特許の被引用数
@@ -488,8 +554,9 @@
   category_name: オルタナデータ
   subsection: null
   definition: 他社からの引用件数
-  formula: null
-  inputs: null
+  formula: 自社特許の他社からの被引用件数
+  inputs:
+  - patent_citation_data
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -502,27 +569,29 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: T2
+  evidence_tier: T1
   markets:
   - JP
   - US
   industries: null
-  period_convention: POINT
-  consolidation: na
+  period_convention: FY
+  consolidation: consolidated
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（カウント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**被引用は時間とともに増えるので、新しい特許ほど過小評価される。** 出願年で正規化しないと、古い特許を持つ企業が有利になる。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - X07
+  - B26
+  - U37
+  economic_rationale: '**件数より引用の方が質を反映する。** 他社が引用するのは、 その技術が業界に影響を与えたということ。 OSAP `CitationsRD` t=2.6。X07（件数）と組み合わせて 「量は多いが引用されない」企業を識別できる。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP CitationsRD — Hirschleifer, Hsu and Li 2013, JFE（OSAP再現 t=2.6, 月次0.26%, 品質=2_fair, 予測力=1_clear）
+  - OSAP CitationsRD t=2.6
   notes: 件数より引用の方が質を反映する
   notes_extra: null
   provenance:
@@ -536,22 +605,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: X09
   name_ja: 商標登録の推移
@@ -559,8 +630,9 @@
   category_name: オルタナデータ
   subsection: null
   definition: 新規商標の出願
-  formula: null
-  inputs: null
+  formula: 年間の商標登録出願件数
+  inputs:
+  - trademark_data
   sign: positive
   buy_class: aux
   sell_class: aux
@@ -573,24 +645,29 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: POINT
-  consolidation: na
+  period_convention: FY
+  consolidation: consolidated
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（カウント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 商標は公開が早い（出願後数ヶ月）ので X07 より遅れが小さい。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - X07
+  - C24
+  - C33
+  - C41
+  economic_rationale: '**新製品・新事業の先行サイン。** 商標は製品名を決めた段階で 出願するので、発売の半年〜1年前に観測できる。 C24（新製品売上比率）の先行指標で、**開示に一切依存しない**点が利点。 ただし実証は無く、★1 で強く縮小される。'
+  references:
+  - 構造的判断。実証は無い
   notes: 新製品・新事業の先行サイン
   notes_extra: null
   provenance:
@@ -604,21 +681,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: X10
   name_ja: 店舗・拠点数の実測
@@ -626,8 +706,10 @@
   category_name: オルタナデータ
   subsection: null
   definition: 地図サービス等からのカウント
-  formula: null
-  inputs: null
+  formula: 地図サービス等から数えた店舗・拠点数
+  inputs:
+  - map_data
+  - LLM
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -641,7 +723,7 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -650,15 +732,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（カウント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**同名の他社店舗を誤カウントする。** フランチャイズと直営の区別もつかない。 **過去のスナップショットが取れない**ので前向き記録が必須。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U18
+  - C14
+  - X11
+  - U17
+  economic_rationale: '**開示していない企業の店舗数を推定する。** U18（出退店ネット数）が 開示に依存するのに対し、X10 は外部から取れる。 ただし精度が低いので、**開示企業で誤差を較正してから 非開示企業に適用する**という手順が要る。'
+  references:
+  - 構造的判断。実証は無い
   notes: 開示していない企業の推定に使う
   notes_extra: null
   provenance:
@@ -672,21 +759,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: X11
   name_ja: レビュー数（店舗・製品）
@@ -694,8 +784,10 @@
   category_name: オルタナデータ
   subsection: null
   definition: 口コミサイト・EC のレビュー件数
-  formula: null
-  inputs: null
+  formula: 口コミサイト・EC のレビュー件数と評点
+  inputs:
+  - review_sites
+  - LLM
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -709,7 +801,7 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -718,15 +810,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: レビュー数が50未満なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**やらせレビューの影響を受ける。** しかも §4（セキュリティ）で指摘した通り、 **第三者が容易に書き込めるデータ**なので、意図的な操作を前提に扱う必要がある。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - X04
+  - X05
+  - U15
+  - U16
+  - W11
+  - O06
+  economic_rationale: 需要の代理変数。U15（既存店売上）の外部検証に使える。 **ただし操作されやすいので単独では信用しない。** T36（発信源の信頼度）を通し、複数ソースの一致を要求する（§4.2 P7）。
+  references:
+  - 構造的判断。docs/04_security.md §4 の対象データ
   notes: 需要の代理変数。U15 の外部検証
   notes_extra: null
   provenance:
@@ -740,21 +839,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: X12
   name_ja: SNSフォロワー数の推移
@@ -762,8 +864,9 @@
   category_name: オルタナデータ
   subsection: null
   definition: 公式アカウント
-  formula: null
-  inputs: null
+  formula: 公式SNSアカウントのフォロワー数の推移
+  inputs:
+  - social_media
   sign: positive
   buy_class: aux
   sell_class: aux
@@ -776,7 +879,7 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -785,15 +888,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（カウント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: アカウントを持つ企業のみ。BtoB 企業では意味を持たない。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - O06
+  - X05
+  - X11
+  - C33
+  economic_rationale: '**弱い。** O06（SNS言及量）が投資家の注目を測るのに対し、 X12 は顧客の関心を測るという違いはあるが、 フォロワー数と業績の関係は薄い。★1 で強く縮小されるのが妥当で、 **残しているのは「効かないことを確認する」ためでもある**（§1.9 の方針）。'
+  references:
+  - 構造的判断。実証は無い
   notes: 弱い。O06（言及量）とは別物
   notes_extra: null
   provenance:
@@ -807,21 +915,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: X13
   name_ja: 企業サイト・IRページの更新頻度
@@ -829,8 +940,9 @@
   category_name: オルタナデータ
   subsection: null
   definition: 更新回数
-  formula: null
-  inputs: null
+  formula: 企業サイト・IRページの更新回数
+  inputs:
+  - website_monitoring
   sign: positive
   buy_class: aux
   sell_class: aux
@@ -843,7 +955,7 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -852,15 +964,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（カウント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: サイト構造に依存。**過去に遡れない**（アーカイブサービスは網羅的でない）。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - O09
+  - O18
+  - E17
+  - T10
+  economic_rationale: O09（IR活動の積極性）の自動化版。**人手の採点（O09）より 客観的で継続監視できる。** ただし更新の中身（重要な開示か軽微な修正か）を 区別できないので、T33（開示の重要度分類）と組み合わせないと精度が出ない。
+  references:
+  - 構造的判断。実証は無い
   notes: O09/O18 の自動化版
   notes_extra: null
   provenance:
@@ -874,21 +991,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: X14
   name_ja: 業界統計との突合
@@ -896,8 +1016,10 @@
   category_name: オルタナデータ
   subsection: null
   definition: 業界団体の出荷統計 vs 自社売上
-  formula: null
-  inputs: null
+  formula: 業界団体の出荷統計と自社売上の比率（シェア推定）
+  inputs:
+  - industry_statistics
+  - REV
   sign: context
   buy_class: main
   sell_class: main
@@ -911,24 +1033,30 @@
   - 手
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: 統計の集計範囲と自社の連結範囲が一致しない。
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: 業界出荷額>0。統計が存在する業種のみ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 統計が整備された業種のみ（半導体・鉄鋼・化学・工作機械・自動車）。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U22
+  - U25
+  - C01
+  - C25
+  - L01
+  economic_rationale: '**シェアの変化を検出できる。個社開示より信頼できることがある。** 自社の売上が伸びていても、業界がそれ以上に伸びていればシェアは落ちている。 **業界の追い風と個社の実力を分離する**という点で、 Q10（同業他社との相対）と同じ発想をファンダメンタルで行う。 業界統計は改竄しにくいので、E カテゴリ（会計品質）の外部検証にも使える。'
+  references:
+  - 構造的判断。実務上の標準手法
   notes: シェアの変化を検出できる。個社開示より信頼できることがある
   notes_extra: null
   provenance:
@@ -942,21 +1070,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: X15
   name_ja: 主要顧客の業績・株価
@@ -964,8 +1095,11 @@
   category_name: オルタナデータ
   subsection: null
   definition: 顧客企業の売上・受注・株価
-  formula: null
-  inputs: null
+  formula: 主要顧客企業の売上・受注・株価の変化（売上構成比で加重）
+  inputs:
+  - customer_disclosure
+  - PRICE
+  - LLM
   sign: positive
   buy_class: main
   sell_class: main
@@ -978,24 +1112,32 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
   industries: null
   period_convention: POINT
   consolidation: na
-  accounting_standard_note: na
+  accounting_standard_note: N21 と同じ顧客開示の日米差。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 顧客が特定できなければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: N21/L07 と同じ。日本は匿名開示が多く LLM 推定に頼る。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - L07
+  - N21
+  - N41
+  - I25
+  - T18
+  - Q16
+  economic_rationale: '**L07（顧客モメンタム）と実質的に同一。無料で作れるのが最大の利点。** 顧客企業が上場していれば株価も業績も公開されているので、 追加のデータ購入なしにサプライチェーンの上流が読める。 **X カテゴリの中で唯一、取得の安定性が高い**（上場企業のデータだから）。'
+  references:
+  - https://www.openassetpricing.com/
+  - OSAP CustomerMomentum t=3.8 / iomom_cust t=4.1
   notes: N21 の定量版。サプライチェーン上流の先読み。無料で作れる
   notes_extra: null
   provenance:
@@ -1009,21 +1151,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: X16
   name_ja: 競合の価格・キャンペーン
@@ -1031,8 +1176,10 @@
   category_name: オルタナデータ
   subsection: null
   definition: 実売価格の実測
-  formula: null
-  inputs: null
+  formula: 競合製品の実売価格とキャンペーンの実測
+  inputs:
+  - price_monitoring
+  - LLM
   sign: negative
   buy_class: useful
   sell_class: main
@@ -1046,7 +1193,7 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1055,15 +1202,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: 比較対象製品が特定できなければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**製品の同一性判定が難しい。** 型番違い・セット販売で価格が比較できない。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B18
+  - B36
+  - C25
+  - U16
+  - T21
+  economic_rationale: '**価格競争の検出。粗利率悪化（B18）に先行する。** 競合が値下げを始めれば、自社も追随するか数量を失うかのどちらかで、 どちらにせよ利益が減る。**T21（真の競合の特定）が前提**になるので、 LLM の競合判定の精度がそのまま効く。'
+  references:
+  - 構造的判断。実証は無い
   notes: 価格競争の検出。粗利率悪化（B18）に先行する
   notes_extra: null
   provenance:
@@ -1077,19 +1230,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1

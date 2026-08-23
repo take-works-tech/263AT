@@ -6376,3 +6376,1209 @@ Y12:
   references: ["https://www.openassetpricing.com/", "K13（指数イベント）と同種の需給効果"]
   markets: [JP, US]
   review: {status: verified}
+
+# =============================================================================
+# U（業種固有KPI 44）+ X（オルタナデータ 16）= 60件
+#
+# U カテゴリに共通する4つの制約（個別に繰り返さず、ここに一度だけ書く）:
+#   (1) 業種内でのみ正規化する。非該当業種は欠損（rank_industry）
+#   (2) **業種判定のロジックが未実装**（spec SP-04）。GICS の日本株付与も未解決（SP-03）
+#   (3) 疎（sparse）なので §1.9 の縮小では扱いにくい。業種ダミーとの交互作用にすべき（OQ-18）
+#   (4) **多くが自主開示に依存**するので、開示企業に偏る（Z03 で監視）
+#
+# X カテゴリに共通する3つの制約:
+#   (1) **過去に遡れない。** forward_log で今日から記録しないと永遠に検証できない（§6.4）
+#   (2) 取得の安定性が低い（規約・レート制限・仕様変更）
+#   (3) 主軸にせず、他シグナルの裏取りと早期警戒に使う
+# =============================================================================
+
+# --- U-1 金融 -----------------------------------------------------------------
+
+U01:
+  formula: "(資金運用収益 - 資金調達費用) / 平均運用資産"
+  inputs: [interest_income, interest_expense, earning_assets]
+  period_convention: AVG
+  consolidation: consolidated
+  accounting_standard_note: "銀行業のみ。運用資産の定義が国で違う（日本は貸出金+有価証券、米国は earning assets）。"
+  zero_denominator_policy: "運用資産>0。銀行業以外では欠損。"
+  missing_bias: "銀行業のみ。日本の地銀は全社取得可能。"
+  correlated_with: [U02, U03, U04, U05, P01, P05, D25]
+  economic_rationale: >-
+    **日本の金利正常化で最大の追い風。** ゼロ金利下では預金金利を下げられず
+    利鞘が潰れていたが、金利上昇局面では貸出金利が先に上がる。
+    地銀の再評価テーマの中核で、**P05（日銀スタンス）との交互作用が本質。**
+    ただし同時に U02（与信費用）が悪化するので、正味の効果は両者の差。
+  evidence_tier: T3
+  references: ["構造的判断。銀行分析の実務標準"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U02:
+  formula: "与信関係費用 / 貸出金残高"
+  inputs: [credit_costs, loans]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "**IFRS9 / CECL で予想信用損失モデルに移行し、計上タイミングが前倒しになった。** 移行年は不連続。"
+  zero_denominator_policy: "貸出金>0。"
+  missing_bias: "銀行業のみ。"
+  correlated_with: [U01, U03, D08, D09, P11, P15]
+  economic_rationale: >-
+    **景気後退の先行指標。** 銀行の与信費用は借り手の悪化を最初に反映するので、
+    P11（クレジットスプレッド）と並んで**株式市場より早く壊れる指標。**
+    急増は個別銀行の問題であると同時に、**マクロの警告**でもある。
+  evidence_tier: T3
+  references: ["IFRS 9 / ASC 326（CECL）", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U03:
+  formula: "金融再生法開示債権 / 総与信"
+  inputs: [disclosed_claims, total_credit]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: "**日本の金融再生法開示基準は日本固有。** 米国は non-performing loans で定義が違う。"
+  zero_denominator_policy: "総与信>0。"
+  missing_bias: "銀行業のみ。日本は開示義務があるので全行取得可能。"
+  correlated_with: [U01, U02, D08, D09]
+  economic_rationale: >-
+    U02（フロー）に対するストック。**残高が積み上がっている銀行は、
+    将来の与信費用が確定的に発生する。** ただし引当済みの部分は既に費用化されているので、
+    引当率と併せて見ないと二重計上になる。
+  evidence_tier: T3
+  references: ["金融機能の再生のための緊急措置に関する法律 第6条", "構造的判断"]
+  markets: [JP]
+  review: {status: verified}
+
+U04:
+  formula: "経費 / 業務粗利益"
+  inputs: [operating_expenses, gross_operating_profit]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "**業務粗利益は日本の銀行会計固有の概念。** 米国は efficiency ratio で近い。"
+  zero_denominator_policy: "業務粗利益>0。負なら欠損。"
+  missing_bias: "銀行業のみ。"
+  correlated_with: [U01, U05, B08, B31]
+  economic_rationale: >-
+    銀行の効率性。**日本の地銀は70%超が多く、構造的に高コスト。**
+    B31（販管費率のトレンド）の銀行版で、水準より改善方向が効く。
+    店舗統廃合・システム共同化の進捗を反映する。
+  evidence_tier: T3
+  references: ["構造的判断。銀行分析の実務標準"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U05:
+  formula: "貸出金 / 預金"
+  inputs: [loans, deposits]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "預金>0。"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: "銀行業のみ。"
+  correlated_with: [U01, U04, D07]
+  economic_rationale: >-
+    ∩型。**高すぎると流動性リスク**（預金流出に耐えられない — SVB の破綻が典型）、
+    **低すぎると収益機会の逸失**（預金が有価証券運用に回り、金利上昇で含み損になる）。
+    日本の地銀は預貸率が低く、**その余資が国債運用に回っているので
+    金利上昇が含み損を生む**という、U01（NIM改善）と逆方向の効果がある。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U06:
+  formula: "(正味支払保険金 + 事業費) / 正味収入保険料"
+  inputs: [claims, expenses, premiums]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "**損保のみ。** 日本と米国で事業費の範囲が違う。"
+  zero_denominator_policy: "保険料>0。"
+  missing_bias: "損保のみ。生保では意味を持たない（U07 を使う）。"
+  correlated_with: [U07, U08, B08]
+  economic_rationale: >-
+    **100%未満で引受利益。これが損保の本業の成績。**
+    100%を超えていても資産運用益で黒字になるが、それは本業ではない。
+    **自然災害の多い年は悪化するので、Y11（気候物理リスク）が直接効く数少ない業種。**
+  evidence_tier: T3
+  references: ["構造的判断。損保分析の実務標準"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U07:
+  formula: "エンベディッド・バリュー / 時価総額"
+  inputs: [embedded_value, MCAP]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **EV の算定は各社の前提（割引率・死亡率・解約率）に依存し、監査対象外。**
+    企業間比較には注意が要る。IFRS17 移行で状況が変わりつつある。
+  zero_denominator_policy: "MCAP>0。EV を開示しない生保では欠損。"
+  missing_bias: "生保のみ。開示は任意なので開示企業に偏る。"
+  correlated_with: [U06, U08, A03, A28]
+  economic_rationale: >-
+    **通常の PER は生保にほぼ無意味。** 保険契約は数十年にわたるので、
+    単年度利益では価値を測れない。EV は保有契約の将来利益の現在価値で、
+    **A28（残余利益モデル）と同じ発想を保険業に特化させたもの。**
+    EV/時価総額が1を大きく超える生保が日本には存在する。
+  evidence_tier: T3
+  references: ["構造的判断。EV は業界標準だが監査対象外"]
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- U-2 不動産・REIT ---------------------------------------------------------
+
+U09:
+  formula: "MCAP / 純資産価値（保有不動産を鑑定評価額で置き換えた自己資本）"
+  inputs: [MCAP, appraisal_value, EQ, IBD]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **日本は賃貸等不動産の時価が注記で開示される**（企業会計基準第20号）。
+    米国は原価主義で時価開示が無いことが多く、**日本の方が計算しやすい。**
+  zero_denominator_policy: "NAV<=0 なら欠損（債務超過相当）。"
+  missing_bias: "不動産業・REIT のみ。時価注記のない企業では計算不能。"
+  correlated_with: [U11, U12, U13, A03, A19, A34]
+  economic_rationale: >-
+    **簿価ベースの PBR より遥かに意味がある。** 不動産は取得原価で計上されるので、
+    含み益が大きい企業ほど PBR が高く見えて割高に見誤る。
+    **日本の老舗不動産会社の PBR が低いのは、含み益が簿価に反映されていないため。**
+    A19（不動産含み益）を業種特化させた形。
+  evidence_tier: T3
+  references: ["企業会計基準第20号（賃貸等不動産の時価等の開示）", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U10:
+  formula: "稼働面積 / 賃貸可能面積"
+  inputs: [occupancy_disclosure]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "賃貸可能面積>0。"
+  missing_bias: "**J-REIT は月次開示が多いが、事業会社の不動産部門は年次。** 開示頻度が大きく違う。"
+  correlated_with: [U09, U11, U13, C13, C11]
+  economic_rationale: >-
+    **月次開示されるので決算より速い。** C13（既存店売上）と同じ性格で、
+    不動産の需給を直接反映する。稼働率の低下は賃料下落に先行するので、
+    U11（キャップレート・スプレッド）の悪化を予告する。
+  evidence_tier: T3
+  references: ["構造的判断。REIT 分析の実務標準"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U11:
+  formula: "NOI利回り - 長期国債利回り"
+  inputs: [NOI, appraisal_value, MACRO_10y]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "NOI の定義（減価償却前か後か）が企業で違う。減価償却前に統一する。"
+  zero_denominator_policy: "鑑定評価額>0。"
+  missing_bias: "A38 と同じく日米で使う国債が違うので、統合ランクを取ってはいけない（rank_market が妥当）。"
+  correlated_with: [U09, U12, U14, A38, A12, P01, P02]
+  economic_rationale: >-
+    **不動産は金利上昇に最も脆弱な業種。** キャップレートが金利に連動するので、
+    金利が1%上がれば不動産価格は理論上大きく下がる。
+    **日本の金利正常化局面（P05）では、U01（銀行のNIM改善）と正反対の効果を受ける。**
+    A38（FCF利回りスプレッド）の不動産版。
+  evidence_tier: T3
+  references: ["構造的判断。不動産評価の実務標準"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U12:
+  formula: "有利子負債 / 総資産（時価ベース）"
+  inputs: [IBD, appraisal_value, TA]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: "分母を時価にするか簿価にするかで大きく違う。時価に統一する。"
+  zero_denominator_policy: "総資産>0。"
+  missing_bias: "REIT は規約で上限が定まっているので分布が狭い。事業会社では広い。"
+  correlated_with: [U09, U11, D01, D02, D03]
+  economic_rationale: >-
+    **REIT には上限規律があり、超えると増資を迫られる。**
+    D01/D02（一般的なレバレッジ指標）が業種調整を要するのに対し、
+    U12 は業種固有の閾値が明確。**LTV が上限に近い REIT は、
+    不動産価格が下がると強制的に増資（F05）することになる**ので、
+    希薄化リスクの先行指標でもある。
+  evidence_tier: T3
+  references: ["投資信託及び投資法人に関する法律（REIT の借入制限）", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U13:
+  formula: "(鑑定評価額 - 簿価) / 簿価"
+  inputs: [appraisal_value, book_value]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "日本の時価注記から取得。米国は原価主義で開示が無いことが多い。"
+  zero_denominator_policy: "簿価>0。"
+  missing_bias: "**日本優位。** 米国では計算できない企業が多い。"
+  correlated_with: [U09, A19, A18, A03]
+  economic_rationale: >-
+    A19（不動産含み益）の業種特化版。**日本の老舗企業に眠る隠れ資産。**
+    ただし**顕在化しないと意味がない**ので、N43（不動産売却）や
+    M08（アクティビスト保有）といったカタリストと併用する。
+    東証の資本コスト要請（LAW-47）が是正圧力になっている。
+  evidence_tier: T3
+  references: ["企業会計基準第20号", "構造的判断"]
+  markets: [JP]
+  review: {status: verified}
+
+U14:
+  formula: "分配金利回り - 長期国債利回り"
+  inputs: [distribution_yield, MACRO_10y]
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: "REIT のみ。"
+  zero_denominator_policy: "na（差分）"
+  missing_bias: "REIT のみ。事業会社では A12（益回りスプレッド）を使う。"
+  correlated_with: [U11, U12, A11, A12, A38, P01]
+  economic_rationale: >-
+    REIT のバリュエーション。**利益の90%超を分配する法的構造なので、
+    分配金利回りが実質的に益回りに等しい。** したがって A12（益回りスプレッド）と
+    ほぼ同義だが、REIT では分配金の方が確実性が高い。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- U-3 小売・外食・消費 -----------------------------------------------------
+
+U15:
+  formula: "同一店舗ベースの売上 YoY（月次）"
+  inputs: [monthly_disclosure, LLM]
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: "C13 と同一定義。「既存店」の定義が企業ごとに違う。"
+  zero_denominator_policy: "na（YoY）"
+  missing_bias: "**月次開示企業に偏る。日本は比較的多いが米国は少ない。**"
+  correlated_with: [C13, U16, U18, X11, X14]
+  economic_rationale: >-
+    C13 と同一の量で、業種特化として重複して持つ。
+    **月次開示なので決算より遥かに速く、日本の小売・外食では最重要指標。**
+    U16 との分解が本質で、単独では値上げによる嵩上げを見抜けない。
+  evidence_tier: T2
+  references: ["構造的判断。小売分析の実務標準"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U16:
+  formula: "既存店売上 YoY を 客数 YoY と客単価 YoY に分解"
+  inputs: [U15, monthly_disclosure]
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: "客数・客単価の両方を開示する企業に限られる。"
+  zero_denominator_policy: "na（分解）"
+  missing_bias: "**分解を開示する企業はさらに少ない。** U15 は出すが分解は出さない企業が多い。"
+  correlated_with: [U15, C25, B36, B18, U19]
+  economic_rationale: >-
+    **客数減を値上げで補う成長は持続しない。** 客数が減っているのに
+    売上が伸びているのは、既存顧客からより多く取っているだけで、
+    やがて顧客が離れる。C25（価格 vs 数量）を小売に特化させた形で、
+    **C25 が全業種で推定に頼るのに対し、小売では実測値が取れる**という利点がある。
+  evidence_tier: T3
+  references: ["構造的判断。小売分析の実務標準"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U17:
+  formula: "売上 / 売場面積"
+  inputs: [REV, floor_area]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "売場面積の定義（総面積か賃貸面積か）が企業で違う。"
+  zero_denominator_policy: "売場面積>0。"
+  missing_bias: "面積を開示する企業に偏る。業態内でのみ比較可能（コンビニと百貨店は比較不能）。"
+  correlated_with: [U15, U18, B11, B44]
+  economic_rationale: >-
+    小売の資産効率。B11（総資産回転率）を物理的な資産で測った版。
+    **業態内でのみ意味を持つ**ので、U カテゴリの中でもさらに細かい
+    業態分類が要る（spec SP-04 の課題）。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U18:
+  formula: "新規出店数 - 閉店数"
+  inputs: [store_count, TD_disclosure]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（差分）"
+  missing_bias: "店舗数を開示する企業に偏る。X10（地図サービスからの実測）で代替可能。"
+  correlated_with: [U15, U17, C14, C29, X10, C35]
+  economic_rationale: >-
+    **符号は文脈依存。** 出店は成長だが、C35（資産成長アノマリー）の観点では
+    投資しすぎのリスク。**U15（既存店）が良い企業の出店は加点、
+    悪い企業の出店は減点**という交互作用が本質で、B04（ROIC-WACC）が条件変数。
+    C カテゴリの「アウトプット vs インプット」の整理がここでも当てはまる。
+  evidence_tier: T3
+  references: ["構造的判断。catalog §4-C の符号整理"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U19:
+  formula: "在庫回転日数 × 商材の陳腐化速度（LLM 判定 0-1）"
+  inputs: [B22, LLM, product_category]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "在庫の評価方法（低価法の適用）が企業で違う。"
+  zero_denominator_policy: "在庫がゼロなら欠損（サービス業）。"
+  missing_bias: "陳腐化速度を LLM が判定するので、商材分類の誤りが直接効く。"
+  correlated_with: [B22, B35, C36, U15, U16]
+  economic_rationale: >-
+    **アパレル・家電・PC で致命的。** 同じ在庫日数でも、
+    生鮮食品と鉄鋼では意味が全く違う。B22（在庫回転日数の変化）に
+    商材の性質を掛けることで、**評価損のリスクを業種横断で比較可能にする。**
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U20:
+  formula: "EC売上 / 総売上 とその変化"
+  inputs: [ec_revenue, REV, LLM]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "EC の定義（自社サイトのみか、モール経由を含むか）が企業で違う。"
+  zero_denominator_policy: "REV>0。EC 売上を開示しない企業では欠損。"
+  missing_bias: "開示企業に偏る。X01（Webトラフィック）で外部から推定できる。"
+  correlated_with: [X01, X02, U15, U17, C24]
+  economic_rationale: >-
+    チャネル移行の進捗。EC 比率が高いほど**店舗の固定費が軽く、
+    U17（坪効率）の悪化に耐えられる。** ただし EC は価格競争が激しく
+    粗利率（B07）が下がるトレードオフがある。
+    **X01（Webトラフィック）で外部から検証できる稀な開示項目。**
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- U-4 製造・機械・電子部品・半導体 ------------------------------------------
+
+U21:
+  formula: "受注残高 / (REV_TTM / 12)"
+  inputs: [order_backlog, REV]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "C11 と同じ受注残の定義問題を継承。"
+  zero_denominator_policy: "REV>0。受注残を開示しない企業では欠損。"
+  missing_bias: "**開示業種が限られる**（機械・建設・IT・造船）。C11 と同じ。"
+  correlated_with: [C11, U22, U44, C12, N16]
+  economic_rationale: >-
+    **何ヶ月分の仕事が確定しているか。** C11（受注残の成長率）が変化を測るのに対し、
+    U21 は水準を月商で正規化する。**企業規模の影響を除けるので企業間比較ができる。**
+    3ヶ月分と12ヶ月分では業績の確実性が全く違う。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP OrderBacklog t=2.4"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U22:
+  formula: "受注額 / 出荷額"
+  inputs: [orders, shipments]
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "出荷額>0。"
+  missing_bias: >-
+    **個社開示は少ないが、業界統計（SEMI 等）で取れる。**
+    X14（業界統計との突合）と組み合わせると、個社の開示なしに業界サイクルが分かる。
+  correlated_with: [U21, U25, X14, C11, P15]
+  economic_rationale: >-
+    **1を超えると拡大局面。半導体・機械のサイクル判定の標準指標。**
+    受注は出荷に先行するので、売上が伸びる前に方向が分かる。
+    **業界統計として公表されるので、個社より業界レベルで使う方が実用的**
+    — そして業界の方向が分かれば L01（同業大型株のリターン）と同じ効果が得られる。
+  evidence_tier: T3
+  references: ["構造的判断。半導体・機械分析の実務標準"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U23:
+  formula: "実生産量 / 生産能力"
+  inputs: [production, capacity]
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: "生産能力の定義（定格か実効か）が企業で違う。"
+  zero_denominator_policy: "生産能力>0。開示企業に限られる。"
+  missing_bias: "**開示企業が非常に少ない。** 装置産業の一部のみ。"
+  correlated_with: [U22, U25, B19, B20, C36]
+  economic_rationale: >-
+    **装置産業では利益率に直結する。** 固定費が大きいので、
+    稼働率が損益分岐点（B20）を超えると急激に利益が出る
+    — B19（営業レバレッジ）の物理的な裏付け。
+    ただし開示が少なく、実用性は限定的。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U24:
+  formula: "beta( 粗利率の変化 ~ 主要原材料指数の変化 )"
+  inputs: [B07, commodity_index]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "推定に20四半期以上が要る。不足なら欠損。"
+  missing_bias: "主要原材料の特定が要る。LLM 推定に頼るので誤りが入る。"
+  correlated_with: [B36, P09, P20, U25, U39]
+  economic_rationale: >-
+    B36（価格転嫁力）の業種特化・定量版。**原材料価格の上昇を
+    どれだけ価格に転嫁できるか**を回帰係数で測る。
+    転嫁できない企業は、インフレ局面で構造的に利益が圧迫される。
+    P09（商品価格感応度）が株価で測るのに対し、U24 は損益で測る。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U25:
+  formula: "業界統計の在庫 / 出荷比率"
+  inputs: [industry_statistics]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "出荷>0。業界統計が存在する業種のみ。"
+  missing_bias: "統計が整備された業種（半導体・鉄鋼・化学・工作機械）のみ。"
+  correlated_with: [U22, U19, B22, X14, P15]
+  economic_rationale: >-
+    **個社データより業界在庫が先行する。** 個社の在庫（B22）は
+    自社の判断で調整できるが、業界全体の在庫は需給そのもの。
+    半導体・素材のサイクル判定では、**個社決算を見るより業界統計を見る方が速い。**
+    X14（業界統計との突合）の入力でもある。
+  evidence_tier: T3
+  references: ["構造的判断。素材・半導体分析の実務標準"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U26:
+  formula: "会社開示の「1円円安あたりの営業利益変化額」/ 営業利益"
+  inputs: [fx_sensitivity_disclosure, OP]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "OP>0。開示が無ければ欠損。"
+  missing_bias: >-
+    **日本の輸出企業は決算説明資料で開示するが、義務ではない。**
+    開示するのは影響が大きい企業なので、**影響の大きい企業に偏る**
+    — この場合は測りたい対象と一致するので、実害は小さい。
+  correlated_with: [P07, P08, V07, C23, U24]
+  economic_rationale: >-
+    **P08（統計推定の為替感応度）より正確。** 企業自身が
+    事業構造を把握して計算した数字なので、株価の回帰から推定するより信頼できる。
+    **P08 と突合して大きく食い違う銘柄は、株価が為替以外の要因で動いている**
+    ことを示すので、その乖離自体が情報になる。
+  evidence_tier: T3
+  references: ["構造的判断。日本の輸出企業の開示慣行"]
+  markets: [JP]
+  review: {status: verified}
+
+# --- U-5 IT・SaaS・インターネット ---------------------------------------------
+
+U27:
+  formula: "売上成長率(%) + FCFマージン(%)"
+  inputs: [C01, B09]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "B09（FCFマージン）の IFRS16 の注意を継承。"
+  zero_denominator_policy: "C01 または B09 が欠損なら欠損。"
+  missing_bias: "SaaS 以外では意味を持たない。業種判定が必要。"
+  correlated_with: [C01, B09, U28, U29, U30, C08]
+  economic_rationale: >-
+    SaaS の総合指標。**成長と収益性のトレードオフを1本にまとめる。**
+    40超が目安とされる。C08（ROIC × 再投資率）と同じく
+    「成長と効率の積」を測る思想だが、**赤字期の SaaS でも計算できる**点が違う。
+    ただし**閾値40に理論的根拠は無く、業界の経験則。**
+  evidence_tier: T3
+  references: ["構造的判断。SaaS 業界の実務標準だが学術的実証は無い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U28:
+  formula: "既存顧客からの当期売上 / 前期売上"
+  inputs: [NRR_disclosure, LLM]
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: "**自主開示で定義が企業ごとに違う。** チャーンした顧客の扱いが特に違う。"
+  zero_denominator_policy: "前期売上>0。開示が無ければ欠損。"
+  missing_bias: "**開示企業に強く偏る。しかも良い数字の企業ほど開示する。**"
+  correlated_with: [C15, U27, U29, U30, C12]
+  economic_rationale: >-
+    **120%超は極めて強い。** 既存顧客だけで年20%成長するということは、
+    新規獲得コストなしに複利が回るということで、C08（ROIC × 再投資率）が
+    構造的に高くなる。**ただし定義が企業任意なので、
+    E21（会計上の見積り変更）と同種の操作リスクがある。**
+  evidence_tier: T3
+  references: ["構造的判断。SaaS 業界標準だが自主開示"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U29:
+  formula: "解約率（顧客数ベースおよび金額ベース）"
+  inputs: [churn_disclosure, LLM]
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: "U28 と同じ定義問題。"
+  zero_denominator_policy: "期首顧客数>0。"
+  missing_bias: "U28 と同じ。**悪い数字は開示されにくい**という非対称。"
+  correlated_with: [U28, U30, U31, C15, T38]
+  economic_rationale: >-
+    U28（NRR）の分解要素。**NRR が高くても、
+    大口顧客の増額が小口の解約を隠している場合がある。**
+    顧客数ベースと金額ベースの両方を見ないと実態が分からない。
+    T38（スイッチングコスト）の実測値でもある。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U30:
+  formula: "顧客生涯価値 / 顧客獲得コスト"
+  inputs: [LTV_estimate, CAC_estimate, LLM]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "**両方とも推定値で、算定方法が企業ごとに違う。**"
+  zero_denominator_policy: "CAC>0。"
+  missing_bias: "推定に依存するので信頼度が低い。開示企業も少ない。"
+  correlated_with: [U28, U29, U31, U32, B26]
+  economic_rationale: >-
+    3倍超が目安。**ただし LTV は将来の解約率の仮定に依存する**ので、
+    企業に有利な仮定を置けばいくらでも高くできる。
+    U29（実際の解約率）と突合しないと信用できない。
+    **B26（R&D生産性）と同じく「投資の実り」を測る指標だが、より恣意的。**
+  evidence_tier: T3
+  references: ["構造的判断。推定値依存で信頼度が低い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U31:
+  formula: "CAC / 月次粗利"
+  inputs: [CAC_estimate, GP]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "U30 と同じ推定問題。"
+  zero_denominator_policy: "月次粗利>0。"
+  missing_bias: "U30 と同じ。"
+  correlated_with: [U30, U32, B09, D22]
+  economic_rationale: >-
+    12ヶ月以内が目安。**回収期間が長いほど、成長のために先に現金が出ていく**ので、
+    D22（資金繰り余力）との交互作用が本質。急成長 SaaS が
+    資金ショートするのはこの構造による。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U32:
+  formula: "(当四半期ARR増 × 4) / 前四半期の営業マーケティング費"
+  inputs: [ARR, sales_marketing_expense]
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: "ARR は自主開示。営業マーケ費の区分も企業判断。"
+  zero_denominator_policy: "前四半期の営業マーケ費>0。"
+  missing_bias: "U28-U31 と同じ開示バイアス。"
+  correlated_with: [U27, U28, U30, U31, B31]
+  economic_rationale: >-
+    0.75超なら投資を増やす価値がある、というのが業界の目安。
+    **営業効率の限界生産性を測る**という点で B12（増分ROIC）と同じ発想。
+    C08（ROIC × 再投資率）を SaaS の言語で表現したもの。
+  evidence_tier: T3
+  references: ["構造的判断。SaaS 業界の経験則"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U33:
+  formula: "日次アクティブユーザー / 月次アクティブユーザー"
+  inputs: [DAU, MAU, LLM]
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: "**アクティブの定義が企業ごとに違う。**"
+  zero_denominator_policy: "MAU>0。"
+  missing_bias: "開示企業に偏る。X03/X04（アプリのDL数・レビュー）で外部推定が可能。"
+  correlated_with: [C16, X03, X04, X05, U28]
+  economic_rationale: >-
+    ゲーム・SNS のエンゲージメント。**高いほど習慣化されており解約されにくい**ので、
+    U29（解約率）の代理変数になる。
+    **X03（アプリランキング）で外部から検証できる**数少ない指標で、
+    開示に頼らずに追跡できる点が実務的に重要。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- U-6 医薬・バイオ・医療機器 -----------------------------------------------
+
+U34:
+  formula: "SUM( 各開発品の売上ポテンシャル × フェーズ別承認確率 × 割引 ) / MCAP"
+  inputs: [pipeline_disclosure, LLM, MCAP]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "MCAP>0。パイプラインが無ければゼロ。"
+  missing_bias: >-
+    **売上ポテンシャルの推定が LLM 依存で、しかも極めて不確実。**
+    フェーズ別承認確率は業界統計（フェーズ1で約10%、フェーズ3で約60%）が
+    使えるが、疾患領域で大きく違う。
+  correlated_with: [U35, U36, U37, N40, X07, A27]
+  economic_rationale: >-
+    **医薬は現在の利益ではなくパイプラインで評価される。PER は誤導的。**
+    赤字のバイオ企業に高い時価総額が付くのはこのため。
+    A27（DCF）と同じく仮定に敏感なので、**幅で持ち点推定を信じない。**
+    5年ホライズンでは、フェーズ3の開発品が結果を出す確率が高い。
+  evidence_tier: T3
+  references: ["構造的判断。rNPV は業界標準手法だが推定の幅が大きい"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U35:
+  formula: "主力製品の特許満了までの残存年数（売上加重）"
+  inputs: [patent_data, segment_revenue, LLM]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "主力製品が特定できなければ欠損。"
+  missing_bias: "N39 と同一。特許と製品の紐付けを LLM に頼るので誤りが入る。"
+  correlated_with: [N39, U34, U36, U38, X07]
+  economic_rationale: >-
+    N39 と同一の量で、業種特化として重複して持つ。
+    **5年ホライズンでは決定的。** 満了直後に後発品が出ると売上が数割落ちる。
+    **PER が低く見える医薬企業の多くは、市場がクリフを織り込んでいるだけ**で、
+    A カテゴリのバリュートラップの業種特有の形。
+  evidence_tier: T3
+  references: ["構造的判断。パテントクリフは実務上自明"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U36:
+  formula: "最大売上製品の売上 / REV"
+  inputs: [product_revenue, REV]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "製品別売上の開示は義務ではない。"
+  zero_denominator_policy: "REV>0。"
+  missing_bias: "製品別開示をする企業に偏る。大手製薬は開示するが中小は少ない。"
+  correlated_with: [U34, U35, V02, I25, T18]
+  economic_rationale: >-
+    **U35 と掛け合わせて「クリフの深さ」を推定する。**
+    売上の60%を占める製品の特許が2年後に切れるなら、
+    2年後に売上の3〜4割が消える。I25（単一要因への依存度）の医薬版で、
+    **U35 単独では危険度が測れない**ので必ずセットで使う。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U37:
+  formula: "過去10年の新薬承認数 / 累計R&D費"
+  inputs: [approvals, RD]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "累計R&D>0。承認ゼロならゼロ（欠損にしない）。"
+  missing_bias: "10年の履歴が要るので、若い企業で欠損。バイオベンチャーは常にゼロ。"
+  correlated_with: [B26, U34, X07, X08, B25]
+  economic_rationale: >-
+    B26（R&D生産性）の医薬特化版。**研究開発費が実際に承認薬に
+    転換されているか。** 大手製薬でも生産性は大きく違い、
+    R&D 費の絶対額（B25）は実力を表さない。
+    **X08（特許の被引用数）と併せると、研究の質を多角的に測れる。**
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U38:
+  formula: "薬価改定率 × 対象品の売上比率"
+  inputs: [drug_price_revision, product_revenue, LLM]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "REV>0。"
+  missing_bias: >-
+    **日本固有の制度。** 米国は市場価格なので対応する概念が無い
+    （ただし IRA による価格交渉が始まっている）。
+  correlated_with: [U34, U35, U36, P30, N19]
+  economic_rationale: >-
+    **日本は薬価改定が構造的な逆風。** かつては2年ごとだったが
+    毎年改定に移行し、影響が増した。**制度で価格が下がることが確定している**
+    という点で、他業種にない特異な性質を持つ。
+    P30（税制・制度の変更）の監視対象として最も重要な業種。
+  evidence_tier: T3
+  references: ["健康保険法（薬価基準）", "構造的判断"]
+  markets: [JP]
+  review: {status: verified}
+
+# --- U-7 資源・エネルギー・海運・商社 ------------------------------------------
+
+U39:
+  formula: "beta( r_i ~ 主要商品価格の変化 ) と長期契約比率の複合"
+  inputs: [PRICE, commodity_index, U42]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "推定に252営業日が要る。"
+  missing_bias: "主要商品の特定が要る。複数商品に跨る企業では単純化される。"
+  correlated_with: [P09, U24, U40, U41, U42]
+  economic_rationale: >-
+    **PER が最も誤導的になる業種。ピーク PER が最安値になる。**
+    商品価格がピークのとき利益もピークで PER が低く見えるが、
+    そこが天井。**A22/A23（自己バリュエーション位置）や
+    C26（平均回帰調整）で補正しないと、必ず高値を掴む。**
+    バリュー指標を業種横断で使うことの危険が最も顕著に出る場所。
+  evidence_tier: T3
+  references: ["構造的判断。資源株分析の実務標準"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U40:
+  formula: "確認埋蔵量 / 年間生産量"
+  inputs: [reserves, production]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "**埋蔵量の認定基準（SEC 基準 / SPE-PRMS）で数値が変わる。**"
+  zero_denominator_policy: "生産量>0。"
+  missing_bias: "資源企業のみ。日本には該当企業が少ない。"
+  correlated_with: [U39, U42, C40, A29]
+  economic_rationale: >-
+    **資源企業の実質的な資産。** 会計上の簿価より埋蔵量の方が価値を表す。
+    可採年数が短い企業は、探鉱に投資し続けないと事業が終わる
+    — **C07（再投資率）が構造的に高くならざるを得ない業種。**
+  evidence_tier: T3
+  references: ["SEC Rule 4-10 (Reg S-X)", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U41:
+  formula: "BDI・コンテナ運賃指数・タンカー用船料の水準と変化"
+  inputs: [freight_indices]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  missing_bias: "海運のみ。指数は公開されているので欠損しない。"
+  correlated_with: [U39, U42, P15, P09]
+  economic_rationale: >-
+    **極端にシクリカルで、指数が業績に先行する。**
+    BDI は数ヶ月で10倍変動することがあり、海運株の利益は運賃に直結する。
+    **業界指数が公開されているので、個社開示を待たずに業績が推定できる**
+    という点で U25（業界在庫）と同じ性格。
+    U39（PER の誤導）が最も激しく現れる業種でもある。
+  evidence_tier: T3
+  references: ["構造的判断。海運分析の実務標準"]
+  markets: [JP, US]
+  review: {status: verified}
+
+U42:
+  formula: "長期契約売上 / 総売上"
+  inputs: [contract_disclosure, REV, LLM]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "契約形態の開示は任意。"
+  zero_denominator_policy: "REV>0。"
+  missing_bias: "開示企業に偏る。海運・資源で LLM 推定に頼る部分が大きい。"
+  correlated_with: [U39, U40, U41, C11, C12, B15]
+  economic_rationale: >-
+    **収益の安定性。スポット比率が高いほどボラが大きい。**
+    U39（商品価格感応度）を緩和する条件変数で、
+    長期契約が多い企業は商品価格が下がっても利益が守られる。
+    **同じ業種内でもビジネスモデルが違うことを捉える**ので、
+    業種内正規化だけでは足りない部分を補う。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- U-8 建設・インフラ・公益 --------------------------------------------------
+
+U43:
+  formula: "完成工事総利益 / 完成工事高"
+  inputs: [construction_profit, construction_revenue]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **工事進行基準（IFRS15 では一定期間にわたり充足する履行義務）の適用で、
+    利益の計上タイミングが変わる。** 見積総原価の変更で過去の利益が修正されることがある。
+  zero_denominator_policy: "完成工事高>0。"
+  missing_bias: "建設業のみ。日本は建設業会計で区分開示される。"
+  correlated_with: [U44, B07, B18, C11, U21]
+  economic_rationale: >-
+    **受注時の採算が2〜3年後の利益に出るので、先行性がある。**
+    今期の利益率は2〜3年前の受注環境を反映しているので、
+    **現在の受注環境（U44）を見れば将来の利益率が予測できる。**
+    B18（粗利率トレンド）の建設版だが、ラグが長い分だけ予測に使える。
+  evidence_tier: T3
+  references: ["建設業法施行規則（完成工事原価報告書）", "構造的判断"]
+  markets: [JP]
+  review: {status: verified}
+
+U44:
+  formula: "新規受注案件の想定利益率（開示または推定）"
+  inputs: [order_disclosure, LLM, U43]
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: "受注時採算は通常開示されない。LLM が説明資料から推定する。"
+  zero_denominator_policy: "受注額>0。"
+  missing_bias: "**ほぼ開示されないので推定精度が低い。** 経営陣の説明の定性表現に頼る。"
+  correlated_with: [U43, U21, C11, T07, T32]
+  economic_rationale: >-
+    U43 の先行指標。**受注時の採算が悪化していれば、
+    2〜3年後の利益率低下が確定している。** 建設業界は
+    競争激化局面で採算を落として受注する傾向があり、
+    その影響が数年後に出る。**T07（ガイダンス文言の変化）で
+    経営陣の慎重さの変化を捉えるのが実務的な代替。**
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP]
+  review: {status: verified}
+
+U45:
+  formula: "規制資産ベース × 認可利回り / 時価総額"
+  inputs: [regulated_asset_base, allowed_return, MCAP, LLM]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "MCAP>0。規制産業以外では欠損。"
+  missing_bias: "電力・ガス・鉄道のみ。規制の枠組みが国で全く違う。"
+  correlated_with: [U39, B03, B04, A28, N19]
+  economic_rationale: >-
+    **規制産業では通常の ROIC 分析が効かない。**
+    利益が規制で決まるので、B03（ROIC）は認可利回りに張り付く。
+    **投資すればするほど規制資産ベースが増え、利益も増える**という、
+    C35（資産成長アノマリー）と正反対の構造を持つ。
+    U カテゴリを設けた最大の理由がこの種の構造差にある。
+  evidence_tier: T3
+  references: ["電気事業法（託送料金の総括原価方式）", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- X オルタナデータ ---------------------------------------------------------
+
+X01:
+  formula: "推定月間訪問者数"
+  inputs: [web_traffic_data]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（カウント）"
+  pit_lag_days: 3
+  missing_bias: >-
+    **推定値であり、実測ではない。** パネルベースの推定なので
+    小規模サイトほど誤差が大きい。**過去に遡れない**（有料サービスは遡れるが高額）。
+  correlated_with: [X02, X03, U20, C01, C16, O05]
+  economic_rationale: >-
+    **EC・ネット企業の売上の直接的な先行指標。** 訪問者数 × 転換率 × 客単価 = 売上
+    なので、訪問者数の変化は売上に機械的に効く。
+    **U20（EC比率）が開示に依存するのに対し、X01 は外部から取れる**
+    という点で、開示バイアス（Z03）を回避できる稀な変数。
+  evidence_tier: T3
+  references: ["構造的判断。オルタナデータの実務利用は広いが公開実証は限定的"]
+  markets: [JP, US]
+  review: {status: verified}
+
+X02:
+  formula: "X01 の YoY / MoM"
+  inputs: [X01]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "前期がゼロなら欠損。"
+  pit_lag_days: 3
+  missing_bias: "X01 を継承。推定手法の変更で不連続になる。"
+  correlated_with: [X01, C01, C21, U20]
+  economic_rationale: >-
+    **水準より変化。** X01 の絶対値は企業規模に依存するが、
+    変化率は成長を直接測る。**四半期決算より速く、しかも月次で取れる**ので、
+    C21（季節調整済み四半期成長）より解像度が高い。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+X03:
+  formula: "アプリのダウンロード数推定とストアランキング"
+  inputs: [app_store_data]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  pit_lag_days: 3
+  missing_bias: "アプリを持つ企業のみ。ランキングは相対値なので市場全体の変化と混同しやすい。"
+  correlated_with: [X04, X05, U33, C16, C15]
+  economic_rationale: >-
+    **ゲーム・アプリ企業では売上に直結する。**
+    新作リリース直後のランキングが、その四半期の売上をほぼ決める。
+    **決算を待たずに業績が分かる稀な業種**で、U33（DAU/MAU）と
+    組み合わせると継続率まで推定できる。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+X04:
+  formula: "アプリのレビュー件数と平均評点の推移"
+  inputs: [app_store_reviews]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "レビュー数が50未満なら評点が不安定。欠損。"
+  pit_lag_days: 3
+  missing_bias: "X03 と同じ。**評点は不満を持った利用者が書きやすい**ので下方に偏る。"
+  correlated_with: [X03, X11, U29, U33, W11]
+  economic_rationale: >-
+    **評点の急落は不具合・改悪のサイン。** 課金仕様の変更で
+    ユーザーが離反する事例は多く、U29（解約率）の先行指標になる。
+    W11（従業員クチコミ）と同じく、**外部の声を定量化する**という発想。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+X05:
+  formula: "Google Trends の企業名・製品名それぞれの検索ボリューム"
+  inputs: [search_trends]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "指数がゼロ固定なら欠損。"
+  pit_lag_days: 3
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: "O05 と同じ。指数は相対値で銘柄間比較ができない。小型株はゼロ固定になりやすい。"
+  correlated_with: [O05, O06, X01, X03, X11]
+  economic_rationale: >-
+    ∩型。**企業名検索は過熱の逆指標、製品名検索は需要の先行指標。**
+    符号が逆なので**必ず分けて持つ。** 混ぜると打ち消し合う。
+    O05 が企業名側を扱うのに対し、X05 は製品名側を主に扱う。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+X06:
+  formula: "W09 と同一（求人掲載数）"
+  inputs: [job_postings]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（カウント）"
+  pit_lag_days: 3
+  missing_bias: "W09 と同一。過去に遡れないので forward_log で記録対象。"
+  correlated_with: [W09, W10, C32, C01]
+  economic_rationale: >-
+    W09 と同一の量。**オルタナデータで最も実用的。**
+    ただし C32（従業員数の成長は劣後）と符号が衝突するので、
+    W10（職種構成）と W06（離職率）で「成長のための採用」と
+    「離職の補充」を分離する必要がある。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+X07:
+  formula: "年間の特許出願件数"
+  inputs: [patent_office_data]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（カウント）"
+  pit_lag_days: 3
+  missing_bias: >-
+    **特許は出願から公開まで18ヶ月かかる**ので、直近の出願は観測できない。
+    構造的に1.5年遅れる指標。
+  correlated_with: [X08, X09, B25, B26, U37, C41]
+  economic_rationale: >-
+    B25（R&D集約度）が投入を測るのに対し、X07 は産出を測る。
+    **ただし件数は質を表さない**ので、X08（被引用数）と併せて見ないと
+    「防衛的な出願を大量にしているだけ」の企業を高評価してしまう。
+    OSAP `PatentsRD` t=4.1 は R&D 費で正規化した形。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP PatentsRD t=4.1"]
+  markets: [JP, US]
+  review: {status: verified}
+
+X08:
+  formula: "自社特許の他社からの被引用件数"
+  inputs: [patent_citation_data]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（カウント）"
+  pit_lag_days: 3
+  missing_bias: >-
+    **被引用は時間とともに増えるので、新しい特許ほど過小評価される。**
+    出願年で正規化しないと、古い特許を持つ企業が有利になる。
+  correlated_with: [X07, B26, U37]
+  economic_rationale: >-
+    **件数より引用の方が質を反映する。** 他社が引用するのは、
+    その技術が業界に影響を与えたということ。
+    OSAP `CitationsRD` t=2.6。X07（件数）と組み合わせて
+    「量は多いが引用されない」企業を識別できる。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP CitationsRD t=2.6"]
+  markets: [JP, US]
+  review: {status: verified}
+
+X09:
+  formula: "年間の商標登録出願件数"
+  inputs: [trademark_data]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（カウント）"
+  pit_lag_days: 3
+  missing_bias: "商標は公開が早い（出願後数ヶ月）ので X07 より遅れが小さい。"
+  correlated_with: [X07, C24, C33, C41]
+  economic_rationale: >-
+    **新製品・新事業の先行サイン。** 商標は製品名を決めた段階で
+    出願するので、発売の半年〜1年前に観測できる。
+    C24（新製品売上比率）の先行指標で、**開示に一切依存しない**点が利点。
+    ただし実証は無く、★1 で強く縮小される。
+  evidence_tier: T3
+  references: ["構造的判断。実証は無い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+X10:
+  formula: "地図サービス等から数えた店舗・拠点数"
+  inputs: [map_data, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（カウント）"
+  pit_lag_days: 3
+  missing_bias: >-
+    **同名の他社店舗を誤カウントする。** フランチャイズと直営の区別もつかない。
+    **過去のスナップショットが取れない**ので前向き記録が必須。
+  correlated_with: [U18, C14, X11, U17]
+  economic_rationale: >-
+    **開示していない企業の店舗数を推定する。** U18（出退店ネット数）が
+    開示に依存するのに対し、X10 は外部から取れる。
+    ただし精度が低いので、**開示企業で誤差を較正してから
+    非開示企業に適用する**という手順が要る。
+  evidence_tier: T3
+  references: ["構造的判断。実証は無い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+X11:
+  formula: "口コミサイト・EC のレビュー件数と評点"
+  inputs: [review_sites, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "レビュー数が50未満なら欠損。"
+  pit_lag_days: 3
+  missing_bias: >-
+    **やらせレビューの影響を受ける。** しかも §4（セキュリティ）で指摘した通り、
+    **第三者が容易に書き込めるデータ**なので、意図的な操作を前提に扱う必要がある。
+  correlated_with: [X04, X05, U15, U16, W11, O06]
+  economic_rationale: >-
+    需要の代理変数。U15（既存店売上）の外部検証に使える。
+    **ただし操作されやすいので単独では信用しない。**
+    T36（発信源の信頼度）を通し、複数ソースの一致を要求する（§4.2 P7）。
+  evidence_tier: T3
+  references: ["構造的判断。docs/04_security.md §4 の対象データ"]
+  markets: [JP, US]
+  review: {status: verified}
+
+X12:
+  formula: "公式SNSアカウントのフォロワー数の推移"
+  inputs: [social_media]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（カウント）"
+  pit_lag_days: 3
+  missing_bias: "アカウントを持つ企業のみ。BtoB 企業では意味を持たない。"
+  correlated_with: [O06, X05, X11, C33]
+  economic_rationale: >-
+    **弱い。** O06（SNS言及量）が投資家の注目を測るのに対し、
+    X12 は顧客の関心を測るという違いはあるが、
+    フォロワー数と業績の関係は薄い。★1 で強く縮小されるのが妥当で、
+    **残しているのは「効かないことを確認する」ためでもある**（§1.9 の方針）。
+  evidence_tier: T3
+  references: ["構造的判断。実証は無い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+X13:
+  formula: "企業サイト・IRページの更新回数"
+  inputs: [website_monitoring]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（カウント）"
+  pit_lag_days: 3
+  missing_bias: "サイト構造に依存。**過去に遡れない**（アーカイブサービスは網羅的でない）。"
+  correlated_with: [O09, O18, E17, T10]
+  economic_rationale: >-
+    O09（IR活動の積極性）の自動化版。**人手の採点（O09）より
+    客観的で継続監視できる。** ただし更新の中身（重要な開示か軽微な修正か）を
+    区別できないので、T33（開示の重要度分類）と組み合わせないと精度が出ない。
+  evidence_tier: T3
+  references: ["構造的判断。実証は無い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+X14:
+  formula: "業界団体の出荷統計と自社売上の比率（シェア推定）"
+  inputs: [industry_statistics, REV]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "統計の集計範囲と自社の連結範囲が一致しない。"
+  zero_denominator_policy: "業界出荷額>0。統計が存在する業種のみ。"
+  pit_lag_days: 3
+  missing_bias: "統計が整備された業種のみ（半導体・鉄鋼・化学・工作機械・自動車）。"
+  correlated_with: [U22, U25, C01, C25, L01]
+  economic_rationale: >-
+    **シェアの変化を検出できる。個社開示より信頼できることがある。**
+    自社の売上が伸びていても、業界がそれ以上に伸びていればシェアは落ちている。
+    **業界の追い風と個社の実力を分離する**という点で、
+    Q10（同業他社との相対）と同じ発想をファンダメンタルで行う。
+    業界統計は改竄しにくいので、E カテゴリ（会計品質）の外部検証にも使える。
+  evidence_tier: T3
+  references: ["構造的判断。実務上の標準手法"]
+  markets: [JP, US]
+  review: {status: verified}
+
+X15:
+  formula: "主要顧客企業の売上・受注・株価の変化（売上構成比で加重）"
+  inputs: [customer_disclosure, PRICE, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "N21 と同じ顧客開示の日米差。"
+  zero_denominator_policy: "顧客が特定できなければ欠損。"
+  pit_lag_days: 0
+  missing_bias: "N21/L07 と同じ。日本は匿名開示が多く LLM 推定に頼る。"
+  correlated_with: [L07, N21, N41, I25, T18, Q16]
+  economic_rationale: >-
+    **L07（顧客モメンタム）と実質的に同一。無料で作れるのが最大の利点。**
+    顧客企業が上場していれば株価も業績も公開されているので、
+    追加のデータ購入なしにサプライチェーンの上流が読める。
+    **X カテゴリの中で唯一、取得の安定性が高い**（上場企業のデータだから）。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP CustomerMomentum t=3.8 / iomom_cust t=4.1"]
+  markets: [JP, US]
+  review: {status: verified}
+
+X16:
+  formula: "競合製品の実売価格とキャンペーンの実測"
+  inputs: [price_monitoring, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "比較対象製品が特定できなければ欠損。"
+  pit_lag_days: 3
+  missing_bias: "**製品の同一性判定が難しい。** 型番違い・セット販売で価格が比較できない。"
+  correlated_with: [B18, B36, C25, U16, T21]
+  economic_rationale: >-
+    **価格競争の検出。粗利率悪化（B18）に先行する。**
+    競合が値下げを始めれば、自社も追随するか数量を失うかのどちらかで、
+    どちらにせよ利益が減る。**T21（真の競合の特定）が前提**になるので、
+    LLM の競合判定の精度がそのまま効く。
+  evidence_tier: T3
+  references: ["構造的判断。実証は無い"]
+  markets: [JP, US]
+  review: {status: verified}

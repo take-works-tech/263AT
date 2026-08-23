@@ -12,8 +12,11 @@
   category_name: 業種固有KPI
   subsection: 金融（銀行・保険・証券）
   definition: (資金運用収益 - 資金調達費用) / 平均運用資産
-  formula: null
-  inputs: null
+  formula: (資金運用収益 - 資金調達費用) / 平均運用資産
+  inputs:
+  - interest_income
+  - interest_expense
+  - earning_assets
   sign: positive
   buy_class: main
   sell_class: useful
@@ -26,25 +29,33 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 金融（銀行・保険・証券）
-  period_convention: TTM
+  period_convention: AVG
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: 銀行業のみ。運用資産の定義が国で違う（日本は貸出金+有価証券、米国は earning assets）。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 運用資産>0。銀行業以外では欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 銀行業のみ。日本の地銀は全社取得可能。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U02
+  - U03
+  - U04
+  - U05
+  - P01
+  - P05
+  - D25
+  economic_rationale: '**日本の金利正常化で最大の追い風。** ゼロ金利下では預金金利を下げられず 利鞘が潰れていたが、金利上昇局面では貸出金利が先に上がる。 地銀の再評価テーマの中核で、**P05（日銀スタンス）との交互作用が本質。** ただし同時に U02（与信費用）が悪化するので、正味の効果は両者の差。'
+  references:
+  - 構造的判断。銀行分析の実務標準
   notes: 銀行。日本の金利正常化で最大の追い風。地銀の再評価テーマの中核
   notes_extra: null
   provenance:
@@ -58,22 +69,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U02
   name_ja: 与信費用率
@@ -81,8 +94,10 @@
   category_name: 業種固有KPI
   subsection: 金融（銀行・保険・証券）
   definition: 与信関係費用 / 貸出金残高
-  formula: null
-  inputs: null
+  formula: 与信関係費用 / 貸出金残高
+  inputs:
+  - credit_costs
+  - loans
   sign: negative
   buy_class: main
   sell_class: main
@@ -95,7 +110,7 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -103,17 +118,25 @@
   - 金融（銀行・保険・証券）
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**IFRS9 / CECL で予想信用損失モデルに移行し、計上タイミングが前倒しになった。** 移行年は不連続。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 貸出金>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 銀行業のみ。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U01
+  - U03
+  - D08
+  - D09
+  - P11
+  - P15
+  economic_rationale: '**景気後退の先行指標。** 銀行の与信費用は借り手の悪化を最初に反映するので、 P11（クレジットスプレッド）と並んで**株式市場より早く壊れる指標。** 急増は個別銀行の問題であると同時に、**マクロの警告**でもある。'
+  references:
+  - IFRS 9 / ASC 326（CECL）
+  - 構造的判断
   notes: 銀行。景気後退の先行指標。急増は株価に先行する
   notes_extra: null
   provenance:
@@ -127,22 +150,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U03
   name_ja: 不良債権比率
@@ -150,8 +175,10 @@
   category_name: 業種固有KPI
   subsection: 金融（銀行・保険・証券）
   definition: 金融再生法開示債権 / 総与信
-  formula: null
-  inputs: null
+  formula: 金融再生法開示債権 / 総与信
+  inputs:
+  - disclosed_claims
+  - total_credit
   sign: negative
   buy_class: useful
   sell_class: main
@@ -164,25 +191,30 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries:
   - 金融（銀行・保険・証券）
-  period_convention: TTM
+  period_convention: POINT
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**日本の金融再生法開示基準は日本固有。** 米国は non-performing loans で定義が違う。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 総与信>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 銀行業のみ。日本は開示義務があるので全行取得可能。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U01
+  - U02
+  - D08
+  - D09
+  economic_rationale: U02（フロー）に対するストック。**残高が積み上がっている銀行は、 将来の与信費用が確定的に発生する。** ただし引当済みの部分は既に費用化されているので、 引当率と併せて見ないと二重計上になる。
+  references:
+  - 金融機能の再生のための緊急措置に関する法律 第6条
+  - 構造的判断
   notes: 銀行
   notes_extra: null
   provenance:
@@ -196,22 +228,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U04
   name_ja: OHR（経費率）
@@ -219,8 +253,10 @@
   category_name: 業種固有KPI
   subsection: 金融（銀行・保険・証券）
   definition: 経費 / 業務粗利益
-  formula: null
-  inputs: null
+  formula: 経費 / 業務粗利益
+  inputs:
+  - operating_expenses
+  - gross_operating_profit
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -233,25 +269,30 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 金融（銀行・保険・証券）
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: '**業務粗利益は日本の銀行会計固有の概念。** 米国は efficiency ratio で近い。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 業務粗利益>0。負なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 銀行業のみ。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U01
+  - U05
+  - B08
+  - B31
+  economic_rationale: 銀行の効率性。**日本の地銀は70%超が多く、構造的に高コスト。** B31（販管費率のトレンド）の銀行版で、水準より改善方向が効く。 店舗統廃合・システム共同化の進捗を反映する。
+  references:
+  - 構造的判断。銀行分析の実務標準
   notes: 銀行の効率性。地銀では 70% 超が多い
   notes_extra: null
   provenance:
@@ -265,22 +306,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U05
   name_ja: 預貸率
@@ -288,8 +331,10 @@
   category_name: 業種固有KPI
   subsection: 金融（銀行・保険・証券）
   definition: 貸出金 / 預金
-  formula: null
-  inputs: null
+  formula: 貸出金 / 預金
+  inputs:
+  - loans
+  - deposits
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -302,25 +347,29 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 金融（銀行・保険・証券）
-  period_convention: TTM
+  period_convention: POINT
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 預金>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 銀行業のみ。
   normalization: rank_industry
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U01
+  - U04
+  - D07
+  economic_rationale: ∩型。**高すぎると流動性リスク**（預金流出に耐えられない — SVB の破綻が典型）、 **低すぎると収益機会の逸失**（預金が有価証券運用に回り、金利上昇で含み損になる）。 日本の地銀は預貸率が低く、**その余資が国債運用に回っているので 金利上昇が含み損を生む**という、U01（NIM改善）と逆方向の効果がある。
+  references:
+  - 構造的判断
   notes: 高すぎは流動性リスク、低すぎは収益機会の逸失
   notes_extra: null
   provenance:
@@ -334,24 +383,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
+    nonlinear: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U06
   name_ja: コンバインド・レシオ
@@ -359,8 +409,11 @@
   category_name: 業種固有KPI
   subsection: 金融（銀行・保険・証券）
   definition: (保険金 + 事業費) / 正味収入保険料
-  formula: null
-  inputs: null
+  formula: (正味支払保険金 + 事業費) / 正味収入保険料
+  inputs:
+  - claims
+  - expenses
+  - premiums
   sign: negative
   buy_class: main
   sell_class: main
@@ -373,7 +426,7 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -381,17 +434,21 @@
   - 金融（銀行・保険・証券）
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**損保のみ。** 日本と米国で事業費の範囲が違う。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 保険料>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 損保のみ。生保では意味を持たない（U07 を使う）。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U07
+  - U08
+  - B08
+  economic_rationale: '**100%未満で引受利益。これが損保の本業の成績。** 100%を超えていても資産運用益で黒字になるが、それは本業ではない。 **自然災害の多い年は悪化するので、Y11（気候物理リスク）が直接効く数少ない業種。**'
+  references:
+  - 構造的判断。損保分析の実務標準
   notes: 損保。100%未満で引受利益。これが損保の本業の成績
   notes_extra: null
   provenance:
@@ -405,22 +462,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U07
   name_ja: EV（エンベディッド・バリュー）倍率
@@ -428,8 +487,10 @@
   category_name: 業種固有KPI
   subsection: 金融（銀行・保険・証券）
   definition: EV / 時価総額
-  formula: null
-  inputs: null
+  formula: エンベディッド・バリュー / 時価総額
+  inputs:
+  - embedded_value
+  - MCAP
   sign: positive
   buy_class: main
   sell_class: useful
@@ -442,25 +503,30 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 金融（銀行・保険・証券）
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**EV の算定は各社の前提（割引率・死亡率・解約率）に依存し、監査対象外。** 企業間比較には注意が要る。IFRS17 移行で状況が変わりつつある。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: MCAP>0。EV を開示しない生保では欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 生保のみ。開示は任意なので開示企業に偏る。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U06
+  - U08
+  - A03
+  - A28
+  economic_rationale: '**通常の PER は生保にほぼ無意味。** 保険契約は数十年にわたるので、 単年度利益では価値を測れない。EV は保有契約の将来利益の現在価値で、 **A28（残余利益モデル）と同じ発想を保険業に特化させたもの。** EV/時価総額が1を大きく超える生保が日本には存在する。'
+  references:
+  - 構造的判断。EV は業界標準だが監査対象外
   notes: 生保。通常の PER は生保にほぼ無意味。EV倍率で見る
   notes_extra: null
   provenance:
@@ -474,22 +540,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U08
   name_ja: ソルベンシー・マージン比率
@@ -577,8 +645,12 @@
   category_name: 業種固有KPI
   subsection: 不動産・REIT
   definition: 時価総額 / 純資産価値（時価ベース）
-  formula: null
-  inputs: null
+  formula: MCAP / 純資産価値（保有不動産を鑑定評価額で置き換えた自己資本）
+  inputs:
+  - MCAP
+  - appraisal_value
+  - EQ
+  - IBD
   sign: negative
   buy_class: main
   sell_class: main
@@ -591,25 +663,33 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 不動産・REIT
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: '**日本は賃貸等不動産の時価が注記で開示される**（企業会計基準第20号）。 米国は原価主義で時価開示が無いことが多く、**日本の方が計算しやすい。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: NAV<=0 なら欠損（債務超過相当）。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 不動産業・REIT のみ。時価注記のない企業では計算不能。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U11
+  - U12
+  - U13
+  - A03
+  - A19
+  - A34
+  economic_rationale: '**簿価ベースの PBR より遥かに意味がある。** 不動産は取得原価で計上されるので、 含み益が大きい企業ほど PBR が高く見えて割高に見誤る。 **日本の老舗不動産会社の PBR が低いのは、含み益が簿価に反映されていないため。** A19（不動産含み益）を業種特化させた形。'
+  references:
+  - 企業会計基準第20号（賃貸等不動産の時価等の開示）
+  - 構造的判断
   notes: 不動産。簿価ベースの PBR より遥かに意味がある
   notes_extra: null
   provenance:
@@ -623,22 +703,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U10
   name_ja: 稼働率
@@ -646,8 +728,9 @@
   category_name: 業種固有KPI
   subsection: 不動産・REIT
   definition: 賃貸可能面積に対する稼働面積
-  formula: null
-  inputs: null
+  formula: 稼働面積 / 賃貸可能面積
+  inputs:
+  - occupancy_disclosure
   sign: positive
   buy_class: main
   sell_class: main
@@ -661,25 +744,31 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 不動産・REIT
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 賃貸可能面積>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**J-REIT は月次開示が多いが、事業会社の不動産部門は年次。** 開示頻度が大きく違う。'
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U09
+  - U11
+  - U13
+  - C13
+  - C11
+  economic_rationale: '**月次開示されるので決算より速い。** C13（既存店売上）と同じ性格で、 不動産の需給を直接反映する。稼働率の低下は賃料下落に先行するので、 U11（キャップレート・スプレッド）の悪化を予告する。'
+  references:
+  - 構造的判断。REIT 分析の実務標準
   notes: 不動産・REIT。月次開示されることが多く反応が速い
   notes_extra: null
   provenance:
@@ -693,22 +782,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U11
   name_ja: キャップレート・スプレッド
@@ -716,8 +807,11 @@
   category_name: 業種固有KPI
   subsection: 不動産・REIT
   definition: NOI利回り - 長期金利
-  formula: null
-  inputs: null
+  formula: NOI利回り - 長期国債利回り
+  inputs:
+  - NOI
+  - appraisal_value
+  - MACRO_10y
   sign: positive
   buy_class: main
   sell_class: useful
@@ -730,25 +824,33 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 不動産・REIT
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: NOI の定義（減価償却前か後か）が企業で違う。減価償却前に統一する。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 鑑定評価額>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: A38 と同じく日米で使う国債が違うので、統合ランクを取ってはいけない（rank_market が妥当）。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U09
+  - U12
+  - U14
+  - A38
+  - A12
+  - P01
+  - P02
+  economic_rationale: '**不動産は金利上昇に最も脆弱な業種。** キャップレートが金利に連動するので、 金利が1%上がれば不動産価格は理論上大きく下がる。 **日本の金利正常化局面（P05）では、U01（銀行のNIM改善）と正反対の効果を受ける。** A38（FCF利回りスプレッド）の不動産版。'
+  references:
+  - 構造的判断。不動産評価の実務標準
   notes: 不動産。金利上昇に最も脆弱な業種。日本の金利正常化局面では要警戒
   notes_extra: null
   provenance:
@@ -762,22 +864,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U12
   name_ja: LTV
@@ -785,8 +889,11 @@
   category_name: 業種固有KPI
   subsection: 不動産・REIT
   definition: 有利子負債 / 総資産（時価）
-  formula: null
-  inputs: null
+  formula: 有利子負債 / 総資産（時価ベース）
+  inputs:
+  - IBD
+  - appraisal_value
+  - TA
   sign: negative
   buy_class: useful
   sell_class: main
@@ -799,25 +906,32 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 不動産・REIT
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: 分母を時価にするか簿価にするかで大きく違う。時価に統一する。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 総資産>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: REIT は規約で上限が定まっているので分布が狭い。事業会社では広い。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U09
+  - U11
+  - D01
+  - D02
+  - D03
+  economic_rationale: '**REIT には上限規律があり、超えると増資を迫られる。** D01/D02（一般的なレバレッジ指標）が業種調整を要するのに対し、 U12 は業種固有の閾値が明確。**LTV が上限に近い REIT は、 不動産価格が下がると強制的に増資（F05）することになる**ので、 希薄化リスクの先行指標でもある。'
+  references:
+  - 投資信託及び投資法人に関する法律（REIT の借入制限）
+  - 構造的判断
   notes: REIT。上限規律がある
   notes_extra: null
   provenance:
@@ -831,22 +945,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U13
   name_ja: 含み損益率
@@ -854,8 +970,10 @@
   category_name: 業種固有KPI
   subsection: 不動産・REIT
   definition: (鑑定評価額 - 簿価) / 簿価
-  formula: null
-  inputs: null
+  formula: (鑑定評価額 - 簿価) / 簿価
+  inputs:
+  - appraisal_value
+  - book_value
   sign: positive
   buy_class: main
   sell_class: useful
@@ -868,25 +986,30 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries:
   - 不動産・REIT
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: 日本の時価注記から取得。米国は原価主義で開示が無いことが多い。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 簿価>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本優位。** 米国では計算できない企業が多い。'
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U09
+  - A19
+  - A18
+  - A03
+  economic_rationale: A19（不動産含み益）の業種特化版。**日本の老舗企業に眠る隠れ資産。** ただし**顕在化しないと意味がない**ので、N43（不動産売却）や M08（アクティビスト保有）といったカタリストと併用する。 東証の資本コスト要請（LAW-47）が是正圧力になっている。
+  references:
+  - 企業会計基準第20号
+  - 構造的判断
   notes: 不動産・REIT。A19 の業種特化版
   notes_extra: null
   provenance:
@@ -900,22 +1023,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U14
   name_ja: 分配金利回りスプレッド
@@ -923,8 +1048,10 @@
   category_name: 業種固有KPI
   subsection: 不動産・REIT
   definition: 分配金利回り - 長期金利
-  formula: null
-  inputs: null
+  formula: 分配金利回り - 長期国債利回り
+  inputs:
+  - distribution_yield
+  - MACRO_10y
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -937,7 +1064,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -945,17 +1072,24 @@
   - 不動産・REIT
   period_convention: TTM
   consolidation: na
-  accounting_standard_note: null
+  accounting_standard_note: REIT のみ。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（差分）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: REIT のみ。事業会社では A12（益回りスプレッド）を使う。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U11
+  - U12
+  - A11
+  - A12
+  - A38
+  - P01
+  economic_rationale: REIT のバリュエーション。**利益の90%超を分配する法的構造なので、 分配金利回りが実質的に益回りに等しい。** したがって A12（益回りスプレッド）と ほぼ同義だが、REIT では分配金の方が確実性が高い。
+  references:
+  - 構造的判断
   notes: REIT のバリュエーション
   notes_extra: null
   provenance:
@@ -969,22 +1103,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U15
   name_ja: 既存店売上高（月次）
@@ -992,8 +1128,10 @@
   category_name: 業種固有KPI
   subsection: 小売・外食・消費
   definition: 同一店舗ベースの売上 YoY
-  formula: null
-  inputs: null
+  formula: 同一店舗ベースの売上 YoY（月次）
+  inputs:
+  - monthly_disclosure
+  - LLM
   sign: positive
   buy_class: main
   sell_class: main
@@ -1007,25 +1145,31 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries:
   - 小売・外食・消費
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: C13 と同一定義。「既存店」の定義が企業ごとに違う。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（YoY）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**月次開示企業に偏る。日本は比較的多いが米国は少ない。**'
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - C13
+  - U16
+  - U18
+  - X11
+  - X14
+  economic_rationale: C13 と同一の量で、業種特化として重複して持つ。 **月次開示なので決算より遥かに速く、日本の小売・外食では最重要指標。** U16 との分解が本質で、単独では値上げによる嵩上げを見抜けない。
+  references:
+  - 構造的判断。小売分析の実務標準
   notes: 月次開示で反応が速い。日本の小売・外食で最重要。C13 の業種特化
   notes_extra: null
   provenance:
@@ -1039,22 +1183,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U16
   name_ja: 客数と客単価の分解
@@ -1062,8 +1208,10 @@
   category_name: 業種固有KPI
   subsection: 小売・外食・消費
   definition: 既存店売上を客数 × 単価に分解
-  formula: null
-  inputs: null
+  formula: 既存店売上 YoY を 客数 YoY と客単価 YoY に分解
+  inputs:
+  - U15
+  - monthly_disclosure
   sign: context
   buy_class: main
   sell_class: main
@@ -1077,25 +1225,31 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 小売・外食・消費
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: 客数・客単価の両方を開示する企業に限られる。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（分解）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**分解を開示する企業はさらに少ない。** U15 は出すが分解は出さない企業が多い。'
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U15
+  - C25
+  - B36
+  - B18
+  - U19
+  economic_rationale: '**客数減を値上げで補う成長は持続しない。** 客数が減っているのに 売上が伸びているのは、既存顧客からより多く取っているだけで、 やがて顧客が離れる。C25（価格 vs 数量）を小売に特化させた形で、 **C25 が全業種で推定に頼るのに対し、小売では実測値が取れる**という利点がある。'
+  references:
+  - 構造的判断。小売分析の実務標準
   notes: 客数減を値上げで補う成長は持続しない。分解しないと見誤る
   notes_extra: null
   provenance:
@@ -1109,22 +1263,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U17
   name_ja: 坪効率
@@ -1132,8 +1288,10 @@
   category_name: 業種固有KPI
   subsection: 小売・外食・消費
   definition: 売上 / 売場面積
-  formula: null
-  inputs: null
+  formula: 売上 / 売場面積
+  inputs:
+  - REV
+  - floor_area
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1146,25 +1304,30 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 小売・外食・消費
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: 売場面積の定義（総面積か賃貸面積か）が企業で違う。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 売場面積>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 面積を開示する企業に偏る。業態内でのみ比較可能（コンビニと百貨店は比較不能）。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U15
+  - U18
+  - B11
+  - B44
+  economic_rationale: 小売の資産効率。B11（総資産回転率）を物理的な資産で測った版。 **業態内でのみ意味を持つ**ので、U カテゴリの中でもさらに細かい 業態分類が要る（spec SP-04 の課題）。
+  references:
+  - 構造的判断
   notes: 小売。業態内でのみ比較可能
   notes_extra: null
   provenance:
@@ -1178,22 +1341,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U18
   name_ja: 出退店ネット数
@@ -1201,8 +1366,10 @@
   category_name: 業種固有KPI
   subsection: 小売・外食・消費
   definition: 新規出店数 - 閉店数
-  formula: null
-  inputs: null
+  formula: 新規出店数 - 閉店数
+  inputs:
+  - store_count
+  - TD_disclosure
   sign: context
   buy_class: useful
   sell_class: useful
@@ -1216,25 +1383,32 @@
   - TD
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 小売・外食・消費
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（差分）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 店舗数を開示する企業に偏る。X10（地図サービスからの実測）で代替可能。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U15
+  - U17
+  - C14
+  - C29
+  - X10
+  - C35
+  economic_rationale: '**符号は文脈依存。** 出店は成長だが、C35（資産成長アノマリー）の観点では 投資しすぎのリスク。**U15（既存店）が良い企業の出店は加点、 悪い企業の出店は減点**という交互作用が本質で、B04（ROIC-WACC）が条件変数。 C カテゴリの「アウトプット vs インプット」の整理がここでも当てはまる。'
+  references:
+  - 構造的判断。catalog §4-C の符号整理
   notes: 成長と撤退の両面。U15 と分けて見る
   notes_extra: null
   provenance:
@@ -1248,22 +1422,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U19
   name_ja: 在庫の陳腐化リスク
@@ -1271,8 +1447,11 @@
   category_name: 業種固有KPI
   subsection: 小売・外食・消費
   definition: 在庫日数 × 商材の陳腐化速度
-  formula: null
-  inputs: null
+  formula: 在庫回転日数 × 商材の陳腐化速度（LLM 判定 0-1）
+  inputs:
+  - B22
+  - LLM
+  - product_category
   sign: negative
   buy_class: useful
   sell_class: main
@@ -1286,25 +1465,31 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 小売・外食・消費
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: 在庫の評価方法（低価法の適用）が企業で違う。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 在庫がゼロなら欠損（サービス業）。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 陳腐化速度を LLM が判定するので、商材分類の誤りが直接効く。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B22
+  - B35
+  - C36
+  - U15
+  - U16
+  economic_rationale: '**アパレル・家電・PC で致命的。** 同じ在庫日数でも、 生鮮食品と鉄鋼では意味が全く違う。B22（在庫回転日数の変化）に 商材の性質を掛けることで、**評価損のリスクを業種横断で比較可能にする。**'
+  references:
+  - 構造的判断
   notes: アパレル・家電・PC で致命的
   notes_extra: null
   provenance:
@@ -1318,22 +1503,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U20
   name_ja: EC比率と成長
@@ -1341,8 +1528,11 @@
   category_name: 業種固有KPI
   subsection: 小売・外食・消費
   definition: EC売上 / 総売上 とその変化
-  formula: null
-  inputs: null
+  formula: EC売上 / 総売上 とその変化
+  inputs:
+  - ec_revenue
+  - REV
+  - LLM
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1356,7 +1546,7 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1364,17 +1554,23 @@
   - 小売・外食・消費
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: EC の定義（自社サイトのみか、モール経由を含むか）が企業で違う。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: REV>0。EC 売上を開示しない企業では欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 開示企業に偏る。X01（Webトラフィック）で外部から推定できる。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - X01
+  - X02
+  - U15
+  - U17
+  - C24
+  economic_rationale: チャネル移行の進捗。EC 比率が高いほど**店舗の固定費が軽く、 U17（坪効率）の悪化に耐えられる。** ただし EC は価格競争が激しく 粗利率（B07）が下がるトレードオフがある。 **X01（Webトラフィック）で外部から検証できる稀な開示項目。**
+  references:
+  - 構造的判断
   notes: チャネル移行の進捗。X01（Webトラフィック）で裏取り
   notes_extra: null
   provenance:
@@ -1388,22 +1584,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U21
   name_ja: 受注残 / 月商
@@ -1411,8 +1609,10 @@
   category_name: 業種固有KPI
   subsection: 製造・機械・電子部品・半導体
   definition: 受注残高 / (年間売上 / 12)
-  formula: null
-  inputs: null
+  formula: 受注残高 / (REV_TTM / 12)
+  inputs:
+  - order_backlog
+  - REV
   sign: positive
   buy_class: main
   sell_class: main
@@ -1426,7 +1626,7 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -1434,17 +1634,24 @@
   - 製造・機械・電子部品・半導体
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: C11 と同じ受注残の定義問題を継承。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: REV>0。受注残を開示しない企業では欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**開示業種が限られる**（機械・建設・IT・造船）。C11 と同じ。'
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - C11
+  - U22
+  - U44
+  - C12
+  - N16
+  economic_rationale: '**何ヶ月分の仕事が確定しているか。** C11（受注残の成長率）が変化を測るのに対し、 U21 は水準を月商で正規化する。**企業規模の影響を除けるので企業間比較ができる。** 3ヶ月分と12ヶ月分では業績の確実性が全く違う。'
+  references:
+  - https://www.openassetpricing.com/
+  - OSAP OrderBacklog t=2.4
   notes: 何ヶ月分の仕事が確定しているか。C11 の正規化版
   notes_extra: null
   provenance:
@@ -1458,22 +1665,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U22
   name_ja: BBレシオ（受注 / 出荷）
@@ -1481,8 +1690,10 @@
   category_name: 業種固有KPI
   subsection: 製造・機械・電子部品・半導体
   definition: 受注額 / 出荷額
-  formula: null
-  inputs: null
+  formula: 受注額 / 出荷額
+  inputs:
+  - orders
+  - shipments
   sign: positive
   buy_class: main
   sell_class: main
@@ -1496,25 +1707,31 @@
   - 手
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 製造・機械・電子部品・半導体
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: null
+  zero_denominator_policy: 出荷額>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**個社開示は少ないが、業界統計（SEMI 等）で取れる。** X14（業界統計との突合）と組み合わせると、個社の開示なしに業界サイクルが分かる。'
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U21
+  - U25
+  - X14
+  - C11
+  - P15
+  economic_rationale: '**1を超えると拡大局面。半導体・機械のサイクル判定の標準指標。** 受注は出荷に先行するので、売上が伸びる前に方向が分かる。 **業界統計として公表されるので、個社より業界レベルで使う方が実用的** — そして業界の方向が分かれば L01（同業大型株のリターン）と同じ効果が得られる。'
+  references:
+  - 構造的判断。半導体・機械分析の実務標準
   notes: 半導体・機械。1を超えると拡大局面。業界統計（X14）でも取れる
   notes_extra: null
   provenance:
@@ -1528,22 +1745,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U23
   name_ja: 設備稼働率
@@ -1551,8 +1770,10 @@
   category_name: 業種固有KPI
   subsection: 製造・機械・電子部品・半導体
   definition: 生産能力に対する実生産量
-  formula: null
-  inputs: null
+  formula: 実生産量 / 生産能力
+  inputs:
+  - production
+  - capacity
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1566,25 +1787,31 @@
   - TD
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 製造・機械・電子部品・半導体
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: 生産能力の定義（定格か実効か）が企業で違う。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 生産能力>0。開示企業に限られる。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**開示企業が非常に少ない。** 装置産業の一部のみ。'
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U22
+  - U25
+  - B19
+  - B20
+  - C36
+  economic_rationale: '**装置産業では利益率に直結する。** 固定費が大きいので、 稼働率が損益分岐点（B20）を超えると急激に利益が出る — B19（営業レバレッジ）の物理的な裏付け。 ただし開示が少なく、実用性は限定的。'
+  references:
+  - 構造的判断
   notes: 開示企業限定。装置産業では利益率に直結
   notes_extra: null
   provenance:
@@ -1598,22 +1825,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U24
   name_ja: 原材料価格への感応度
@@ -1621,8 +1850,10 @@
   category_name: 業種固有KPI
   subsection: 製造・機械・電子部品・半導体
   definition: 主要原材料指数への beta
-  formula: null
-  inputs: null
+  formula: beta( 粗利率の変化 ~ 主要原材料指数の変化 )
+  inputs:
+  - B07
+  - commodity_index
   sign: context
   buy_class: useful
   sell_class: useful
@@ -1636,25 +1867,31 @@
   - MACRO
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 製造・機械・電子部品・半導体
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: na
+  zero_denominator_policy: 推定に20四半期以上が要る。不足なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 主要原材料の特定が要る。LLM 推定に頼るので誤りが入る。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B36
+  - P09
+  - P20
+  - U25
+  - U39
+  economic_rationale: B36（価格転嫁力）の業種特化・定量版。**原材料価格の上昇を どれだけ価格に転嫁できるか**を回帰係数で測る。 転嫁できない企業は、インフレ局面で構造的に利益が圧迫される。 P09（商品価格感応度）が株価で測るのに対し、U24 は損益で測る。
+  references:
+  - 構造的判断
   notes: B36（価格転嫁力）の業種特化
   notes_extra: null
   provenance:
@@ -1668,22 +1905,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U25
   name_ja: 業界在庫水準
@@ -1691,8 +1930,9 @@
   category_name: 業種固有KPI
   subsection: 製造・機械・電子部品・半導体
   definition: 業界統計の在庫 / 出荷比率
-  formula: null
-  inputs: null
+  formula: 業界統計の在庫 / 出荷比率
+  inputs:
+  - industry_statistics
   sign: negative
   buy_class: useful
   sell_class: main
@@ -1706,25 +1946,31 @@
   - 手
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 製造・機械・電子部品・半導体
-  period_convention: TTM
+  period_convention: POINT
   consolidation: na
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: null
+  zero_denominator_policy: 出荷>0。業界統計が存在する業種のみ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 統計が整備された業種（半導体・鉄鋼・化学・工作機械）のみ。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U22
+  - U19
+  - B22
+  - X14
+  - P15
+  economic_rationale: '**個社データより業界在庫が先行する。** 個社の在庫（B22）は 自社の判断で調整できるが、業界全体の在庫は需給そのもの。 半導体・素材のサイクル判定では、**個社決算を見るより業界統計を見る方が速い。** X14（業界統計との突合）の入力でもある。'
+  references:
+  - 構造的判断。素材・半導体分析の実務標準
   notes: 半導体・素材のサイクル判定。個社データより業界在庫が先行する
   notes_extra: null
   provenance:
@@ -1738,22 +1984,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U26
   name_ja: 為替感応度（会社開示値）
@@ -1761,8 +2009,10 @@
   category_name: 業種固有KPI
   subsection: 製造・機械・電子部品・半導体
   definition: 1円円安あたりの営業利益変化額
-  formula: null
-  inputs: null
+  formula: 会社開示の「1円円安あたりの営業利益変化額」/ 営業利益
+  inputs:
+  - fx_sensitivity_disclosure
+  - OP
   sign: context
   buy_class: main
   sell_class: useful
@@ -1776,25 +2026,30 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries:
   - 製造・機械・電子部品・半導体
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: OP>0。開示が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本の輸出企業は決算説明資料で開示するが、義務ではない。** 開示するのは影響が大きい企業なので、**影響の大きい企業に偏る** — この場合は測りたい対象と一致するので、実害は小さい。'
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P07
+  - P08
+  - V07
+  - C23
+  - U24
+  economic_rationale: '**P08（統計推定の為替感応度）より正確。** 企業自身が 事業構造を把握して計算した数字なので、株価の回帰から推定するより信頼できる。 **P08 と突合して大きく食い違う銘柄は、株価が為替以外の要因で動いている** ことを示すので、その乖離自体が情報になる。'
+  references:
+  - 構造的判断。日本の輸出企業の開示慣行
   notes: 日本の輸出企業は決算資料で開示している。P08 の統計推定より正確
   notes_extra: null
   provenance:
@@ -1808,22 +2063,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U27
   name_ja: Rule of 40
@@ -1831,8 +2088,10 @@
   category_name: 業種固有KPI
   subsection: IT・SaaS・インターネット
   definition: 売上成長率(%) + FCFマージン(%)
-  formula: null
-  inputs: null
+  formula: 売上成長率(%) + FCFマージン(%)
+  inputs:
+  - C01
+  - B09
   sign: positive
   buy_class: main
   sell_class: useful
@@ -1845,25 +2104,32 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - IT・SaaS・インターネット
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: B09（FCFマージン）の IFRS16 の注意を継承。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: C01 または B09 が欠損なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: SaaS 以外では意味を持たない。業種判定が必要。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - C01
+  - B09
+  - U28
+  - U29
+  - U30
+  - C08
+  economic_rationale: SaaS の総合指標。**成長と収益性のトレードオフを1本にまとめる。** 40超が目安とされる。C08（ROIC × 再投資率）と同じく 「成長と効率の積」を測る思想だが、**赤字期の SaaS でも計算できる**点が違う。 ただし**閾値40に理論的根拠は無く、業界の経験則。**
+  references:
+  - 構造的判断。SaaS 業界の実務標準だが学術的実証は無い
   notes: SaaS の総合指標。40超が目安
   notes_extra: null
   provenance:
@@ -1877,22 +2143,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U28
   name_ja: NRR（売上維持率）
@@ -1900,8 +2168,10 @@
   category_name: 業種固有KPI
   subsection: IT・SaaS・インターネット
   definition: 既存顧客からの売上の前年比
-  formula: null
-  inputs: null
+  formula: 既存顧客からの当期売上 / 前期売上
+  inputs:
+  - NRR_disclosure
+  - LLM
   sign: positive
   buy_class: main
   sell_class: main
@@ -1915,25 +2185,31 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - IT・SaaS・インターネット
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: '**自主開示で定義が企業ごとに違う。** チャーンした顧客の扱いが特に違う。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 前期売上>0。開示が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**開示企業に強く偏る。しかも良い数字の企業ほど開示する。**'
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - C15
+  - U27
+  - U29
+  - U30
+  - C12
+  economic_rationale: '**120%超は極めて強い。** 既存顧客だけで年20%成長するということは、 新規獲得コストなしに複利が回るということで、C08（ROIC × 再投資率）が 構造的に高くなる。**ただし定義が企業任意なので、 E21（会計上の見積り変更）と同種の操作リスクがある。**'
+  references:
+  - 構造的判断。SaaS 業界標準だが自主開示
   notes: 120%超は極めて強い。C15 の特化版
   notes_extra: null
   provenance:
@@ -1947,22 +2223,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U29
   name_ja: 解約率（Churn）
@@ -1970,8 +2248,10 @@
   category_name: 業種固有KPI
   subsection: IT・SaaS・インターネット
   definition: 顧客数ベース / 金額ベース
-  formula: null
-  inputs: null
+  formula: 解約率（顧客数ベースおよび金額ベース）
+  inputs:
+  - churn_disclosure
+  - LLM
   sign: negative
   buy_class: main
   sell_class: main
@@ -1985,25 +2265,31 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - IT・SaaS・インターネット
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: U28 と同じ定義問題。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 期首顧客数>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: U28 と同じ。**悪い数字は開示されにくい**という非対称。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U28
+  - U30
+  - U31
+  - C15
+  - T38
+  economic_rationale: U28（NRR）の分解要素。**NRR が高くても、 大口顧客の増額が小口の解約を隠している場合がある。** 顧客数ベースと金額ベースの両方を見ないと実態が分からない。 T38（スイッチングコスト）の実測値でもある。
+  references:
+  - 構造的判断
   notes: NRR と対で見る
   notes_extra: null
   provenance:
@@ -2017,22 +2303,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U30
   name_ja: LTV / CAC
@@ -2040,8 +2328,11 @@
   category_name: 業種固有KPI
   subsection: IT・SaaS・インターネット
   definition: 顧客生涯価値 / 顧客獲得コスト
-  formula: null
-  inputs: null
+  formula: 顧客生涯価値 / 顧客獲得コスト
+  inputs:
+  - LTV_estimate
+  - CAC_estimate
+  - LLM
   sign: positive
   buy_class: main
   sell_class: useful
@@ -2055,25 +2346,31 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - IT・SaaS・インターネット
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: '**両方とも推定値で、算定方法が企業ごとに違う。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: CAC>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 推定に依存するので信頼度が低い。開示企業も少ない。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U28
+  - U29
+  - U31
+  - U32
+  - B26
+  economic_rationale: 3倍超が目安。**ただし LTV は将来の解約率の仮定に依存する**ので、 企業に有利な仮定を置けばいくらでも高くできる。 U29（実際の解約率）と突合しないと信用できない。 **B26（R&D生産性）と同じく「投資の実り」を測る指標だが、より恣意的。**
+  references:
+  - 構造的判断。推定値依存で信頼度が低い
   notes: 3倍超が目安
   notes_extra: null
   provenance:
@@ -2087,22 +2384,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U31
   name_ja: CAC回収期間
@@ -2110,8 +2409,10 @@
   category_name: 業種固有KPI
   subsection: IT・SaaS・インターネット
   definition: CAC / 月次粗利
-  formula: null
-  inputs: null
+  formula: CAC / 月次粗利
+  inputs:
+  - CAC_estimate
+  - GP
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -2124,25 +2425,30 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - IT・SaaS・インターネット
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: U30 と同じ推定問題。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 月次粗利>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: U30 と同じ。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U30
+  - U32
+  - B09
+  - D22
+  economic_rationale: 12ヶ月以内が目安。**回収期間が長いほど、成長のために先に現金が出ていく**ので、 D22（資金繰り余力）との交互作用が本質。急成長 SaaS が 資金ショートするのはこの構造による。
+  references:
+  - 構造的判断
   notes: 12ヶ月以内が目安
   notes_extra: null
   provenance:
@@ -2156,22 +2462,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U32
   name_ja: Magic Number
@@ -2179,8 +2487,10 @@
   category_name: 業種固有KPI
   subsection: IT・SaaS・インターネット
   definition: (当四半期ARR増 × 4) / 前四半期の営業マーケ費
-  formula: null
-  inputs: null
+  formula: (当四半期ARR増 × 4) / 前四半期の営業マーケティング費
+  inputs:
+  - ARR
+  - sales_marketing_expense
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -2193,25 +2503,31 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - IT・SaaS・インターネット
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: ARR は自主開示。営業マーケ費の区分も企業判断。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 前四半期の営業マーケ費>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: U28-U31 と同じ開示バイアス。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U27
+  - U28
+  - U30
+  - U31
+  - B31
+  economic_rationale: 0.75超なら投資を増やす価値がある、というのが業界の目安。 **営業効率の限界生産性を測る**という点で B12（増分ROIC）と同じ発想。 C08（ROIC × 再投資率）を SaaS の言語で表現したもの。
+  references:
+  - 構造的判断。SaaS 業界の経験則
   notes: 営業効率。0.75超で増資して伸ばす価値がある
   notes_extra: null
   provenance:
@@ -2225,22 +2541,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U33
   name_ja: DAU / MAU（スティッキネス）
@@ -2248,8 +2566,11 @@
   category_name: 業種固有KPI
   subsection: IT・SaaS・インターネット
   definition: 日次 / 月次アクティブユーザー比
-  formula: null
-  inputs: null
+  formula: 日次アクティブユーザー / 月次アクティブユーザー
+  inputs:
+  - DAU
+  - MAU
+  - LLM
   sign: positive
   buy_class: main
   sell_class: main
@@ -2263,25 +2584,31 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - IT・SaaS・インターネット
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: '**アクティブの定義が企業ごとに違う。**'
   pit_lag_days: 3
-  zero_denominator_policy: null
+  zero_denominator_policy: MAU>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 開示企業に偏る。X03/X04（アプリのDL数・レビュー）で外部推定が可能。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - C16
+  - X03
+  - X04
+  - X05
+  - U28
+  economic_rationale: ゲーム・SNS のエンゲージメント。**高いほど習慣化されており解約されにくい**ので、 U29（解約率）の代理変数になる。 **X03（アプリランキング）で外部から検証できる**数少ない指標で、 開示に頼らずに追跡できる点が実務的に重要。
+  references:
+  - 構造的判断
   notes: ゲーム・SNS。X03/X04 で外部から検証できる
   notes_extra: null
   provenance:
@@ -2295,22 +2622,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U34
   name_ja: パイプラインの期待価値
@@ -2318,8 +2647,11 @@
   category_name: 業種固有KPI
   subsection: 医薬・バイオ・医療機器
   definition: SUM( 売上ポテンシャル × 承認確率 × 割引 ) / 時価総額
-  formula: null
-  inputs: null
+  formula: SUM( 各開発品の売上ポテンシャル × フェーズ別承認確率 × 割引 ) / MCAP
+  inputs:
+  - pipeline_disclosure
+  - LLM
+  - MCAP
   sign: positive
   buy_class: main
   sell_class: main
@@ -2332,25 +2664,32 @@
   - LLM
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 医薬・バイオ・医療機器
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: MCAP>0。パイプラインが無ければゼロ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**売上ポテンシャルの推定が LLM 依存で、しかも極めて不確実。** フェーズ別承認確率は業界統計（フェーズ1で約10%、フェーズ3で約60%）が 使えるが、疾患領域で大きく違う。'
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U35
+  - U36
+  - U37
+  - N40
+  - X07
+  - A27
+  economic_rationale: '**医薬は現在の利益ではなくパイプラインで評価される。PER は誤導的。** 赤字のバイオ企業に高い時価総額が付くのはこのため。 A27（DCF）と同じく仮定に敏感なので、**幅で持ち点推定を信じない。** 5年ホライズンでは、フェーズ3の開発品が結果を出す確率が高い。'
+  references:
+  - 構造的判断。rNPV は業界標準手法だが推定の幅が大きい
   notes: 医薬は現在の利益ではなくパイプラインで評価される。PER は誤導的
   notes_extra: null
   provenance:
@@ -2364,22 +2703,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U35
   name_ja: パテントクリフまでの年数
@@ -2387,8 +2728,11 @@
   category_name: 業種固有KPI
   subsection: 医薬・バイオ・医療機器
   definition: 主力品の特許満了までの残存期間
-  formula: null
-  inputs: null
+  formula: 主力製品の特許満了までの残存年数（売上加重）
+  inputs:
+  - patent_data
+  - segment_revenue
+  - LLM
   sign: positive
   buy_class: main
   sell_class: main
@@ -2401,25 +2745,31 @@
   - LLM
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 医薬・バイオ・医療機器
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 主力製品が特定できなければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: N39 と同一。特許と製品の紐付けを LLM に頼るので誤りが入る。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N39
+  - U34
+  - U36
+  - U38
+  - X07
+  economic_rationale: N39 と同一の量で、業種特化として重複して持つ。 **5年ホライズンでは決定的。** 満了直後に後発品が出ると売上が数割落ちる。 **PER が低く見える医薬企業の多くは、市場がクリフを織り込んでいるだけ**で、 A カテゴリのバリュートラップの業種特有の形。
+  references:
+  - 構造的判断。パテントクリフは実務上自明
   notes: 5年ホライズンでは決定的。満了直後は売上が数割落ちる
   notes_extra: null
   provenance:
@@ -2433,22 +2783,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U36
   name_ja: 主力品への依存度
@@ -2456,8 +2808,10 @@
   category_name: 業種固有KPI
   subsection: 医薬・バイオ・医療機器
   definition: 最大売上製品の売上 / 総売上
-  formula: null
-  inputs: null
+  formula: 最大売上製品の売上 / REV
+  inputs:
+  - product_revenue
+  - REV
   sign: negative
   buy_class: useful
   sell_class: main
@@ -2471,7 +2825,7 @@
   - LLM
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -2479,17 +2833,23 @@
   - 医薬・バイオ・医療機器
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: 製品別売上の開示は義務ではない。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: REV>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 製品別開示をする企業に偏る。大手製薬は開示するが中小は少ない。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U34
+  - U35
+  - V02
+  - I25
+  - T18
+  economic_rationale: '**U35 と掛け合わせて「クリフの深さ」を推定する。** 売上の60%を占める製品の特許が2年後に切れるなら、 2年後に売上の3〜4割が消える。I25（単一要因への依存度）の医薬版で、 **U35 単独では危険度が測れない**ので必ずセットで使う。'
+  references:
+  - 構造的判断
   notes: U35 と掛け合わせて「クリフの深さ」を推定する
   notes_extra: null
   provenance:
@@ -2503,22 +2863,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U37
   name_ja: R&D生産性
@@ -2526,8 +2888,10 @@
   category_name: 業種固有KPI
   subsection: 医薬・バイオ・医療機器
   definition: 過去10年の新薬承認数 / 累計R&D費
-  formula: null
-  inputs: null
+  formula: 過去10年の新薬承認数 / 累計R&D費
+  inputs:
+  - approvals
+  - RD
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -2541,25 +2905,31 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 医薬・バイオ・医療機器
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 累計R&D>0。承認ゼロならゼロ（欠損にしない）。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 10年の履歴が要るので、若い企業で欠損。バイオベンチャーは常にゼロ。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B26
+  - U34
+  - X07
+  - X08
+  - B25
+  economic_rationale: B26（R&D生産性）の医薬特化版。**研究開発費が実際に承認薬に 転換されているか。** 大手製薬でも生産性は大きく違い、 R&D 費の絶対額（B25）は実力を表さない。 **X08（特許の被引用数）と併せると、研究の質を多角的に測れる。**
+  references:
+  - 構造的判断
   notes: B26 の業種特化
   notes_extra: null
   provenance:
@@ -2573,22 +2943,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U38
   name_ja: 薬価改定の影響
@@ -2596,8 +2968,11 @@
   category_name: 業種固有KPI
   subsection: 医薬・バイオ・医療機器
   definition: 改定率 × 対象品の売上比率
-  formula: null
-  inputs: null
+  formula: 薬価改定率 × 対象品の売上比率
+  inputs:
+  - drug_price_revision
+  - product_revenue
+  - LLM
   sign: negative
   buy_class: main
   sell_class: main
@@ -2611,25 +2986,31 @@
   - MACRO
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries:
   - 医薬・バイオ・医療機器
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: na
+  zero_denominator_policy: REV>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本固有の制度。** 米国は市場価格なので対応する概念が無い （ただし IRA による価格交渉が始まっている）。'
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U34
+  - U35
+  - U36
+  - P30
+  - N19
+  economic_rationale: '**日本は薬価改定が構造的な逆風。** かつては2年ごとだったが 毎年改定に移行し、影響が増した。**制度で価格が下がることが確定している** という点で、他業種にない特異な性質を持つ。 P30（税制・制度の変更）の監視対象として最も重要な業種。'
+  references:
+  - 健康保険法（薬価基準）
+  - 構造的判断
   notes: 日本は薬価改定が構造的な逆風。毎年改定化で影響が増した
   notes_extra: null
   provenance:
@@ -2643,22 +3024,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U39
   name_ja: 商品価格への感応度
@@ -2666,8 +3049,11 @@
   category_name: 業種固有KPI
   subsection: 資源・エネルギー・海運・商社
   definition: 主要商品価格への beta と契約構造
-  formula: null
-  inputs: null
+  formula: beta( r_i ~ 主要商品価格の変化 ) と長期契約比率の複合
+  inputs:
+  - PRICE
+  - commodity_index
+  - U42
   sign: context
   buy_class: main
   sell_class: main
@@ -2680,25 +3066,31 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 資源・エネルギー・海運・商社
-  period_convention: TTM
+  period_convention: POINT
   consolidation: na
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 推定に252営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 主要商品の特定が要る。複数商品に跨る企業では単純化される。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P09
+  - U24
+  - U40
+  - U41
+  - U42
+  economic_rationale: '**PER が最も誤導的になる業種。ピーク PER が最安値になる。** 商品価格がピークのとき利益もピークで PER が低く見えるが、 そこが天井。**A22/A23（自己バリュエーション位置）や C26（平均回帰調整）で補正しないと、必ず高値を掴む。** バリュー指標を業種横断で使うことの危険が最も顕著に出る場所。'
+  references:
+  - 構造的判断。資源株分析の実務標準
   notes: PER が最も誤導的になる業種。ピークPERが最安値になる
   notes_extra: null
   provenance:
@@ -2712,22 +3104,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U40
   name_ja: 可採年数
@@ -2735,8 +3129,10 @@
   category_name: 業種固有KPI
   subsection: 資源・エネルギー・海運・商社
   definition: 埋蔵量 / 年間生産量
-  formula: null
-  inputs: null
+  formula: 確認埋蔵量 / 年間生産量
+  inputs:
+  - reserves
+  - production
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -2750,25 +3146,31 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 資源・エネルギー・海運・商社
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**埋蔵量の認定基準（SEC 基準 / SPE-PRMS）で数値が変わる。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 生産量>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 資源企業のみ。日本には該当企業が少ない。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U39
+  - U42
+  - C40
+  - A29
+  economic_rationale: '**資源企業の実質的な資産。** 会計上の簿価より埋蔵量の方が価値を表す。 可採年数が短い企業は、探鉱に投資し続けないと事業が終わる — **C07（再投資率）が構造的に高くならざるを得ない業種。**'
+  references:
+  - SEC Rule 4-10 (Reg S-X)
+  - 構造的判断
   notes: 資源企業の実質的な資産
   notes_extra: null
   provenance:
@@ -2782,22 +3184,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U41
   name_ja: 運賃指数
@@ -2805,8 +3209,9 @@
   category_name: 業種固有KPI
   subsection: 資源・エネルギー・海運・商社
   definition: BDI、コンテナ運賃指数、タンカー用船料
-  formula: null
-  inputs: null
+  formula: BDI・コンテナ運賃指数・タンカー用船料の水準と変化
+  inputs:
+  - freight_indices
   sign: context
   buy_class: main
   sell_class: main
@@ -2819,25 +3224,30 @@
   - MACRO
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 資源・エネルギー・海運・商社
-  period_convention: TTM
+  period_convention: POINT
   consolidation: na
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 1
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 海運のみ。指数は公開されているので欠損しない。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U39
+  - U42
+  - P15
+  - P09
+  economic_rationale: '**極端にシクリカルで、指数が業績に先行する。** BDI は数ヶ月で10倍変動することがあり、海運株の利益は運賃に直結する。 **業界指数が公開されているので、個社開示を待たずに業績が推定できる** という点で U25（業界在庫）と同じ性格。 U39（PER の誤導）が最も激しく現れる業種でもある。'
+  references:
+  - 構造的判断。海運分析の実務標準
   notes: 海運。極端にシクリカルで、指数が先行する
   notes_extra: null
   provenance:
@@ -2851,22 +3261,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U42
   name_ja: 長期契約比率
@@ -2874,8 +3286,11 @@
   category_name: 業種固有KPI
   subsection: 資源・エネルギー・海運・商社
   definition: 長期契約売上 / 総売上
-  formula: null
-  inputs: null
+  formula: 長期契約売上 / 総売上
+  inputs:
+  - contract_disclosure
+  - REV
+  - LLM
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -2888,25 +3303,32 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 資源・エネルギー・海運・商社
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: 契約形態の開示は任意。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: REV>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 開示企業に偏る。海運・資源で LLM 推定に頼る部分が大きい。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U39
+  - U40
+  - U41
+  - C11
+  - C12
+  - B15
+  economic_rationale: '**収益の安定性。スポット比率が高いほどボラが大きい。** U39（商品価格感応度）を緩和する条件変数で、 長期契約が多い企業は商品価格が下がっても利益が守られる。 **同じ業種内でもビジネスモデルが違うことを捉える**ので、 業種内正規化だけでは足りない部分を補う。'
+  references:
+  - 構造的判断
   notes: 収益の安定性。スポット比率が高いほどボラが大きい
   notes_extra: null
   provenance:
@@ -2920,22 +3342,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U43
   name_ja: 完成工事総利益率
@@ -2943,8 +3367,10 @@
   category_name: 業種固有KPI
   subsection: 建設・インフラ・公益
   definition: 完成工事総利益 / 完成工事高
-  formula: null
-  inputs: null
+  formula: 完成工事総利益 / 完成工事高
+  inputs:
+  - construction_profit
+  - construction_revenue
   sign: positive
   buy_class: main
   sell_class: main
@@ -2957,25 +3383,31 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries:
   - 建設・インフラ・公益
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**工事進行基準（IFRS15 では一定期間にわたり充足する履行義務）の適用で、 利益の計上タイミングが変わる。** 見積総原価の変更で過去の利益が修正されることがある。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 完成工事高>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 建設業のみ。日本は建設業会計で区分開示される。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U44
+  - B07
+  - B18
+  - C11
+  - U21
+  economic_rationale: '**受注時の採算が2〜3年後の利益に出るので、先行性がある。** 今期の利益率は2〜3年前の受注環境を反映しているので、 **現在の受注環境（U44）を見れば将来の利益率が予測できる。** B18（粗利率トレンド）の建設版だが、ラグが長い分だけ予測に使える。'
+  references:
+  - 建設業法施行規則（完成工事原価報告書）
+  - 構造的判断
   notes: 建設。受注時の採算が2〜3年後の利益に出るので先行性がある
   notes_extra: null
   provenance:
@@ -2989,22 +3421,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U44
   name_ja: 新規受注の採算
@@ -3012,8 +3446,11 @@
   category_name: 業種固有KPI
   subsection: 建設・インフラ・公益
   definition: 受注時の想定利益率（開示または推定）
-  formula: null
-  inputs: null
+  formula: 新規受注案件の想定利益率（開示または推定）
+  inputs:
+  - order_disclosure
+  - LLM
+  - U43
   sign: positive
   buy_class: main
   sell_class: main
@@ -3027,25 +3464,30 @@
   - TD
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries:
   - 建設・インフラ・公益
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: 受注時採算は通常開示されない。LLM が説明資料から推定する。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 受注額>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**ほぼ開示されないので推定精度が低い。** 経営陣の説明の定性表現に頼る。'
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U43
+  - U21
+  - C11
+  - T07
+  - T32
+  economic_rationale: U43 の先行指標。**受注時の採算が悪化していれば、 2〜3年後の利益率低下が確定している。** 建設業界は 競争激化局面で採算を落として受注する傾向があり、 その影響が数年後に出る。**T07（ガイダンス文言の変化）で 経営陣の慎重さの変化を捉えるのが実務的な代替。**
+  references:
+  - 構造的判断
   notes: 建設。U43 の先行指標
   notes_extra: null
   provenance:
@@ -3059,22 +3501,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U45
   name_ja: 規制資産ベースと認可利回り
@@ -3082,8 +3526,12 @@
   category_name: 業種固有KPI
   subsection: 建設・インフラ・公益
   definition: 総括原価方式の対象資産と認められた利回り
-  formula: null
-  inputs: null
+  formula: 規制資産ベース × 認可利回り / 時価総額
+  inputs:
+  - regulated_asset_base
+  - allowed_return
+  - MCAP
+  - LLM
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -3096,25 +3544,32 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 建設・インフラ・公益
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: MCAP>0。規制産業以外では欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 電力・ガス・鉄道のみ。規制の枠組みが国で全く違う。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U39
+  - B03
+  - B04
+  - A28
+  - N19
+  economic_rationale: '**規制産業では通常の ROIC 分析が効かない。** 利益が規制で決まるので、B03（ROIC）は認可利回りに張り付く。 **投資すればするほど規制資産ベースが増え、利益も増える**という、 C35（資産成長アノマリー）と正反対の構造を持つ。 U カテゴリを設けた最大の理由がこの種の構造差にある。'
+  references:
+  - 電気事業法（託送料金の総括原価方式）
+  - 構造的判断
   notes: 電力・ガス・鉄道。規制産業は通常の ROIC 分析が効かない
   notes_extra: null
   provenance:
@@ -3128,20 +3583,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
