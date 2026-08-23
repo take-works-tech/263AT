@@ -235,8 +235,11 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: 発表日 ± 1日の超過リターン (CAR)
-  formula: null
-  inputs: null
+  formula: 決算発表日を含む ±1営業日の市場調整後累積リターン
+  inputs:
+  - PRICE
+  - market_return
+  - announcement_datetime
   sign: positive
   buy_class: main
   sell_class: useful
@@ -260,16 +263,23 @@
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**発表時刻の精度が結果を左右する。** 引け後発表なら翌日が反応日、場中発表なら当日。 日本は15時以降の発表が大半だが例外がある（N29）。**時刻を間違えると、 反応日を1日ずらして CAR がノイズになる。** 米国は寄り前・引け後の両方があり、 Form 8-K のタイムスタンプで判定できる。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - N02
+  - N03
+  - N05
+  - N06
+  - N29
+  - G04
+  economic_rationale: '**市場の初期反応そのものが最良の「サプライズ」推定である。** SUE（N02）は予想との差を測るが、予想の質に依存する。N04 は市場全体が どう驚いたかを直接測るので、**予想データが無い日本の小型株でも計算できる** という決定的な利点がある（OQ-22 の回避策になりうる）。 SUE より頑健という報告があり、OSAP `AnnouncementReturn` t=9.2 は earnings event カテゴリで最上位。'
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP AnnouncementReturn — Chan, Jegadeesh and Lakonishok 1996, JF（OSAP再現 t=9.2, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - OSAP AnnouncementReturn t=9.2
+  - https://www2.econ.osaka-u.ac.jp/econ_society/dp/2125.pdf
   notes: 市場の初期反応そのものが最良の予想。SUEより頑健という報告あり
   notes_extra: null
   provenance:
@@ -283,22 +293,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N05
   name_ja: PEAD残存期間
@@ -373,8 +385,10 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: SUE × (1 - z(アナリスト数))
-  formula: null
-  inputs: null
+  formula: N02 × (1 - z_rank(O01))
+  inputs:
+  - N02
+  - O01
   sign: positive
   buy_class: main
   sell_class: useful
@@ -387,24 +401,33 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
+  period_convention: GUIDE_CONS
+  consolidation: consolidated
+  accounting_standard_note: N02 を継承。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: N02 または O01 が欠損なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**致命的な自己矛盾を抱える。** N02（SUE）はコンセンサス予想が要り、O01（カバレッジ数）も 予想データベースが要る。**注目度が最も低い銘柄では両方とも欠損する。** つまり「注目度が低いほど強い」という仮説を、注目度が低い銘柄で検証できない。 **回避策は N02 を N04（決算発表日リターン）に置き換えること** — N04 は価格だけで 計算でき、O01 の代わりに O04（ニュース数）や O08（出来高枯渇）を使えば 予想データ非依存の版が作れる。**この代替版を別 ID として作るべき（未実施）。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N02
+  - N04
+  - N05
+  - O01
+  - O10
+  - O04
+  economic_rationale: '**LAW-27（ネグレクト）× LAW-28（PEAD）の交互作用で、263AT の目玉候補。** 注目度が低い銘柄ほど決算情報の織り込みが遅く、ドリフトが長く強いことは 日本の実証でも確認されている。O カテゴリを「乗数として使う」という設計思想 （O10 の議論）の最も具体的な実装例。'
+  references:
+  - https://www2.econ.osaka-u.ac.jp/econ_society/dp/2125.pdf
+  - https://www.jstage.jst.go.jp/article/jbef/3/0/3_0_1/_pdf/-char/ja
+  - https://www.openassetpricing.com/
   notes: LAW-27 × LAW-28 の交互作用項。本プロジェクトの目玉候補
   notes_extra: null
   provenance:
@@ -418,21 +441,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N07
   name_ja: 業績予想の上方修正
@@ -440,8 +466,10 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: 会社予想の修正発表（日本の適時開示）
-  formula: null
-  inputs: null
+  formula: (修正後の通期営業利益予想 - 修正前) / abs(修正前)
+  inputs:
+  - OP_guidance
+  - TD_disclosure
   sign: positive
   buy_class: main
   sell_class: useful
@@ -454,24 +482,31 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
-  - US
   industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
+  period_convention: GUIDE_CO
+  consolidation: consolidated
+  accounting_standard_note: 会社予想の開示。日本は義務、米国は任意。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 修正前予想がゼロ近傍だと発散する。**分母に下限（売上の1%）を置く。** 赤字予想から黒字予想への転換は比率が意味を失うのでフラグで別に持つ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**米国はガイダンスを出さない企業が多く、体系的に欠損。** 日本は義務開示なのでほぼ全銘柄で取れる（LAW-114）。**markets を JP 主体にすべき。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N08
+  - N09
+  - N31
+  - C19
+  - C20
+  - N10
+  economic_rationale: '**日本固有の強力なイベント。** 米国のコンセンサス改定（N10）に相当するが、 会社自身が出すので情報源が一次であり、しかも義務開示なので全銘柄で取れる。 **N10 が日本の小型株で使えない（OQ-22）ぶん、これが代替の主力になる。** C19/C20（四半期進捗率）は N07 の先行指標。'
+  references:
+  - https://www2.econ.osaka-u.ac.jp/econ_society/dp/2125.pdf
+  - https://www.jstage.jst.go.jp/article/jbef/3/0/3_0_1/_pdf/-char/ja
   notes: 修正幅を営業利益ベースで正規化。日本は義務開示なので取りやすい
   notes_extra: null
   provenance:
@@ -485,21 +520,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N08
   name_ja: 修正の連続性
@@ -507,8 +545,9 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: 過去4期の上方修正回数
-  formula: null
-  inputs: null
+  formula: 過去4期における上方修正の回数（0-4）
+  inputs:
+  - N07
   sign: positive
   buy_class: main
   sell_class: useful
@@ -524,25 +563,30 @@
   evidence_tier: T2
   markets:
   - JP
-  - US
   industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
+  period_convention: GUIDE_CO
+  consolidation: consolidated
+  accounting_standard_note: N07 を継承。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（カウント）。4期分の履歴が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 上場1年未満で欠損。米国では N07 と同じ理由で欠損が多い。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - N07
+  - N09
+  - N31
+  - C19
+  - C20
+  - C06
+  - G37
+  economic_rationale: '**上方修正を出した企業は次も上方修正しやすい（LAW-29）。** 理由の候補は (a) 会社予想が構造的に保守的（N09）、(b) 業績の系列相関、 (c) 経営陣が段階的に情報を出している。どれでも符号は正。 OSAP の `EarningsStreak` t=9.5、`NumEarnIncrease` に対応し、 G37（収益サプライズの連続性）と同じ現象を会社予想側から見ている。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP EarningsConsistency — Alwathainani 2009, BAR（OSAP再現 t=2.7, 月次0.360833333%, 品質=2_fair, 予測力=1_clear）
-  - OSAP NumEarnIncrease — Loh and Warachka 2012, MS（OSAP再現 t=n/a, 月次nan%, 品質=3_distant, 予測力=2_likely）
+  - OSAP EarningsStreak t=9.5 / NumEarnIncrease
+  - https://www2.econ.osaka-u.ac.jp/econ_society/dp/2125.pdf
   notes: LAW-29。上方修正した企業は次も上方修正しやすい
   notes_extra: null
   provenance:
@@ -556,22 +600,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N09
   name_ja: 会社予想の保守性
@@ -951,8 +997,12 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: z(親会社比率50-90%) + z(低PBR) + z(ネットキャッシュ) + 1[買収防衛策なし]
-  formula: null
-  inputs: null
+  formula: z(1[K18 が 50-90%]) + z(-A03) + z(A16) + 1[M13 買収防衛策なし]
+  inputs:
+  - K18
+  - A03
+  - A16
+  - M13
   sign: positive
   buy_class: main
   sell_class: aux
@@ -965,24 +1015,36 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: 構成要素の会計基準差を継承。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 構成要素が3つ未満なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: K18（親会社比率）は大株主開示から。日本は年1回なので解像度が粗い。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K18
+  - A03
+  - A16
+  - M10
+  - M13
+  - M28
+  - N13
+  - N34
+  economic_rationale: '**親子上場の解消（完全子会社化）を先回りする。** 東証は親子上場の ガバナンス問題を問題視しており、アクティビストの標的にもなりやすい（M10）。 親会社にとっては、低PBR で現金を持つ子会社を買い取るのは資本効率上も合理的。
+
+    **ただし M10 と同じく DF-01 により検証不能。** TOB が成立すると銘柄は上場廃止になり、 無料の株価データから消える（取得率 0/15）。**成功例だけが消えるバックテストからは、 この指標が機能したかどうかを知る方法がない。** さらに M28（支配株主との取引）が大きい企業では、親会社が 利益移転で済ませて買い取らない可能性があり、符号が反転しうる。'
+  references:
+  - https://note.com/tatsuya_sabato/n/n035f8265adb9
+  - https://corpgov.law.harvard.edu/2025/10/21/tokyo-stock-exchange-initiative-on-cost-of-capital-and-stock-price-conscious-management/
+  - 合成仮説。DF-01 により検証手段が存在しない
   notes: LAW-45。東証改革とアクティビスト増で確率が上昇中
   notes_extra: null
   provenance:
@@ -996,21 +1058,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N15
   name_ja: 事業売却・スピンオフ
@@ -1226,8 +1291,10 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: 発表有無、目標達成率
-  formula: null
-  inputs: null
+  formula: 中期経営計画の目標に対する実績の達成率
+  inputs:
+  - LLM
+  - TD_disclosure
   sign: positive
   buy_class: useful
   sell_class: main
@@ -1241,24 +1308,32 @@
   - TD
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: 計画の指標（売上・営業利益・ROE）が企業ごとに違うので統一が要る。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 計画目標がゼロ・未開示なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**中計を出さない企業がある**（特に米国）。日本は東証の要請もあり出す企業が多い。 また**未達が見込まれると計画を撤回・改訂する企業がある**ため、 「達成率が低い企業」が母集団から消える生存者バイアスが働く。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - T11
+  - T41
+  - M21
+  - F13
+  - F22
+  - N31
+  economic_rationale: '**T11（経営陣の約束履行率）の定量版。計画未達が続く企業は経営を信用しない。** 売り判定で価値が高い（sell=main）。逆に達成率が高い企業は、 次の計画も信頼でき、**将来の業績予想の確度が上がる**という形で 他のパラメータの信頼度に波及する。'
+  references:
+  - https://www.jpx.co.jp/english/equities/follow-up/02.html
+  - 構造的判断。中計達成率と株価の断面実証は未確認
   notes: 計画未達が続く企業は経営を信用しない。売り判定で価値が高い
   notes_extra: null
   provenance:
@@ -1272,21 +1347,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N19
   name_ja: 規制・法改正の影響
@@ -1361,8 +1439,11 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: 係争の有無、規模 / 時価総額
-  formula: null
-  inputs: null
+  formula: 係争中の訴訟の請求額 / MCAP、および行政処分の有無
+  inputs:
+  - LLM
+  - EDINET_notes
+  - SEC_legal_proceedings
   sign: negative
   buy_class: useful
   sell_class: main
@@ -1376,24 +1457,32 @@
   - EDI
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: POINT
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: na
+  accounting_standard_note: '**偶発債務の開示基準が国で違う。** 米国は ASC 450 で「reasonably possible」まで 開示するが、日本は「発生可能性が高い」ものが中心。**米国の方が開示が広い。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: MCAP>0。請求額が不明な訴訟は件数で代替。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**米国はクラスアクションが多く、日本は少ない。** 制度差がそのまま数値差になるので、 **日米統合ランクを取ってはいけない**（rank_market にすべき）。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Y07
+  - Y10
+  - D21
+  - E12
+  - N36
+  - N37
+  economic_rationale: 構造的制約に近い。訴訟は (a) 直接の金銭的損失、(b) 経営リソースの消費、 (c) レピュテーション毀損の3つの経路で価値を削る。 **請求額が時価総額に対して大きい訴訟は、事実上の破綻リスク**になる。 Y07（訴訟の履歴）が過去を見るのに対し、これは現在進行形。
+  references:
+  - '米国: ASC 450 Contingencies / Reg S-K Item 103'
+  - '日本: 財務諸表等規則 第58条（偶発債務）'
   notes: 米国はクラスアクションの影響が大きい
   notes_extra: null
   provenance:
@@ -1407,21 +1496,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N21
   name_ja: 主要顧客・取引先の動向
@@ -1429,8 +1521,11 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: 顧客集中度 × 顧客企業の業績変化
-  formula: null
-  inputs: null
+  formula: 顧客集中度 × 主要顧客企業の業績変化
+  inputs:
+  - LLM
+  - customer_disclosure
+  - X15
   sign: context
   buy_class: useful
   sell_class: main
@@ -1443,24 +1538,33 @@
   - LLM
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: '**主要顧客の開示基準が違う。** 米国は売上の10%以上の顧客の開示が義務（ASC 280）。 日本は「主要な顧客ごとの情報」として開示するが、顧客名を伏せる企業も多い。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 顧客が特定できなければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**顧客名を開示する企業に強く偏る。** 日本は「A社」等の匿名開示が多く、 LLM で推定するしかない。**推定の誤りがそのまま符号の誤りになる。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - T18
+  - X15
+  - I25
+  - L06
+  - L07
+  - V02
+  economic_rationale: '**サプライチェーンの上流を先読みできる数少ない手段。** 主要顧客の業績が悪化すれば、発注が減るのは数四半期後。 L07（顧客モメンタム、OSAP `iomom_cust` t=4.1）が価格で捉える現象を、 ファンダメンタルで捉える版。小型株では単独で株価を決めることがある（I25 一本足リスク）。'
+  references:
+  - https://www.openassetpricing.com/
+  - OSAP CustomerMomentum t=3.8 / iomom_cust t=4.1
+  - '米国: ASC 280-10-50-42（主要顧客の開示）'
   notes: サプライチェーンの上流を先読みできる数少ない手段
   notes_extra: null
   provenance:
@@ -1474,21 +1578,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N22
   name_ja: 上場市場区分の変更
@@ -1496,8 +1603,10 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: プライム / スタンダード / グロース の移行
-  formula: null
-  inputs: null
+  formula: 市場区分の変更（プライム↔スタンダード↔グロース）の有無と方向
+  inputs:
+  - TD_disclosure
+  - exchange_designation
   sign: context
   buy_class: useful
   sell_class: main
@@ -1519,18 +1628,24 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: na（分類）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 日本固有の制度。米国は取引所間の移行（NASDAQ↔NYSE）が対応するが意味が違う。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - N23
+  - N44
+  - K12
+  - K39
+  - O13
+  - J06
+  economic_rationale: '**降格はパッシブ売り、昇格は買い。** TOPIX の構成銘柄縮小（K12、2028年に1,200銘柄へ） と連動しており、**今後数年は制度要因で需給が動く時限的なテーマ**。 ただし降格は上場維持基準への抵触（N23/N44）と相関するので、 **需給要因と信用リスク要因が混在する。** 分離するには N44 で条件付けする必要がある。 OSAP `ExchSwitch` t=3.6（米国）。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP ExchSwitch — Dharan and Ikenberry 1995, JF（OSAP再現 t=3.6, 月次0.455%, 品質=2_fair, 予測力=1_clear）
+  - OSAP ExchSwitch t=3.6
+  - https://www.jpx.co.jp/english/equities/follow-up/02.html
   notes: 降格はパッシブ売り、昇格は買い
   notes_extra: null
   provenance:
@@ -1544,22 +1659,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N23
   name_ja: 上場維持基準への抵触
@@ -1718,8 +1835,10 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: IPO時の契約から
-  formula: null
-  inputs: null
+  formula: IPO時のロックアップ契約の解除日までの営業日数
+  inputs:
+  - IPO_prospectus
+  - LLM
   sign: cap
   buy_class: useful
   sell_class: main
@@ -1733,7 +1852,7 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1742,15 +1861,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（日数）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**目論見書からの抽出が必要で、過去に遡るのが難しい。** 日本はロックアップ期間が90日/180日と、価格条件付き解除（公開価格の1.5倍等）の 2種類があり、**後者は株価次第で解除日が変わる**ので日数で表現できない。'
   normalization: rank_all
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N24
+  - F05
+  - F06
+  - J07
+  - K34
+  economic_rationale: ∩型。**解除前は需給が締まり、解除直後に売り圧力が出る。** 日本の新興市場では顕著で、ベンチャーキャピタルの持分が一斉に放出されることがある。 N24（上場後経過年数、LAW-48 IPO後の長期劣後）と併せて、 **IPO後3年程度は構造的な需給悪化要因が続く**と考えるべき。
+  references:
+  - https://www.openassetpricing.com/
+  - OSAP IndIPO t=4.0 / AgeIPO との関連
   notes: 解除前後の売り圧力。日本の新興市場で顕著
   notes_extra: null
   provenance:
@@ -1764,23 +1890,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N26
   name_ja: 株主総会議案
@@ -1923,8 +2051,9 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: 同日に決算発表する銘柄数
-  formula: null
-  inputs: null
+  formula: 同一日に決算発表を行う銘柄数
+  inputs:
+  - earnings_calendar
   sign: positive
   buy_class: main
   sell_class: useful
@@ -1937,7 +2066,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1946,15 +2075,24 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（カウント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 決算発表予定日は事前に開示されるが、**変更されることがある。** 予定日で計算するか実績日で計算するかで値が変わる。**PIT を守るなら 「その時点で公表されていた予定日」を使う**べきで、実績日を使うとルックアヘッド。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N01
+  - N02
+  - N04
+  - N05
+  - N06
+  - N29
+  - O01
+  economic_rationale: '**注目が分散する日の決算はドリフトが強く長い。** 日本は決算発表が特定日に極端に集中する（3月期決算が5月上旬に数百社）ため、 米国より効果が大きい可能性がある。 **LAW-27（ネグレクト）× LAW-28（PEAD）を、企業属性ではなくタイミングで捉える別ルート。** N06 が予想データ依存で日本の小型株で使えないのに対し、 **N28 は決算カレンダーだけで計算でき、欠損しない**という実務上の大きな利点がある。'
+  references:
+  - https://www2.econ.osaka-u.ac.jp/econ_society/dp/2125.pdf
+  - 投資家の注意力の限界に関する研究群に基づく。日本での定量的実証は未確認
   notes: 注目が分散する日の決算はドリフトが強く長い。LAW-27 × LAW-28 の別ルート
   notes_extra: null
   provenance:
@@ -1968,21 +2106,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N29
   name_ja: 決算発表時刻
@@ -2125,8 +2266,10 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: 期初予想営業利益 / 前期実績 - 1
-  formula: null
-  inputs: null
+  formula: 期初の通期営業利益予想 / 前期実績営業利益 - 1
+  inputs:
+  - OP_guidance
+  - OP
   sign: positive
   buy_class: main
   sell_class: main
@@ -2139,24 +2282,31 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
+  period_convention: GUIDE_CO
+  consolidation: consolidated
+  accounting_standard_note: 会社予想。日本は義務開示。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 前期の営業利益がゼロ・負なら比率が意味を失う。**売上比（(予想OP - 実績OP)/REV）で代替する。**
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 米国はガイダンスが任意なので欠損が多い。日本は義務でほぼ全銘柄。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N07
+  - N08
+  - N09
+  - C19
+  - C20
+  - N32
+  economic_rationale: '**日本固有。期初予想が保守的すぎる企業は上方修正の宝庫。** 日本企業は期初に控えめな予想を出す傾向があり（N09 で測る）、 N31 が低い企業ほど後で上方修正する余地が大きい。**符号が直感と逆に見える** — 「期初予想が弱気＝悪い会社」ではなく「期初予想が弱気＝保守的＝上振れ余地」。 ただし本当に業績が悪い企業も低くなるので、**N09（過去の保守性）で条件付けないと 単に業績が悪い企業を買うことになる。**'
+  references:
+  - https://www2.econ.osaka-u.ac.jp/econ_society/dp/2125.pdf
+  - 構造的判断。日本企業の予想の保守性は広く指摘されるが、この形での実証は未確認
   notes: 日本固有。期初予想が保守的すぎる企業は上方修正の宝庫（N09 と組で使う）
   notes_extra: null
   provenance:
@@ -2170,21 +2320,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N32
   name_ja: 予想の開示形態
@@ -2463,8 +2616,11 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: 発生と規模
-  formula: null
-  inputs: null
+  formula: リコール・製品事故の発生と、対象製品の売上比率
+  inputs:
+  - NEWS
+  - LLM
+  - TD_disclosure
   sign: negative
   buy_class: useful
   sell_class: main
@@ -2478,7 +2634,7 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -2487,15 +2643,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 対象製品の売上が不明なら件数と報道量で代替。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**報道量に依存するので、大企業ほど検出されやすい。** 小型株のリコールは報道されず見逃す。**O カテゴリと逆方向に偏る**（ネグレクト銘柄で 悪材料を見逃す）という、リスク管理上まずい形の偏り。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N20
+  - N37
+  - N38
+  - Y06
+  - Y07
+  - U19
+  economic_rationale: 自動車・食品・医療機器で致命的になりうる。直接の費用（回収・賠償）に加え、 ブランド毀損が長期に効く。**Y06（不祥事の履歴）が示す通り再発率が高い**ので、 1件目を組織文化の問題の兆候として扱う。
+  references:
+  - 構造的判断。個別事象なので断面での実証は困難
   notes: 自動車・食品・医療機器で致命的になりうる
   notes_extra: null
   provenance:
@@ -2509,21 +2672,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N37
   name_ja: サイバー攻撃・情報漏洩
@@ -2531,8 +2697,11 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: 発生と規模
-  formula: null
-  inputs: null
+  formula: サイバー攻撃・情報漏洩の発生と、影響範囲（件数・停止日数）
+  inputs:
+  - NEWS
+  - LLM
+  - TD_disclosure
   sign: negative
   buy_class: useful
   sell_class: main
@@ -2546,24 +2715,31 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: POINT
   consolidation: na
-  accounting_standard_note: na
+  accounting_standard_note: '**米国は SEC のサイバーセキュリティ開示規則（2023年施行）で、重要なインシデントは 4営業日以内の 8-K 開示が義務。日本には同等の義務が無い。** したがって**米国の方が検出が速く確実**という制度差がある。'
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: N36 と同じく報道依存。加えて**日本は開示義務が無いので、中小型株は 公表せずに済ませることがある。** 検出できないこと自体がリスク。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N36
+  - N20
+  - Y06
+  - Y09
+  - W14
+  economic_rationale: 近年増加している。直接被害（復旧費用・賠償）より、**事業停止の期間**が効く。 サプライチェーン攻撃では取引先にも波及するので、L06/L07（仕入先・顧客モメンタム） との連動を見る価値がある。**中小型株は開示が遅れがちで、後から発覚する。**
+  references:
+  - '米国: SEC Cybersecurity Disclosure Rules（17 CFR 229.106、2023年施行）'
+  - 構造的判断。個別事象なので断面での実証は困難
   notes: 近年増加。中小型株は開示が遅れがちで、後から発覚する
   notes_extra: null
   provenance:
@@ -2577,21 +2753,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N38
   name_ja: 自然災害・地政学の影響
@@ -2599,8 +2778,11 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: 拠点の被災、サプライチェーン寸断
-  formula: null
-  inputs: null
+  formula: 拠点の被災・サプライチェーン寸断の影響を LLM が -5〜0 で採点
+  inputs:
+  - LLM
+  - NEWS
+  - facility_locations
   sign: negative
   buy_class: useful
   sell_class: main
@@ -2613,7 +2795,7 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -2622,15 +2804,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（スコア）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**拠点の所在地情報が必要だが、開示が粗い。** 有報の「主要な設備の状況」から 抽出できるが、サプライヤーの所在地までは分からない。**間接的な被害を捉えられない。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N36
+  - N37
+  - Y11
+  - V07
+  - V08
+  - T19
+  economic_rationale: 日本は地震・水害リスクが構造的に高い。Y11（気候・地震の物理リスク）が 平時の潜在リスクを測るのに対し、N38 は実際に起きた事象の影響を測る。 **短期の生産停止は数四半期で回復するが、顧客を失うと戻らない**ので、 N41（大口顧客の喪失）への波及を見る必要がある。
+  references:
+  - 構造的判断。個別事象なので断面での実証は困難
   notes: 日本は地震リスクの織り込みが必要。Y11 と対
   notes_extra: null
   provenance:
@@ -2644,21 +2833,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N39
   name_ja: 主要特許の満了までの年数
@@ -2666,8 +2858,11 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: パテントクリフまでの残存期間
-  formula: null
-  inputs: null
+  formula: 主力製品の特許満了までの残存年数（売上加重）
+  inputs:
+  - LLM
+  - patent_data
+  - segment_revenue
   sign: positive
   buy_class: main
   sell_class: main
@@ -2680,7 +2875,7 @@
   - LLM
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -2689,15 +2884,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 主力製品が特定できなければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**医薬・素材以外ではほぼ意味を持たない。** 実質的に U-6（医薬）専用で、 汎用の N カテゴリに置いているのは分類上の妥協（C11/C12 と同じ問題）。 特許の特定は LLM に頼るので、**製品と特許の紐付けの誤りが直接効く。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U35
+  - U36
+  - U37
+  - X07
+  - X08
+  - T16
+  economic_rationale: '**医薬では決定的。特許満了で後発品が出ると売上が数割落ちる。** **保有期間 6M〜5Y という設計では、5年以内に満了する特許は必ず影響する**ので、 無視できない。PER が低く見える医薬企業の多くは、 パテントクリフを市場が織り込んでいるだけである可能性が高い — **A カテゴリのバリュートラップの業種特有の形。**'
+  references:
+  - 構造的判断。パテントクリフの株価影響は実務上自明だが、断面パラメータとしての実証は未確認
   notes: 医薬・素材で決定的。5年ホライズンでは必須。U35 の一般版
   notes_extra: null
   provenance:
@@ -2711,21 +2913,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N40
   name_ja: 規制承認の見込み
@@ -2800,8 +3005,11 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: 開示または推定
-  formula: null
-  inputs: null
+  formula: 大口顧客の獲得・喪失の開示と、対象売上 / REV
+  inputs:
+  - LLM
+  - TD_disclosure
+  - customer_disclosure
   sign: context
   buy_class: main
   sell_class: main
@@ -2814,24 +3022,32 @@
   - LLM
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
+  consolidation: consolidated
+  accounting_standard_note: N21 と同じ開示基準の日米差。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: REV>0。金額が不明なら定性スコアで代替。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**獲得は開示され、喪失は開示されにくい**という非対称がある。 企業は良い知らせを積極的に出すので、**N41 は正の方向に偏る。** 喪失は N21（顧客の業績変化）や X15（顧客の株価）から推定するしかない。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N21
+  - X15
+  - I25
+  - V02
+  - T18
+  - C11
+  economic_rationale: '**小型株では単独で株価を決める。** 売上の30%を占める顧客を失えば、 それだけで事業が成立しなくなる。I25（単一要因への依存度）と T18（顧客集中リスク）が 静的なリスクを測るのに対し、N41 はそれが現実化したイベントを捉える。 **開示の非対称性があるので、喪失側は X15（顧客の株価）で先回りする方が確実。**'
+  references:
+  - https://www.openassetpricing.com/
+  - OSAP CustomerMomentum t=3.8 との関連。イベントとしての実証は未確認
   notes: 小型株では単独で株価を決める。T18/X15 と連携
   notes_extra: null
   provenance:
@@ -2845,21 +3061,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N42
   name_ja: 社名変更
@@ -3084,8 +3303,10 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: LLM が「いつ顕在化しそうか」を月数で推定
-  formula: null
-  inputs: null
+  formula: LLM が「想定カタリストが顕在化するまでの月数」を推定
+  inputs:
+  - LLM
+  - T23
   sign: cap
   buy_class: main
   sell_class: main
@@ -3098,7 +3319,7 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -3107,15 +3328,23 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（月数）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**完全に LLM 依存で、過去に遡れない**（T カテゴリと同じ制約。§6.4 の前向き記録が必要）。 さらに **LLM の期間推定は較正されていない** — 「6ヶ月」と言ったものが 実際に6ヶ月で起きる頻度は未知。T44（較正記録）が貯まるまで信用度は不明。'
   normalization: rank_all
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - T23
+  - T24
+  - T29
+  - T30
+  - R18
+  - R19
+  - N14
+  economic_rationale: ∩型。**保有期間 6M〜5Y の設計では「いつ起きるか」が決定的。** 3ヶ月で起きるカタリストは既に価格に入っている可能性が高く、 10年後のカタリストは待つコストが大きすぎる。 §1.5 の h*（想定保有期間）の直接の入力になり、R19（カタリストの期限超過）で 事後検証される。**「いつまでも起きないカタリスト」が最も資本効率を毀損する。**
+  references:
+  - 構造的判断。LLM 由来のため §6.4 のカットオフ後検証・前向き記録が必要
   notes: 半年〜5年ホライズンでは「いつ」が決定的。h*（§1.5）の入力になる
   notes_extra: null
   provenance:
@@ -3129,23 +3358,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N46
   name_ja: 長短予想の乖離
@@ -3153,8 +3384,10 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: 長期EPS成長率予想 - 短期EPS成長率予想
-  formula: null
-  inputs: null
+  formula: 長期(3-5年)EPS成長率予想 - 短期(1年)EPS成長率予想
+  inputs:
+  - EST_long_term_growth
+  - EST_short_term_growth
   sign: negative
   buy_class: main
   sell_class: main
@@ -3172,22 +3405,27 @@
   - JP
   - US
   industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
+  period_convention: GUIDE_CONS
+  consolidation: consolidated
+  accounting_standard_note: コンセンサス。ベンダーごとに長期成長率の定義が違う。
   pit_lag_days: 1
-  zero_denominator_policy: na
+  zero_denominator_policy: na（差分）。いずれかが欠損なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**長期成長率予想を出すアナリストは短期より少ない**ので、 N10 よりさらに欠損が多い。日本の小型株ではほぼ使えない（OQ-22 と同根）。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - N10
+  - N11
+  - N47
+  - A26
+  - C26
+  - A42
+  economic_rationale: '**長期だけ強気なのは、実現しない期待の兆候。** 短期は検証されるが長期は検証されないので、アナリストは長期に楽観を逃がす。 N47（長期成長率予想が高い銘柄は劣後、OSAP `fgr5yrLag` t=4.9）と、 A26（インプライド成長率）、C26（平均回帰調整）が同じ現象を別角度から捉えている。 **「高成長の物語」に高い値段が付いているときに買わないための装置。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP EarningsForecastDisparity — Da and Warachka 2011, JFE（OSAP再現 t=5.1, 月次0.48%, 品質=2_fair, 予測力=1_clear）
+  - OSAP EarningsForecastDisparity t=5.1 / fgr5yrLag t=4.9
   notes: OSAP EarningsForecastDisparity t=5.1。長期だけ強気なのは実現しない期待の兆候
   notes_extra: null
   provenance:
@@ -3201,22 +3439,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N47
   name_ja: 長期成長率予想
@@ -3366,8 +3606,10 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: コンセンサス推奨 × 空売り残高比率 の交互作用
-  formula: null
-  inputs: null
+  formula: z(コンセンサス推奨) × z(空売り残高比率)
+  inputs:
+  - N48
+  - K19
   sign: negative
   buy_class: useful
   sell_class: main
@@ -3380,7 +3622,85 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T3
+  evidence_tier: T1
+  markets:
+  - US
+  industries: null
+  period_convention: GUIDE_CONS
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: N48 または K19 が欠損なら欠損。
+  missing_policy: flag
+  missing_bias: '**K19（空売り残高）は米国の制度（月2回公表）。日本は K09（0.5%以上の個別報告）で 粒度が違う。** N48（推奨）も日本の小型株では欠損。**実質的に米国大型株専用。**'
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - N48
+  - N12
+  - K19
+  - K20
+  - K21
+  - K52
+  economic_rationale: '**アナリストが強気で空売りも多い銘柄は特に危険。** 情報を持つ空売り筋とセルサイドの見解が正面から対立している状態で、 実証では空売り側が正しい（OSAP `Recomm_ShortInterest` t=4.1）。 N48（推奨が高い銘柄ほど劣後、t=3.2）を空売り情報で増幅した形。 **セルサイドの推奨を逆張り指標として使う**という、直感に反するが頑健な関係。'
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP Recomm_ShortInterest t=4.1 / ConsRecomm t=3.2
+  notes: OSAP Recomm_ShortInterest t=4.1。アナリストが強気で空売りも多い銘柄は特に危険
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    evidence_tier: override
+    references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: N50
+  name_ja: 予想非依存の注目度調整PEAD
+  category: N
+  category_name: カタリスト・イベント
+  subsection: null
+  definition: N04（決算発表日リターン） × (1 - z(O04 ニュース数))
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: null
   markets:
   - JP
   - US
@@ -3397,11 +3717,8 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP Recomm_ShortInterest — Drake, Rees and Swanson 2011, AR（OSAP再現 t=4.1, 月次1.11%, 品質=4_lack_data, 予測力=1_clear）
-  notes: OSAP Recomm_ShortInterest t=4.1。アナリストが強気で空売りも多い銘柄は特に危険
+  references: []
+  notes: v0.4 追加。N06 の自己矛盾を回避する版。 N06 は SUE（コンセンサス予想）と O01（アナリスト数）を使うため、注目度が最も低い銘柄で両方とも欠損するという自己矛盾を抱えていた。N04 は価格だけ、O04 はニュース数だけで計算できるので、日本の無カバー小型株でも欠損しない（OQ-22 の回避策）
   notes_extra: null
   provenance:
     name_ja: catalog
@@ -3421,13 +3738,12 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
-    evidence_tier: override
-    references: override
   review:
     status: draft
     pending:
     - q06
     - q09
     - q10
+    - q11
     - q12
   version: 1

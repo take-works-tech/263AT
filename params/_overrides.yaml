@@ -2999,3 +2999,877 @@ C38:
     - "OSAP DelEqu — Change in equity to assets, t=6.2"
   markets: [JP, US]
   review: {status: verified}
+
+# =============================================================================
+# M（株主構成・ガバナンス）主力14件 + N（カタリスト）主力20件
+#
+# このレビューで確認された、カテゴリ横断の重要事項が2つある。
+#
+# (1) **インサイダー情報の鮮度が日米で桁違いに違う。**
+#     米国 Form 4 は取引から2営業日以内。日本の「役員又は主要株主の所有株券等の
+#     売買報告書」は翌月15日までで、**最長45日以上遅れる。**
+#     同じ M02-M04 でも、米国では速報性のあるシグナル、日本では遅行指標になる。
+#     日米で別 ID にするか、pit_lag_days を市場別に持つ必要がある（未解決）。
+#
+# (2) **M10 と N14（買収の予測）は DF-01 により検証できない。**
+#     yfinance で買収廃止銘柄の株価取得率は 0/15 = 0%（docs/03_data_feasibility.md §7.0）。
+#     **買収を予測するパラメータのバックテストから、成功例だけが系統的に削除される。**
+#     これらは「実装するが検証できない」という特殊な状態に置かれる。
+#     有料データを入れるか、これらを諦めるかの判断が要る。
+# =============================================================================
+
+# --- M 株主構成・ガバナンス ---------------------------------------------------
+
+M01:
+  formula: "(役員保有株数 + 創業家保有株数) / SHARES"
+  inputs: [officer_holdings, SHARES]
+  period_convention: FY
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "SHARES>0。"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: >-
+    **「創業家」の判定が機械的にできない。** 大株主リストの氏名と役員名の突合で
+    近似するしかなく、姓が同じだけの他人や、資産管理会社経由の保有を取りこぼす。
+    日本は資産管理会社（〇〇興産など）経由が非常に多いので、**過小評価に偏る。**
+  correlated_with: [M07, M15, M22, M29, J07, K35, K36]
+  economic_rationale: >-
+    ∩型。**利害一致（スキン・イン・ザ・ゲーム）と支配の弊害のトレードオフ。**
+    低すぎると経営陣が株主価値に無関心になり、高すぎると少数株主が軽視され
+    浮動株が枯れる（J07）。最適点は業種と企業規模で違うので業種内中央値を暫定 x* とするが、
+    **理論的な最適点があるわけではないので Phase 1 で分布を見て決め直す。**
+  evidence_tier: T3
+  references:
+    - "構造的判断。日本のコーポレートガバナンス・コードは利害一致を推奨するが、最適水準の実証は無い"
+  markets: [JP, US]
+  review: {status: verified}
+
+M02:
+  formula: "SUM(買付額) - SUM(売却額)、直近6ヶ月、自社株報酬の定期売却を除外"
+  inputs: [insider_transactions, K42]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "取引が1件も無ければゼロで正当（欠損にしない）。"
+  pit_lag_days: 2
+  missing_bias: >-
+    **日米で鮮度が桁違い。米国 Form 4 は取引から2営業日、日本の売買報告書は翌月15日まで
+    （最長45日超）。** 同じ指標でも米国は速報、日本は遅行指標になる。
+    さらに**米国は 10b5-1 プラン（K42）を除外しないと情報量がゼロに近づく**
+    — 事前計画売買は情報を含まない。
+  correlated_with: [M03, M04, M05, M06, M30, K42, F03]
+  economic_rationale: >-
+    **経営陣は自社の内実を最もよく知っている。** そして自腹で買うのは、
+    株価が安いと本気で考えているとき以外にほとんど無い（売る理由は分散・納税・生活など
+    多数あるが、買う理由は基本的に1つしかない）。だから M05（売り）より M02（買い）の方が
+    情報量が多いという非対称が生まれる。**マイクロキャップで特に強い**という報告があり、
+    O カテゴリ（ネグレクト）との相乗が期待できる。
+  evidence_tier: T2
+  references:
+    - "https://www.sciencedirect.com/science/article/abs/pii/S092753982500088X"
+    - "https://arxiv.org/html/2602.06198"
+    - "https://www.acadian-asset.com/investment-insights/owenomics/firms-are-the-smart-money"
+  markets: [JP, US]
+  review: {status: verified}
+
+M03:
+  formula: "過去3年の取引パターンから外れた取引のみを抽出した純買い額"
+  inputs: [insider_transactions, K42]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "ルーティン判定に3年の履歴が要る。履歴不足なら欠損。"
+  pit_lag_days: 2
+  missing_bias: >-
+    **3年の取引履歴が要るので、上場3年未満と、そもそも取引が少ない企業で判定不能。**
+    小型株は役員の取引自体が稀なので、「ルーティンか非ルーティンか」の判定に必要な
+    サンプルが集まらない。**O カテゴリと逆方向に偏る。**
+  correlated_with: [M02, M04, M05, M30, K42, K49]
+  economic_rationale: >-
+    **学術的には非ルーティン取引だけが予測力を持つ。** 毎年同じ月に同じ量を売買する
+    役員の取引は、分散や納税のスケジュールであって情報ではない。
+    ルーティンを混ぜると効果が薄まるので、**M02 より M03 を主軸にすべき**だが、
+    判定に履歴が要るぶん適用範囲が狭まるというトレードオフがある。
+    米国では K42（10b5-1 フラグ）が使えるので判定が容易。
+  evidence_tier: T2
+  references:
+    - "https://www.sciencedirect.com/science/article/abs/pii/S092753982500088X"
+    - "https://www.sciencedirect.com/science/article/abs/pii/S0929119918308824"
+  markets: [JP, US]
+  review: {status: verified}
+
+M04:
+  formula: "SUM( 純買い額 × 役職重み )、CEO=3 CFO=3 社内取締役=2 社外=1"
+  inputs: [insider_transactions, officer_titles]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "取引が無ければゼロで正当。"
+  pit_lag_days: 2
+  missing_bias: >-
+    **役職の正規化が必要。** 日本は「取締役常務執行役員」のような複合肩書が多く、
+    米国は Form 4 の officer title が自由記述。**LLM で正規化する前提だが、
+    その誤りがそのまま重みの誤りになる。** 重み自体（3/3/2/1）にも実証的根拠は無い。
+  correlated_with: [M02, M03, M06, M30]
+  economic_rationale: >-
+    情報優位の階層を反映する。**CFO の買いが最も情報量が多い**という報告がある
+    — 決算の着地を最初に知る立場にあるため。社外取締役は情報も少なく、
+    形式的に買う場合もあるので重みを下げる。
+    **ただし重み付けは仮説であり、Phase 1 で役職別の予測力を実測して較正する。**
+  evidence_tier: T3
+  references:
+    - "https://www.sciencedirect.com/science/article/abs/pii/S092753982500088X"
+    - "重み 3/3/2/1 は仮説であり、この配分の実証は無い"
+  markets: [JP, US]
+  review: {status: verified}
+
+M05:
+  formula: "SUM(売却額) - SUM(買付額)、自社株報酬の定期売却を除外"
+  inputs: [insider_transactions, K42, SBC]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "取引が無ければゼロ。"
+  pit_lag_days: 2
+  missing_bias: >-
+    **自社株報酬の売却を除外できないと、株式報酬の多い企業（米国テック）が
+    体系的に「インサイダー売り」と判定される。** SBC（E07/F07）が大きい企業ほど
+    誤検出が増えるので、**業種・地域に強く偏る。**
+  correlated_with: [M02, M03, M04, F07, K42]
+  economic_rationale: >-
+    **M02（買い）と対称に扱ってはいけない。** 売る理由は分散・納税・住宅購入・離職など
+    非情報的なものが多数あり、買う理由は基本的に「安い」の1つしかない。
+    したがって**売りは弱いシグナルとして扱い、重みを買いより小さくする。**
+    符号を対称にすると、株式報酬の多い成長企業を体系的に減点することになる。
+  evidence_tier: T3
+  references:
+    - "https://www.sciencedirect.com/science/article/abs/pii/S092753982500088X"
+    - "非対称性は広く指摘されるが、最適な重み配分の実証は無い"
+  markets: [JP, US]
+  review: {status: verified}
+
+M06:
+  formula: "1[F04 自社株買い実行あり] × 1[M02 > 0]"
+  inputs: [F04, M02]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール積）"
+  missing_bias: "F04（自社株買いの実額）と M02 の欠損を継承。日本は月次開示の集計が要る。"
+  correlated_with: [M02, M30, F03, F04, F15, A10]
+  economic_rationale: >-
+    **会社と経営者が同じ方向に賭けている**という二重の確認。
+    会社の自社株買いには「EPS を嵩上げしたい」「余剰資金の使い道が無い」といった
+    情報以外の動機もありうるが、**経営者が同時に自腹で買っているなら、
+    その動機は「安い」である蓋然性が高まる。**
+    Acadian の "Firms are the smart money" の主張を個人レベルで裏取りする形。
+  evidence_tier: T2
+  references:
+    - "https://www.acadian-asset.com/investment-insights/owenomics/firms-are-the-smart-money"
+    - "https://www.sciencedirect.com/science/article/abs/pii/S0929119913000278"
+  markets: [JP, US]
+  review: {status: verified}
+
+M08:
+  formula: "1 if 既知アクティビストによる大量保有報告書の提出あり（直近24ヶ月） else 0"
+  inputs: [EDINET_5pct, SEC_13D]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  pit_lag_days: 0
+  missing_bias: >-
+    **「既知アクティビスト」のリストを保持する必要があり、そのリスト自体が
+    後知恵バイアスの温床になる。** 今アクティビストとして知られている主体を
+    過去に遡って適用すると、当時は無名だった主体を「既知」として扱うことになる。
+    **リストにも as-of 日付を持たせる必要がある**（未実装）。
+  correlated_with: [M09, M10, M11, M24, K18, N13, N14]
+  economic_rationale: >-
+    **日本株で特に有効。** NRI の分析では、コーポレートアクションを契機とせず
+    アクティビストの買い集めで提出された報告について、義務発生日から公表日にかけて
+    累積超過リターンが増加する。日本は 5% 超で5営業日以内の提出義務があり、
+    **米国の 13D（10日以内、2024年から5日）より情報が速い時期があった。**
+    2024年の「重要提案行為」記載は133件で前年比+55%と、活動自体が増えている。
+  evidence_tier: T2
+  references:
+    - "https://www.nri.com/jp/media/column/osaki/20230509.html"
+    - "https://www.nikkei.com/article/DGXZQOTG139ZP0T11C24A2000000/"
+    - "https://www.businesslawyers.jp/articles/1536"
+  markets: [JP, US]
+  review: {status: verified}
+
+M09:
+  formula: "1 if 大量保有報告書の保有目的欄に「重要提案行為」を含む else 0"
+  inputs: [EDINET_5pct]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  pit_lag_days: 0
+  missing_bias: >-
+    **日本固有の制度。** 米国では 13D（経営関与目的）と 13G（純投資）の区別が対応するが、
+    粒度が違う。日本の「重要提案行為」は具体的な行為類型が列挙されており、より明確。
+    **markets を JP に限定し、米国は K48（13D/G）で扱う。**
+  correlated_with: [M08, M10, M11, M24, K48]
+  economic_rationale: >-
+    **通常の投資目的より遥かに強いシグナル。** 「重要提案行為」を記載すると
+    保有報告の特例（機関投資家の簡易報告）が使えなくなるため、
+    **記載するのは本気で経営に介入する意思がある場合に限られる。**
+    制度設計上、コストを払ってでも意思表示しているという点で情報量が高い。
+  evidence_tier: T2
+  references:
+    - "https://www.nri.com/jp/media/column/osaki/20230509.html"
+    - "https://www.businesslawyers.jp/articles/1536"
+    - "金融商品取引法 第27条の23（大量保有報告制度）"
+  markets: [JP]
+  review: {status: verified}
+
+M10:
+  formula: "z(-A03) + z(A16) + z(-B01) + z(政策保有株比率) + 1[K18 親会社比率 50-90%]"
+  inputs: [A03, A16, B01, K17, K18]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "構成要素の会計基準差を継承。政策保有株の開示は日本固有。"
+  zero_denominator_policy: "構成要素が3つ未満しか計算できないなら欠損。"
+  missing_bias: >-
+    政策保有株比率は**日本の有報でのみ開示**されるので、米国では構成要素が1つ減る。
+    日米で中身が違う複合指標になる。
+  correlated_with: [A03, A16, B01, K17, K18, M08, M09, N13, N14]
+  economic_rationale: >-
+    **保有報告が出る「前」に先回りする。** M08/M09 は既に公表された事実なので、
+    その時点で価格は動いている。アクティビストが狙う条件
+    （低PBR・現金過多・低ROE・政策保有多・親子上場）を先に満たす銘柄を拾う。
+    東証の資本コスト要請（LAW-47）が同じ条件の企業に圧力をかけているので、
+    **アクティビストが来なくても企業自身が動く可能性がある**という二重の期待。
+
+    **ただし DF-01 により検証できない。** 成功シナリオ（TOB・非公開化）で
+    廃止された銘柄は無料の株価データから消える（取得率 0/15）。
+    **バックテストすると勝ち筋だけが削除される**ので、この指標の有効性は
+    有料データを入れるまで測定不能。
+  evidence_tier: T3
+  references:
+    - "https://note.com/tatsuya_sabato/n/n035f8265adb9"
+    - "https://www.nri.com/jp/media/column/osaki/20230509.html"
+    - "https://corpgov.law.harvard.edu/2025/10/21/tokyo-stock-exchange-initiative-on-cost-of-capital-and-stock-price-conscious-management/"
+    - "合成仮説であり、この形での実証は無い。加えて DF-01 により検証手段が無い"
+  markets: [JP]
+  review: {status: verified}
+
+M21:
+  formula: "社長交代の有無と背景を LLM が分類（内部昇格 / 外部招聘 / 引責 / 定年）"
+  inputs: [LLM, TD_disclosure]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（分類）"
+  missing_bias: >-
+    **「引責」は開示文言に現れない。** 「一身上の都合」「本人の申し出」と書かれるので、
+    LLM が業績推移や不祥事（Y06）と突き合わせて推定するしかない。
+    **推定の誤りが符号を反転させる**（引責交代は変化の期待、定年は現状維持）。
+  correlated_with: [M14, M15, M22, W13, T41, N18]
+  economic_rationale: >-
+    符号は文脈依存。**外部招聘と引責交代は変化のカタリスト**で、
+    低 ROE・低 PBR の企業では改善期待になる。一方、好業績企業での交代は
+    継続性のリスクになる。**B04（ROIC-WACC）の水準で符号が変わる**ので、
+    単独で符号を固定してはいけない。T41（資本配分の質）の評価が交代でリセットされる点も重要。
+  evidence_tier: T3
+  references:
+    - "構造的判断。CEO交代の株価影響の研究は多いが、文脈依存で符号が定まらない"
+  markets: [JP, US]
+  review: {status: verified}
+
+M24:
+  formula: "1 if 株主総会に株主提案が提出された else 0（提案者と議案内容を付す）"
+  inputs: [LLM, TD_disclosure, AGM_notice]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: >-
+    **招集通知は PDF で、機械抽出が不安定。** 日本は東証の適時開示に載らない場合もあり、
+    企業サイトからの取得になる。取りこぼしは「提案なし」に倒れる。
+  correlated_with: [M08, M09, M25, M13, K18]
+  economic_rationale: >-
+    M08/M09 と並ぶアクティビスト圧力の直接証拠。**大量保有報告を出さずに
+    株主提案だけを行う主体もいる**（5%未満でも提案権はある）ので、
+    M08 では捕捉できない圧力を拾える。可決されなくても、
+    **提案が出ること自体が経営陣への圧力**になり、企業側の自主的な改善を促す。
+  evidence_tier: T3
+  references:
+    - "https://www.nikkei.com/article/DGXZQOTG139ZP0T11C24A2000000/"
+    - "会社法 第303条（株主提案権）"
+  markets: [JP, US]
+  review: {status: verified}
+
+M25:
+  formula: "取締役選任議案（特に社長）の賛成率"
+  inputs: [TD_disclosure, AGM_results]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "議案が無ければ欠損。"
+  missing_bias: >-
+    日本は臨時報告書で議決権行使結果が開示される（義務）。**米国は 8-K で開示されるが
+    形式が非定型。** 日本の方が機械抽出しやすいという珍しい例。
+  correlated_with: [M24, M12, M13, M26, M27, K36]
+  economic_rationale: >-
+    **賛成率80%割れは機関投資家の不信任。** 議決権行使助言会社の反対推奨が出ると
+    賛成率が下がるので、**外部の専門家がガバナンスに問題ありと判断した証拠**になる。
+    賛成率の低下が続くと経営陣の交代（M21）や、企業側の自主的な資本政策変更（F20）に
+    つながることがある。**売り判定で価値が高い**（sell=main）。
+  evidence_tier: T3
+  references:
+    - "金融商品取引法 第24条の5第4項（臨時報告書：議決権行使結果）"
+    - "構造的判断。賛成率と将来リターンの断面実証は未確認"
+  markets: [JP, US]
+  review: {status: verified}
+
+M28:
+  formula: "関連当事者取引の金額 / REV"
+  inputs: [related_party_transactions, REV]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **開示基準に重要性の閾値があるので、小規模な取引は開示されない。**
+    日本は連結財務諸表規則、米国は Reg S-K Item 404 で基準が違う。
+  zero_denominator_policy: "REV>0。関連当事者取引が無ければゼロで正当。"
+  missing_bias: "注記からの抽出なので、開示形式が非定型な企業で取りこぼす。取りこぼしは「取引なし」に倒れる。"
+  correlated_with: [K18, M23, M10, N14, E25]
+  economic_rationale: >-
+    **親子上場での利益移転（トンネリング）リスクの直接測定。**
+    K18（親会社の保有比率が高い）は TOB 期待という上side を持つが、
+    同時に**少数株主から親会社へ利益が移転される downside** も持つ。
+    M28 が大きい企業では後者が現実に起きている可能性が高く、
+    **K18 の符号を反転させうる条件変数**として機能する。
+  evidence_tier: T3
+  references:
+    - "連結財務諸表規則 第15条の4の2（関連当事者との取引）"
+    - "米国: Regulation S-K Item 404"
+    - "構造的判断。トンネリングの実証研究は新興国中心で、日米では限定的"
+  markets: [JP, US]
+  review: {status: verified}
+
+M30:
+  formula: "同一90日間に買い付けを行った役員の実人数"
+  inputs: [insider_transactions]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（カウント）"
+  pit_lag_days: 2
+  missing_bias: >-
+    **役員数が少ない小型株では、そもそも「複数人」が発生しにくい。**
+    大企業の方がクラスタが観測されやすいので、O カテゴリ（小型株重視）と逆方向に偏る。
+    役員数で正規化すべきかは要検討。
+  correlated_with: [M02, M03, M04, M06]
+  economic_rationale: >-
+    **単独の買いより複数人の同時買いが遥かに強い。** 1人なら個人的な事情
+    （自社株買付制度への参加、住宅ローン完済など）で説明できるが、
+    複数人が同時に動くのは共通の情報を持っている蓋然性が高い。
+    M06（会社との一致）と同じく、**独立な意思決定の一致**に情報を見出す構造。
+  evidence_tier: T2
+  references:
+    - "https://www.sciencedirect.com/science/article/abs/pii/S092753982500088X"
+    - "https://arxiv.org/html/2602.06198"
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- N カタリスト・イベント ---------------------------------------------------
+
+N04:
+  formula: "決算発表日を含む ±1営業日の市場調整後累積リターン"
+  inputs: [PRICE, market_return, announcement_datetime]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  pit_lag_days: 0
+  missing_bias: >-
+    **発表時刻の精度が結果を左右する。** 引け後発表なら翌日が反応日、場中発表なら当日。
+    日本は15時以降の発表が大半だが例外がある（N29）。**時刻を間違えると、
+    反応日を1日ずらして CAR がノイズになる。** 米国は寄り前・引け後の両方があり、
+    Form 8-K のタイムスタンプで判定できる。
+  correlated_with: [N02, N03, N05, N06, N29, G04]
+  economic_rationale: >-
+    **市場の初期反応そのものが最良の「サプライズ」推定である。**
+    SUE（N02）は予想との差を測るが、予想の質に依存する。N04 は市場全体が
+    どう驚いたかを直接測るので、**予想データが無い日本の小型株でも計算できる**
+    という決定的な利点がある（OQ-22 の回避策になりうる）。
+    SUE より頑健という報告があり、OSAP `AnnouncementReturn` t=9.2 は
+    earnings event カテゴリで最上位。
+  evidence_tier: T1
+  references:
+    - "https://www.openassetpricing.com/"
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+    - "OSAP AnnouncementReturn t=9.2"
+    - "https://www2.econ.osaka-u.ac.jp/econ_society/dp/2125.pdf"
+  markets: [JP, US]
+  review: {status: verified}
+
+N06:
+  formula: "N02 × (1 - z_rank(O01))"
+  inputs: [N02, O01]
+  period_convention: GUIDE_CONS
+  consolidation: consolidated
+  accounting_standard_note: "N02 を継承。"
+  zero_denominator_policy: "N02 または O01 が欠損なら欠損。"
+  missing_bias: >-
+    **致命的な自己矛盾を抱える。** N02（SUE）はコンセンサス予想が要り、O01（カバレッジ数）も
+    予想データベースが要る。**注目度が最も低い銘柄では両方とも欠損する。**
+    つまり「注目度が低いほど強い」という仮説を、注目度が低い銘柄で検証できない。
+    **回避策は N02 を N04（決算発表日リターン）に置き換えること** — N04 は価格だけで
+    計算でき、O01 の代わりに O04（ニュース数）や O08（出来高枯渇）を使えば
+    予想データ非依存の版が作れる。**この代替版を別 ID として作るべき（未実施）。**
+  correlated_with: [N02, N04, N05, O01, O10, O04]
+  economic_rationale: >-
+    **LAW-27（ネグレクト）× LAW-28（PEAD）の交互作用で、263AT の目玉候補。**
+    注目度が低い銘柄ほど決算情報の織り込みが遅く、ドリフトが長く強いことは
+    日本の実証でも確認されている。O カテゴリを「乗数として使う」という設計思想
+    （O10 の議論）の最も具体的な実装例。
+  evidence_tier: T2
+  references:
+    - "https://www2.econ.osaka-u.ac.jp/econ_society/dp/2125.pdf"
+    - "https://www.jstage.jst.go.jp/article/jbef/3/0/3_0_1/_pdf/-char/ja"
+    - "https://www.openassetpricing.com/"
+  markets: [JP, US]
+  review: {status: verified}
+
+N07:
+  formula: "(修正後の通期営業利益予想 - 修正前) / abs(修正前)"
+  inputs: [OP_guidance, TD_disclosure]
+  period_convention: GUIDE_CO
+  consolidation: consolidated
+  accounting_standard_note: "会社予想の開示。日本は義務、米国は任意。"
+  zero_denominator_policy: >-
+    修正前予想がゼロ近傍だと発散する。**分母に下限（売上の1%）を置く。**
+    赤字予想から黒字予想への転換は比率が意味を失うのでフラグで別に持つ。
+  pit_lag_days: 0
+  missing_bias: >-
+    **米国はガイダンスを出さない企業が多く、体系的に欠損。**
+    日本は義務開示なのでほぼ全銘柄で取れる（LAW-114）。**markets を JP 主体にすべき。**
+  correlated_with: [N08, N09, N31, C19, C20, N10]
+  economic_rationale: >-
+    **日本固有の強力なイベント。** 米国のコンセンサス改定（N10）に相当するが、
+    会社自身が出すので情報源が一次であり、しかも義務開示なので全銘柄で取れる。
+    **N10 が日本の小型株で使えない（OQ-22）ぶん、これが代替の主力になる。**
+    C19/C20（四半期進捗率）は N07 の先行指標。
+  evidence_tier: T2
+  references:
+    - "https://www2.econ.osaka-u.ac.jp/econ_society/dp/2125.pdf"
+    - "https://www.jstage.jst.go.jp/article/jbef/3/0/3_0_1/_pdf/-char/ja"
+  markets: [JP]
+  review: {status: verified}
+
+N08:
+  formula: "過去4期における上方修正の回数（0-4）"
+  inputs: [N07]
+  period_convention: GUIDE_CO
+  consolidation: consolidated
+  accounting_standard_note: "N07 を継承。"
+  zero_denominator_policy: "na（カウント）。4期分の履歴が無ければ欠損。"
+  missing_bias: "上場1年未満で欠損。米国では N07 と同じ理由で欠損が多い。"
+  correlated_with: [N07, N09, N31, C19, C20, C06, G37]
+  economic_rationale: >-
+    **上方修正を出した企業は次も上方修正しやすい（LAW-29）。**
+    理由の候補は (a) 会社予想が構造的に保守的（N09）、(b) 業績の系列相関、
+    (c) 経営陣が段階的に情報を出している。どれでも符号は正。
+    OSAP の `EarningsStreak` t=9.5、`NumEarnIncrease` に対応し、
+    G37（収益サプライズの連続性）と同じ現象を会社予想側から見ている。
+  evidence_tier: T2
+  references:
+    - "https://www.openassetpricing.com/"
+    - "OSAP EarningsStreak t=9.5 / NumEarnIncrease"
+    - "https://www2.econ.osaka-u.ac.jp/econ_society/dp/2125.pdf"
+  markets: [JP]
+  review: {status: verified}
+
+N14:
+  formula: "z(1[K18 が 50-90%]) + z(-A03) + z(A16) + 1[M13 買収防衛策なし]"
+  inputs: [K18, A03, A16, M13]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "構成要素の会計基準差を継承。"
+  zero_denominator_policy: "構成要素が3つ未満なら欠損。"
+  missing_bias: "K18（親会社比率）は大株主開示から。日本は年1回なので解像度が粗い。"
+  correlated_with: [K18, A03, A16, M10, M13, M28, N13, N34]
+  economic_rationale: >-
+    **親子上場の解消（完全子会社化）を先回りする。** 東証は親子上場の
+    ガバナンス問題を問題視しており、アクティビストの標的にもなりやすい（M10）。
+    親会社にとっては、低PBR で現金を持つ子会社を買い取るのは資本効率上も合理的。
+
+    **ただし M10 と同じく DF-01 により検証不能。** TOB が成立すると銘柄は上場廃止になり、
+    無料の株価データから消える（取得率 0/15）。**成功例だけが消えるバックテストからは、
+    この指標が機能したかどうかを知る方法がない。**
+    さらに M28（支配株主との取引）が大きい企業では、親会社が
+    利益移転で済ませて買い取らない可能性があり、符号が反転しうる。
+  evidence_tier: T3
+  references:
+    - "https://note.com/tatsuya_sabato/n/n035f8265adb9"
+    - "https://corpgov.law.harvard.edu/2025/10/21/tokyo-stock-exchange-initiative-on-cost-of-capital-and-stock-price-conscious-management/"
+    - "合成仮説。DF-01 により検証手段が存在しない"
+  markets: [JP]
+  review: {status: verified}
+
+N18:
+  formula: "中期経営計画の目標に対する実績の達成率"
+  inputs: [LLM, TD_disclosure]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "計画の指標（売上・営業利益・ROE）が企業ごとに違うので統一が要る。"
+  zero_denominator_policy: "計画目標がゼロ・未開示なら欠損。"
+  missing_bias: >-
+    **中計を出さない企業がある**（特に米国）。日本は東証の要請もあり出す企業が多い。
+    また**未達が見込まれると計画を撤回・改訂する企業がある**ため、
+    「達成率が低い企業」が母集団から消える生存者バイアスが働く。
+  correlated_with: [T11, T41, M21, F13, F22, N31]
+  economic_rationale: >-
+    **T11（経営陣の約束履行率）の定量版。計画未達が続く企業は経営を信用しない。**
+    売り判定で価値が高い（sell=main）。逆に達成率が高い企業は、
+    次の計画も信頼でき、**将来の業績予想の確度が上がる**という形で
+    他のパラメータの信頼度に波及する。
+  evidence_tier: T3
+  references:
+    - "https://www.jpx.co.jp/english/equities/follow-up/02.html"
+    - "構造的判断。中計達成率と株価の断面実証は未確認"
+  markets: [JP, US]
+  review: {status: verified}
+
+N20:
+  formula: "係争中の訴訟の請求額 / MCAP、および行政処分の有無"
+  inputs: [LLM, EDINET_notes, SEC_legal_proceedings]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **偶発債務の開示基準が国で違う。** 米国は ASC 450 で「reasonably possible」まで
+    開示するが、日本は「発生可能性が高い」ものが中心。**米国の方が開示が広い。**
+  zero_denominator_policy: "MCAP>0。請求額が不明な訴訟は件数で代替。"
+  missing_bias: >-
+    **米国はクラスアクションが多く、日本は少ない。** 制度差がそのまま数値差になるので、
+    **日米統合ランクを取ってはいけない**（rank_market にすべき）。
+  correlated_with: [Y07, Y10, D21, E12, N36, N37]
+  economic_rationale: >-
+    構造的制約に近い。訴訟は (a) 直接の金銭的損失、(b) 経営リソースの消費、
+    (c) レピュテーション毀損の3つの経路で価値を削る。
+    **請求額が時価総額に対して大きい訴訟は、事実上の破綻リスク**になる。
+    Y07（訴訟の履歴）が過去を見るのに対し、これは現在進行形。
+  evidence_tier: T3
+  references:
+    - "米国: ASC 450 Contingencies / Reg S-K Item 103"
+    - "日本: 財務諸表等規則 第58条（偶発債務）"
+  markets: [JP, US]
+  review: {status: verified}
+
+N21:
+  formula: "顧客集中度 × 主要顧客企業の業績変化"
+  inputs: [LLM, customer_disclosure, X15]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **主要顧客の開示基準が違う。** 米国は売上の10%以上の顧客の開示が義務（ASC 280）。
+    日本は「主要な顧客ごとの情報」として開示するが、顧客名を伏せる企業も多い。
+  zero_denominator_policy: "顧客が特定できなければ欠損。"
+  missing_bias: >-
+    **顧客名を開示する企業に強く偏る。** 日本は「A社」等の匿名開示が多く、
+    LLM で推定するしかない。**推定の誤りがそのまま符号の誤りになる。**
+  correlated_with: [T18, X15, I25, L06, L07, V02]
+  economic_rationale: >-
+    **サプライチェーンの上流を先読みできる数少ない手段。**
+    主要顧客の業績が悪化すれば、発注が減るのは数四半期後。
+    L07（顧客モメンタム、OSAP `iomom_cust` t=4.1）が価格で捉える現象を、
+    ファンダメンタルで捉える版。小型株では単独で株価を決めることがある（I25 一本足リスク）。
+  evidence_tier: T2
+  references:
+    - "https://www.openassetpricing.com/"
+    - "OSAP CustomerMomentum t=3.8 / iomom_cust t=4.1"
+    - "米国: ASC 280-10-50-42（主要顧客の開示）"
+  markets: [JP, US]
+  review: {status: verified}
+
+N22:
+  formula: "市場区分の変更（プライム↔スタンダード↔グロース）の有無と方向"
+  inputs: [TD_disclosure, exchange_designation]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（分類）"
+  missing_bias: "日本固有の制度。米国は取引所間の移行（NASDAQ↔NYSE）が対応するが意味が違う。"
+  correlated_with: [N23, N44, K12, K39, O13, J06]
+  economic_rationale: >-
+    **降格はパッシブ売り、昇格は買い。** TOPIX の構成銘柄縮小（K12、2028年に1,200銘柄へ）
+    と連動しており、**今後数年は制度要因で需給が動く時限的なテーマ**。
+    ただし降格は上場維持基準への抵触（N23/N44）と相関するので、
+    **需給要因と信用リスク要因が混在する。** 分離するには N44 で条件付けする必要がある。
+    OSAP `ExchSwitch` t=3.6（米国）。
+  evidence_tier: T2
+  references:
+    - "https://www.openassetpricing.com/"
+    - "OSAP ExchSwitch t=3.6"
+    - "https://www.jpx.co.jp/english/equities/follow-up/02.html"
+  markets: [JP, US]
+  review: {status: verified}
+
+N25:
+  formula: "IPO時のロックアップ契約の解除日までの営業日数"
+  inputs: [IPO_prospectus, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（日数）"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: >-
+    **目論見書からの抽出が必要で、過去に遡るのが難しい。**
+    日本はロックアップ期間が90日/180日と、価格条件付き解除（公開価格の1.5倍等）の
+    2種類があり、**後者は株価次第で解除日が変わる**ので日数で表現できない。
+  correlated_with: [N24, F05, F06, J07, K34]
+  economic_rationale: >-
+    ∩型。**解除前は需給が締まり、解除直後に売り圧力が出る。**
+    日本の新興市場では顕著で、ベンチャーキャピタルの持分が一斉に放出されることがある。
+    N24（上場後経過年数、LAW-48 IPO後の長期劣後）と併せて、
+    **IPO後3年程度は構造的な需給悪化要因が続く**と考えるべき。
+  evidence_tier: T3
+  references:
+    - "https://www.openassetpricing.com/"
+    - "OSAP IndIPO t=4.0 / AgeIPO との関連"
+  markets: [JP, US]
+  review: {status: verified}
+
+N28:
+  formula: "同一日に決算発表を行う銘柄数"
+  inputs: [earnings_calendar]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（カウント）"
+  missing_bias: >-
+    決算発表予定日は事前に開示されるが、**変更されることがある。**
+    予定日で計算するか実績日で計算するかで値が変わる。**PIT を守るなら
+    「その時点で公表されていた予定日」を使う**べきで、実績日を使うとルックアヘッド。
+  correlated_with: [N01, N02, N04, N05, N06, N29, O01]
+  economic_rationale: >-
+    **注目が分散する日の決算はドリフトが強く長い。**
+    日本は決算発表が特定日に極端に集中する（3月期決算が5月上旬に数百社）ため、
+    米国より効果が大きい可能性がある。
+    **LAW-27（ネグレクト）× LAW-28（PEAD）を、企業属性ではなくタイミングで捉える別ルート。**
+    N06 が予想データ依存で日本の小型株で使えないのに対し、
+    **N28 は決算カレンダーだけで計算でき、欠損しない**という実務上の大きな利点がある。
+  evidence_tier: T3
+  references:
+    - "https://www2.econ.osaka-u.ac.jp/econ_society/dp/2125.pdf"
+    - "投資家の注意力の限界に関する研究群に基づく。日本での定量的実証は未確認"
+  markets: [JP, US]
+  review: {status: verified}
+
+N31:
+  formula: "期初の通期営業利益予想 / 前期実績営業利益 - 1"
+  inputs: [OP_guidance, OP]
+  period_convention: GUIDE_CO
+  consolidation: consolidated
+  accounting_standard_note: "会社予想。日本は義務開示。"
+  zero_denominator_policy: >-
+    前期の営業利益がゼロ・負なら比率が意味を失う。**売上比（(予想OP - 実績OP)/REV）で代替する。**
+  missing_bias: "米国はガイダンスが任意なので欠損が多い。日本は義務でほぼ全銘柄。"
+  correlated_with: [N07, N08, N09, C19, C20, N32]
+  economic_rationale: >-
+    **日本固有。期初予想が保守的すぎる企業は上方修正の宝庫。**
+    日本企業は期初に控えめな予想を出す傾向があり（N09 で測る）、
+    N31 が低い企業ほど後で上方修正する余地が大きい。**符号が直感と逆に見える**
+    — 「期初予想が弱気＝悪い会社」ではなく「期初予想が弱気＝保守的＝上振れ余地」。
+    ただし本当に業績が悪い企業も低くなるので、**N09（過去の保守性）で条件付けないと
+    単に業績が悪い企業を買うことになる。**
+  evidence_tier: T3
+  references:
+    - "https://www2.econ.osaka-u.ac.jp/econ_society/dp/2125.pdf"
+    - "構造的判断。日本企業の予想の保守性は広く指摘されるが、この形での実証は未確認"
+  markets: [JP]
+  review: {status: verified}
+
+N36:
+  formula: "リコール・製品事故の発生と、対象製品の売上比率"
+  inputs: [NEWS, LLM, TD_disclosure]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "対象製品の売上が不明なら件数と報道量で代替。"
+  missing_bias: >-
+    **報道量に依存するので、大企業ほど検出されやすい。**
+    小型株のリコールは報道されず見逃す。**O カテゴリと逆方向に偏る**（ネグレクト銘柄で
+    悪材料を見逃す）という、リスク管理上まずい形の偏り。
+  correlated_with: [N20, N37, N38, Y06, Y07, U19]
+  economic_rationale: >-
+    自動車・食品・医療機器で致命的になりうる。直接の費用（回収・賠償）に加え、
+    ブランド毀損が長期に効く。**Y06（不祥事の履歴）が示す通り再発率が高い**ので、
+    1件目を組織文化の問題の兆候として扱う。
+  evidence_tier: T3
+  references:
+    - "構造的判断。個別事象なので断面での実証は困難"
+  markets: [JP, US]
+  review: {status: verified}
+
+N37:
+  formula: "サイバー攻撃・情報漏洩の発生と、影響範囲（件数・停止日数）"
+  inputs: [NEWS, LLM, TD_disclosure]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: >-
+    **米国は SEC のサイバーセキュリティ開示規則（2023年施行）で、重要なインシデントは
+    4営業日以内の 8-K 開示が義務。日本には同等の義務が無い。**
+    したがって**米国の方が検出が速く確実**という制度差がある。
+  zero_denominator_policy: "na"
+  missing_bias: >-
+    N36 と同じく報道依存。加えて**日本は開示義務が無いので、中小型株は
+    公表せずに済ませることがある。** 検出できないこと自体がリスク。
+  correlated_with: [N36, N20, Y06, Y09, W14]
+  economic_rationale: >-
+    近年増加している。直接被害（復旧費用・賠償）より、**事業停止の期間**が効く。
+    サプライチェーン攻撃では取引先にも波及するので、L06/L07（仕入先・顧客モメンタム）
+    との連動を見る価値がある。**中小型株は開示が遅れがちで、後から発覚する。**
+  evidence_tier: T3
+  references:
+    - "米国: SEC Cybersecurity Disclosure Rules（17 CFR 229.106、2023年施行）"
+    - "構造的判断。個別事象なので断面での実証は困難"
+  markets: [JP, US]
+  review: {status: verified}
+
+N38:
+  formula: "拠点の被災・サプライチェーン寸断の影響を LLM が -5〜0 で採点"
+  inputs: [LLM, NEWS, facility_locations]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（スコア）"
+  missing_bias: >-
+    **拠点の所在地情報が必要だが、開示が粗い。** 有報の「主要な設備の状況」から
+    抽出できるが、サプライヤーの所在地までは分からない。**間接的な被害を捉えられない。**
+  correlated_with: [N36, N37, Y11, V07, V08, T19]
+  economic_rationale: >-
+    日本は地震・水害リスクが構造的に高い。Y11（気候・地震の物理リスク）が
+    平時の潜在リスクを測るのに対し、N38 は実際に起きた事象の影響を測る。
+    **短期の生産停止は数四半期で回復するが、顧客を失うと戻らない**ので、
+    N41（大口顧客の喪失）への波及を見る必要がある。
+  evidence_tier: T3
+  references:
+    - "構造的判断。個別事象なので断面での実証は困難"
+  markets: [JP, US]
+  review: {status: verified}
+
+N39:
+  formula: "主力製品の特許満了までの残存年数（売上加重）"
+  inputs: [LLM, patent_data, segment_revenue]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "主力製品が特定できなければ欠損。"
+  missing_bias: >-
+    **医薬・素材以外ではほぼ意味を持たない。** 実質的に U-6（医薬）専用で、
+    汎用の N カテゴリに置いているのは分類上の妥協（C11/C12 と同じ問題）。
+    特許の特定は LLM に頼るので、**製品と特許の紐付けの誤りが直接効く。**
+  correlated_with: [U35, U36, U37, X07, X08, T16]
+  economic_rationale: >-
+    **医薬では決定的。特許満了で後発品が出ると売上が数割落ちる。**
+    **保有期間 6M〜5Y という設計では、5年以内に満了する特許は必ず影響する**ので、
+    無視できない。PER が低く見える医薬企業の多くは、
+    パテントクリフを市場が織り込んでいるだけである可能性が高い
+    — **A カテゴリのバリュートラップの業種特有の形。**
+  evidence_tier: T3
+  references:
+    - "構造的判断。パテントクリフの株価影響は実務上自明だが、断面パラメータとしての実証は未確認"
+  markets: [JP, US]
+  review: {status: verified}
+
+N41:
+  formula: "大口顧客の獲得・喪失の開示と、対象売上 / REV"
+  inputs: [LLM, TD_disclosure, customer_disclosure]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: "N21 と同じ開示基準の日米差。"
+  zero_denominator_policy: "REV>0。金額が不明なら定性スコアで代替。"
+  missing_bias: >-
+    **獲得は開示され、喪失は開示されにくい**という非対称がある。
+    企業は良い知らせを積極的に出すので、**N41 は正の方向に偏る。**
+    喪失は N21（顧客の業績変化）や X15（顧客の株価）から推定するしかない。
+  correlated_with: [N21, X15, I25, V02, T18, C11]
+  economic_rationale: >-
+    **小型株では単独で株価を決める。** 売上の30%を占める顧客を失えば、
+    それだけで事業が成立しなくなる。I25（単一要因への依存度）と T18（顧客集中リスク）が
+    静的なリスクを測るのに対し、N41 はそれが現実化したイベントを捉える。
+    **開示の非対称性があるので、喪失側は X15（顧客の株価）で先回りする方が確実。**
+  evidence_tier: T3
+  references:
+    - "https://www.openassetpricing.com/"
+    - "OSAP CustomerMomentum t=3.8 との関連。イベントとしての実証は未確認"
+  markets: [JP, US]
+  review: {status: verified}
+
+N45:
+  formula: "LLM が「想定カタリストが顕在化するまでの月数」を推定"
+  inputs: [LLM, T23]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  zero_denominator_policy: "na（月数）"
+  missing_bias: >-
+    **完全に LLM 依存で、過去に遡れない**（T カテゴリと同じ制約。§6.4 の前向き記録が必要）。
+    さらに **LLM の期間推定は較正されていない** — 「6ヶ月」と言ったものが
+    実際に6ヶ月で起きる頻度は未知。T44（較正記録）が貯まるまで信用度は不明。
+  correlated_with: [T23, T24, T29, T30, R18, R19, N14]
+  economic_rationale: >-
+    ∩型。**保有期間 6M〜5Y の設計では「いつ起きるか」が決定的。**
+    3ヶ月で起きるカタリストは既に価格に入っている可能性が高く、
+    10年後のカタリストは待つコストが大きすぎる。
+    §1.5 の h*（想定保有期間）の直接の入力になり、R19（カタリストの期限超過）で
+    事後検証される。**「いつまでも起きないカタリスト」が最も資本効率を毀損する。**
+  evidence_tier: T3
+  references:
+    - "構造的判断。LLM 由来のため §6.4 のカットオフ後検証・前向き記録が必要"
+  markets: [JP, US]
+  review: {status: verified}
+
+N46:
+  formula: "長期(3-5年)EPS成長率予想 - 短期(1年)EPS成長率予想"
+  inputs: [EST_long_term_growth, EST_short_term_growth]
+  period_convention: GUIDE_CONS
+  consolidation: consolidated
+  accounting_standard_note: "コンセンサス。ベンダーごとに長期成長率の定義が違う。"
+  zero_denominator_policy: "na（差分）。いずれかが欠損なら欠損。"
+  missing_bias: >-
+    **長期成長率予想を出すアナリストは短期より少ない**ので、
+    N10 よりさらに欠損が多い。日本の小型株ではほぼ使えない（OQ-22 と同根）。
+  correlated_with: [N10, N11, N47, A26, C26, A42]
+  economic_rationale: >-
+    **長期だけ強気なのは、実現しない期待の兆候。**
+    短期は検証されるが長期は検証されないので、アナリストは長期に楽観を逃がす。
+    N47（長期成長率予想が高い銘柄は劣後、OSAP `fgr5yrLag` t=4.9）と、
+    A26（インプライド成長率）、C26（平均回帰調整）が同じ現象を別角度から捉えている。
+    **「高成長の物語」に高い値段が付いているときに買わないための装置。**
+  evidence_tier: T2
+  references:
+    - "https://www.openassetpricing.com/"
+    - "OSAP EarningsForecastDisparity t=5.1 / fgr5yrLag t=4.9"
+  markets: [JP, US]
+  review: {status: verified}
+
+N49:
+  formula: "z(コンセンサス推奨) × z(空売り残高比率)"
+  inputs: [N48, K19]
+  period_convention: GUIDE_CONS
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "N48 または K19 が欠損なら欠損。"
+  missing_bias: >-
+    **K19（空売り残高）は米国の制度（月2回公表）。日本は K09（0.5%以上の個別報告）で
+    粒度が違う。** N48（推奨）も日本の小型株では欠損。**実質的に米国大型株専用。**
+  correlated_with: [N48, N12, K19, K20, K21, K52]
+  economic_rationale: >-
+    **アナリストが強気で空売りも多い銘柄は特に危険。**
+    情報を持つ空売り筋とセルサイドの見解が正面から対立している状態で、
+    実証では空売り側が正しい（OSAP `Recomm_ShortInterest` t=4.1）。
+    N48（推奨が高い銘柄ほど劣後、t=3.2）を空売り情報で増幅した形。
+    **セルサイドの推奨を逆張り指標として使う**という、直感に反するが頑健な関係。
+  evidence_tier: T1
+  references:
+    - "https://www.openassetpricing.com/"
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+    - "OSAP Recomm_ShortInterest t=4.1 / ConsRecomm t=3.2"
+  markets: [US]
+  review: {status: verified}

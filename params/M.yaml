@@ -12,8 +12,10 @@
   category_name: 株主構成・ガバナンス
   subsection: null
   definition: 役員 + 創業家保有 / 発行済株式数
-  formula: null
-  inputs: null
+  formula: (役員保有株数 + 創業家保有株数) / SHARES
+  inputs:
+  - officer_holdings
+  - SHARES
   sign: cap
   buy_class: main
   sell_class: useful
@@ -27,24 +29,32 @@
   - SEC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: POINT
-  consolidation: consolidated
+  period_convention: FY
+  consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: SHARES>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**「創業家」の判定が機械的にできない。** 大株主リストの氏名と役員名の突合で 近似するしかなく、姓が同じだけの他人や、資産管理会社経由の保有を取りこぼす。 日本は資産管理会社（〇〇興産など）経由が非常に多いので、**過小評価に偏る。**'
   normalization: rank_market
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - M07
+  - M15
+  - M22
+  - M29
+  - J07
+  - K35
+  - K36
+  economic_rationale: ∩型。**利害一致（スキン・イン・ザ・ゲーム）と支配の弊害のトレードオフ。** 低すぎると経営陣が株主価値に無関心になり、高すぎると少数株主が軽視され 浮動株が枯れる（J07）。最適点は業種と企業規模で違うので業種内中央値を暫定 x* とするが、 **理論的な最適点があるわけではないので Phase 1 で分布を見て決め直す。**
+  references:
+  - 構造的判断。日本のコーポレートガバナンス・コードは利害一致を推奨するが、最適水準の実証は無い
   notes: 利害一致（スキン・イン・ザ・ゲーム）。高すぎると少数株主軽視・流動性欠如
   notes_extra: null
   provenance:
@@ -58,23 +68,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
+    nonlinear: override
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: M02
   name_ja: インサイダー純買い額(6ヶ月)
@@ -82,8 +94,10 @@
   category_name: 株主構成・ガバナンス
   subsection: null
   definition: 買付額 - 売却額（自社株報酬の売却は除外）
-  formula: null
-  inputs: null
+  formula: SUM(買付額) - SUM(売却額)、直近6ヶ月、自社株報酬の定期売却を除外
+  inputs:
+  - insider_transactions
+  - K42
   sign: positive
   buy_class: main
   sell_class: useful
@@ -97,24 +111,34 @@
   - SEC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
   period_convention: POINT
-  consolidation: consolidated
+  consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
+  pit_lag_days: 2
+  zero_denominator_policy: 取引が1件も無ければゼロで正当（欠損にしない）。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日米で鮮度が桁違い。米国 Form 4 は取引から2営業日、日本の売買報告書は翌月15日まで （最長45日超）。** 同じ指標でも米国は速報、日本は遅行指標になる。 さらに**米国は 10b5-1 プラン（K42）を除外しないと情報量がゼロに近づく** — 事前計画売買は情報を含まない。'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - M03
+  - M04
+  - M05
+  - M06
+  - M30
+  - K42
+  - F03
+  economic_rationale: '**経営陣は自社の内実を最もよく知っている。** そして自腹で買うのは、 株価が安いと本気で考えているとき以外にほとんど無い（売る理由は分散・納税・生活など 多数あるが、買う理由は基本的に1つしかない）。だから M05（売り）より M02（買い）の方が 情報量が多いという非対称が生まれる。**マイクロキャップで特に強い**という報告があり、 O カテゴリ（ネグレクト）との相乗が期待できる。'
+  references:
+  - https://www.sciencedirect.com/science/article/abs/pii/S092753982500088X
+  - https://arxiv.org/html/2602.06198
+  - https://www.acadian-asset.com/investment-insights/owenomics/firms-are-the-smart-money
   notes: マイクロキャップで最強クラス。定期的な売却（ルーティン）は必ず除外する（LAW-33）
   notes_extra: null
   provenance:
@@ -128,21 +152,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: M03
   name_ja: 非ルーティンインサイダー取引
@@ -150,8 +177,10 @@
   category_name: 株主構成・ガバナンス
   subsection: null
   definition: 過去の取引パターンから外れた取引の抽出
-  formula: null
-  inputs: null
+  formula: 過去3年の取引パターンから外れた取引のみを抽出した純買い額
+  inputs:
+  - insider_transactions
+  - K42
   sign: positive
   buy_class: main
   sell_class: useful
@@ -164,7 +193,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -172,16 +201,24 @@
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
+  pit_lag_days: 2
+  zero_denominator_policy: ルーティン判定に3年の履歴が要る。履歴不足なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**3年の取引履歴が要るので、上場3年未満と、そもそも取引が少ない企業で判定不能。** 小型株は役員の取引自体が稀なので、「ルーティンか非ルーティンか」の判定に必要な サンプルが集まらない。**O カテゴリと逆方向に偏る。**'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - M02
+  - M04
+  - M05
+  - M30
+  - K42
+  - K49
+  economic_rationale: '**学術的には非ルーティン取引だけが予測力を持つ。** 毎年同じ月に同じ量を売買する 役員の取引は、分散や納税のスケジュールであって情報ではない。 ルーティンを混ぜると効果が薄まるので、**M02 より M03 を主軸にすべき**だが、 判定に履歴が要るぶん適用範囲が狭まるというトレードオフがある。 米国では K42（10b5-1 フラグ）が使えるので判定が容易。'
+  references:
+  - https://www.sciencedirect.com/science/article/abs/pii/S092753982500088X
+  - https://www.sciencedirect.com/science/article/abs/pii/S0929119918308824
   notes: 学術的には非ルーティン取引だけが予測力を持つ。ルーティン混入は効果を消す
   notes_extra: null
   provenance:
@@ -195,21 +232,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: M04
   name_ja: 役職重み付きインサイダー買い
@@ -217,8 +257,10 @@
   category_name: 株主構成・ガバナンス
   subsection: null
   definition: CEO=3, CFO=3, 社内取締役=2, 社外=1 で加重
-  formula: null
-  inputs: null
+  formula: SUM( 純買い額 × 役職重み )、CEO=3 CFO=3 社内取締役=2 社外=1
+  inputs:
+  - insider_transactions
+  - officer_titles
   sign: positive
   buy_class: main
   sell_class: useful
@@ -231,7 +273,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -239,16 +281,22 @@
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
+  pit_lag_days: 2
+  zero_denominator_policy: 取引が無ければゼロで正当。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**役職の正規化が必要。** 日本は「取締役常務執行役員」のような複合肩書が多く、 米国は Form 4 の officer title が自由記述。**LLM で正規化する前提だが、 その誤りがそのまま重みの誤りになる。** 重み自体（3/3/2/1）にも実証的根拠は無い。'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - M02
+  - M03
+  - M06
+  - M30
+  economic_rationale: 情報優位の階層を反映する。**CFO の買いが最も情報量が多い**という報告がある — 決算の着地を最初に知る立場にあるため。社外取締役は情報も少なく、 形式的に買う場合もあるので重みを下げる。 **ただし重み付けは仮説であり、Phase 1 で役職別の予測力を実測して較正する。**
+  references:
+  - https://www.sciencedirect.com/science/article/abs/pii/S092753982500088X
+  - 重み 3/3/2/1 は仮説であり、この配分の実証は無い
   notes: 情報優位の階層を反映。CFOの買いが最も情報量が多いという報告あり
   notes_extra: null
   provenance:
@@ -262,21 +310,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: M05
   name_ja: インサイダー売り
@@ -284,8 +335,11 @@
   category_name: 株主構成・ガバナンス
   subsection: null
   definition: 純売却額（自社株報酬の定期売却を除く）
-  formula: null
-  inputs: null
+  formula: SUM(売却額) - SUM(買付額)、自社株報酬の定期売却を除外
+  inputs:
+  - insider_transactions
+  - K42
+  - SBC
   sign: negative
   buy_class: useful
   sell_class: main
@@ -299,24 +353,31 @@
   - SEC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: POINT
-  consolidation: consolidated
+  consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
+  pit_lag_days: 2
+  zero_denominator_policy: 取引が無ければゼロ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**自社株報酬の売却を除外できないと、株式報酬の多い企業（米国テック）が 体系的に「インサイダー売り」と判定される。** SBC（E07/F07）が大きい企業ほど 誤検出が増えるので、**業種・地域に強く偏る。**'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - M02
+  - M03
+  - M04
+  - F07
+  - K42
+  economic_rationale: '**M02（買い）と対称に扱ってはいけない。** 売る理由は分散・納税・住宅購入・離職など 非情報的なものが多数あり、買う理由は基本的に「安い」の1つしかない。 したがって**売りは弱いシグナルとして扱い、重みを買いより小さくする。** 符号を対称にすると、株式報酬の多い成長企業を体系的に減点することになる。'
+  references:
+  - https://www.sciencedirect.com/science/article/abs/pii/S092753982500088X
+  - 非対称性は広く指摘されるが、最適な重み配分の実証は無い
   notes: 買いより情報量が少ない（分散・納税など非情報的動機が多い）。売りは弱いシグナルとして扱う
   notes_extra: null
   provenance:
@@ -330,21 +391,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: M06
   name_ja: 自社株買いとインサイダー買いの一致
@@ -352,8 +416,10 @@
   category_name: 株主構成・ガバナンス
   subsection: null
   definition: 1[自社株買い実施] × 1[インサイダー純買い]
-  formula: null
-  inputs: null
+  formula: 1[F04 自社株買い実行あり] × 1[M02 > 0]
+  inputs:
+  - F04
+  - M02
   sign: positive
   buy_class: main
   sell_class: aux
@@ -366,7 +432,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -375,15 +441,23 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール積）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: F04（自社株買いの実額）と M02 の欠損を継承。日本は月次開示の集計が要る。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - M02
+  - M30
+  - F03
+  - F04
+  - F15
+  - A10
+  economic_rationale: '**会社と経営者が同じ方向に賭けている**という二重の確認。 会社の自社株買いには「EPS を嵩上げしたい」「余剰資金の使い道が無い」といった 情報以外の動機もありうるが、**経営者が同時に自腹で買っているなら、 その動機は「安い」である蓋然性が高まる。** Acadian の "Firms are the smart money" の主張を個人レベルで裏取りする形。'
+  references:
+  - https://www.acadian-asset.com/investment-insights/owenomics/firms-are-the-smart-money
+  - https://www.sciencedirect.com/science/article/abs/pii/S0929119913000278
   notes: 会社と経営者が同方向 = 割安の強い示唆
   notes_extra: null
   provenance:
@@ -397,21 +471,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: M07
   name_ja: 従業員持株会・ESOP比率
@@ -486,8 +563,10 @@
   category_name: 株主構成・ガバナンス
   subsection: null
   definition: 大量保有報告（5%ルール）の提出有無
-  formula: null
-  inputs: null
+  formula: 1 if 既知アクティビストによる大量保有報告書の提出あり（直近24ヶ月） else 0
+  inputs:
+  - EDINET_5pct
+  - SEC_13D
   sign: positive
   buy_class: main
   sell_class: useful
@@ -506,21 +585,28 @@
   - US
   industries: null
   period_convention: POINT
-  consolidation: consolidated
+  consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**「既知アクティビスト」のリストを保持する必要があり、そのリスト自体が 後知恵バイアスの温床になる。** 今アクティビストとして知られている主体を 過去に遡って適用すると、当時は無名だった主体を「既知」として扱うことになる。 **リストにも as-of 日付を持たせる必要がある**（未実装）。'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - M09
+  - M10
+  - M11
+  - M24
+  - K18
+  - N13
+  - N14
+  economic_rationale: '**日本株で特に有効。** NRI の分析では、コーポレートアクションを契機とせず アクティビストの買い集めで提出された報告について、義務発生日から公表日にかけて 累積超過リターンが増加する。日本は 5% 超で5営業日以内の提出義務があり、 **米国の 13D（10日以内、2024年から5日）より情報が速い時期があった。** 2024年の「重要提案行為」記載は133件で前年比+55%と、活動自体が増えている。'
   references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP Activism2 — Cremers and Nair 2005, JF（OSAP再現 t=2.0, 月次0.661666667%, 品質=1_good, 予測力=2_likely）
+  - https://www.nri.com/jp/media/column/osaki/20230509.html
+  - https://www.nikkei.com/article/DGXZQOTG139ZP0T11C24A2000000/
+  - https://www.businesslawyers.jp/articles/1536
   notes: LAW-44。日本株で特に有効。提出者リストを保持し、既知アクティビストとマッチング
   notes_extra: null
   provenance:
@@ -534,22 +620,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: M09
   name_ja: 「重要提案行為」の記載
@@ -557,8 +645,9 @@
   category_name: 株主構成・ガバナンス
   subsection: null
   definition: 保有目的欄に重要提案行為が含まれるか
-  formula: null
-  inputs: null
+  formula: 1 if 大量保有報告書の保有目的欄に「重要提案行為」を含む else 0
+  inputs:
+  - EDINET_5pct
   sign: positive
   buy_class: main
   sell_class: useful
@@ -571,24 +660,31 @@
   - EDI
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
-  - US
   industries: null
   period_convention: POINT
-  consolidation: consolidated
+  consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本固有の制度。** 米国では 13D（経営関与目的）と 13G（純投資）の区別が対応するが、 粒度が違う。日本の「重要提案行為」は具体的な行為類型が列挙されており、より明確。 **markets を JP に限定し、米国は K48（13D/G）で扱う。**'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - M08
+  - M10
+  - M11
+  - M24
+  - K48
+  economic_rationale: '**通常の投資目的より遥かに強いシグナル。** 「重要提案行為」を記載すると 保有報告の特例（機関投資家の簡易報告）が使えなくなるため、 **記載するのは本気で経営に介入する意思がある場合に限られる。** 制度設計上、コストを払ってでも意思表示しているという点で情報量が高い。'
+  references:
+  - https://www.nri.com/jp/media/column/osaki/20230509.html
+  - https://www.businesslawyers.jp/articles/1536
+  - 金融商品取引法 第27条の23（大量保有報告制度）
   notes: 通常の投資目的より遥かに強いシグナル。2024年で133件、前年比+55%
   notes_extra: null
   provenance:
@@ -602,21 +698,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: M10
   name_ja: アクティビスト標的スコア
@@ -624,8 +723,13 @@
   category_name: 株主構成・ガバナンス
   subsection: null
   definition: z(低PBR) + z(ネットキャッシュ比率) + z(低ROE) + z(政策保有多) + 1[親子上場]
-  formula: null
-  inputs: null
+  formula: z(-A03) + z(A16) + z(-B01) + z(政策保有株比率) + 1[K18 親会社比率 50-90%]
+  inputs:
+  - A03
+  - A16
+  - B01
+  - K17
+  - K18
   sign: positive
   buy_class: main
   sell_class: useful
@@ -638,27 +742,38 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: T1
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: 構成要素の会計基準差を継承。政策保有株の開示は日本固有。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 構成要素が3つ未満しか計算できないなら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 政策保有株比率は**日本の有報でのみ開示**されるので、米国では構成要素が1つ減る。 日米で中身が違う複合指標になる。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - A03
+  - A16
+  - B01
+  - K17
+  - K18
+  - M08
+  - M09
+  - N13
+  - N14
+  economic_rationale: '**保有報告が出る「前」に先回りする。** M08/M09 は既に公表された事実なので、 その時点で価格は動いている。アクティビストが狙う条件 （低PBR・現金過多・低ROE・政策保有多・親子上場）を先に満たす銘柄を拾う。 東証の資本コスト要請（LAW-47）が同じ条件の企業に圧力をかけているので、 **アクティビストが来なくても企業自身が動く可能性がある**という二重の期待。
+
+    **ただし DF-01 により検証できない。** 成功シナリオ（TOB・非公開化）で 廃止された銘柄は無料の株価データから消える（取得率 0/15）。 **バックテストすると勝ち筋だけが削除される**ので、この指標の有効性は 有料データを入れるまで測定不能。'
   references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP Activism1 — Cremers and Nair 2005, JF（OSAP再現 t=3.1, 月次0.9025%, 品質=1_good, 予測力=1_clear）
+  - https://note.com/tatsuya_sabato/n/n035f8265adb9
+  - https://www.nri.com/jp/media/column/osaki/20230509.html
+  - https://corpgov.law.harvard.edu/2025/10/21/tokyo-stock-exchange-initiative-on-cost-of-capital-and-stock-price-conscious-management/
+  - 合成仮説であり、この形での実証は無い。加えて DF-01 により検証手段が無い
   notes: 保有報告が出る「前」に先回りする。日本の中小型株で最も妙味がある設計
   notes_extra: null
   provenance:
@@ -672,22 +787,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: M11
   name_ja: 保有報告の追加取得
@@ -1376,8 +1493,10 @@
   category_name: 株主構成・ガバナンス
   subsection: null
   definition: 交代の有無と背景（内部昇格 / 外部招聘 / 引責）
-  formula: null
-  inputs: null
+  formula: 社長交代の有無と背景を LLM が分類（内部昇格 / 外部招聘 / 引責 / 定年）
+  inputs:
+  - LLM
+  - TD_disclosure
   sign: context
   buy_class: main
   sell_class: main
@@ -1391,7 +1510,7 @@
   - TD
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1400,15 +1519,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: na（分類）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**「引責」は開示文言に現れない。** 「一身上の都合」「本人の申し出」と書かれるので、 LLM が業績推移や不祥事（Y06）と突き合わせて推定するしかない。 **推定の誤りが符号を反転させる**（引責交代は変化の期待、定年は現状維持）。'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - M14
+  - M15
+  - M22
+  - W13
+  - T41
+  - N18
+  economic_rationale: 符号は文脈依存。**外部招聘と引責交代は変化のカタリスト**で、 低 ROE・低 PBR の企業では改善期待になる。一方、好業績企業での交代は 継続性のリスクになる。**B04（ROIC-WACC）の水準で符号が変わる**ので、 単独で符号を固定してはいけない。T41（資本配分の質）の評価が交代でリセットされる点も重要。
+  references:
+  - 構造的判断。CEO交代の株価影響の研究は多いが、文脈依存で符号が定まらない
   notes: 外部招聘や引責交代は変化のカタリスト。内部昇格は現状維持
   notes_extra: null
   provenance:
@@ -1422,21 +1548,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: M22
   name_ja: 創業家の世代
@@ -1580,8 +1709,11 @@
   category_name: 株主構成・ガバナンス
   subsection: null
   definition: 提案の有無・提案者・議案内容
-  formula: null
-  inputs: null
+  formula: 1 if 株主総会に株主提案が提出された else 0（提案者と議案内容を付す）
+  inputs:
+  - LLM
+  - TD_disclosure
+  - AGM_notice
   sign: positive
   buy_class: main
   sell_class: useful
@@ -1595,7 +1727,7 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1604,15 +1736,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**招集通知は PDF で、機械抽出が不安定。** 日本は東証の適時開示に載らない場合もあり、 企業サイトからの取得になる。取りこぼしは「提案なし」に倒れる。'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - M08
+  - M09
+  - M25
+  - M13
+  - K18
+  economic_rationale: M08/M09 と並ぶアクティビスト圧力の直接証拠。**大量保有報告を出さずに 株主提案だけを行う主体もいる**（5%未満でも提案権はある）ので、 M08 では捕捉できない圧力を拾える。可決されなくても、 **提案が出ること自体が経営陣への圧力**になり、企業側の自主的な改善を促す。
+  references:
+  - https://www.nikkei.com/article/DGXZQOTG139ZP0T11C24A2000000/
+  - 会社法 第303条（株主提案権）
   notes: M08/M09 と並ぶアクティビスト圧力の直接証拠
   notes_extra: null
   provenance:
@@ -1626,21 +1765,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: M25
   name_ja: 議決権行使結果
@@ -1648,8 +1790,10 @@
   category_name: 株主構成・ガバナンス
   subsection: null
   definition: 取締役選任議案の賛成率
-  formula: null
-  inputs: null
+  formula: 取締役選任議案（特に社長）の賛成率
+  inputs:
+  - TD_disclosure
+  - AGM_results
   sign: positive
   buy_class: useful
   sell_class: main
@@ -1662,7 +1806,7 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1671,15 +1815,23 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 議案が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 日本は臨時報告書で議決権行使結果が開示される（義務）。**米国は 8-K で開示されるが 形式が非定型。** 日本の方が機械抽出しやすいという珍しい例。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - M24
+  - M12
+  - M13
+  - M26
+  - M27
+  - K36
+  economic_rationale: '**賛成率80%割れは機関投資家の不信任。** 議決権行使助言会社の反対推奨が出ると 賛成率が下がるので、**外部の専門家がガバナンスに問題ありと判断した証拠**になる。 賛成率の低下が続くと経営陣の交代（M21）や、企業側の自主的な資本政策変更（F20）に つながることがある。**売り判定で価値が高い**（sell=main）。'
+  references:
+  - 金融商品取引法 第24条の5第4項（臨時報告書：議決権行使結果）
+  - 構造的判断。賛成率と将来リターンの断面実証は未確認
   notes: 賛成率80%割れは機関投資家の不信任。変化の前兆になる
   notes_extra: null
   provenance:
@@ -1693,21 +1845,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: M26
   name_ja: 社外取締役の質
@@ -1852,8 +2007,10 @@
   category_name: 株主構成・ガバナンス
   subsection: null
   definition: 関連当事者取引の規模 / 売上
-  formula: null
-  inputs: null
+  formula: 関連当事者取引の金額 / REV
+  inputs:
+  - related_party_transactions
+  - REV
   sign: negative
   buy_class: useful
   sell_class: main
@@ -1866,24 +2023,32 @@
   - EDI
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: POINT
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: na
+  accounting_standard_note: '**開示基準に重要性の閾値があるので、小規模な取引は開示されない。** 日本は連結財務諸表規則、米国は Reg S-K Item 404 で基準が違う。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: REV>0。関連当事者取引が無ければゼロで正当。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 注記からの抽出なので、開示形式が非定型な企業で取りこぼす。取りこぼしは「取引なし」に倒れる。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K18
+  - M23
+  - M10
+  - N14
+  - E25
+  economic_rationale: '**親子上場での利益移転（トンネリング）リスクの直接測定。** K18（親会社の保有比率が高い）は TOB 期待という上side を持つが、 同時に**少数株主から親会社へ利益が移転される downside** も持つ。 M28 が大きい企業では後者が現実に起きている可能性が高く、 **K18 の符号を反転させうる条件変数**として機能する。'
+  references:
+  - 連結財務諸表規則 第15条の4の2（関連当事者との取引）
+  - '米国: Regulation S-K Item 404'
+  - 構造的判断。トンネリングの実証研究は新興国中心で、日米では限定的
   notes: 親子上場での利益移転リスク。K18 の裏面であり、TOB期待の減点要因
   notes_extra: null
   provenance:
@@ -1897,21 +2062,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: M29
   name_ja: 従業員持株会の買付動向
@@ -1986,8 +2154,9 @@
   category_name: 株主構成・ガバナンス
   subsection: null
   definition: 同一期間に買い付けた役員の人数
-  formula: null
-  inputs: null
+  formula: 同一90日間に買い付けを行った役員の実人数
+  inputs:
+  - insider_transactions
   sign: positive
   buy_class: main
   sell_class: useful
@@ -2000,7 +2169,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -2008,16 +2177,22 @@
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
+  pit_lag_days: 2
+  zero_denominator_policy: na（カウント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**役員数が少ない小型株では、そもそも「複数人」が発生しにくい。** 大企業の方がクラスタが観測されやすいので、O カテゴリ（小型株重視）と逆方向に偏る。 役員数で正規化すべきかは要検討。'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - M02
+  - M03
+  - M04
+  - M06
+  economic_rationale: '**単独の買いより複数人の同時買いが遥かに強い。** 1人なら個人的な事情 （自社株買付制度への参加、住宅ローン完済など）で説明できるが、 複数人が同時に動くのは共通の情報を持っている蓋然性が高い。 M06（会社との一致）と同じく、**独立な意思決定の一致**に情報を見出す構造。'
+  references:
+  - https://www.sciencedirect.com/science/article/abs/pii/S092753982500088X
+  - https://arxiv.org/html/2602.06198
   notes: 単独の買いより複数人の同時買いが遥かに強い
   notes_extra: null
   provenance:
@@ -2031,19 +2206,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1

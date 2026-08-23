@@ -8,19 +8,19 @@ generated_from:
 - params/_overrides.yaml
 generated_by: tools/build_registry.py
 generated_on: '2026-08-23'
-total_parameters: 769
-verified: 118
-draft: 651
+total_parameters: 770
+verified: 152
+draft: 618
 open_questions_by_id:
   q01: 208
   q04: 208
-  q05: 233
-  q06: 651
-  q09: 651
-  q10: 651
-  q12: 595
-  q11: 513
-  q08: 53
+  q05: 227
+  q06: 618
+  q09: 618
+  q10: 618
+  q12: 562
+  q11: 487
+  q08: 50
 categories:
 - letter: A
   name_ja: バリュエーション
@@ -63,7 +63,7 @@ categories:
   count: 30
 - letter: N
   name_ja: カタリスト・イベント
-  count: 49
+  count: 50
 - letter: O
   name_ja: アナリスト・注目度（ネグレクト）
   count: 24
