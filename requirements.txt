@@ -1,0 +1,23 @@
+# 263AT の依存。docs/04_security.md §6（サプライチェーン）に従いバージョンを固定する。
+#
+#   python -m venv .venv
+#   .venv/Scripts/python.exe -m pip install -r requirements.txt
+#
+# 依存は最小に保つ。新しいパッケージを足す前に §6 の S4 を通すこと。
+
+pandas==2.2.3
+numpy==2.3.5
+pyarrow==25.0.1
+PyYAML==6.0.2
+
+# 分析用（無くても registry/probe は動く）
+scipy==1.16.3
+polars==1.43.2
+
+# Open Source Asset Pricing の再現データ取得
+openassetpricing==0.0.2
+
+# 注意: yfinance は検証の結果、上場廃止銘柄（特に買収による廃止）の株価が
+# 取得できないため、バックテストには使えない。docs/03_data_feasibility.md DF-01 参照。
+# 現在値の確認用に入れる場合のみ、以下を有効にする。
+# yfinance==1.6.0
