@@ -188,6 +188,47 @@ def zero_volume_days(rows: Sequence[dict], window: int = 60) -> list[int | None]
     return out
 
 
+def detect_split_misadjustment(rows: Sequence[dict], bars: Sequence[Bar],
+                               tol: float = 0.25) -> list[dict]:
+    """**分割の二重調整・未調整を検出する。**
+
+    調整が正しければ、分割日をまたぐリターンは通常の日と変わらない。
+    誤っていれば `|r| ≈ ln(split_factor)` になる。
+
+    なぜ要るか
+    ----------
+    **データ源によって「分割調整済みか」が違い、しかも明記されていない。**
+    実測（2026-08-23）: yfinance は `auto_adjust=False` を指定しても
+    **分割については既に調整済みの価格を返す**（配当だけ未調整）。
+    それに気づかず bars.adjust() を掛けると**二重調整**になり、
+    5分割なら分割日に +161%（= ln 5）のリターンが立つ。
+
+    これは spec §8 の「バックテストでは検出されず成績を良く見せる方向に効く」
+    誤りそのものである — **モメンタム（G）は偽の急騰を買い、
+    リバーサル（H）は偽の急落を買う。**
+
+    → **新しいデータ源を繋いだら必ずこれを通す。**
+    """
+    out = []
+    for i, b in enumerate(bars):
+        if b.split_factor == 1.0 or i == 0:
+            continue
+        prev, cur = rows[i - 1], rows[i]
+        if prev["close"] <= 0 or cur["close"] <= 0:
+            continue
+        r = math.log(cur["close"] / prev["close"])
+        expected = math.log(b.split_factor)
+        if abs(abs(r) - expected) < tol:
+            out.append({
+                "date": b.date, "split_factor": b.split_factor,
+                "log_return": r,
+                "diagnosis": ("**二重調整**（データ源が既に分割調整済みなのに"
+                              "さらに調整した）" if r > 0 else
+                              "**未調整**（split_factor が渡されていない）"),
+            })
+    return out
+
+
 def to_jpy(values: Iterable[float | None], fx: Iterable[float | None]) -> list[float | None]:
     """円換算。**集計・比較の時にだけ呼ぶ**（§5）。
 
@@ -267,8 +308,18 @@ def _test() -> int:
     # 7) 円換算は明示的に呼ぶまで起きない
     check("円換算", to_jpy([10.0, None], [150.0, 150.0]) == [1500.0, None])
 
+    # 8) 分割の二重調整を検出する（実データで踏んだ罠、2026-08-23）
+    #    データ源が既に分割調整済みなのに split_factor を渡すと二重になる
+    already = [_bar("2026-01-05", 2848.0), _bar("2026-01-06", 2861.0, split_factor=5.0)]
+    d = detect_split_misadjustment(adjust(already), already)
+    check("**二重調整を検出する**", len(d) == 1 and "二重調整" in d[0]["diagnosis"])
+    # 正しく生価格が渡っていれば検出されない
+    proper = [_bar("2026-01-05", 14240.0), _bar("2026-01-06", 2861.0, split_factor=5.0)]
+    check("正しい生価格では検出しない",
+          detect_split_misadjustment(adjust(proper), proper) == [])
+
     print("-" * 66)
-    print("%d/%d 通過" % (7 + 15 - len(fails), 7 + 15))
+    print("%d/%d 通過" % (24 - len(fails), 24))
     return 1 if fails else 0
 
 
