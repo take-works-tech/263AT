@@ -135,7 +135,8 @@ def survivorship(dates: list[str]) -> list[tuple[str, int, int, float]]:
     return out
 
 
-def spread_ic(rows: list[dict], f: SH.Fit, q: float = 0.2) -> dict:
+def spread_ic(rows: list[dict], f: SH.Fit, q: float = 0.2,
+              top_n: int = 20) -> dict:
     """推定した重みで、**上位分位と下位分位のリターン差**を測る。
 
     IC（順位相関）ではなく分位差にするのは、
@@ -168,7 +169,17 @@ def spread_ic(rows: list[dict], f: SH.Fit, q: float = 0.2) -> dict:
             #
             # 正しい問いは「上位分位は、何もしないより儲かるか」である。
             # → **上位 − 全体平均**（等加重で全部買った場合との差）
-            "excess": top - allm}
+            "excess": top - allm,
+            # **実際に持つ銘柄数で測る。**
+            # 上位20% は 600銘柄の断面なら 120銘柄になるが、
+            # **3M円で最小ポジション2%なら、持てるのは数十銘柄**である。
+            # 120銘柄の平均は「その分位が良いか」を測るが、
+            # **十数銘柄に集中したときに何が起きるか**は測らない。
+            # 集中するほど分散が効かず、上位の1〜2銘柄で結果が決まる。
+            # **最終的な利益はこちらで決まる。**
+            "top_n": (sum(x[1] for x in scored[:top_n]) / top_n
+                      - allm) if len(scored) >= top_n else None,
+            "n_top": top_n}
 
 
 def main() -> int:
@@ -177,6 +188,8 @@ def main() -> int:
     ap.add_argument("--panel", default="",
                     help="data/panel 配下の枝（対照条件を測るため）")
     ap.add_argument("--min-train-obs", type=int, default=1000)
+    ap.add_argument("--top-n", type=int, default=20,
+                    help="**実際に持つ銘柄数。** 上位分位ではなくこの本数で測る")
     ap.add_argument("--cost-bps", type=float, default=30.0,
                     help="片道コスト。**リバランスのたびに両側で払う**")
     args = ap.parse_args()
@@ -214,7 +227,7 @@ def main() -> int:
         f = SH.fit(train, PARAMS)
         # **検証は T 当日の断面。** 訓練には一切入っていない
         test = [r for r in panel if r["date"] == T]
-        st = spread_ic(test, f)
+        st = spread_ic(test, f, top_n=args.top_n)
         results.append((T, f, st))
         if "spread" in st:
             print("%-12s %8d %8d %6g %7.1f %+8.2f%% %+8.2f%% %+8.2f%%"
@@ -245,6 +258,14 @@ def main() -> int:
         print("  **上位20%% − 全体平均   %+.2f%%**（%d日の保有あたり）"
               % (100 * mean, args.horizon_days))
         print("  **正だった回数         %d / %d**" % (n_pos, len(sp)))
+        tn = [st["top_n"] for _, _, st in results if st.get("top_n") is not None]
+        if tn:
+            tm = sum(tn) / len(tn)
+            n_pos_n = sum(1 for x in tn if x > 0)
+            print("  **上位%d銘柄 − 全体平均 %+.2f%%**（%d日）  正 %d / %d"
+                  % (args.top_n, 100 * tm, args.horizon_days,
+                     n_pos_n, len(tn)))
+            print("     ← **実際に持つ集中度。最終的な利益はこちらで決まる**")
         if ls:
             lm = sum(ls) / len(ls)
             print("  （参考）上位−下位      %+.2f%%  ← **ロングショートの指標。"
