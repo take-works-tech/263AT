@@ -47,6 +47,7 @@ import ff49                # noqa: E402
 import listing as LS       # noqa: E402
 import normalize as NZ     # noqa: E402
 import params_us as PU     # noqa: E402
+import params_px as PX     # noqa: E402
 import portfolio as PF     # noqa: E402
 import prices as PR        # noqa: E402
 import universe as UV      # noqa: E402
@@ -55,8 +56,36 @@ FX = 150.0
 CACHE = ROOT / "data" / "panel"
 
 # 符号（カタログの sign）。**生の値は歪めず、ここで掛ける**
+# **符号はカタログの符号列そのまま。** ここで推測しない。
 SIGN = {"E29": +1, "B22": -1, "E03": -1, "F24": -1, "E01": -1,
-        "B02": +1, "B06": +1, "A04": +1, "A03": +1, "A06": +1}
+        "B02": +1, "B06": +1, "A04": +1, "A03": +1, "A06": +1,
+        # 価格系（Phase 0、src/params_px.py）
+        "G01": +1, "G02": +1, "G03": +1, "G04": -1, "G16": +1, "G32": +1,
+        "G38": +1, "G39": +1, "G40": +1, "G41": +1, "G42": -1, "G43": +1,
+        "G44": +1, "G45": -1,
+        "H05": +1,          # 定義に負号が入っているので符号は +
+        "I01": -1,
+        "J10": -1, "J22": -1, "J25": +1}
+
+# **J01（平均売買代金）はここに入れない。**
+# カタログの符号が `?` のまま解決していない。**推測で符号を付けると、
+# 効いているのか符号を当てただけなのかが区別できなくなる。**
+# 流動性ゲートの入力としては adv_jpy で既に使っている。
+
+
+def _index_at(rows: list[dict], t: str) -> int | None:
+    """`t` 以前で最後の行の位置。**t より後ろは存在しないものとして扱う。**
+
+    二分探索でなく線形で十分（月末ごとに1回）。
+    **`date <= t` で切る**のが PIT の境界そのもの。
+    """
+    lo = None
+    for i, r in enumerate(rows):
+        if r["date"] <= t:
+            lo = i
+        else:
+            break
+    return lo
 
 
 def month_ends(lo: str, hi: str) -> list[str]:
@@ -108,6 +137,13 @@ def build_one(t: str, series, by_ticker, sic_asof, asof, bars_by_ticker,
             continue
         v = PU.compute(asof, cik, t, mcap)
         vals = {k: x.value for k, x in v.items() if x.value is not None}
+        # **価格系を足す。** 財務が無い銘柄でも価格系だけで行が立つ
+        br = bars_by_ticker.get(tk)
+        i_t = _index_at(br, t) if br else None
+        if i_t is not None:
+            for k, x in PX.compute_all(br, i_t).items():
+                if x.value is not None and k in SIGN:
+                    vals[k] = x.value
         if len(vals) < 3:
             continue
         raw.append({"ticker": tk, "sector": ff49.industry(sic_asof.get(cik, t)),

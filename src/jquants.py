@@ -338,14 +338,15 @@ def _test() -> int:
             check("**Free では財務情報を叩く前に落とす**", False)
             check("必要なプランを例外文に書く", False)
         os.environ["JQUANTS_PLAN"] = "Standard"
-        try:
-            fins("7203")
-            check("**Standard なら壁を通す**", False)
-        except PlanError:
-            check("**Standard なら壁を通す**", False)
-        except (CR.MissingCredential, AuthError, RateLimited):
-            # キーが無い / 無効なのは別の話。**壁は通った**
-            check("**Standard なら壁を通す**", True)
+        # **ここでネットワークを叩かない。** 壁の判定だけを見る。
+        # 最初は fins() を呼んでいたが、.env に鍵が入った途端に
+        # **自己テストが実際の API を叩き始めた**（そして Free 契約なので
+        # サーバ側の 403 を「壁が通らなかった」と誤判定した）。
+        # **自己テストは外部に依存してはいけない。**
+        check("**Standard なら壁を通す**",
+              PLAN_RANK[plan()] >= PLAN_RANK[NEEDS_PLAN[EP_FINS]])
+        check("**Premium は Standard の壁も通る**",
+              PLAN_RANK["Premium"] >= PLAN_RANK[NEEDS_PLAN[EP_MARGIN]])
     finally:
         if keep is None:
             os.environ.pop("JQUANTS_PLAN", None)
@@ -385,7 +386,7 @@ def _test() -> int:
         check("（同上）", True)
 
     print("-" * 80)
-    total = 22
+    total = 23
     print("%d/%d 通過" % (total - len(fails), total))
     return 1 if fails else 0
 
