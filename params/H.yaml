@@ -12,8 +12,9 @@
   category_name: リバーサル・逆張り
   subsection: null
   definition: SUM r_{t-60..t-13}
-  formula: null
-  inputs: null
+  formula: SUM r_{t-60m..t-13m}
+  inputs:
+  - PRICE_adj
   sign: negative
   buy_class: main
   sell_class: useful
@@ -35,18 +36,24 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: '**5年の履歴が要る。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**5年の履歴が要るので若い企業で欠損。** G26/F23/A43 と同じ偏り。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - A01
+  - A03
+  - H02
+  - H08
+  - H13
+  - H18
+  - C26
+  economic_rationale: '**本プロジェクトのホライズンに最も合致する。** De Bondt-Thaler (JF 1985) の overreaction。 **バリューと強く相関するので二重計上に注意（LAW-110）。** → **H01 と A03（B/P）を両方入れると、 同じ「下がった銘柄」を2回加点する**ことになる。 **H13-H16（無形リターン）が 「ファンダメンタルの変化で説明できない下落」だけを 取り出すことでこの問題を解消する**ので、 **H01 より H13-H16 の方が概念的に優れている。** → **H01 は基準線として残す。**'
   references:
+  - De Bondt-Thaler (JF 1985) Does the Stock Market Overreact?
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP LRreversal — De Bondt and Thaler 1985, JF（OSAP再現 t=3.3, 月次0.105%, 品質=1_good, 予測力=1_clear）
   notes: 本プロジェクトのホライズンに最も合致。バリューと強く相関するので二重計上に注意（LAW-24）
   notes_extra: null
   provenance:
@@ -60,22 +67,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: H02
   name_ja: 業種内相対リバーサル
@@ -83,8 +92,10 @@
   category_name: リバーサル・逆張り
   subsection: null
   definition: r_i(t-60..t-13) - r_業種中央値
-  formula: null
-  inputs: null
+  formula: 'r_i(t-60m..t-13m) - median( r_j : j in same industry )'
+  inputs:
+  - PRICE_adj
+  - industry
   sign: negative
   buy_class: useful
   sell_class: aux
@@ -97,7 +108,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -106,15 +117,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 業種内 N>=30 と5年の履歴。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: H01 に加えて業種分類の粒度に依存（SP-03/SP-04）。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - H01
+  - H08
+  - G11
+  - C31
+  - E26
+  economic_rationale: '**業種丸ごとの下落と個社要因の分離。** **G11（業種相対モメンタム）/ C31（業種調整投資）/ E26（異常アクルーアル）/ G10（残差モメンタム）と 全く同じ「業種・ファクター効果を除いた残りが本体」 というパターン。** → **H08（業種単位の長期リバーサル）が 除いた側そのものを測る**ので、 **H02 と H08 は補集合の関係。** **両方持つと「業種が下がったのか個社が下がったのか」を 分解できる。**'
+  references:
+  - 構造的判断。G10/G11/C31/E26 と同じパターン
   notes: 業種丸ごとの下落と個社要因の分離
   notes_extra: null
   provenance:
@@ -128,21 +145,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: H03
   name_ja: 高値からの下落率
@@ -150,1043 +170,12 @@
   category_name: リバーサル・逆張り
   subsection: null
   definition: P_t / max(P, 過去3年) - 1
-  formula: null
-  inputs: null
+  formula: P_t / max(P, 過去3年) - 1
+  inputs:
+  - PRICE_adj
   sign: negative
   buy_class: useful
   sell_class: aux
-  gate_policy: null
-  horizon:
-    label: 1Y-3Y
-    min_m: 12
-    max_m: 36
-  data_sources:
-  - PX
-  evidence_stars: 1
-  prior_scale: 0.15
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: null
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: 単独では罠。A22-A24（自己バリュエーション位置）と併用して初めて意味を持つ
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-  review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: H04
-  name_ja: ドローダウンからの回復率
-  category: H
-  category_name: リバーサル・逆張り
-  subsection: null
-  definition: (P_t - min) / (max_prev - min)
-  formula: null
-  inputs: null
-  sign: positive
-  buy_class: useful
-  sell_class: aux
-  gate_policy: null
-  horizon:
-    label: 6M-2Y
-    min_m: 6
-    max_m: 24
-  data_sources:
-  - CALC
-  evidence_stars: 1
-  prior_scale: 0.15
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: null
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: 底打ちの確認。LAW-72
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-  review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: H05
-  name_ja: 1週間リバーサル
-  category: H
-  category_name: リバーサル・逆張り
-  subsection: null
-  definition: -r_{t-5..t}
-  formula: null
-  inputs: null
-  sign: positive
-  buy_class: aux
-  sell_class: none
-  gate_policy: null
-  horizon:
-    label: 1W
-    min_m: 0.25
-    max_m: 0.25
-  data_sources:
-  - PX
-  evidence_stars: 2
-  prior_scale: 0.45
-  evidence_tier: T1
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP STreversal — Jegadeesh 1990, JF（OSAP再現 t=12.4, 月次1.99%, 品質=1_good, 予測力=1_clear）
-  notes: 執行の日程調整のみ。数日待つだけで平均取得単価が改善する
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    evidence_tier: override
-    references: override
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
-  version: 1
-- id: H06
-  name_ja: 悲観の極み複合スコア
-  category: H
-  category_name: リバーサル・逆張り
-  subsection: null
-  definition: z(A22最低圏) + z(出来高枯渇) + z(ネガニュース飽和) + 1[テーゼ健在]
-  formula: null
-  inputs: null
-  sign: positive
-  buy_class: useful
-  sell_class: none
-  gate_policy: null
-  horizon:
-    label: 1Y-3Y
-    min_m: 12
-    max_m: 36
-  data_sources:
-  - CALC
-  - LLM
-  evidence_stars: 1
-  prior_scale: 0.15
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: LAW-67 Templeton の実装。4つ目の条件（テーゼ健在）が命
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: H07
-  name_ja: 出来高枯渇度
-  category: H
-  category_name: リバーサル・逆張り
-  subsection: null
-  definition: -log( 出来高20日平均 / 出来高250日平均 )
-  formula: null
-  inputs: null
-  sign: positive
-  buy_class: useful
-  sell_class: none
-  gate_policy: null
-  horizon:
-    label: 6M-2Y
-    min_m: 6
-    max_m: 24
-  data_sources:
-  - PX
-  evidence_stars: 1
-  prior_scale: 0.15
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: null
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: 「誰も見ていない」の定量化。K・O カテゴリと相乗する
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-  review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: H08
-  name_ja: 業種単位の長期リバーサル
-  category: H
-  category_name: リバーサル・逆張り
-  subsection: null
-  definition: 業種指数の3-5年リターン
-  formula: null
-  inputs: null
-  sign: negative
-  buy_class: useful
-  sell_class: aux
-  gate_policy: null
-  horizon:
-    label: 2Y-5Y
-    min_m: 24
-    max_m: 60
-  data_sources:
-  - CALC
-  evidence_stars: 2
-  prior_scale: 0.45
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: 業種単位の平均回帰。個別銘柄より安定している
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: H09
-  name_ja: 過剰反応の検出
-  category: H
-  category_name: リバーサル・逆張り
-  subsection: null
-  definition: イベント日の絶対リターン vs その後30日の逆行幅
-  formula: null
-  inputs: null
-  sign: positive
-  buy_class: useful
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 3M-1Y
-    min_m: 3
-    max_m: 12
-  data_sources:
-  - CALC
-  evidence_stars: 1
-  prior_scale: 0.15
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: 一時的な悪材料での投げ売りを拾う
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: H10
-  name_ja: 連続下落日数
-  category: H
-  category_name: リバーサル・逆張り
-  subsection: null
-  definition: 直近の連続陰線日数
-  formula: null
-  inputs: null
-  sign: cap
-  buy_class: useful
-  sell_class: aux
-  gate_policy: null
-  horizon:
-    label: 1M
-    min_m: 1
-    max_m: 1
-  data_sources:
-  - PX
-  evidence_stars: 1
-  prior_scale: 0.15
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: abs_dev(x_star=sector_median)
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: 執行タイミングのみ
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-  review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: H11
-  name_ja: 損出し売り一巡の反発
-  category: H
-  category_name: リバーサル・逆張り
-  subsection: null
-  definition: 1[12月] × 1[年初来大幅下落] × 1[テーゼ健在]
-  formula: null
-  inputs: null
-  sign: positive
-  buy_class: useful
-  sell_class: none
-  gate_policy: null
-  horizon:
-    label: 1M-3M
-    min_m: 1
-    max_m: 3
-  data_sources:
-  - CALC
-  evidence_stars: 2
-  prior_scale: 0.45
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: 税金絡みの売りが一巡した後の反発。S08 の裏返しを他人の側で利用する
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: H12
-  name_ja: 需給改善の検出
-  category: H
-  category_name: リバーサル・逆張り
-  subsection: null
-  definition: 信用買残の減少 × 出来高減少 × 価格の下げ止まり
-  formula: null
-  inputs: null
-  sign: positive
-  buy_class: main
-  sell_class: none
-  gate_policy: null
-  horizon:
-    label: 3M-1Y
-    min_m: 3
-    max_m: 12
-  data_sources:
-  - CALC
-  evidence_stars: 1
-  prior_scale: 0.15
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: K04 との複合。「投げ終わった」状態の定量化
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: H13
-  name_ja: 無形リターン（BM基準）
-  category: H
-  category_name: リバーサル・逆張り
-  subsection: null
-  definition: 過去5年のリターンのうち、簿価純資産の変化で説明できない部分
-  formula: null
-  inputs: null
-  sign: negative
-  buy_class: main
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 2Y-5Y
-    min_m: 24
-    max_m: 60
-  data_sources:
-  - CALC
-  evidence_stars: 2
-  prior_scale: 0.45
-  evidence_tier: T1
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP IntanBM — Daniel and Titman 2006, JF（OSAP再現 t=4.0, 月次nan%, 品質=1_good, 予測力=1_clear）
-  notes: OSAP IntanBM t=4.0。H01 の長期リバーサルを「ファンダメンタルで説明できない部分」に絞った版。本プロジェクトのホライズンに直撃
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    evidence_tier: override
-    references: override
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
-  version: 1
-- id: H14
-  name_ja: 無形リターン（CF/P基準）
-  category: H
-  category_name: リバーサル・逆張り
-  subsection: null
-  definition: 同上、営業CFの変化で説明できない部分
-  formula: null
-  inputs: null
-  sign: negative
-  buy_class: main
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 2Y-5Y
-    min_m: 24
-    max_m: 60
-  data_sources:
-  - CALC
-  evidence_stars: 2
-  prior_scale: 0.45
-  evidence_tier: T1
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP IntanCFP — Daniel and Titman 2006, JF（OSAP再現 t=4.9, 月次nan%, 品質=1_good, 予測力=1_clear）
-  notes: OSAP IntanCFP t=4.9。Intan 系で最も強い
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    evidence_tier: override
-    references: override
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
-  version: 1
-- id: H15
-  name_ja: 無形リターン（E/P基準）
-  category: H
-  category_name: リバーサル・逆張り
-  subsection: null
-  definition: 同上、利益の変化で説明できない部分
-  formula: null
-  inputs: null
-  sign: negative
-  buy_class: main
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 2Y-5Y
-    min_m: 24
-    max_m: 60
-  data_sources:
-  - CALC
-  evidence_stars: 2
-  prior_scale: 0.45
-  evidence_tier: T1
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP IntanEP — Daniel and Titman 2006, JF（OSAP再現 t=4.6, 月次nan%, 品質=1_good, 予測力=1_clear）
-  notes: OSAP IntanEP t=4.6
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    evidence_tier: override
-    references: override
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
-  version: 1
-- id: H16
-  name_ja: 無形リターン（S/P基準）
-  category: H
-  category_name: リバーサル・逆張り
-  subsection: null
-  definition: 同上、売上の変化で説明できない部分
-  formula: null
-  inputs: null
-  sign: negative
-  buy_class: useful
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 2Y-5Y
-    min_m: 24
-    max_m: 60
-  data_sources:
-  - CALC
-  evidence_stars: 2
-  prior_scale: 0.45
-  evidence_tier: T2
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP IntanSP — Daniel and Titman 2006, JF（OSAP再現 t=4.2, 月次nan%, 品質=2_fair, 予測力=1_clear）
-  notes: OSAP IntanSP t=4.2
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    evidence_tier: override
-    references: override
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
-  version: 1
-- id: H17
-  name_ja: モメンタムと長期リバーサルの複合
-  category: H
-  category_name: リバーサル・逆張り
-  subsection: null
-  definition: 12-1モメンタム上位 かつ 5年リバーサル上位
-  formula: null
-  inputs: null
-  sign: positive
-  buy_class: main
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 1Y-3Y
-    min_m: 12
-    max_m: 36
-  data_sources:
-  - CALC
-  evidence_stars: 2
-  prior_scale: 0.45
-  evidence_tier: T1
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP MomRev — Chan and Ko 2006, JOIM（OSAP再現 t=4.3, 月次0.48%, 品質=1_good, 予測力=1_clear）
-  notes: OSAP MomRev t=4.3。LAW-111（バリューとモメンタムをセットで持つ）の直接の実装形
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    evidence_tier: override
-    references: override
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
-  version: 1
-- id: H18
-  name_ja: 中期リバーサル
-  category: H
-  category_name: リバーサル・逆張り
-  subsection: null
-  definition: SUM r_{t-36..t-13}
-  formula: null
-  inputs: null
-  sign: negative
-  buy_class: useful
-  sell_class: useful
   gate_policy: null
   horizon:
     label: 1Y-3Y
@@ -1205,18 +194,1214 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 3年の履歴が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 3年の履歴。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G07
+  - G08
+  - I11
+  - A22
+  - A24
+  - T25
+  - H04
+  economic_rationale: '**単独では罠。A22-A24（自己バリュエーション位置）と 併用して初めて意味を持つ。** → **株価が高値から70%下げていても、 利益がそれ以上に落ちていれば割安になっていない。** **A22/A24 が「バリュエーションが自己履歴の中で低いか」を 見るのに対し、H03 は価格だけを見る。** **G07（52週高値接近度）と符号が逆**で、 **同じ量を逆方向から読む** — G07 はアンカリングによるモメンタム、 H03 は過剰反応によるリバーサル。 → **時間軸が違う**（G07 は 6M-2Y、H03 は 1Y-3Y）ので 矛盾しないが、**境界がどこかは実測が要る** （OQ-31 の G26 と同じ論点）。'
+  references:
+  - 構造的判断。A22-A24 との併用が必須
+  notes: 単独では罠。A22-A24（自己バリュエーション位置）と併用して初めて意味を持つ
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: H04
+  name_ja: ドローダウンからの回復率
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: (P_t - min) / (max_prev - min)
+  formula: (P_t - min) / (max_prev - min)
+  inputs:
+  - PRICE_adj
+  sign: positive
+  buy_class: useful
+  sell_class: aux
+  gate_policy: null
+  horizon:
+    label: 6M-2Y
+    min_m: 6
+    max_m: 24
+  data_sources:
+  - CALC
+  evidence_stars: 1
+  prior_scale: 0.15
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: '**max_prev > min。3年の履歴が要る。**'
+  missing_policy: flag
+  missing_bias: 3年の履歴。
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - H03
+  - G08
+  - H12
+  - H09
+  - I11
+  economic_rationale: '**底打ちの確認。LAW-72（落ちるナイフを掴むな）。** **H03（まだ下がっている）と組み合わせて、 「大きく下げた かつ 底を打った」を検出する。** → **G08（52週安値からの乖離）と実質同じ**だが、 **H04 は前回高値を基準に回復度合いを測る**ので、 **「どこまで戻ったか」が分かる。** **戻りすぎ（H04 が高い）ならもう機会は無い**ので、 **本来は∩型にすべき可能性がある** — 符号を + としたのは 底打ち確認を重視したためで、暫定。'
+  references:
+  - 構造的判断。LAW-72
+  notes: 底打ちの確認。LAW-72
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: H05
+  name_ja: 1週間リバーサル
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: -r_{t-5..t}
+  formula: -r_{t-5..t}
+  inputs:
+  - PRICE_adj
+  sign: positive
+  buy_class: aux
+  sell_class: none
+  gate_policy: null
+  horizon:
+    label: 1W
+    min_m: 0.25
+    max_m: 0.25
+  data_sources:
+  - PX
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: 5営業日が要る。
+  missing_policy: flag
+  missing_bias: ほぼ欠損しない。
+  normalization: none
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - G04
+  - G21
+  - G23
+  - J04
+  economic_rationale: '**執行の日程調整のみ。数日待つだけで平均取得単価が改善する。** → **G04（1ヶ月リバーサル）の週次版。** **保有 6ヶ月-5年 の戦略で1週間の反転を 銘柄選択に使うのは無意味**なので、 **normalization: none で執行専用と明示する。** **J04（スプレッド）と同じく、 「期待アルファ 2-3%」に対して 執行の巧拙が無視できない大きさを持つ**という 文脈でのみ価値がある。'
+  references:
+  - Jegadeesh (JF 1990)
+  - 構造的判断。執行専用
+  notes: 執行の日程調整のみ。数日待つだけで平均取得単価が改善する
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: override
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    evidence_tier: override
+    references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: H06
+  name_ja: 悲観の極み複合スコア
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: z(A22最低圏) + z(出来高枯渇) + z(ネガニュース飽和) + 1[テーゼ健在]
+  formula: z(A22 最低圏) + z(出来高枯渇 H07) + z(ネガニュース飽和) + 1[テーゼ健在 T25]
+  inputs:
+  - A22
+  - H07
+  - T01
+  - T25
+  sign: positive
+  buy_class: useful
+  sell_class: none
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  - LLM
+  evidence_stars: 1
+  prior_scale: 0.15
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: '**4成分のいずれかが欠損すれば欠損。** 特に T25 は買う前の記録が要る。'
+  missing_policy: flag
+  missing_bias: '**T25 が無い新規銘柄では作れない。** → 新規購入時は3成分で代替する。'
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - A22
+  - H07
+  - T01
+  - T25
+  - T26
+  - O01
+  economic_rationale: '**LAW-67 Templeton「悲観の極みが最良の買い時」の実装。 4つ目の条件（テーゼ健在）が命。** → **悲観だけを買うと、 正しく悲観されている企業を買うことになる。** **T25（テーゼ健在度）が「悲観は行き過ぎか」を判定する。** **H06 は 263AT で数少ない 「複数カテゴリを明示的に合成した」パラメータ**で、 §1.9（選択せず縮小する）の方針からすると **本来は合成せず個別に入れるべき。** → **それでも合成する理由は、 4条件が同時に揃うことに意味があり、 線形和では表現できないから。** **T28（否定的チェックリスト）と同じカウント型の設計。**'
+  references:
+  - 構造的判断。LAW-67
+  - T25 との併用が必須
+  notes: LAW-67 Templeton の実装。4つ目の条件（テーゼ健在）が命
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: H07
+  name_ja: 出来高枯渇度
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: -log( 出来高20日平均 / 出来高250日平均 )
+  formula: -log( mean(出来高,20d) / mean(出来高,250d) )
+  inputs:
+  - VOLUME
+  sign: positive
+  buy_class: useful
+  sell_class: none
+  gate_policy: null
+  horizon:
+    label: 6M-2Y
+    min_m: 6
+    max_m: 24
+  data_sources:
+  - PX
+  evidence_stars: 1
+  prior_scale: 0.15
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: '**mean(250d)>0。出来高ゼロ日が多いと log が発散する。**'
+  missing_policy: flag
+  missing_bias: J10 で除外される銘柄と重なる。
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - J14
+  - J22
+  - J23
+  - H06
+  - H12
+  - O06
+  - O01
+  economic_rationale: '**「誰も見ていない」の定量化。K・O カテゴリと相乗する。** → **J14（流動性の改善 +）と正反対の符号。** **J22（出来高トレンド −）と同じ向き。** **263AT の中核戦略（ネグレクト）から見ると、 出来高が枯渇していることは 「まだ発見されていない」の最も直接的な証拠。** → **H07 が高く、かつ A（バリュー）が点灯し、 かつ T25（テーゼ健在）なら、それが理想形。** **H06 の構成要素であり、 O01（カバレッジゼロ）/ K22（機関保有低）と 同じ軸を出来高で測る。**'
+  references:
+  - 構造的判断。O カテゴリと同じ軸
+  notes: 「誰も見ていない」の定量化。K・O カテゴリと相乗する
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: H08
+  name_ja: 業種単位の長期リバーサル
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: 業種指数の3-5年リターン
+  formula: 業種指数の3-5年リターン
+  inputs:
+  - sector_index
+  sign: negative
+  buy_class: useful
+  sell_class: aux
+  gate_policy: null
+  horizon:
+    label: 2Y-5Y
+    min_m: 24
+    max_m: 60
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: 業種指数の5年履歴が要る。
+  missing_policy: flag
+  missing_bias: 業種分類の粒度に依存。
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - H01
+  - H02
+  - G36
+  - P19
+  - P23
+  - P24
+  economic_rationale: '**業種単位の平均回帰。個別銘柄より安定している。** **個別銘柄のリバーサル（H01）は 企業固有のノイズを多く含むが、 業種はノイズが平均化される。** → **H02（業種内相対）と補集合の関係。** **P23（ファクター混雑度）/ P24（ファクターのDD）が ファクター単位で同じことをする**ので、 **銘柄 → 業種 → ファクター という 3つの階層で平均回帰を測っている。** → **どの階層で平均回帰が起きているかで、 買うべき対象が変わる。**'
+  references:
+  - 構造的判断。P23/P24 のファクター版と同じ思想
+  notes: 業種単位の平均回帰。個別銘柄より安定している
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: override
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: H09
+  name_ja: 過剰反応の検出
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: イベント日の絶対リターン vs その後30日の逆行幅
+  formula: イベント日の絶対リターン vs その後30日の逆行幅
+  inputs:
+  - PRICE_adj
+  - event_dates
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 1
+  prior_scale: 0.15
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: '**イベント日の特定が要る。** 決算日または大きなニュース日。'
+  missing_policy: flag
+  missing_bias: '**イベントの定義に依存。T33（開示の重要度分類）が入力になる。**'
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - N08
+  - G04
+  - T03
+  - T30
+  - H03
+  - I22
+  economic_rationale: '**一時的な悪材料での投げ売りを拾う。** **N08（PEAD）は「決算サプライズ後にドリフトが続く」と言い、 H09 は「過剰反応は戻る」と言う。** → **正面から矛盾する。** **区別は材料の性質**で、 **T04（一時的か構造的か）が判定する。** 構造的な材料ならドリフト（N08）、 一時的な材料なら反転（H09）。 → **H09 と N08 を両方持つなら、 T04 を条件変数にしないと打ち消し合う。** **これは H カテゴリと N カテゴリの境界にある論点。**'
+  references:
+  - 構造的判断。T04 を条件変数にしないと N08 と打ち消し合う
+  notes: 一時的な悪材料での投げ売りを拾う
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: H10
+  name_ja: 連続下落日数
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: 直近の連続陰線日数
+  formula: 直近の連続陰線日数
+  inputs:
+  - PRICE_adj
+  sign: cap
+  buy_class: useful
+  sell_class: aux
+  gate_policy: null
+  horizon:
+    label: 1M
+    min_m: 1
+    max_m: 1
+  data_sources:
+  - PX
+  evidence_stars: 1
+  prior_scale: 0.15
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na（日数）
+  missing_policy: flag
+  missing_bias: ほぼ欠損しない。
+  normalization: none
+  nonlinear: abs_dev(x_star=sector_median)
+  winsorize: null
+  correlated_with:
+  - H05
+  - G04
+  - G21
+  - G23
+  economic_rationale: '∩型。**執行タイミングのみ。** H05（1週間リバーサル）と同じ用途で、 **normalization: none で執行専用と明示する。** **連続して下げた後は短期的に反発しやすい**が、 **下げ続けている＝何かが起きている**可能性もある。 → **∩型にしたのはこの両義性による。** **H カテゴリで最も実証が弱く時間軸が短い**ので、 **★1 のまま、実装優先度は低い。**'
+  references:
+  - 構造的判断。執行専用、実装優先度は低い
+  notes: 執行タイミングのみ
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: override
+    period_convention: override
+    pit_lag_days: default
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: H11
+  name_ja: 損出し売り一巡の反発
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: 1[12月] × 1[年初来大幅下落] × 1[テーゼ健在]
+  formula: 1[12月] × 1[年初来大幅下落] × 1[テーゼ健在 T25]
+  inputs:
+  - PRICE_adj
+  - T25
+  sign: positive
+  buy_class: useful
+  sell_class: none
+  gate_policy: null
+  horizon:
+    label: 1M-3M
+    min_m: 1
+    max_m: 3
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: T25 が無ければ2条件で代替。
+  missing_policy: flag
+  missing_bias: '**日米で税務年度が違う。** 米国は12月、日本は個人が12月で 法人が3月。→ **rank_market。**'
+  normalization: rank_market
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - S08
+  - S16
+  - G38
+  - K15
+  - T25
+  - H03
+  economic_rationale: '**税金絡みの売りが一巡した後の反発。S08 の裏返しを他人の側で利用する。** → **自分が損出しをする（S08）のと同じ動機が 他の投資家にもある**ので、 **12月に大きく下げた銘柄は税務上の売りで 余分に下げている。** **1月に反発する**（January effect の一部）。 **ただし LAW-100 の減衰が最も進んだ現象の一つ**で、 広く知られているので効果は弱まっている。 → **★2 だが、S08 と同じ機構を逆から使うので 263AT の中では一貫性がある。** **NISA 枠では損益通算ができない（P30）ので、 自分の S08 の動機は課税口座に限られる。**'
+  references:
+  - 構造的判断。S08 の裏返し
+  - January effect の系譜
+  notes: 税金絡みの売りが一巡した後の反発。S08 の裏返しを他人の側で利用する
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: override
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: H12
+  name_ja: 需給改善の検出
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: 信用買残の減少 × 出来高減少 × 価格の下げ止まり
+  formula: 信用買残の減少 × 出来高減少 × 価格の下げ止まり
+  inputs:
+  - K01
+  - VOLUME
+  - PRICE_adj
+  sign: positive
+  buy_class: main
+  sell_class: none
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 1
+  prior_scale: 0.15
+  evidence_tier: T3
+  markets:
+  - JP
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: '**K01（信用買残）が取れる貸借銘柄のみ。**'
+  missing_policy: flag
+  missing_bias: '**信用取引銘柄のみ。日本固有。** K01 の制約を継承。'
+  normalization: rank_market
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - K01
+  - K04
+  - K05
+  - K37
+  - H07
+  - H04
+  economic_rationale: '**K04 との複合。「投げ終わった」状態の定量化。** **K01（信用買残）の説明で述べた通り、 信用買いは6ヶ月以内に決済されるので 「期限付きの売り予約」。** → **その在庫が減り、出来高も減り、 価格が下げ止まったなら、売り圧力が尽きた。** **K37（信用建玉の日柄）が 「いつ投げるか」を予測するのに対し、 H12 は「投げ終わったか」を確認する。** → **予測と確認の対**で、 **263AT は確認側（H12）の方を重く使う** — 予測を外すコストの方が大きいから。'
+  references:
+  - 構造的判断。K37 と対をなす
+  notes: K04 との複合。「投げ終わった」状態の定量化
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: override
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: H13
+  name_ja: 無形リターン（BM基準）
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: 過去5年のリターンのうち、簿価純資産の変化で説明できない部分
+  formula: 過去5年のリターンのうち、簿価純資産の変化で説明できない部分
+  inputs:
+  - PRICE_adj
+  - EQ
+  sign: negative
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 2Y-5Y
+    min_m: 24
+    max_m: 60
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: EQ の定義（spec §2）を継承。**5年間の会計基準変更をまたぐと不連続。**
+  pit_lag_days: 0
+  zero_denominator_policy: 5年の履歴と EQ>0 が要る。
+  missing_policy: flag
+  missing_bias: H01 と同じ5年の履歴の制約。
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - H01
+  - H14
+  - H15
+  - H16
+  - A03
+  - C26
+  economic_rationale: '**OSAP IntanBM t=4.0。H01 の長期リバーサルを 「ファンダメンタルで説明できない部分」に限定する。** Daniel-Titman (JF 2006) の intangible return。 → **これが H カテゴリの核心。** **H01（素の長期リバーサル）は A03（B/P）と強く相関して二重計上になる**が、 **H13 は簿価の変化で説明できる部分を除く**ので、 **A03 と独立した情報だけが残る。** → **「説明できる部分を除いた残りが本体」という パターンの H 版**（G10 / C31 / E26 / H02 と同じ）。 **このパターンが 263AT の全カテゴリに現れる**のは、 **どのシグナルも「既知の要因で説明できない部分」に 情報があるという共通構造による。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP MRreversal — De Bondt and Thaler 1985, JF（OSAP再現 t=n/a, 月次0.75%, 品質=3_distant, 予測力=2_likely）
+  - Daniel-Titman (JF 2006) Market Reactions to Tangible and Intangible Information
+  - OSAP IntanBM t=4.0
+  notes: OSAP IntanBM t=4.0。H01 の長期リバーサルを「ファンダメンタルで説明できない部分」に絞った版。本プロジェクトのホライズンに直撃
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    evidence_tier: override
+    references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: H14
+  name_ja: 無形リターン（CF/P基準）
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: 同上、営業CFの変化で説明できない部分
+  formula: 過去5年のリターンのうち、CFO の変化で説明できない部分
+  inputs:
+  - PRICE_adj
+  - CFO
+  sign: negative
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 2Y-5Y
+    min_m: 24
+    max_m: 60
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: CFO の定義を継承。
+  pit_lag_days: 0
+  zero_denominator_policy: 5年の履歴と CFO>0 が要る。
+  missing_policy: flag
+  missing_bias: H13 に加え、**CFO が負の期があると計算できない。**
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - H13
+  - H15
+  - H16
+  - B10
+  - A38
+  - E01
+  economic_rationale: '**OSAP IntanCFP t=4.9。Intan 系で最も強い。** → **簿価（H13）・利益（H15）・売上（H16）より キャッシュフローで測った方が強い**という結果は、 **E カテゴリの主題（利益は操作できるが CF は より操作しにくい）と完全に整合する。** **D23（CFO 連続黒字年数）の説明で述べたのと同じ論理。** → **H13-H16 の4本の中では H14 を主軸にする。** 上の missing_bias が制約で、 **CFO が負の企業では作れない。**'
+  references:
+  - https://www.openassetpricing.com/
+  - Daniel-Titman (JF 2006)
+  - OSAP IntanCFP t=4.9
+  notes: OSAP IntanCFP t=4.9。Intan 系で最も強い
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    evidence_tier: override
+    references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: H15
+  name_ja: 無形リターン（E/P基準）
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: 同上、利益の変化で説明できない部分
+  formula: 過去5年のリターンのうち、利益の変化で説明できない部分
+  inputs:
+  - PRICE_adj
+  - NI
+  sign: negative
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 2Y-5Y
+    min_m: 24
+    max_m: 60
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: '**のれん償却（日本基準）が NI を押し下げる**ので、日本基準企業で説明部分が過小になる。'
+  pit_lag_days: 0
+  zero_denominator_policy: 5年の履歴と NI>0 が要る。
+  missing_policy: flag
+  missing_bias: '**赤字期があると計算できない。** H14 より欠損が多い。'
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - H13
+  - H14
+  - H16
+  - A01
+  - C03
+  - E01
+  economic_rationale: '**OSAP IntanEP t=4.6。** H14（CFO 基準 t=4.9）より僅かに弱い。 → **その差が「利益の操作可能性」の大きさ**を 表していると読める。 **E01（アクルーアル）が測っているものが、 H14 と H15 の差として現れている**という 別経路での確認になる。 → **H13-H16 の4本を並べると、 どのファンダメンタル指標が 価格を最もよく説明するかが分かる**ので、 **4本セットで持つことに診断的な価値がある。**'
+  references:
+  - https://www.openassetpricing.com/
+  - Daniel-Titman (JF 2006)
+  - OSAP IntanEP t=4.6
+  notes: OSAP IntanEP t=4.6
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    evidence_tier: override
+    references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: H16
+  name_ja: 無形リターン（S/P基準）
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: 同上、売上の変化で説明できない部分
+  formula: 過去5年のリターンのうち、売上の変化で説明できない部分
+  inputs:
+  - PRICE_adj
+  - REV
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 2Y-5Y
+    min_m: 24
+    max_m: 60
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: '**総額/純額基準の変更（IFRS15）で売上が不連続に変わる。**'
+  pit_lag_days: 0
+  zero_denominator_policy: 5年の履歴と REV>0 が要る。
+  missing_policy: flag
+  missing_bias: '**売上は赤字企業でも正なので、H14/H15 より欠損が少ない。**'
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - H13
+  - H14
+  - H15
+  - A04
+  - C01
+  economic_rationale: '**OSAP IntanSP t=4.2。** **A04（S/P）が「赤字企業でも作れる」利点を持つのと同じく、 H16 は赤字企業でも計算できる**ので、 **H14/H15 が欠損する銘柄群を救う。** → **A カテゴリで A01 → A04 という 「欠損の埋め合わせ」の関係があったのと 完全に同じ構造が H にもある。** t は4本中最も低い（4.2）が、 **カバレッジが最も広い**という トレードオフになっている。'
+  references:
+  - https://www.openassetpricing.com/
+  - Daniel-Titman (JF 2006)
+  - OSAP IntanSP t=4.2
+  notes: OSAP IntanSP t=4.2
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    evidence_tier: override
+    references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: H17
+  name_ja: モメンタムと長期リバーサルの複合
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: 12-1モメンタム上位 かつ 5年リバーサル上位
+  formula: 1[12-1モメンタム上位] × 1[5年リバーサル上位]
+  inputs:
+  - G01
+  - H01
+  sign: positive
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: G01 と H01 の両方が要る。**5年の履歴が要る。**
+  missing_policy: flag
+  missing_bias: H01 を継承。
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - G01
+  - H01
+  - A01
+  - A03
+  - G13
+  economic_rationale: '**OSAP MomRev t=4.3。LAW-111（バリューとモメンタムをセットで持つ）。** **「長期では下げているが、直近では上げ始めた」**銘柄。 → **H03/H04（底打ちの確認）を モメンタムで表現した形**であり、 **LAW-72（落ちるナイフを掴むな）の実装でもある。** **Asness (JPM 2011) の 「日本ではモメンタム単独は効かないが バリューと50/50で組むと Sharpe 0.65」**という結果と 直接繋がる。 → **H17 は日本市場でこそ意味を持つ可能性が高い。** G カテゴリの検証で述べた 「日本ではモメンタムを分散材料として使う」の具体形。'
+  references:
+  - https://www.openassetpricing.com/
+  - Asness (JPM 2011) Momentum in Japan
+  - OSAP MomRev t=4.3
+  notes: OSAP MomRev t=4.3。LAW-111（バリューとモメンタムをセットで持つ）の直接の実装形
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    evidence_tier: override
+    references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: H18
+  name_ja: 中期リバーサル
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: SUM r_{t-36..t-13}
+  formula: SUM r_{t-36m..t-13m}
+  inputs:
+  - PRICE_adj
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - PX
+  evidence_stars: 1
+  prior_scale: 0.15
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: 3年の履歴が要る。
+  missing_policy: flag
+  missing_bias: '**3年の履歴。H01（5年）より欠損が少ない。**'
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - H01
+  - H02
+  - G01
+  - G32
+  - G26
+  economic_rationale: '**OSAP MRreversal。H01（3-5年）と G01（12ヶ月）の間を埋める。** → **モメンタム（1年）とリバーサル（3-5年）の間には 符号が反転する境界がある**が、 **その境界がどこかは市場と時期で変わる。** **OQ-31 で記録した G26（長期移動平均乖離）の 符号未確定と全く同じ論点。** → **H18 を持つことで、 1年 / 1-3年 / 3-5年 の3区間で 符号の変化を実測できる。** **263AT の保有期間（6ヶ月-5年）が この符号反転の区間を跨いでいる**以上、 **H18 は境界を測るために必要。**'
+  references:
+  - https://www.openassetpricing.com/
+  - OSAP MRreversal
+  - OQ-31 と同じ論点
   notes: OSAP MRreversal。H01（3-5年）と G01（12ヶ月）の間を埋める
   notes_extra: null
   provenance:
@@ -1230,20 +1415,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1

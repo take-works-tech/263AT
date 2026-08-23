@@ -171,8 +171,10 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: 有利子負債 / 自己資本
-  formula: null
-  inputs: null
+  formula: IBD / EQ
+  inputs:
+  - IBD
+  - EQ
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -185,28 +187,31 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T1
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: '**IBD にリースを含めるか（spec §2 では含める版が既定）。IFRS16 移行年は不連続。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**EQ>0。債務超過では欠損。** ただし債務超過であること自体が最悪の情報なので、Z01 のフラグで捉える。'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**債務超過企業で欠損する。最も危険な企業が落ちる**という、D カテゴリで最も注意すべき偏り。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - D01
+  - D02
+  - D19
+  - A48
+  - B05
+  - D25
+  economic_rationale: '**D01（負債/総資産）と重複気味。片方でよい。** 分母が自己資本なので、**EQ が小さい企業で発散する**という 実装上の弱点がある。 → **D01 の方が頑健**で、D03 は伝統的に使われているだけ。 **A48（B/P のレバレッジ成分）と B05（デュポン分解）が 同じレバレッジを別の目的で使う**ので、 **Z12 で D01/D03/A48/B05 が一塊になるはず。** 上の missing_bias が重要 — **債務超過を欠損にすると、 最も避けるべき企業がユニバースに残る。**'
   references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP Leverage — Bhandari 1988, JF（OSAP再現 t=3.9, 月次nan%, 品質=1_good, 予測力=1_clear）
-  - OSAP NetDebtPrice — Penman, Richardson and Tuna 2007, JAR（OSAP再現 t=2.3, 月次0.658333333%, 品質=1_good, 予測力=1_clear）
+  - 構造的判断。D01 と冗長
   notes: D01 と重複気味。片方でよい
   notes_extra: null
   provenance:
@@ -220,23 +225,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D04
   name_ja: インタレストカバレッジ
@@ -322,8 +328,10 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: 流動資産 / 流動負債
-  formula: null
-  inputs: null
+  formula: 流動資産 / 流動負債
+  inputs:
+  - current_assets
+  - current_liabilities
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -336,24 +344,30 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**IFRS は流動/非流動の分類に企業判断の余地がある**（E02 と同じ）。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 流動負債>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**金融業では意味を持たない。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D06
+  - D07
+  - D22
+  - B21
+  - B34
+  economic_rationale: '**1未満は要調査。** ただし**業種で適正水準が全く違う** （小売は現金商売なので低くてよい、製造業は高くあるべき）。 → rank_sector が必須。 **B21（CCC）が負の企業は D05 が低くても健全** — 前受金モデルは構造的に流動負債が大きい。 → **D05 単独では前受金モデルの優良企業を 財務不安と誤判定する。** B21 と併用する。'
+  references:
+  - 構造的判断。B21 との併用が必須
   notes: 1未満は要調査
   notes_extra: null
   provenance:
@@ -367,22 +381,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D06
   name_ja: 当座比率
@@ -390,8 +406,11 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: (現金 + 売掛金) / 流動負債
-  formula: null
-  inputs: null
+  formula: (CASH + 売掛金) / 流動負債
+  inputs:
+  - CASH
+  - receivables
+  - current_liabilities
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -404,24 +423,30 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: D05 を継承。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 流動負債>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: D05 と同じ。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D05
+  - D07
+  - D22
+  - B22
+  - B47
+  economic_rationale: '**在庫を除くので流動比率より厳しい。** **在庫は現金化できないことがある** — U19（商材の陳腐化速度）が高い業種では特にそう。 → **D05 と D06 の差が「在庫への依存度」**で、 **B22（在庫日数の急増）が起きている企業では D05 が良くても D06 が悪い**という形で問題が現れる。 **B47（有形資産比率）の係数（在庫 0.547）が 「在庫は簿価の半分程度でしか換金できない」という 実証的な裏付けを与える。**'
+  references:
+  - 構造的判断。B47 の実証係数が裏付け
   notes: 在庫を除くので流動比率より厳しい
   notes_extra: null
   provenance:
@@ -435,22 +460,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D07
   name_ja: 現金 / 短期債務
@@ -707,8 +734,11 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: (ln(V/D) + (mu - sigma^2/2)T) / (sigma*sqrt(T))
-  formula: null
-  inputs: null
+  formula: ( ln(V/D) + (mu - sigma^2/2)*T ) / ( sigma*sqrt(T) )
+  inputs:
+  - MCAP
+  - IBD
+  - PRICE_adj
   sign: positive
   buy_class: useful
   sell_class: main
@@ -722,24 +752,32 @@
   - PX
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: D の定義は短期債務 + 長期債務の半分（Moody's KMV の慣行）。**spec §2 の IBD とは別**なので明記する。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: sigma>0、V>0。**252営業日の株価履歴が要る。**
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**上場後1年未満で欠損**（N24 と重複）。低流動性銘柄で sigma が過小評価され DD が過大に出る。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D08
+  - D09
+  - D17
+  - I01
+  - K21
+  - K19
+  economic_rationale: '**株価情報を使うので財務諸表より反応が速い。売り判定で価値が高い。** Merton (1974) の構造モデル。 **D08（Altman Z）/ D09（Ohlson O）が会計数値だけを使うのに対し、 D10 は株価とボラティリティを使う。** → **決算は3ヶ月遅れるが株価は毎日動く**ので、 **Z04（シグナル鮮度）の観点で D10 が圧倒的に有利。** **K19/K21（空売り・借株コスト）が 同じ悲観を需給の側から測る**ので、 **D10 と K21 が同時に悪化していれば確度が高い。**'
+  references:
+  - Merton (1974) On the Pricing of Corporate Debt
+  - Bharath-Shumway (RFS 2008) Forecasting Default with the Merton DD Model
   notes: 株価情報を使うので財務諸表より反応が速い。売り判定で価値が高い
   notes_extra: null
   provenance:
@@ -753,22 +791,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D11
   name_ja: 有利子負債の返済集中度
@@ -776,8 +816,10 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: 今後3年の返済額 / 年間営業CF の最大値
-  formula: null
-  inputs: null
+  formula: max( 今後3年の各年の返済額 ) / 年間CFO
+  inputs:
+  - debt_maturity_schedule
+  - CFO
   sign: negative
   buy_class: useful
   sell_class: main
@@ -790,24 +832,31 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**返済予定額は有報の注記にある。米国は 10-K の contractual obligations 表。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**CFO>0。CFO<=0 の企業では返済能力が無いので極値として扱う。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**注記の抽出が要る。日本の小型株では表形式が統一されておらず LLM 抽出に頼る。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D22
+  - D24
+  - D25
+  - D12
+  - F25
+  - D08
+  economic_rationale: '**有報の注記から。集中年に借換不能なら即死。** **平均的なレバレッジ（D01）が同じでも、 返済が1年に集中している企業とならされている企業では リスクが全く違う。** → **D01 では捉えられない「時間構造」の情報。** **P11（クレジットスプレッド）が拡大している局面では 借換ができなくなる**ので、 **D11 × P11 の交互作用が本質。** 平時は問題にならず危機時に一気に効く、 **典型的なテールリスク変数。**'
+  references:
+  - 構造的判断。P11 との交互作用が本質
   notes: 有報の注記から。集中年に借換不能なら即死
   notes_extra: null
   provenance:
@@ -821,22 +870,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D12
   name_ja: 変動金利負債比率 × 金利変化
@@ -844,8 +895,11 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: (変動金利負債/総負債) × delta_政策金利
-  formula: null
-  inputs: null
+  formula: (変動金利負債 / IBD) × delta 政策金利
+  inputs:
+  - floating_rate_debt
+  - IBD
+  - MACRO_policy
   sign: negative
   buy_class: useful
   sell_class: main
@@ -859,24 +913,30 @@
   - MACRO
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: '**変動金利負債の内訳は注記にある。金利スワップでヘッジしている分を除く必要がある。**'
   pit_lag_days: 1
-  zero_denominator_policy: null
+  zero_denominator_policy: IBD>0。無借金企業ではゼロ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**スワップの開示が不十分だと実質的な変動比率が分からない。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D25
+  - P05
+  - P01
+  - P02
+  - D01
+  - U11
+  economic_rationale: '**日本の金利正常化局面では新しく重要になった項。** → **上の (3) の通り、バックテスト期間の大半が ゼロ金利なので、過去データから D12 の重要性を学習できない。** **P05（日銀スタンス）と同じ構造の問題。** **日本の中小企業は変動金利の銀行借入が主体**なので、 **D16（銀行借入依存度）が高い企業ほど D12 が効く。** → **D12 × D16 の交互作用。** U11（不動産）が業種としてこの直撃を受ける。'
+  references:
+  - 構造的判断。過去データから学習できない局面
   notes: 日本の金利正常化局面では新しく重要になった項
   notes_extra: null
   provenance:
@@ -890,22 +950,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D13
   name_ja: 継続企業の前提に関する注記
@@ -996,8 +1058,9 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: 格付機関のレーティングと方向
-  formula: null
-  inputs: null
+  formula: 格付機関のレーティングとアウトルックの方向
+  inputs:
+  - credit_rating
   sign: positive
   buy_class: useful
   sell_class: main
@@ -1010,24 +1073,31 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（順序尺度）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**小型株は無格付が大半。日本は特に格付取得企業が少ない。** → **263AT の中核ユニバースではほぼ全て欠損する。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D08
+  - D09
+  - D10
+  - G35
+  - P11
+  - K21
+  economic_rationale: '**取れる範囲で。** 格付は会計と定性を統合した専門家の判断で、 **信頼できるが遅い**（格付機関は実態の後追いになりがち）。 → **D10（Merton DD）の方が速い**ので、 **D14 は基準線として使い、 D10 との乖離（格付は良いが DD が悪化）を見る方が有用。** 上の missing_bias が致命的で、 **無格付企業では D08/D09/D10 で代替する**しかない （G35 の説明と同じ構造）。'
+  references:
+  - 構造的判断。中核ユニバースでほぼ欠損
   notes: 小型株は無格付が大半。取れる範囲で
   notes_extra: null
   provenance:
@@ -1041,22 +1111,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D15
   name_ja: 増資リスクスコア
@@ -1064,8 +1136,13 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: 1[現金/短期債務 < 1] + 1[FCF < 0] + 1[株価が高値圏] + 1[過去に増資歴]
-  formula: null
-  inputs: null
+  formula: 1[CASH/短期債務<1] + 1[FCF<0] + 1[株価が高値圏] + 1[過去に増資歴]
+  inputs:
+  - CASH
+  - short_term_debt
+  - FCF
+  - PRICE_adj
+  - F01
   sign: negative
   buy_class: useful
   sell_class: main
@@ -1078,24 +1155,32 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 短期債務>0。無借金なら該当項目は0点。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**「高値圏」の定義（52週高値からの距離）と「過去の増資歴」の遡及期間を固定する必要がある。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F01
+  - F02
+  - F06
+  - D22
+  - D24
+  - G07
+  economic_rationale: '**希薄化の事前予測。小型グロースで最も痛い事象を先読みする。** **企業が増資するのは (a) 金が要る かつ (b) 株が高い ときで、 しかも (c) 一度やった企業は再びやる。** → **4条件のカウントにすることで、 確率的な予測を単純なルールで近似する。** **F27（複合株式発行）が事後、D15 が事前**という関係。 **263AT の狙う小型株は増資の被害を最も受けやすい**ので、 **D15 はサイジングで強く効かせるべき。** T28（否定的チェックリスト）と同じカウント型の設計。'
+  references:
+  - 構造的判断。F01/F27 の事前版
+  - Baker-Wurgler の market timing 仮説
   notes: 希薄化の事前予測。小型グロースで最も痛い事象を先読みする
   notes_extra: null
   provenance:
@@ -1109,22 +1194,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D16
   name_ja: 銀行借入依存度
@@ -1132,8 +1219,10 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: 銀行借入 / 有利子負債
-  formula: null
-  inputs: null
+  formula: 銀行借入 / IBD
+  inputs:
+  - bank_loans
+  - IBD
   sign: cap
   buy_class: aux
   sell_class: useful
@@ -1146,24 +1235,30 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**借入の内訳（銀行 / 社債 / CP）は注記にある。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: IBD>0。無借金企業では欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**無借金企業で欠損。日本の小型株にはネットキャッシュ企業が多い。**'
   normalization: rank_sector
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D12
+  - D22
+  - D24
+  - D11
+  - U01
+  - P11
+  economic_rationale: ∩型。**日本の中小型ではメインバンクの存在が下支えにもリスクにもなる。** **メインバンクは危機時に支える**（護送船団の名残）が、 **同時に不採算事業の温存や過剰な借入を許す。** → **社債市場にアクセスできる企業（D16 が低い）は 信用力の証明でもある**が、 **危機時に借換ができないと即死する**（D11 との交互作用）。 **D12（変動金利）の説明の通り、 銀行借入は変動金利が主体なので金利正常化の直撃を受ける。**
+  references:
+  - 構造的判断。日本のメインバンク制の両義性
   notes: 日本の中小型ではメインバンクの存在が下支えにもリスクにもなる
   notes_extra: null
   provenance:
@@ -1177,24 +1272,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
+    nonlinear: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D17
   name_ja: Merton DD の変化
@@ -1202,8 +1298,9 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: delta_DD(過去3ヶ月)
-  formula: null
-  inputs: null
+  formula: delta D10（過去3ヶ月）
+  inputs:
+  - D10
   sign: negative
   buy_class: useful
   sell_class: main
@@ -1216,24 +1313,32 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: D10 を継承。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: D10 が2時点必要。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: D10 を継承。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D10
+  - D08
+  - I01
+  - K19
+  - K21
+  - R07
+  economic_rationale: '**水準より変化。株価情報を使うので最も反応が速い破綻シグナル。** → **A/C の「水準より変化」原則が D でも成り立つ** （E05 と E29 の関係と同じ）。 **D10 の水準が低い企業は既に市場に織り込まれているが、 急激に悪化している企業は情報が新しい。** → **売り判定（R07）で D カテゴリ最重要。** **保有中の銘柄について D17 を毎日監視する**のが 実運用での使い方で、**買いスコアより売りスコアの変数。**'
+  references:
+  - Bharath-Shumway (RFS 2008)
+  - 構造的判断。D10 の変化版
   notes: 水準より変化。株価情報を使うので最も反応が速い破綻シグナル
   notes_extra: null
   provenance:
@@ -1247,22 +1352,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D18
   name_ja: 退職給付債務の積立比率
@@ -1270,8 +1377,10 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: 年金資産 / 退職給付債務
-  formula: null
-  inputs: null
+  formula: 年金資産 / 退職給付債務
+  inputs:
+  - pension_assets
+  - pension_obligations
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1284,27 +1393,31 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: T2
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**割引率の設定が企業裁量で、これで債務の額が大きく変わる。** 低金利下では割引率が下がり債務が膨らむ。 **金利正常化（P05）は逆に債務を減らす。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 退職給付債務>0。**制度が無い企業では欠損。**
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**確定拠出年金に移行した企業では債務が小さく、意味を持たない。** 老舗の確定給付企業でのみ有効。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - D21
+  - D20
+  - A03
+  - W04
+  - P01
+  - E28
+  economic_rationale: '**日本の老舗企業で重要。積立不足は隠れ負債。** **積立不足は純資産に反映されるが、 A03（PBR）で見ると「純資産が小さい」としか見えない。** → **なぜ小さいのかが分からない。** **P05（金利正常化）で割引率が上がれば債務が減り、 積立不足が自動的に解消される**ので、 **D18 が悪い企業は金利上昇の受益者**という D12/D25（金利上昇で不利）と正反対の効果を持つ。 → **同じマクロ変数が同じ企業に逆向きに効くので、 正味の効果は個別に計算する必要がある。** **E28（包括利益との差）に退職給付調整が入る。**'
   references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP FR — Franzoni and Marin 2006, JF（OSAP再現 t=n/a, 月次0.4875%, 品質=2_fair, 予測力=2_likely）
+  - 構造的判断。P05 との関係が D12/D25 と逆向き
   notes: 日本の老舗企業で重要。積立不足は隠れ負債
   notes_extra: null
   provenance:
@@ -1318,23 +1431,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D19
   name_ja: リース負債込みレバレッジ
@@ -1342,8 +1456,12 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: (有利子負債 + リース負債 - 現金) / EBITDA
-  formula: null
-  inputs: null
+  formula: (IBD + リース負債 - CASH) / EBITDA
+  inputs:
+  - IBD
+  - lease_liabilities
+  - CASH
+  - EBITDA
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -1356,24 +1474,30 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: '**spec §2 では IBD にリースを含める版を既定としたので、D19 は 「含めない版の IBD」を使う場合との差分を持つための ID。** IFRS16 / ASC842 適用前後で不連続。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**EBITDA>0。赤字企業では欠損。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**適用前の期間（日本の日本基準企業は現在も未適用）ではリース負債が無い。** 日米・基準間で比較不能な期間がある。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D01
+  - D02
+  - D03
+  - D07
+  - U12
+  economic_rationale: '**IFRS16 適用後。小売・外食で数字が大きく変わる。** 店舗を賃借している小売・外食は、 **実質的に長期の支払義務を負っている**のに かつてはオフバランスだった。 → **同じ実態の企業が、基準の変更だけで レバレッジ指標が数倍になった。** **これは spec §2.1 で挙げた3つの基準差の一つ**で、 **バックテストで2019年前後に不連続が入る。** → **Z07（会計基準フラグ）で必ず検出する。**'
+  references:
+  - 構造的判断。spec §2.1 の3つの基準差の一つ
   notes: IFRS16 適用後。小売・外食で数字が大きく変わる
   notes_extra: null
   provenance:
@@ -1387,22 +1511,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D20
   name_ja: 繰延税金資産 / 自己資本
@@ -1410,8 +1536,10 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: DTA / 自己資本
-  formula: null
-  inputs: null
+  formula: 繰延税金資産 / EQ
+  inputs:
+  - deferred_tax_assets
+  - EQ
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -1424,24 +1552,31 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**回収可能性の判断基準が基準で違う。日本は5分類の実務指針があり、米国は valuation allowance で調整する。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: EQ>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**繰越欠損金を持つ企業（過去に赤字）で大きくなる。** 回復途上の企業が減点される。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D21
+  - E05
+  - E30
+  - B39
+  - D08
+  - F19
+  economic_rationale: '**回収可能性が疑わしい資産。赤字転落時に一気に取り崩される。** DTA は「将来利益が出れば税金が減る」という権利なので、 **将来利益が出ないと判断された瞬間に価値がゼロになる。** → **純資産が急減し、A03（PBR）が突然悪化する。** **B39（赤字回数）が多い企業ほど DTA が積み上がり、 かつ取り崩しリスクも高い**という二重の関係。 **E05/E30（税務）と同じデータ源だが、 D20 は貸借対照表の側から見ている。**'
+  references:
+  - 構造的判断
   notes: 回収可能性が疑わしい資産。赤字転落時に一気に取り崩される
   notes_extra: null
   provenance:
@@ -1455,22 +1590,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D21
   name_ja: 保証債務・偶発債務
@@ -1478,8 +1615,10 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: 保証債務 / 自己資本
-  formula: null
-  inputs: null
+  formula: 保証債務・偶発債務 / EQ
+  inputs:
+  - contingent_liabilities
+  - EQ
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -1492,24 +1631,31 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**偶発債務の開示範囲が基準で違う。IFRS は蓋然性が低いものも注記する。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: EQ>0。開示が無ければゼロ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**注記からの抽出が要る。LLM に頼るので誤りが入る。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D18
+  - D20
+  - D24
+  - D01
+  - T19
+  - E23
+  economic_rationale: '**注記から抽出。オフバランスのリスク。** 子会社や取引先への債務保証は、 **B/S に載らないが実質的な負債。** → **D01（負債/総資産）が良く見える企業でも、 保証債務が自己資本を超えていることがある。** **D19（リース）と同じく「オフバランスの実質債務」**で、 リースは基準改正でオンバランス化されたが **保証債務は今も注記のまま。** → **T12（開示文書からの数値抽出）の重要な適用先。**'
+  references:
+  - 構造的判断。T12 の適用先
   notes: 注記から抽出。オフバランスのリスク
   notes_extra: null
   provenance:
@@ -1523,22 +1669,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D22
   name_ja: 資金繰り余力（月数）
@@ -1627,8 +1775,9 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: 営業CFが正だった連続年数
-  formula: null
-  inputs: null
+  formula: CFO が正だった連続年数
+  inputs:
+  - CFO
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1641,24 +1790,31 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: CFO の定義は基準間で概ね一致するが、**利息・配当の分類（営業か財務か）が IFRS では選択可能。**
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（年数）。CFO が負になればゼロにリセット。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**長い履歴が要るので若い企業で低く出る。** C22/F09/B39 と同じ構造。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B39
+  - C22
+  - F09
+  - D08
+  - D22
+  - B10
+  economic_rationale: '**単純だが強い。営業CF 赤字が続く企業は原則除外。** → **D カテゴリのゲートとして最も分かりやすい。** **利益（B39 の赤字回数）は会計操作で作れるが、 営業CF はより作りにくい** — E01（アクルーアル）の議論そのもの。 → **B39 より D23 の方が信頼できる。** **C22（成長の連続年数）/ F09（連続増配）/ B39（赤字回数）と 同じカウント型の4本セット**で、 **いずれも「一線を越えなかった回数」を測る。** **若い企業で不利**という共通の欠点も同じ。'
+  references:
+  - 構造的判断。E01 の議論から CFO の方が信頼できる
   notes: 単純だが強い。営業CF赤字が続く企業は原則除外
   notes_extra: null
   provenance:
@@ -1672,22 +1828,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D24
   name_ja: 財務制限条項の余裕度
@@ -1695,8 +1853,11 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: 開示されたコベナンツに対する現状の余裕率
-  formula: null
-  inputs: null
+  formula: 開示された財務制限条項に対する現状の余裕率
+  inputs:
+  - covenants
+  - financial_statements
+  - LLM
   sign: positive
   buy_class: useful
   sell_class: main
@@ -1710,24 +1871,31 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**コベナンツの指標定義が契約ごとに違う**（EBITDA の定義など）。契約書の定義に従う必要がある。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: '**コベナンツの開示が無ければ欠損。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**開示が任意で、しかも「抵触の可能性がある場合」により詳しく開示される。** → **危険な企業ほど情報が多いという、珍しく好都合な偏り。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D11
+  - D22
+  - D16
+  - D25
+  - D08
+  - E23
+  economic_rationale: '**抵触は期限の利益喪失＝即死。有報注記から抽出。** **純資産維持条項・利益維持条項が典型**で、 2期連続赤字で抵触するものが多い。 → **B39（赤字回数）/ D23（CFO 連続黒字）が 「あと何回で抵触するか」を教える。** **D24 は D カテゴリで最も「即死」に近い変数**で、 **抵触すると借入が一括返済になり、 そこから増資（D15）か破綻（D08）に進む。** 上の missing_bias が実務上ありがたい点。'
+  references:
+  - 構造的判断。T12/LLM による注記抽出が前提
   notes: 抵触は期限の利益喪失＝即死。有報注記から抽出
   notes_extra: null
   provenance:
@@ -1741,22 +1909,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D25
   name_ja: 金利上昇ストレス耐性
@@ -1764,8 +1934,12 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: 金利 +2% 時のインタレストカバレッジ
-  formula: null
-  inputs: null
+  formula: 金利 +2% 時の EBIT / 支払利息
+  inputs:
+  - EBIT
+  - interest_expense
+  - IBD
+  - D12
   sign: positive
   buy_class: useful
   sell_class: main
@@ -1778,24 +1952,31 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: EBIT の定義（spec §2）を継承。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: '**IBD>0。無借金企業では無限大なので極値として扱う。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**変動金利比率（D12）が分からないと、ストレスの当て方が粗くなる。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D12
+  - D04
+  - D16
+  - P05
+  - P01
+  - U01
+  economic_rationale: '**日本の金利正常化局面で新たに重要。D12 の定量版。** → **上の (3) の通り、バックテスト期間の大半がゼロ金利なので、 過去データから学習できない。** **ストレステストという形で、 データに無い局面を明示的に作り出す**のが D25 の意義。 **I18（危機時パフォーマンス）が過去の実績で測るのに対し、 D25 は仮想のシナリオで測る。** → **過去に無い局面（金利正常化）には シナリオ分析しか手がない**という点で、 **T29（LLM のシナリオ分布）と同じ役割を 定量的に果たしている。**'
+  references:
+  - 構造的判断。過去データに無い局面へのストレステスト
   notes: 日本の金利正常化局面で新たに重要。D12 の定量版
   notes_extra: null
   provenance:
@@ -1809,22 +1990,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D26
   name_ja: 格下げイベント
