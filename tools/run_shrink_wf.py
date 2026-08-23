@@ -155,7 +155,20 @@ def spread_ic(rows: list[dict], f: SH.Fit, q: float = 0.2) -> dict:
     bot = sum(x[1] for x in scored[-k:]) / k
     allm = sum(x[1] for x in scored) / len(scored)
     return {"n": len(scored), "top": top, "bottom": bot,
-            "spread": top - bot, "mean": allm, "k": k}
+            "spread": top - bot, "mean": allm, "k": k,
+            # **263AT はロングオンリーである。**
+            # 買うのは上位分位だけで、下位分位は**一度も持たない。**
+            # それなのに評価指標を「上位 − 下位」にしていた。
+            # これはロングショートの指標であって、この設計のものではない。
+            #
+            # 実害があった（2026-08-23）。2020-10-31 の差が -206.9% に
+            # なったのは、**下位分位にサブペニー株が入って +250% に化けた**
+            # からで、**上位分位は何も悪くない。**
+            # 買わない銘柄の値動きで、買う銘柄の評価が壊れていた。
+            #
+            # 正しい問いは「上位分位は、何もしないより儲かるか」である。
+            # → **上位 − 全体平均**（等加重で全部買った場合との差）
+            "excess": top - allm}
 
 
 def main() -> int:
@@ -218,7 +231,9 @@ def main() -> int:
         return 0
 
     # --- まとめ ---------------------------------------------------------------
-    sp = [st["spread"] for _, _, st in results if "spread" in st]
+    # **主指標はロングオンリーの超過（上位 − 全体平均）。**
+    sp = [st["excess"] for _, _, st in results if "excess" in st]
+    ls = [st["spread"] for _, _, st in results if "spread" in st]
     print()
     print("-" * 80)
     print("まとめ")
@@ -227,18 +242,22 @@ def main() -> int:
         n_pos = sum(1 for x in sp if x > 0)
         mean = sum(sp) / len(sp)
         print("  生成回数              %d" % len(sp))
-        print("  上位-下位の差の平均    %+.2f%%（%d日の保有あたり）"
+        print("  **上位20%% − 全体平均   %+.2f%%**（%d日の保有あたり）"
               % (100 * mean, args.horizon_days))
-        print("  **差が正だった回数     %d / %d**" % (n_pos, len(sp)))
+        print("  **正だった回数         %d / %d**" % (n_pos, len(sp)))
+        if ls:
+            lm = sum(ls) / len(ls)
+            print("  （参考）上位−下位      %+.2f%%  ← **ロングショートの指標。"
+                  "この設計では買わない銘柄が入る**" % (100 * lm))
         # 回転コスト。**上位分位を入れ替えるたびに両側で払う**
         turns_per_year = 365.0 / args.horizon_days
         gross = mean * turns_per_year
         cost = 2 * (args.cost_bps / 10000.0) * turns_per_year
         print()
-        print("  **年率の粗リターン差   %+.2f%%**" % (100 * gross))
+        print("  **年率の粗超過        %+.2f%%**" % (100 * gross))
         print("  年率の取引コスト      %.2f%%（片道 %.0fbps × 往復 × 年%.1f回）"
               % (100 * cost, args.cost_bps, turns_per_year))
-        print("  **年率の正味          %+.2f%%**" % (100 * (gross - cost)))
+        print("  **年率の正味超過      %+.2f%%**" % (100 * (gross - cost)))
         print()
         if gross - cost <= 0:
             print("  → **正味がマイナス。** この構成では手数料負けする。")
