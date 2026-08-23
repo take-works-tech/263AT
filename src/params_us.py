@@ -77,6 +77,77 @@ def _debt(a, cik, t):
     return parts if got else None
 
 
+def _ttm_or_identity(a, cik, code, t):
+    """TTM を取る。無ければ**会計恒等式から導出**する。
+
+    実測（2026-08-23、DERA 17四半期 8,714社）で、
+    タグが無いだけで導出できる企業がかなりある:
+
+    | 導出 | 恒等式 | 導出できる企業 |
+    |---|---|---|
+    | GP | `REV − COGS` | **1,016社** |
+
+    **恒等式による導出は「近似」ではない。** 定義上等しい。
+    ただし**導出したことは記録する**（`derived` タグを付ける）—
+    元データに無かったことは後から効いてくる可能性があるので。
+
+    **恒等式が使えない場合は None のまま。** 推測はしない。
+    """
+    v = PE.ttm(a, cik, code, t)
+    if v is not None:
+        return v
+    if code == "GP":
+        rev, cogs = PE.ttm(a, cik, "REV", t), PE.ttm(a, cik, "COGS", t)
+        if rev is None or cogs is None or not PE.aligned(rev, cogs):
+            return None
+        return dataclasses.replace(rev, value=rev.value - cogs.value)
+
+    if code == "PRETAX":
+        # **これは恒等式ではなく近似である。**
+        # 正しくは NI = PRETAX − TAX − 非支配株主持分 − 非継続事業 なので、
+        # PRETAX = NI + TAX は下2つがゼロのときだけ厳密に成り立つ。
+        #
+        # **使う前に誤差を実測した**（2026-08-23、通期 61,095 観測）:
+        #   |相対誤差| < 1%  … **75%**
+        #   |相対誤差| < 5%  … 83%
+        #   中央値の誤差     … **ちょうど 0**
+        #   実効税率への影響 … |差| < 0.01 が **86%**
+        #
+        # → **E29（実効税率の「変化」）でのみ使う。**
+        #   非支配株主持分や非継続事業は同じ企業で持続するので、
+        #   **持続的な偏りは差分を取れば相殺される。**
+        #   水準を測る用途には使わない。
+        ni, tax = PE.ttm(a, cik, "NI", t), PE.ttm(a, cik, "TAX", t)
+        if ni is None or tax is None or not PE.aligned(ni, tax):
+            return None
+        return dataclasses.replace(ni, value=ni.value + tax.value)
+    return None
+
+
+def _point_or_identity(a, cik, code, t, lag=400):
+    """時点値を取る。無ければ会計恒等式から導出する。
+
+    | 導出 | 恒等式 | 導出できる企業 |
+    |---|---|---|
+    | TL | `TA − EQ` | **766社** |
+
+    `TL = TA − EQ` は**非支配株主持分を EQ に含めるかで厳密には差が出る。**
+    spec §2 では EQ を「純資産 − 非支配株主持分 − 新株予約権」と定義したので、
+    厳密には `TL = TA − 純資産` である。
+    → **導出した TL は本来より大きめに出る。** 記録しておく。
+    """
+    v = _point(a, cik, code, t, lag)
+    if v is not None:
+        return v
+    if code == "TL":
+        ta, eq = _point(a, cik, "TA", t, lag), _point(a, cik, "EQ", t, lag)
+        if ta is None or eq is None or ta.ddate != eq.ddate:
+            return None
+        return dataclasses.replace(ta, value=ta.value - eq.value,
+                                   tag="TA-EQ[derived]")
+    return None
+
+
 def _mcap(a, cik, t, price, fx=1.0):
     sh = _point(a, cik, "SHARES", t)
     if sh is None or price is None or sh.value <= 0:
@@ -92,7 +163,9 @@ def e29(a, cik, t) -> Value:
     §1.9.7 で「E は減点でなく加点のカテゴリでは」と問題提起した項目（OQ-40）。
     税務当局に嘘はつきにくいので、**納税の増加は本当に儲かっている証拠。**
     """
-    cur_tax, cur_pre = _ttm(a, cik, "TAX", t), _ttm(a, cik, "PRETAX", t)
+    # PRETAX は無ければ NI + TAX で近似する（**変化を測るので偏りは相殺される**）
+    cur_tax = _ttm(a, cik, "TAX", t)
+    cur_pre = _ttm_or_identity(a, cik, "PRETAX", t)
     if cur_tax is None or cur_pre is None:
         return Value("E29", None, "TTM が作れない")
     if not PE.aligned(cur_tax, cur_pre):
@@ -102,7 +175,8 @@ def e29(a, cik, t) -> Value:
     # 1年前の同じ量。**as-of は t のまま**（過去の値を今の情報で見る）
     import datetime as dt
     t1 = (dt.date.fromisoformat(t[:10]) - dt.timedelta(days=365)).isoformat()
-    p_tax, p_pre = _ttm(a, cik, "TAX", t1), _ttm(a, cik, "PRETAX", t1)
+    p_tax = _ttm(a, cik, "TAX", t1)
+    p_pre = _ttm_or_identity(a, cik, "PRETAX", t1)
     if p_tax is None or p_pre is None or p_pre.value <= 0:
         return Value("E29", None, "1年前の実効税率が作れない")
     return Value("E29", (cur_tax.value / cur_pre.value) - (p_tax.value / p_pre.value),
@@ -136,7 +210,7 @@ def e03(a, cik, t) -> Value:
     **フロー（アクルーアル）を積み上げるとストック（NOA）になる。**
     """
     ta, cash = _point(a, cik, "TA", t), _point(a, cik, "CASH", t)
-    tl = _point(a, cik, "TL", t)
+    tl = _point_or_identity(a, cik, "TL", t)     # TL = TA − EQ で導出可
     debt = _debt(a, cik, t)
     if ta is None or tl is None or cash is None or debt is None:
         return Value("E03", None, "NOA の構成要素が揃わない")
@@ -227,7 +301,7 @@ def b02(a, cik, t) -> Value:
 
 def b06(a, cik, t) -> Value:
     """B06 粗利/総資産（Novy-Marx の gross profitability）。"""
-    gp, ta = _ttm(a, cik, "GP", t), _avg(a, cik, "TA", t)
+    gp, ta = _ttm_or_identity(a, cik, "GP", t), _avg(a, cik, "TA", t)
     if gp is None or ta is None or ta.value <= 0:
         return Value("B06", None, "粗利 TTM か平均総資産が無い")
     return Value("B06", gp.value / ta.value, "", gp.derived_q4)
@@ -280,6 +354,7 @@ def _test() -> int:
         # **テストが何を確かめているのか分からなくなる**
         fs += [q("TAX", d, 1, 5.0, "2023-08-01"),
                q("PRETAX", d, 1, 35.0, "2023-08-01"),
+               q("NI", d, 1, 30.0, "2023-08-01"),        # PRETAX の導出に要る
                q("COGS", d, 1, 120.0, "2023-08-01")]
     for d, v in (("2022-06-30", 800.0), ("2023-06-30", 1000.0), ("2024-06-30", 1200.0)):
         fl = {"2022": "2022-08-01", "2023": "2023-08-01"}.get(d[:4], "2024-08-01")
@@ -337,6 +412,33 @@ def _test() -> int:
     check("**EV<0 でも欠損にしない（OQ-37: 最も割安な銘柄を消さない）**",
           v5["A06"].value is not None and v5["A06"].reason == "EV<0")
 
+    # **会計恒等式による導出。** タグが無いだけで作れる企業がかなりある
+    fs_nogp = [f for f in fs if f.code != "GP"]
+    check("**GP タグが無くても REV − COGS で導出する**",
+          abs(compute(FA.AsOf(fs_nogp), 1, T, mcap)["B06"].value - 400.0 / 1100.0) < 1e-9)
+    fs_norev = [f for f in fs_nogp if f.code != "COGS"]
+    check("**REV / COGS も無ければ None（推測しない）**",
+          compute(FA.AsOf(fs_norev), 1, T, mcap)["B06"].value is None)
+
+    fs_nopre = [f for f in fs if f.code != "PRETAX"]
+    v_pre = compute(FA.AsOf(fs_nopre), 1, T, mcap)
+    check("**PRETAX が無くても NI + TAX で近似して E29 を作る**",
+          v_pre["E29"].value is not None)
+    fs_notax = [f for f in fs_nopre if f.code != "TAX"]
+    check("**TAX も無ければ作らない**",
+          compute(FA.AsOf(fs_notax), 1, T, mcap)["E29"].value is None)
+
+    fs_notl = [f for f in fs if f.code != "TL"]
+    v_tl = compute(FA.AsOf(fs_notl), 1, T, mcap)
+    check("**TL タグが無くても TA − EQ で導出する（E03 が作れる）**",
+          v_tl["E03"].value is not None)
+    # TA 1200 / EQ 720 → TL 480。CASH 120、debt 240 → NOA=(1200-120)-(480-240)=840
+    check("導出した TL で E03 の値が一致する",
+          abs(v_tl["E03"].value - 840.0 / 1100.0) < 1e-9)
+    fs_noeq = [f for f in fs_notl if f.code != "EQ"]
+    check("**EQ も無ければ導出しない**",
+          compute(FA.AsOf(fs_noeq), 1, T, mcap)["E03"].value is None)
+
     # **どの提出よりも前の時点では誰も作れない。**
     # 最初に書いたときに t=2024-01-01 を使ったが、
     # **2023-08-01 提出のデータは既に見えている**ので A03 などは作れてしまう。
@@ -348,7 +450,7 @@ def _test() -> int:
           v7["A03"].value is not None and v7["E29"].value is None)
 
     print("-" * 78)
-    total = 20
+    total = 27
     print("%d/%d 通過" % (total - len(fails), total))
     return 1 if fails else 0
 
