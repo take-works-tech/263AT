@@ -12,8 +12,9 @@
   category_name: 成長性・再投資
   subsection: null
   definition: 売上(t)/売上(t-1) - 1
-  formula: null
-  inputs: null
+  formula: REV_TTM(t) / REV_TTM(t-1y) - 1
+  inputs:
+  - REV
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -26,24 +27,31 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**総額基準 / 純額基準の変更（IFRS15）や決算期変更（spec §1.4）で 成長率が跳ねる。Z06 のフラグで検出する。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 前期 REV>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**決算期変更があると異常値になり、ウィンザライズで静かに消される**（spec §1.4）。フラグで明示検出する。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - C02
+  - C03
+  - C21
+  - B30
+  - A13
+  - T17
+  economic_rationale: '**単年はノイズ。C02（3年 CAGR）と併用する。** C カテゴリのアウトプット側の基本量。 **成長そのものにプレミアムは無い** — 成長株が高リターンという実証は弱く、 むしろ**成長率が高い銘柄は既に高く評価されている。** → **C01 が効くのは A（バリュー）との交互作用**であり、 **「安いのに成長している」が本命。** A13（PEG）がそれを1本で表現する試み。'
+  references:
+  - 構造的判断。成長単独のプレミアムは実証が弱い
   notes: 単年はノイズ。C02 と併用
   notes_extra: null
   provenance:
@@ -57,22 +65,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C02
   name_ja: 売上CAGR 3年/5年/10年
@@ -160,8 +170,10 @@
   category_name: 成長性・再投資
   subsection: null
   definition: 同上
-  formula: null
-  inputs: null
+  formula: EPS_TTM(t) / EPS_TTM(t-1y) - 1
+  inputs:
+  - NI
+  - SHARES
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -174,24 +186,31 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: のれん償却（日本基準）が NI を押し下げる。SHARES は分割調整済み（spec §3）。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: '**前期 EPS>0。赤字からの回復は成長率が定義できないので欠損。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**赤字期を含む企業で欠損。しかも「赤字から黒字化」という最も大きな変化が測れない。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - C01
+  - C02
+  - F01
+  - F02
+  - F03
+  - B01
+  economic_rationale: '**自社株買いで水増しされる（F01 と併せて見る）。** EPS は分母（株数）を減らせば増えるので、 **事業が成長していなくても EPS は伸びる。** → **C01（売上成長）と C03 の乖離が 「自社株買いによる水増し」の量。** **F03（自社株買い）自体は + のシグナルだが、 C03 を通じて成長に見せかけるのは別問題。** → **C01 と C03 を両方持ち、乖離を見るのが正しい使い方。** 上の missing_bias が重く、**黒字転換という最重要の変化が 構造的に測れない**ので、N08/G37（サプライズ）で補う。'
+  references:
+  - 構造的判断。F01/F03 との併用が必須
   notes: 自社株買いで水増しされる（F01と併せて見る）
   notes_extra: null
   provenance:
@@ -205,22 +224,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C04
   name_ja: 営業利益成長率
@@ -466,8 +487,13 @@
   category_name: 成長性・再投資
   subsection: null
   definition: (設備投資 + 買収 + delta_運転資本 - 減価償却) / NOPAT
-  formula: null
-  inputs: null
+  formula: (CAPEX + 買収 + delta 運転資本 - DA) / NOPAT
+  inputs:
+  - CAPEX
+  - acquisitions
+  - working_capital
+  - DA
+  - NOPAT
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -480,24 +506,33 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: DA の定義（spec §2、のれん償却を含む）と NOPAT の TAXR 依存を継承。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**NOPAT>0。赤字企業では定義できない。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 赤字企業で欠損。
   normalization: rank_sector
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - C08
+  - C09
+  - B04
+  - B32
+  - C35
+  - F10
+  - A39
+  economic_rationale: ∩型だが、**本質は B04（ROIC-WACC）との交互作用。** **高 ROIC 企業では再投資率が高い方が良く、 低 ROIC 企業では低い方が良い。** → **∩型（業種中央値からの乖離）は近似にすぎず、 正しくは B04 で条件付けた線形。** **C カテゴリの符号整理そのもの**を1本で体現する変数で、 **F08（配当性向）が同じ論点を還元側から見ている** （高 ROIC 企業は配当性向が低い方がよい）。 → **C07 と F08 は表裏。**
+  references:
+  - 構造的判断。catalog §4-C の符号整理
+  - Mauboussin の ROIC-成長マトリクス
   notes: 高ROIC企業では高い方が良い、低ROIC企業では低い方が良い（B04との交互作用が必須）
   notes_extra: null
   provenance:
@@ -511,24 +546,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
+    nonlinear: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C08
   name_ja: 期待複利成長
@@ -619,8 +655,10 @@
   category_name: 成長性・再投資
   subsection: null
   definition: ROE × (1 - 配当性向)
-  formula: null
-  inputs: null
+  formula: B01（ROE） × (1 - 配当性向)
+  inputs:
+  - B01
+  - F08
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -633,24 +671,31 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: B01 を継承。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: B01 が計算できれば計算可能。**配当性向>1 なら負になる**（正常）。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**債務超過企業で B01 が欠損する分だけ欠損。** C08 より欠損が少ない。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - C08
+  - C07
+  - B01
+  - F08
+  - B05
+  economic_rationale: '**C08（ROIC × 再投資率）の簡易版。データが薄い銘柄用のフォールバック。** ROE と配当性向だけで作れるので、 **CF計算書が無い四半期（日本の第1・第3四半期）でも計算できる。** → **C08 が欠損する場面を埋めるのが役割。** ただし**B01（ROE）を使うので、 レバレッジで水増しされた成長率になる**という C08 に無い欠点がある（B05/A48 の論点）。 → **D01（レバレッジ）で条件付けないと誤読する。**'
+  references:
+  - 構造的判断。C08 のフォールバック
+  - Higgins (1977) 持続可能成長率
   notes: C08 の簡易版。データが薄い銘柄用のフォールバック
   notes_extra: null
   provenance:
@@ -664,22 +709,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C10
   name_ja: 成長の質（オーガニック比率）
@@ -687,8 +734,11 @@
   category_name: 成長性・再投資
   subsection: null
   definition: 1 - 買収由来売上増 / 総売上増
-  formula: null
-  inputs: null
+  formula: 1 - 買収由来の売上増 / 総売上増
+  inputs:
+  - REV
+  - acquisitions
+  - LLM
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -702,24 +752,31 @@
   - LLM
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**買収由来の売上を分離するには、被買収企業の売上規模の開示が要る。日本では開示されないことが多い。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**総売上増>0。減収企業では定義できない。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**買収の売上寄与を開示しない企業が多く、LLM 推定に頼る。** 日本で特に精度が低い。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - C01
+  - E11
+  - C35
+  - T41
+  - N13
+  - B38
+  economic_rationale: '**M&A 頼みの成長は持続しにくい。のれん膨張（E11）と併せる。** 買収で売上を買うのは、**資本を投入して売上を得ているだけ**で、 **インプットの成長（C カテゴリの − 側）そのもの。** → **C01（売上成長）が + でも、 その中身が買収なら実質は − に近い。** **E11（のれん比率）が50%を超え、C10 が低い企業は 「買収で膨らんだだけ」で、将来の減損（E カテゴリ）が控えている。** T41（資本配分の質）の主要な判定材料。'
+  references:
+  - 構造的判断。E11/T41 との併用が必須
   notes: M&A頼みの成長は持続しにくい。のれん膨張（E11）と併せる
   notes_extra: null
   provenance:
@@ -733,22 +790,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C11
   name_ja: 受注残成長率
@@ -996,8 +1055,11 @@
   category_name: 成長性・再投資
   subsection: null
   definition: 拠点数(t)/拠点数(t-1) - 1
-  formula: null
-  inputs: null
+  formula: 拠点数(t) / 拠点数(t-1) - 1
+  inputs:
+  - store_count
+  - LLM
+  - X10
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -1011,24 +1073,30 @@
   - TD
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 前期の拠点数>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**開示企業に偏る。X10（地図サービスからの実測）で補完できるが精度が低い。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U18
+  - C13
+  - U15
+  - C35
+  - X10
+  economic_rationale: '**C13（既存店売上）と分けて持つ（見かけの成長と実力の成長の分離）。** 出店で売上を伸ばすのは**インプットの成長**で、 既存店の伸び（C13）が**アウトプットの成長。** → **C10（買収 vs オーガニック）と全く同じ構造**を 小売業で見たもの。 **U18（出退店ネット数）が同じ量を業種特化で持つ。** C35（資産成長アノマリー）の観点では、 **既存店が良くない企業の出店は減点。**'
+  references:
+  - 構造的判断。catalog §4-C の符号整理
   notes: C13 と分けて持つ（見かけの成長と実力の成長の分離）
   notes_extra: null
   provenance:
@@ -1042,22 +1110,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C15
   name_ja: ARR / NRR
@@ -1145,8 +1215,11 @@
   category_name: 成長性・再投資
   subsection: null
   definition: KPI開示から
-  formula: null
-  inputs: null
+  formula: 顧客数・ユーザー数の成長率（KPI 開示から）
+  inputs:
+  - kpi_disclosure
+  - LLM
+  - T34
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1160,27 +1233,31 @@
   - TD
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: T1
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: '**KPI の定義が企業ごとに違う**（アクティブの定義、解約者の扱い）。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 前期の顧客数>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**開示企業に偏り、しかも数字が良い企業ほど開示する**（U28-U33 と同じ Z03 の偏り）。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - U28
+  - U33
+  - X01
+  - X03
+  - C15
+  - T34
+  economic_rationale: '**収益化前の企業で唯一の物差し。** 売上も利益も無い段階では、 **顧客数の伸びだけが将来の価値を示す。** → **A04（S/P）が「赤字企業を救う」のと同じ役割を、 無収益企業に対して果たす。** ただし**顧客数が増えても収益化できなければ意味がない**ので、 **U28（NRR）/ U30（LTV/CAC）と併せて 「増やした顧客が儲かるか」を判定する。** **X01/X03（外部から観測できる代替指標）で 開示バイアスを一部回避できる。**'
   references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP ChNWC — Soliman 2008, AR（OSAP再現 t=4.6, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - 構造的判断。Z03（開示バイアス）に注意
   notes: 収益化前の企業で唯一の物差し
   notes_extra: null
   provenance:
@@ -1194,23 +1271,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C17
   name_ja: TAM残存余地
@@ -1218,8 +1296,10 @@
   category_name: 成長性・再投資
   subsection: null
   definition: (推定TAM - 現売上) / 現売上
-  formula: null
-  inputs: null
+  formula: (推定TAM - 現売上) / 現売上
+  inputs:
+  - T17
+  - REV
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1232,24 +1312,30 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: REV>0。TAM が推定できなければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: T17 を継承。**TAM は最も水増しされやすい数字。**
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - T17
+  - C01
+  - C26
+  - T14
+  - U34
+  economic_rationale: '**LLM 推定。桁が合っていれば十分。5年以上の複利余地の判定に使う。** T17 と同一の量（C17 は比の形）。 **C26（平均回帰調整）の重要な条件変数** — **TAM の残りが大きければ高成長が続きうるが、 小さければ必ず減速する。** → **成長の平均回帰速度を、市場の飽和度で条件付ける**という 使い方が本来の役割。 **263AT の保有期間（最大5年）では、 5年間複利が回るかどうかが決定的。**'
+  references:
+  - 構造的判断。T17 と同一量。桁レベルの判断に限定
   notes: LLM推定。桁が合っていれば十分。5年以上の複利余地の判定に使う
   notes_extra: null
   provenance:
@@ -1263,22 +1349,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C18
   name_ja: 成長の分散（予測可能性）
@@ -1286,8 +1374,9 @@
   category_name: 成長性・再投資
   subsection: null
   definition: -sd(四半期売上成長率, 過去12Q)
-  formula: null
-  inputs: null
+  formula: -sd( 四半期売上成長率, 過去12Q )
+  inputs:
+  - REV
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -1300,24 +1389,31 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: '**四半期の季節性を除かないと、季節変動を不安定さと誤認する。** C21（季節調整）と併用する。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 12四半期の履歴が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**3年の履歴が要る。日本の四半期開示は2008年以降なので、それ以前は作れない。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B15
+  - B14
+  - C21
+  - C22
+  - I01
+  - A43
+  economic_rationale: '**安定成長にはプレミアムが付く（そして既に付いている場合がある）。** B15（売上成長の10年分散）の四半期版で、 **反応が速いが季節性の影響を受ける。** → **C21（季節調整済み成長）を通してから測るべき。** **B14/B15/B39（安定性の塊）と Z12 で一緒になるはず。** 上の括弧内が重要で、**安定成長企業は既に高い PER が付いている** ことが多いので、**A（バリュー）との交互作用でしか使えない。**'
+  references:
+  - 構造的判断。B15 の四半期版
   notes: 安定成長にはプレミアムが付く（そして既に付いている場合がある）
   notes_extra: null
   provenance:
@@ -1331,22 +1427,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C19
   name_ja: 四半期進捗率
@@ -1589,8 +1687,9 @@
   category_name: 成長性・再投資
   subsection: null
   definition: 売上成長率が正だった連続年数
-  formula: null
-  inputs: null
+  formula: 売上成長率が正だった連続年数
+  inputs:
+  - REV
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -1603,24 +1702,30 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: 決算期変更（spec §1.4）で連続性が切れる。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（年数）。減収があればゼロにリセット。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**長い履歴が要るので若い企業で不利。F09（連続増配）と同じ構造。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - C18
+  - B15
+  - F09
+  - B39
+  - C26
+  economic_rationale: '**長期複利の実績。** **F09（連続増配年数）と全く同じ構造**で、 **「一線を越えなかった回数」というカウント量。** B39（赤字回数）も同じ形。 → **これら3本（C22 / F09 / B39）は 連続量では捉えられないテールの情報を持つ**という 共通の役割がある。 ただし**263AT の狙う小型株は若い企業が多く、 C22 が構造的に低い**ので、 **減点材料にすると戦略と衝突する。**'
+  references:
+  - 構造的判断。F09/B39 と同じ構造
   notes: 長期複利の実績
   notes_extra: null
   provenance:
@@ -1634,22 +1739,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C23
   name_ja: 海外売上比率と変化
@@ -1657,8 +1764,10 @@
   category_name: 成長性・再投資
   subsection: null
   definition: 海外売上 / 総売上 とその YoY 変化
-  formula: null
-  inputs: null
+  formula: 海外売上 / REV とその YoY 変化
+  inputs:
+  - segment_data
+  - REV
   sign: context
   buy_class: useful
   sell_class: useful
@@ -1671,24 +1780,31 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**地域別セグメントの開示が要る。区分（所在地別 / 仕向地別）が企業で違い、 意味が変わる。** 日本は所在地別が多く、輸出は国内に計上される。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: REV>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**上の accounting_standard_note により、日本の輸出企業の海外売上比率は過小に出る。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P07
+  - P08
+  - U26
+  - T19
+  - V07
+  - C01
+  economic_rationale: '**成長余地と為替リスクの両面。P08/U26 と併用。** 符号を context にしたのは、**海外展開は成長機会でもあり リスクでもある**から。 → **P08（為替感応度）/ T19（地政学リスク）と 組んで初めて符号が決まる。** 上の missing_bias が重要で、 **所在地別セグメントでは「日本で作って輸出する」企業が 国内売上に見える** — 実際には為替に大きく晒されている。 → **C23 が低くても P08 が高い企業がある**ので、 **C23 単独で為替エクスポージャーを判断してはいけない。**'
+  references:
+  - 構造的判断。セグメント区分の日米差
   notes: 成長余地と為替リスクの両面。P08/U26 と併用
   notes_extra: null
   provenance:
@@ -1702,22 +1818,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C24
   name_ja: 新製品売上比率
@@ -1725,8 +1843,10 @@
   category_name: 成長性・再投資
   subsection: null
   definition: 直近3年以内に投入した製品の売上比率
-  formula: null
-  inputs: null
+  formula: 直近3年以内に投入した製品の売上比率
+  inputs:
+  - product_disclosure
+  - LLM
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1740,24 +1860,31 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: REV>0。開示が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**開示企業限定。しかも「新製品」の定義が企業判断。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B25
+  - B26
+  - X07
+  - X09
+  - U34
+  - T14
+  economic_rationale: '**イノベーション率。開示企業限定。** **B25（R&D 投入）→ X07/X09（特許・商標）→ C24（新製品売上）→ B26（粗利増）**という **イノベーションの4段階のうち3段目。** → **各段階で欠損の構造が違う**ので、 どの段階まで観測できるかで銘柄ごとに使える指標が変わる。 **X09（商標出願）は開示に依存せず、 しかも C24 の半年〜1年前に観測できる**ので、 **C24 が欠損する企業では X09 が代替になる。**'
+  references:
+  - 構造的判断。X09 が先行かつ開示非依存の代替
   notes: イノベーション率。開示企業限定
   notes_extra: null
   provenance:
@@ -1771,22 +1898,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C25
   name_ja: 価格 vs 数量の成長分解
@@ -1875,8 +2004,12 @@
   category_name: 成長性・再投資
   subsection: null
   definition: 業種の成長率平均回帰速度で割り引いた期待成長
-  formula: null
-  inputs: null
+  formula: 業種の成長率平均回帰速度で割り引いた期待成長率
+  inputs:
+  - C01
+  - C02
+  - industry
+  - B40
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1889,24 +2022,33 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: C01 を継承。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 業種内で回帰速度を推定するのに30社以上・5年以上が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**小業種では推定できない。** B40 と同じ制約。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B40
+  - B13
+  - C01
+  - C02
+  - C17
+  - A43
+  - U39
+  economic_rationale: '**高成長は必ず減速する。素の成長率を信じると高値を掴む。** Chan-Karceski-Lakonishok (JF 2003) は、 **長期の高成長が持続する確率は偶然と区別できない**と報告した。 → **C カテゴリ全体の前提を作る変数。** **B40（ROE の分位遷移）が収益性で同じことをする**ので、 **C26 と B40 は対をなす** — 成長と収益性の両方が平均回帰する。 **C17（TAM 残存余地）が回帰速度の条件変数**になり、 **U39（資源株）では回帰が極端に速い**ので A22/A24（自己バリュエーション位置）での補正が要る。'
+  references:
+  - Chan-Karceski-Lakonishok (JF 2003) The Level and Persistence of Growth Rates
+  - Nissim-Penman (RAST 2001)
   notes: 高成長は必ず減速する。素の成長率を信じると高値を掴む
   notes_extra: null
   provenance:
@@ -1920,22 +2062,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C27
   name_ja: 設備投資の売上先行性
@@ -1943,8 +2087,11 @@
   category_name: 成長性・再投資
   subsection: null
   definition: 設備投資成長率(t-1) と 売上成長率(t) の関係
-  formula: null
-  inputs: null
+  formula: 設備投資成長率(t-1) と 売上成長率(t) の関係（業種別に先行期間を推定）
+  inputs:
+  - CAPEX
+  - REV
+  - industry
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -1957,24 +2104,31 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 複数年の履歴が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**業種により先行期間が異なる**（半導体は2-3年、小売は1年）。推定に業種別の窓が要る。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - C30
+  - C31
+  - C39
+  - B32
+  - U23
+  - C35
+  economic_rationale: '**設備投資が売上に転換するか。** C35（資産成長アノマリー）は「投資した企業は負ける」と言うが、 **それは投資が売上に転換しない企業の話。** → **C27 は「投資が実った企業」と 「投資しただけの企業」を分ける試み。** **B26（R&D 生産性）と全く同じ発想を設備投資で行う。** → **B26 / C27 / U37（医薬の承認生産性）は 「投入の実り」を測る同一の思想の3つの実装。** 実証は無いので★1。'
+  references:
+  - 構造的判断。B26/U37 と同じ思想
   notes: 業種により先行期間が異なる
   notes_extra: null
   provenance:
@@ -1988,22 +2142,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C28
   name_ja: M&A後の統合成否
@@ -2173,8 +2329,9 @@
   category_name: 成長性・再投資
   subsection: null
   definition: (設備投資_t / 設備投資_{t-3})^(1/3) - 1
-  formula: null
-  inputs: null
+  formula: (CAPEX_t / CAPEX_{t-3})^(1/3) - 1
+  inputs:
+  - CAPEX
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -2192,22 +2349,28 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: '**無形資産の取得を CAPEX に含めるかで値が変わる**（spec §2 で有形のみと定義）。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**CAPEX_{t-3}>0。設備投資がほぼ無い企業では不安定。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 3年の履歴が要る。**資産を持たない業種で不安定。**
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - C31
+  - C35
+  - C39
+  - B32
+  - C07
+  - F24
+  economic_rationale: '**OSAP grcapx3y t=4.7。C35（資産成長）の設備投資版。** Titman-Wei-Xie (JFQA 2004) の capital investment。 **投資した企業は将来リターンが低い** — 経営陣の 帝国建設か、あるいは過剰楽観の表れ。 → **C30/C31/C39/C40 と C35、さらに F23-F31 を合わせると、 「資金を集めて資産を増やした企業は負ける」という 一つの現象を10本以上で測っている**ことになる。 **これが Z12 で最大の塊になるはず。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP grcapx3y — Anderson and Garcia-Feijoo 2006, JF（OSAP再現 t=4.7, 月次0.6%, 品質=1_good, 予測力=1_clear）
+  - Titman-Wei-Xie (JFQA 2004) Capital Investments and Stock Returns
+  - OSAP grcapx3y t=4.7
   notes: OSAP grcapx3y t=4.7
   notes_extra: null
   provenance:
@@ -2221,23 +2384,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C31
   name_ja: 業種調整済み設備投資変化
@@ -2245,8 +2409,11 @@
   category_name: 成長性・再投資
   subsection: null
   definition: 設備投資/総資産 - 業種中央値 の変化
-  formula: null
-  inputs: null
+  formula: delta( CAPEX/TA - 業種中央値 )
+  inputs:
+  - CAPEX
+  - TA
+  - industry
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -2264,22 +2431,27 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: C30 を継承。TA はリース（IFRS16）で不連続。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: TA>0。業種内 N>=30。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**業種分類の粒度に依存**（SP-03/SP-04）。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - C30
+  - C35
+  - C39
+  - P19
+  - B32
+  economic_rationale: '**OSAP ChInvIA t=2.9。同業より積極的に投資している企業は劣後する。** C30（絶対的な投資成長）に対して、 **業種のサイクルを除いた相対的な積極性**を測る。 → **半導体が一斉に投資する局面では C30 が全社で高くなるが、 C31 はその中で突出した企業だけを捉える。** **G11（業種相対モメンタム）が価格で同じことをする**のと 同じ構造 — **業種効果を除いた残りが本体。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP ChInvIA — Abarbanell and Bushee 1998, AR（OSAP再現 t=2.9, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - Abarbanell-Bushee (TAR 1998)
+  - OSAP ChInvIA t=2.9
   notes: OSAP ChInvIA t=2.9。同業より積極的に投資している企業は劣後
   notes_extra: null
   provenance:
@@ -2293,23 +2465,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C32
   name_ja: 従業員数成長率
@@ -2396,8 +2569,9 @@
   category_name: 成長性・再投資
   subsection: null
   definition: 広告費_t / 広告費_{t-1} - 1
-  formula: null
-  inputs: null
+  formula: 広告費_t / 広告費_{t-1} - 1
+  inputs:
+  - advertising
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -2417,20 +2591,26 @@
   industries: null
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**広告費を独立掲記する企業に限られる。日本の小型株は販管費に含めて非開示のことが多い。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 前期の広告費>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**開示企業に偏る。米国の方が開示率が高い。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - C34
+  - B43
+  - B25
+  - C41
+  - A31
+  - X05
+  economic_rationale: '**OSAP GrAdExp t=3.5。符号が + であることが重要。** **B25（R&D）は水準を∩型で持ち、 C30/C39（設備投資）は成長を − で持つのに、 広告費の成長は + になる。** → **無形資産への投資は、有形資産への投資と符号が逆。** LAW-49（無形資産の資本化）が符号の水準で現れている。 **カタログは R&D しか見ておらず広告を落としていた** ので、OSAP 突合が埋めた見落とし。 Chan-Lakonishok-Sougiannis (JF 2001) の系譜。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP GrAdExp — Lou 2014, RFS（OSAP再現 t=3.5, 月次0.58%, 品質=1_good, 予測力=1_clear）
+  - Chan-Lakonishok-Sougiannis (JF 2001)
+  - OSAP GrAdExp t=3.5
   notes: OSAP GrAdExp t=3.5。B25 は R&D のみで広告を落としていた
   notes_extra: null
   provenance:
@@ -2444,23 +2624,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C34
   name_ja: ブランド資本投資
@@ -2468,8 +2649,10 @@
   category_name: 成長性・再投資
   subsection: null
   definition: 広告費を資本化して積み上げたブランド資産 / 総資産
-  formula: null
-  inputs: null
+  formula: 広告費を資本化して積み上げたブランド資産 / TA
+  inputs:
+  - advertising
+  - TA
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -2482,27 +2665,33 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T2
+  evidence_tier: T1
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: C33 を継承。**償却率の設定が必要**（B43 と同じ論点）。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: TA>0。広告費の開示が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: C33 を継承。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - C33
+  - B43
+  - A31
+  - B27
+  - T14
+  - T38
+  economic_rationale: '**OSAP BrandInvest t=2.0。** **A31（R&D 資本化 PBR）/ B27（R&D 調整 ROIC）/ B43（販管費の組織資本）/ C34（広告のブランド資本）は 無形資産を資本化する4本セット。** → **それぞれ対象（R&D / 販管費 / 広告）と 適用先（バリュエーション / 収益性 / 資産）が違う。** **T14（堀の5類型）の「無形資産」に対応する 最も直接的な定量アンカー。** t=2.0 と弱いのは、広告費の開示企業が限られるため。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP BrandInvest — Belo, Lin and Vitorino 2014, RED（OSAP再現 t=2.0, 月次0.435%, 品質=1_good, 予測力=2_likely）
+  - Belo-Lin-Vitorino (RED 2014) Brand Capital and Firm Value
+  - OSAP BrandInvest t=2.0
   notes: OSAP BrandInvest t=2.0
   notes_extra: null
   provenance:
@@ -2516,23 +2705,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C35
   name_ja: 総資産成長率
@@ -2864,8 +3054,11 @@
   category_name: 成長性・再投資
   subsection: null
   definition: (設備投資 + R&D) / 売上
-  formula: null
-  inputs: null
+  formula: (CAPEX + RD) / REV
+  inputs:
+  - CAPEX
+  - RD
+  - REV
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -2884,21 +3077,27 @@
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: CAPEX と RD の定義（spec §2、IFRS の開発費資産計上）を継承。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: REV>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: R&D の開示に依存。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - C30
+  - C31
+  - C35
+  - C07
+  - B04
+  - B25
+  economic_rationale: '**OSAP Investment t=2.9。B04（ROIC-WACC）が正なら符号が反転しうる。** → **C カテゴリの符号分岐が最も明示的に現れる変数。** 投資は本来価値を生む行為だが、 **平均的には投資しすぎる企業の方が多い**ので 断面では − になる。 **B04 で条件付けると、 ROIC が WACC を上回る企業では + に転じるはず。** → **C07（再投資率）と同じ構造だが、 C39 は NOPAT でなく売上で正規化するので 赤字企業でも計算できる**という実装上の利点がある。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP Investment — Titman, Wei and Xie 2004, JFQA（OSAP再現 t=2.9, 月次0.168333333%, 品質=1_good, 予測力=1_clear）
+  - Titman-Wei-Xie (JFQA 2004)
+  - OSAP Investment t=2.9
   notes: OSAP Investment t=2.9。B04（ROIC-WACC）が正なら符号が反転しうる（交互作用必須）
   notes_extra: null
   provenance:
@@ -2912,23 +3111,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C40
   name_ja: 長期投資の変化
@@ -2936,8 +3136,11 @@
   category_name: 成長性・再投資
   subsection: null
   definition: delta_投資有価証券・長期貸付 / 前期総資産
-  formula: null
-  inputs: null
+  formula: delta( 投資有価証券 + 長期貸付金 ) / 前期TA
+  inputs:
+  - investment_securities
+  - long_term_loans
+  - TA
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -2955,22 +3158,28 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**その他有価証券の評価差額（時価変動）が delta に混入する。取得・売却による変動だけを取り出すべきだが、注記が要る。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 前期 TA>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**時価変動と実際の投資行動を区別できないと、株高の年に全社が「投資した」ことになる。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - K17
+  - A18
+  - C35
+  - E32
+  - F25
+  - T41
+  economic_rationale: '**OSAP DelLTI t=3.4。日本では政策保有株（K17）と重なる。** → **本業と関係ない資産を増やす企業は劣後する**という、 C35（資産成長）の中でも特に説明が明快な部分。 **日本では政策保有株の積み増しがこれに当たり、 東証の要請（F13/LAW-47）はまさにこれを止めさせるもの。** → **C40 が負（政策保有を減らしている）で K17 が動いている企業が、資本効率改善の本命。** 上の missing_bias が実装上の要点で、 **時価変動を除かないと株高の年に全銘柄が減点される。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP DelLTI — Richardson et al. 2005, JAE（OSAP再現 t=3.4, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - Richardson (RAST 2006) Over-investment of free cash flow
+  - OSAP DelLTI t=3.4
   notes: OSAP DelLTI t=3.4。日本では政策保有株（K17）と重なる
   notes_extra: null
   provenance:
@@ -2984,23 +3193,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: C41
   name_ja: 予想外の R&D 増加
@@ -3008,8 +3218,10 @@
   category_name: 成長性・再投資
   subsection: null
   definition: 過去トレンドから外れた R&D の増加
-  formula: null
-  inputs: null
+  formula: 過去トレンドから外れた R&D の増加（残差）
+  inputs:
+  - RD
+  - REV
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -3028,21 +3240,27 @@
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: B25 を継承。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: '**トレンド推定に5年以上が要る。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: B25 を継承。5年の履歴も要る。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - B25
+  - B26
+  - C33
+  - X07
+  - X08
+  - T39
+  economic_rationale: '**OSAP SurpriseRD t=3.5。R&D は水準（B25）より「意外な増加」が効く。** Eberhart-Maxwell-Siddique (JF 2004)。 **常に R&D を多く使う企業は既にそう評価されているが、 急に増やした企業は市場が織り込んでいない。** → **A（水準）と C（変化）を分ける原則の R&D 版**であり、 **さらに「変化」ではなく「予想外の変化」まで進んでいる。** **N08（PEAD）や G37（連続サプライズ）と同じく、 「期待からの乖離」が効くという構造。** C33（広告費の成長）と同じく符号が + で、 **無形投資の例外性**を示す。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP SurpriseRD — Eberhart, Maxwell and Siddique 2004, JF（OSAP再現 t=3.5, 月次0.294%, 品質=1_good, 予測力=1_clear）
+  - Eberhart-Maxwell-Siddique (JF 2004) An Examination of Long-Term Abnormal Stock Returns Following R&D Increases
+  - OSAP SurpriseRD t=3.5
   notes: OSAP SurpriseRD t=3.5。R&D は水準（B25）より「意外な増加」が効く
   notes_extra: null
   provenance:
@@ -3056,21 +3274,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1

@@ -94,8 +94,13 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: delta_(流動資産-現金) - delta_(流動負債-短期借入) を総資産で割る
-  formula: null
-  inputs: null
+  formula: ( delta(流動資産 - CASH) - delta(流動負債 - 短期借入) ) / TA_AVG
+  inputs:
+  - current_assets
+  - CASH
+  - current_liabilities
+  - short_term_debt
+  - TA
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -113,23 +118,27 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: AVG
+  consolidation: consolidated
+  accounting_standard_note: '**IFRS は流動/非流動の分類に企業判断の余地がある。** 区分変更があると delta が跳ねる。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: TA_AVG>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**2期分の B/S が要るだけなので欠損は少ない。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - E01
+  - E03
+  - E26
+  - E31
+  - B34
+  - B35
+  economic_rationale: '**E01 の分解版。運転資本部分だけを取り出す。** Sloan (1996) の原型に最も近い形。 → **E01（CF法）は減価償却を含むが、E02 は含まない。** **減価償却は裁量の余地が小さい**ので、 **E02 の方が「操作された部分」に近い。** **B34/B35（運転資本 / 売上）とほぼ同じものを 総資産で正規化した版**なので、 **B と E をまたいで同じ量が存在している。** → OQ-38 の塊はカテゴリ境界を越える。'
   references:
+  - Sloan (1996)
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP ChNWC — Soliman 2008, AR（OSAP再現 t=4.6, 月次nan%, 品質=1_good, 予測力=1_clear）
-  - OSAP DelCOA — Richardson et al. 2005, JAE（OSAP再現 t=8.7, 月次nan%, 品質=1_good, 予測力=1_clear）
   notes: E01 の分解版
   notes_extra: null
   provenance:
@@ -143,23 +152,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E03
   name_ja: 純営業資産 (NOA) 比率
@@ -167,8 +177,12 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: (営業資産 - 営業負債) / 前期総資産
-  formula: null
-  inputs: null
+  formula: (営業資産 - 営業負債) / 前期TA
+  inputs:
+  - TA
+  - CASH
+  - total_liabilities
+  - IBD
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -186,23 +200,27 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: 営業/金融の区分が必要。**IBD の定義（spec §2、リース込み）を継承。**
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 前期 TA>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**金融業では営業/金融の区分が意味を持たない。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - E01
+  - E02
+  - E31
+  - E32
+  - E33
+  - C35
+  economic_rationale: '**E01 のストック版。投資ファクターでかなり説明される。** Hirshleifer-Hou-Teoh-Zhang (JAE 2004) の net operating assets。 **フロー（アクルーアル）を積み上げるとストック（NOA）になる**ので、 **E03 は「過去の累積した水増し」を測る。** → **単年のアクルーアルは小さくても、 何年も続けば NOA が膨らむ。** 上の「投資ファクターでかなり説明される」が重要で、 **C35（資産成長）/ C30/C39 の塊と直接繋がる。** → **E と C が同じ現象の別の顔である**ことを示す。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP NOA — Hirshleifer et al. 2004, JAE（OSAP再現 t=8.4, 月次1.48%, 品質=1_good, 予測力=1_clear）
-  - OSAP dNoa — Hirshleifer, Hou, Teoh, Zhang 2004, JAE（OSAP再現 t=8.8, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - Hirshleifer-Hou-Teoh-Zhang (JAE 2004) Do investors overvalue firms with bloated balance sheets?
   notes: E01 のストック版。投資ファクターでかなり説明される
   notes_extra: null
   provenance:
@@ -216,23 +234,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E04
   name_ja: Beneish M-Score
@@ -329,8 +348,10 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: abs(実効税率 - 法定税率) および その年次変動
-  formula: null
-  inputs: null
+  formula: abs( 実効税率 - 法定税率 ) とその年次変動
+  inputs:
+  - tax_expense
+  - pretax_income
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -343,24 +364,30 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: '**法定税率が国で違う**（日本約30%、米国21%）。 **多国籍企業では加重平均が要る**が、地域別の税引前利益が要る。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: '**税引前利益>0。赤字期は欠損。** spec §2 の TAXR は 0-0.6 で clip 済み。'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 赤字企業で欠損。**税務上の繰越欠損金がある企業は恒常的に低税率になる**（異常ではない）。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - E29
+  - E30
+  - E06
+  - E15
+  - E21
+  economic_rationale: '**異常な低税率は利益の質を疑う入口。** ただし**繰越欠損金・研究開発税制・海外税率差など、 正当な理由も多い。** → **E05 単独では偽陽性が多い。** **E29（税率の変化 t=11.3）の方が遥かに強い**のは、 **水準の異常には正当な理由があるが、 急な変化には無いことが多い**から。 → **E05 は水準、E29 は変化**という A/C の原則が税務でも成り立つ。'
+  references:
+  - 構造的判断。E29 が実証的に強い変化版
   notes: 異常な低税率は利益の質を疑う入口
   notes_extra: null
   provenance:
@@ -374,22 +401,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E06
   name_ja: 特別損益の頻度
@@ -397,8 +426,10 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 過去5年で特別損益が経常利益の10%超だった回数
-  formula: null
-  inputs: null
+  formula: 過去5年で特別損益が経常利益の10%超だった回数
+  inputs:
+  - extraordinary_items
+  - ordinary_income
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -411,24 +442,30 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
-  - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**「特別損益」は日本基準の概念。IFRS と US GAAP には 特別損益の区分が無い**（IFRS は禁止、US GAAP は2015年に廃止）。 → **日本でのみ直接測れる。米国では非経常項目を LLM で識別する。**'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 経常利益>0の年のみカウント対象。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**米国では区分が無いので LLM 識別に頼り、精度が落ちる。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - E07
+  - E15
+  - E21
+  - B39
+  - E11
+  - E23
+  economic_rationale: '**「毎年一時的な損失」は一時的ではない。** 5年で3回以上特別損失を出す企業は、 **それが本業の一部**である。 → **経常利益ベースの A01（益回り）が 実力を過大評価している**ことを意味する。 **E07（非GAAP調整）が米国で同じ機構を測る**ので、 **E06（日本）と E07（米国）は対をなす。** **B39（赤字回数）と同じカウント型の指標。**'
+  references:
+  - 構造的判断。日本基準固有。米国は E07 が対応
   notes: 「毎年一時的な損失」は一時的ではない
   notes_extra: null
   provenance:
@@ -442,22 +479,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E07
   name_ja: 非GAAP調整の大きさ
@@ -465,8 +504,11 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: (非GAAP利益 - GAAP利益) / GAAP利益（米国）
-  formula: null
-  inputs: null
+  formula: (非GAAP利益 - GAAP利益) / abs(GAAP利益)
+  inputs:
+  - non_gaap_earnings
+  - NI
+  - LLM
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -480,27 +522,30 @@
   - LLM
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T1
+  evidence_tier: T2
   markets:
-  - JP
   - US
   industries: null
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**spec §2.1 で 263AT は GAAP のみを使うと決めた。** E07 は「非GAAP をどれだけ使っているか」を測るためだけに非GAAP を参照する。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**GAAP 利益がゼロ近傍で発散する。abs で正規化し、上下 clip する。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**非GAAP を開示しない企業ではゼロ。日本ではほぼ全社ゼロ**（実質米国のパラメータ）。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - E06
+  - F07
+  - E15
+  - T10
+  - B08
+  economic_rationale: '**米国テックで肥大化しやすい。SBC 除外が主因なら特に減点。** **F07（株式報酬費用率）で SBC の大きさが分かる**ので、 **E07 の中身が SBC かどうかを判定できる。** → **SBC を除外した非GAAP 利益は、 株主の持分希薄化を無視している**ので、 **株主にとっての利益ではない。** **E06（日本の特別損益の常態化）と対をなす** — どちらも「一時的とされる項目が実は恒常的」という現象。'
   references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP ExclExp — Doyle, Lundholm and Soliman 2003, RAS（OSAP再現 t=6.8, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - 構造的判断。spec §2.1
+  - Black-Christensen et al. の非GAAP 研究
   notes: 米国テックで肥大化しやすい。SBC除外が主因なら特に減点
   notes_extra: null
   provenance:
@@ -514,23 +559,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E08
   name_ja: 監査法人の変更
@@ -617,8 +663,10 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 実際の発表日 - 予定日、または前年比の遅れ
-  formula: null
-  inputs: null
+  formula: 実際の決算発表日 - 予定日、または前年同期比の遅れ日数
+  inputs:
+  - earnings_date
+  - scheduled_date
   sign: negative
   buy_class: useful
   sell_class: main
@@ -632,24 +680,31 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: na
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: na
+  zero_denominator_policy: na（日数）。前年の発表日が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**発表予定日の開示が要る。日本は決算発表予定日を開示する慣行がある。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - E22
+  - E23
+  - K49
+  - D13
+  - N23
+  - T08
+  economic_rationale: '**遅延は不正・システム不備の先行指標。** 決算を予定通り出せないのは、 **監査人と揉めているか、集計ができていないか。** → **どちらも重大。** **K49（Form 4 の提出遅延）と全く同じ発想** — 「小さなルール違反は大きな問題の兆候」。 **E22（監査意見）や D13（継続企業の前提）が 公式に問題を認める前の段階を捉える。** → **E カテゴリで最も速い信号**（immediate ホライズン）。'
+  references:
+  - 構造的判断。K49 と同じ発想
   notes: 遅延は不正・システム不備の先行指標
   notes_extra: null
   provenance:
@@ -663,22 +718,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E10
   name_ja: 売上とCFの乖離トレンド
@@ -686,8 +743,10 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 売上成長率 - 営業CF成長率（3年移動）
-  formula: null
-  inputs: null
+  formula: REV 成長率 - CFO 成長率（3年移動平均）
+  inputs:
+  - REV
+  - CFO
   sign: negative
   buy_class: main
   sell_class: main
@@ -700,24 +759,31 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: '**四半期 CF を開示しない日本企業がある**（第1・第3四半期）。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: '**CFO<=0 の期間があると成長率が定義できない。** 水準の差で代替する。'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: CF計算書の開示に依存。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B10
+  - B23
+  - E01
+  - E20
+  - B22
+  - E26
+  economic_rationale: '**B10/B23 と合わせて押し込み販売を検出する。** 売上は伸びているのに営業CF が伸びていないのは、 **売上が現金になっていない**ということ。 → **B23（DSO の悪化）が原因側、E10 が結果側。** **E20（期末集中売上）と組むと、 「四半期末に押し込んで、売掛金が積み上がり、 CF が伴わない」という一連の兆候が揃う。** → **E カテゴリの複数指標が同時に点灯することに意味がある** という設計思想（E19 のベンフォードも同じ）。'
+  references:
+  - 構造的判断。Sloan (1996) の系譜
   notes: B10/B23 と合わせて押し込み販売を検出
   notes_extra: null
   provenance:
@@ -731,22 +797,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E11
   name_ja: のれん比率
@@ -754,8 +822,10 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: のれん / 自己資本
-  formula: null
-  inputs: null
+  formula: のれん / EQ
+  inputs:
+  - goodwill
+  - EQ
   sign: negative
   buy_class: useful
   sell_class: main
@@ -768,24 +838,31 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**日本基準はのれんを20年以内で償却、IFRS/US GAAP は非償却。** → **日本基準企業ののれんは時間とともに減るが、 IFRS 企業は減損まで残る。同じ買収でも E11 の推移が全く違う。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**EQ>0。債務超過では欠損。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 上の accounting_standard_note により、**IFRS 適用企業の E11 が構造的に高く出る。**
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - C10
+  - E15
+  - D01
+  - T41
+  - N13
+  - B38
+  economic_rationale: '**50%超は減損リスク。C10（M&A 依存の成長）と併せて見る。** のれんは「買収価格が純資産を上回った分」で、 **買収先が期待通りに稼がなければ減損する。** → **減損は突然、大きく来る**ので、 **I17（過去最悪日次リターン）の原因になりやすい。** **IFRS 企業では償却されないので、 のれんが積み上がったまま何年も放置され、 ある日一括で減損する**という日本基準より不連続な形になる。 → **会計基準で「いつ痛みが来るか」が変わる稀な例。**'
+  references:
+  - 構造的判断。会計基準差が結果を変える
   notes: 50%超は減損リスク。C10（M&A依存の成長）と併せて見る
   notes_extra: null
   provenance:
@@ -799,22 +876,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E12
   name_ja: 過年度決算訂正
@@ -902,8 +981,11 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 有報リスク項目の埋め込みベクトル距離（前年比）
-  formula: null
-  inputs: null
+  formula: 有報リスク項目の埋め込みベクトル距離（前年比）
+  inputs:
+  - edinet
+  - sec_filing
+  - LLM
   sign: negative
   buy_class: useful
   sell_class: main
@@ -916,24 +998,30 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: na
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 前年の文書が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**様式改正（日本は2020年3月期にリスク記載が大幅拡充）で距離が跳ねる。** 制度変更の年をフラグする。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - T09
+  - T08
+  - E14
+  - E16
+  - T35
+  economic_rationale: '**T09（MD&A の変化度、Lazy Prices）とほぼ同一の手法をリスク項目に適用したもの。** → **T09 が MD&A、E13 がリスク項目**という対象の違いだけ。 **Z12 で高い相関が出るはず。** 符号を − にしたのは、**リスク記載が大きく変わるのは 悪い方向であることが多い**から（企業は good news を リスク項目には書かない）。 → **T09 が context なのに対し E13 が − なのは、 対象文書の性質の違いによる。**'
+  references:
+  - Cohen-Malloy-Nguyen (JF 2020) Lazy Prices の手法をリスク項目に適用
   notes: 大きな変化は何かが起きているサイン。良い変化か悪い変化かはLLMが判定
   notes_extra: null
   provenance:
@@ -947,22 +1035,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E14
   name_ja: リスク項目の新規追加
@@ -970,8 +1060,11 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 前年になかったリスク記載の抽出
-  formula: null
-  inputs: null
+  formula: 前年になかったリスク記載の抽出（LLM）
+  inputs:
+  - edinet
+  - sec_filing
+  - LLM
   sign: negative
   buy_class: useful
   sell_class: main
@@ -984,24 +1077,32 @@
   - LLM
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: na
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 前年の文書が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**全社が有報・10-K を出すので欠損しない。ただし年1回。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - T08
+  - E13
+  - E23
+  - D13
+  - T16
+  - N19
+  economic_rationale: '**企業が自ら書いたリスクは最も信頼できる悪材料。** T08 と同一の量。 **企業には都合の悪いことを書く動機がない**ので、 **書いてあるのは書かざるを得なかったから。** → **新規追加された項目が最も情報価値が高く、 E13（距離）が捉える「量的な変化」より E14（新規項目）の「質的な変化」の方が鋭い。** **E23（KAM）が監査人の側から同じことを言う**ので、 **両者が一致する項目は特に重い。**'
+  references:
+  - Campbell-Chen-Dhaliwal-Lu-Steele (RAST 2014)
+  - T08 と同一量
   notes: 企業が自ら書いたリスクは最も信頼できる悪材料
   notes_extra: null
   provenance:
@@ -1015,22 +1116,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E15
   name_ja: 会計方針の変更
@@ -1038,8 +1141,11 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 変更の有無と利益への影響額
-  formula: null
-  inputs: null
+  formula: 会計方針の変更の有無と利益への影響額
+  inputs:
+  - edinet
+  - sec_filing
+  - LLM
   sign: negative
   buy_class: useful
   sell_class: main
@@ -1053,24 +1159,31 @@
   - EDI
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**方針変更の開示は日米ともに義務。影響額も原則開示される。**'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（フラグ + 金額）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**IFRS 移行のような基準全体の変更と、企業の裁量による変更を区別する必要がある。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - E21
+  - E06
+  - E11
+  - E16
+  - E23
+  - T09
+  economic_rationale: '**業績悪化のカムフラージュに使われる。** 業績が悪い年に方針を変えて利益を嵩上げする、 あるいは新経営陣が就任した年に一括で損失を出す （big bath）。 → **M21（社長交代）との交互作用が本質** — 交代直後の方針変更は big bath の可能性が高く、 **その場合は翌年以降の利益が良く見えるので、 むしろ買い場になりうる。** **E21（見積りの変更）が同じ機構のより見えにくい形。**'
+  references:
+  - 構造的判断。big bath 会計の古典的論点
   notes: 業績悪化のカムフラージュに使われる
   notes_extra: null
   provenance:
@@ -1084,22 +1197,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E16
   name_ja: 注記量の急増
@@ -1107,8 +1222,10 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 注記の文字数 / 前年比
-  formula: null
-  inputs: null
+  formula: 注記の文字数 / 前年比
+  inputs:
+  - edinet
+  - sec_filing
   sign: negative
   buy_class: aux
   sell_class: useful
@@ -1121,24 +1238,30 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: na
-  accounting_standard_note: null
+  accounting_standard_note: 様式改正で不連続（E13 と同じ）。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 前年の文書が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本語と英語で文字数の意味が違う**ので、日米統合ランクは取らない（rank_market が妥当）。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - E13
+  - E15
+  - E23
+  - T09
+  - T10
+  economic_rationale: '**説明が増える時は説明が要る事態が起きている。** E13（意味的距離）が中身の変化、E16 が量の変化。 → **量だけを見るのは粗いが、 LLM を通さずに計算できる**という実装上の利点がある。 **T33（開示の重要度分類）の説明で述べた 「粗く分類してから精読する」2段構成の 1段目として使える。** → **E16 が跳ねた企業だけ E13/E14 を LLM で精読する。**'
+  references:
+  - 構造的判断。E13/E14 の事前フィルタ
   notes: 説明が増える時は説明が要る事態が起きている
   notes_extra: null
   provenance:
@@ -1152,22 +1275,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E17
   name_ja: 開示の透明性スコア
@@ -1175,8 +1300,10 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: LLMによる 0-10 採点（KPI開示・セグメント粒度・前提の明示・英文開示）
-  formula: null
-  inputs: null
+  formula: LLM による透明性採点 0-10（KPI開示・セグメント粒度・前提の明示・英文開示）
+  inputs:
+  - LLM
+  - disclosure
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1189,24 +1316,31 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: na
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（採点）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**T10 と同一。LLM の主観で揺れる。** T31（確信度）と T44（較正）が前提。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - T10
+  - T06
+  - F13
+  - O09
+  - X13
+  - K11
+  economic_rationale: T10 と同一の量。**高い企業は長期で信頼できる。日本の小型株では差が大きい。** **英文開示の有無が K11（外国人保有比率）と直結する** — 英文開示をしない企業は外国人が買えないので、 **O カテゴリ（ネグレクト）の原因の一つ。** → **E17 が低いことは「隠している」とは限らず、 「IR にリソースを割いていない」だけのことが多い。** **T10 の説明で述べた通り、 E17 が高くて K22/K11（機関保有）が低い企業が 最も純粋なネグレクトで、263AT の狙い目。**
+  references:
+  - 構造的判断。T10 と同一量
   notes: 高い企業は長期で信頼できる。日本の小型株では差が大きい
   notes_extra: null
   provenance:
@@ -1220,22 +1354,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E18
   name_ja: 四半期利益の過剰な平滑さ
@@ -1243,8 +1379,10 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: sd(四半期営業CF) / sd(四半期純利益)
-  formula: null
-  inputs: null
+  formula: sd(四半期CFO) / sd(四半期NI)
+  inputs:
+  - CFO
+  - NI
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1257,24 +1395,30 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: '**日本は第1・第3四半期の CF を開示しないことがある**ので、四半期 CFO が揃わない。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**sd(NI)>0。12四半期以上が要る。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本で CF の四半期開示が無い企業では計算できない。** 米国は 10-Q で必ず出る。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - E01
+  - E26
+  - B14
+  - C18
+  - E10
+  economic_rationale: '**利益が CF より滑らかすぎるのは平準化操作の疑い。値が大きいほど疑わしい。** → **符号が + なのは「CF のばらつき / 利益のばらつき」だから** — 分子が大きい（CF が荒れているのに利益が滑らか）ほど疑わしい。 **B14（利益率の安定性）が「安定は良い」と言うのに対し、 E18 は「安定しすぎは悪い」と言う。** → **一見矛盾するが、B14 は営業利益率の水準の安定、 E18 は CF との乖離を見ているので測っているものが違う。** **I08 と I20 の関係（OQ-35）と同じ構造の論点。**'
+  references:
+  - Leuz-Nanda-Wysocki (JFE 2003) Earnings management and investor protection
   notes: 利益がCFより滑らかすぎるのは平準化操作の疑い。値が大きいほど疑わしい
   notes_extra: null
   provenance:
@@ -1288,22 +1432,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E19
   name_ja: ベンフォード法則からの逸脱
@@ -1311,8 +1457,9 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 財務数値の先頭桁分布とベンフォード分布の距離
-  formula: null
-  inputs: null
+  formula: 財務数値の先頭桁分布とベンフォード分布の距離
+  inputs:
+  - financial_statements
   sign: negative
   buy_class: aux
   sell_class: useful
@@ -1325,24 +1472,30 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: '**十分な数値の個数が要る（数百）。単一企業の単年では検出力が無い。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**小型株は開示項目が少なく数値の個数が足りない。** 大型株でしか使えない。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - E26
+  - E01
+  - E10
+  - E20
+  - E23
+  economic_rationale: '**大量スクリーニング向け。偽陽性が多いので単独では使わない。** → **E カテゴリの中で最も「証拠」としては弱い。** 上の missing_bias が致命的で、 **263AT の狙う小型株では数値の個数が足りず検出力が無い。** → **実装優先度は最も低い。** 残しているのは §1.9 の方針だが、 **★1 で強く縮小され、しかも欠損が多いので 実質的にほぼ効かないと予想される。**'
+  references:
+  - 構造的判断。小型株では検出力が無い
   notes: 大量スクリーニング向け。偽陽性が多いので単独では使わない
   notes_extra: null
   provenance:
@@ -1356,22 +1509,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E20
   name_ja: 期末集中売上
@@ -1379,8 +1534,9 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 第4四半期の売上構成比の対過去乖離
-  formula: null
-  inputs: null
+  formula: 第4四半期の売上構成比の対過去乖離
+  inputs:
+  - REV
   sign: negative
   buy_class: useful
   sell_class: main
@@ -1393,24 +1549,30 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: '**通期売上>0。3年以上の四半期履歴が要る。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**季節性の強い業種（小売の年末、建設の年度末）では正常な集中と区別できない。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B23
+  - E10
+  - E01
+  - C21
+  - U15
+  economic_rationale: '**押し込み販売。B23（DSO）と組で見る。** 期末に売上を集中させるのは、 **通期の目標（会社予想 GUIDE_CO）を達成するため** であることが多い。 → **日本は会社予想の開示義務があるので、 予想達成のプレッシャーが制度的に強い。** **N09（上方/下方修正）を出さずに済ませるために 期末に押し込む**という構造。 → **E20 は日本でより強く効く可能性がある** という仮説が立つ（実証は無い）。 上の missing_bias により、**C21（季節調整）を通してから測る。**'
+  references:
+  - 構造的判断。日本の会社予想開示義務との関係は仮説
   notes: 押し込み販売。B23（DSO）と組で見る
   notes_extra: null
   provenance:
@@ -1424,22 +1586,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E21
   name_ja: 会計上の見積りの変更
@@ -1447,8 +1611,11 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 耐用年数・引当率などの変更
-  formula: null
-  inputs: null
+  formula: 会計上の見積りの変更（耐用年数・引当率など）
+  inputs:
+  - edinet
+  - sec_filing
+  - LLM
   sign: negative
   buy_class: useful
   sell_class: main
@@ -1462,24 +1629,31 @@
   - EDI
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**見積りの変更は遡及修正せず将来に向かって適用される**ので、過去の数字は変わらない。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（フラグ + 影響額）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**影響額を開示しない企業がある。** E15（方針変更）より開示が緩い。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - E15
+  - E05
+  - E06
+  - U28
+  - E23
+  - T06
+  economic_rationale: '**利益操作の常套手段。** 耐用年数を延ばせば減価償却が減って利益が増える。 引当率を下げれば費用が減る。 → **E15（方針の変更）より見えにくく、 しかも監査人が認めれば合法。** **U28（SaaS の NRR）の説明で述べた 「定義が企業任意なので操作リスクがある」のと同種の問題。** → **業績が悪化している年（C01/N09 が悪い）に E21 が起きていれば、それは強い赤旗。** **T28（否定的チェックリスト）の項目に入れるべき。**'
+  references:
+  - 構造的判断。利益操作の古典的手法
   notes: 利益操作の常套手段
   notes_extra: null
   provenance:
@@ -1493,22 +1667,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E22
   name_ja: 監査意見の種類
@@ -1596,8 +1772,11 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: KAM の項目数と内容
-  formula: null
-  inputs: null
+  formula: 監査上の主要な検討事項（KAM）の項目数と内容
+  inputs:
+  - edinet
+  - sec_filing
+  - LLM
   sign: negative
   buy_class: useful
   sell_class: main
@@ -1611,24 +1790,33 @@
   - EDI
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**日本は2021年3月期から開示。米国は CAM として2019年から。** それ以前は存在しない。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（項目数 + 内容）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**制度が新しいので過去データがほぼ無い。** 日本は5年、米国は7年分しかない。 → **バックテストで検証できる期間が極端に短い。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - E14
+  - E22
+  - E11
+  - E21
+  - D13
+  - T08
+  economic_rationale: '**監査人が「ここが危ない」と名指しした箇所。** **企業自身（E14）でも投資家でもなく、 独立した第三者が職業的懐疑心をもって指摘したもの**なので、 **E カテゴリで最も信頼できる情報源。** → **E14（企業が書いたリスク）と E23（監査人が書いた検討事項）が 一致する項目は特に重い。** **のれん減損（E11）が KAM に挙がることが多い**ので、 **E11 の水準と E23 の内容を突合すると 減損の時期が推定できる。** 上の missing_bias の通り**検証期間が短い**のが最大の制約。'
+  references:
+  - 監査基準委員会報告書701（KAM）
+  - PCAOB AS 3101（CAM）
+  - 構造的判断
   notes: 監査人が「ここが危ない」と名指しした箇所。日本は2021年3月期から開示
   notes_extra: null
   provenance:
@@ -1642,22 +1830,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E24
   name_ja: 内部統制報告書の評価
@@ -1744,8 +1934,10 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 内部売上 / 総売上
-  formula: null
-  inputs: null
+  formula: セグメント間の内部売上 / 総売上
+  inputs:
+  - segment_data
+  - REV
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -1758,24 +1950,30 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**セグメント情報の開示（マネジメント・アプローチ）に依存。内部取引の消去前の数字が要る。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: REV>0。単一セグメント企業では欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: B38 と同じく単一セグメント企業で欠損。**日本の小型株は単一セグメントが多い。**
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B38
+  - E15
+  - E21
+  - V02
+  - V03
+  economic_rationale: '**高いと利益の帰属が操作しやすい。** 内部取引の価格（移転価格）は企業が決められるので、 **セグメント間で利益を移動できる。** → **B38（セグメント収益性の分散）が 「再編余地がある」というプラスの読みをするのに対し、 E25 は「その数字自体が信用できない」という警告。** **同じセグメント情報を、B は機会として、 E は疑いとして読む**という対比になっている。 実証は無いので★1。'
+  references:
+  - 構造的判断。実証は無い
   notes: 高いと利益の帰属が操作しやすい
   notes_extra: null
   provenance:
@@ -1789,22 +1987,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E26
   name_ja: 異常アクルーアル
@@ -1812,8 +2012,11 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 修正 Jones モデルの残差（売上変化と設備投資で説明できない部分）
-  formula: null
-  inputs: null
+  formula: 修正 Jones モデルの残差（売上変化と設備投資で説明できない部分）
+  inputs:
+  - E01
+  - REV
+  - PPE
   sign: negative
   buy_class: main
   sell_class: main
@@ -1826,27 +2029,33 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T2
+  evidence_tier: T1
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: E01 を継承。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: '**業種内で回帰するので N>=30 が要る。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**業種内の回帰なので、小業種では推定できない。** B40/C26 と同じ制約。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - E01
+  - E02
+  - E27
+  - E31
+  - B35
+  - E10
+  economic_rationale: '**OSAP AbnormalAccruals t=8.4。E01（総アクルーアル）より t が高い。** Dechow-Sloan-Sweeney (TAR 1995) の修正 Jones モデル。 **アクルーアルには正当な部分（売上が伸びれば売掛も増える）と 裁量的な部分がある。** → **E26 は裁量的な部分だけを取り出す**ので、 **「操作」により近い。** **G10（残差モメンタム）/ C31（業種調整投資）/ I29（残差歪度）と同じく、 「説明できる部分を除いた残りが本体」というパターン**が E でも成り立つ。**263AT の設計全体に通底する構造。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP AbnormalAccruals — Xie 2001, AR（OSAP再現 t=8.4, 月次0.916666667%, 品質=2_fair, 予測力=1_clear）
+  - Dechow-Sloan-Sweeney (TAR 1995) Detecting Earnings Management
+  - OSAP AbnormalAccruals t=8.4
   notes: OSAP AbnormalAccruals t=8.4。E01 の総アクルーアルより t が高い。裁量部分だけを取り出すため
   notes_extra: null
   provenance:
@@ -1860,23 +2069,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E27
   name_ja: パーセント・アクルーアル
@@ -1884,8 +2094,10 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: (NI - CFO) / abs(NI)（総資産でなく利益で正規化）
-  formula: null
-  inputs: null
+  formula: (NI - CFO) / abs(NI)
+  inputs:
+  - NI
+  - CFO
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -1904,21 +2116,26 @@
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: E01 を継承。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**NI がゼロ近傍で発散する。abs で正規化し上下 clip する。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**利益がゼロに近い企業で不安定。** 総資産で正規化する E01 にはこの問題が無い。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - E01
+  - E26
+  - E31
+  - B10
+  - E10
+  economic_rationale: '**OSAP PctAcc t=3.3。小型・低収益企業で総資産正規化より有効。** Hafzalla-Lundholm-Van Winkle (TAR 2011)。 **総資産で割ると、資産が大きい企業のアクルーアルが薄まる。** 利益で割ると「利益のうちどれだけが現金でないか」を 直接測れる。 → **263AT の狙う小型・低収益企業では E27 の方が E01 より適切**という点で、 **戦略と指標選択が結びつく数少ない例。** 上の missing_bias が代償で、利益ゼロ近傍で壊れる。 → **E01 と E27 を両方持ち、利益水準で使い分ける。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP PctAcc — Hafzalla, Lundholm, Van Winkle 2011, AR（OSAP再現 t=3.3, 月次0.97%, 品質=1_good, 予測力=1_clear）
+  - Hafzalla-Lundholm-Van Winkle (TAR 2011) Percent Accruals
+  - OSAP PctAcc t=3.3
   notes: OSAP PctAcc t=3.3 / PctTotAcc t=3.3。小型・低収益企業で E01 より安定する
   notes_extra: null
   provenance:
@@ -1932,23 +2149,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E28
   name_ja: 実質ダーティ・サープラス
@@ -1956,8 +2174,10 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 包括利益と純利益の差のうち、経常的に発生している部分
-  formula: null
-  inputs: null
+  formula: 包括利益と純利益の差のうち、経常的に発生している部分
+  inputs:
+  - comprehensive_income
+  - NI
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -1976,21 +2196,26 @@
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: '**その他の包括利益（OCI）の構成が基準で違う。** 日本基準は為替換算調整・その他有価証券評価差額・退職給付調整が主。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: TA で正規化。TA>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**包括利益の開示が要る。日本は2011年3月期から。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - E01
+  - E32
+  - C40
+  - A18
+  - K17
+  - D26
+  economic_rationale: '**OSAP RDS t=5.8。損益計算書を迂回した損益。** **純利益に載らないが株主の富は確実に変わっている部分。** → **日本では政策保有株の評価差額（A18/K17/C40）が ここに大量に入る。** **その他有価証券評価差額は純資産直入なので、 株価が上がっても純利益には現れない** — つまり**A01（益回り）は政策保有の含み損益を 完全に無視している。** → **E28 は A18 と同じものを損益の側から見ている**ので、 **日本での実装は K17/A18/C40 と一体で考える。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP RDS — Landsman et al. 2011, AR（OSAP再現 t=5.8, 月次0.333333333%, 品質=1_good, 予測力=1_clear）
+  - OSAP RDS t=5.8
   notes: OSAP RDS t=5.8。損益計算書を迂回した損益。日本基準では「その他の包括利益」から取る
   notes_extra: null
   provenance:
@@ -2004,23 +2229,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E29
   name_ja: 税金費用の変化
@@ -2028,8 +2254,10 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: delta_(法人税等 / 税引前利益) の異常度
-  formula: null
-  inputs: null
+  formula: delta( 法人税等 / 税引前利益 ) の異常度
+  inputs:
+  - tax_expense
+  - pretax_income
   sign: positive
   buy_class: main
   sell_class: main
@@ -2048,21 +2276,26 @@
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: E05 を継承。**法定税率の変更（米国2018年、日本の段階的引下げ）が全社同時に効く**ので、年次でフラグする。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**税引前利益>0が2期分要る。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: E05 と同じ。赤字期で欠損。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - E05
+  - E30
+  - E01
+  - N08
+  - G37
+  economic_rationale: '**OSAP ChTax t=11.3。E カテゴリ最上位、OSAP 全体でも最上位クラス。** Thomas-Zhang (RAST 2011)。 **符号が + であることが重要** — **税金費用が増えた企業は将来リターンが高い。** **税務当局に対して嘘はつきにくい**ので、 **税金の増加は「本当に儲かっている」ことの証拠。** → **会計利益は操作できるが、納税額は操作しにくい**という 非対称が、**E カテゴリで最も強い信号を生む。** **E05（水準の異常 ★1）と E29（変化 t=11.3）の落差が、 A/C の「水準より変化」原則の最も極端な例。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP ChTax — Thomas and Zhang 2011, JAR（OSAP再現 t=11.3, 月次1.3%, 品質=1_good, 予測力=1_clear）
+  - Thomas-Zhang (RAST 2011) Tax expense momentum
+  - OSAP ChTax t=11.3
   notes: OSAP ChTax t=11.3。最上位クラス。E05 は水準の異常だけだったが、変化に情報がある（納税額は操作しにくい）
   notes_extra: null
   provenance:
@@ -2076,23 +2309,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E30
   name_ja: 課税所得 / 会計利益
@@ -2100,8 +2334,11 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 推定課税所得 / 純利益
-  formula: null
-  inputs: null
+  formula: 推定課税所得 / NI
+  inputs:
+  - tax_expense
+  - NI
+  - statutory_rate
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -2120,21 +2357,26 @@
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: '**課税所得は開示されないので、税金費用を法定税率で割り戻して推定する。** 税率差のある多国籍企業では誤差が大きい。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**NI>0。法定税率>0。**'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 赤字企業で欠損。多国籍企業で推定精度が落ちる。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - E29
+  - E05
+  - E01
+  - E26
+  - E27
+  economic_rationale: '**OSAP Tax t=3.9。会計利益が税務利益より大きい企業は利益の質が低い。** Lev-Nissim (TAR 2004)。 **E29（変化）に対する E30（水準）**だが、 **E05（税率の水準）と違って t=3.9 と実証がある。** → **税率の異常（E05）より、 課税所得と会計利益の比（E30）の方が意味がある** — 前者は正当な理由が多いが、 後者は**「税務署には少なく、株主には多く」報告している** という直接的な乖離を測る。 **E01（アクルーアル）と同じ現象を税務の側から見たもの。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP Tax — Lev and Nissim 2004, AR（OSAP再現 t=3.9, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - Lev-Nissim (TAR 2004) Taxable Income, Future Earnings, and Equity Values
+  - OSAP Tax t=3.9
   notes: OSAP Tax t=3.9。会計利益が税務利益より大きい企業は利益の質が低い
   notes_extra: null
   provenance:
@@ -2148,23 +2390,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E31
   name_ja: 総アクルーアル（BS法）
@@ -2172,8 +2415,11 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: delta_運転資本 - 減価償却（貸借対照表から算出）
-  formula: null
-  inputs: null
+  formula: delta 運転資本 - DA（貸借対照表から算出）
+  inputs:
+  - working_capital
+  - DA
+  - TA
   sign: negative
   buy_class: main
   sell_class: main
@@ -2191,22 +2437,28 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: AVG
+  consolidation: consolidated
+  accounting_standard_note: DA の定義（spec §2）を継承。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: TA_AVG>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**企業買収・売却があると B/S の差分が実際のアクルーアルと乖離する。** E01（CF法）にはこの問題が無い。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - E01
+  - E02
+  - E26
+  - E27
+  - B35
+  - E03
+  economic_rationale: '**OSAP TotalAccruals t=6.4。E01 の CF法に対する別法。** Hribar-Collins (JAR 2002) は、 **BS法と CF法が食い違うのは企業買収・売却があるとき**で、 **その乖離自体が誤差ではなく情報を持つ**と指摘した。 → **両方持って乖離を見る**というのがカタログの注記の意図。 **C10（買収由来の成長）が高い企業で乖離が大きくなる**はずなので、 **E31 と E01 の差は C10 の代理変数にもなる。** → **開示されない買収の規模を推定できる可能性がある。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP TotalAccruals — Richardson et al. 2005, JAE（OSAP再現 t=6.4, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - Hribar-Collins (JAR 2002) Errors in Estimating Accruals
+  - OSAP TotalAccruals t=6.4
   notes: OSAP TotalAccruals t=6.4。E01 のCF法に対する別法。両方持って乖離を見ると開示の質が分かる
   notes_extra: null
   provenance:
@@ -2220,23 +2472,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E32
   name_ja: 純金融資産の変化
@@ -2244,8 +2497,11 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: delta_(金融資産 - 金融負債) / 前期総資産
-  formula: null
-  inputs: null
+  formula: delta( 金融資産 - 金融負債 ) / 前期TA
+  inputs:
+  - financial_assets
+  - IBD
+  - TA
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -2263,22 +2519,28 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: 金融/営業の区分が必要（E03 と同じ）。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 前期 TA>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**金融業では区分が意味を持たない。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - E03
+  - E33
+  - E34
+  - C40
+  - F24
+  - F25
+  economic_rationale: '**OSAP DelNetFin t=5.8。** Richardson et al. (JAE 2005) の アクルーアルの包括的な分解のうち金融部分。 **純金融資産が増える＝現金を貯め込むか金融資産を買う**ので、 **C40（長期投資の変化）や K17/A18（政策保有）と重なる。** → **E32 / E33 / E34 は 貸借対照表を「金融 / 非流動営業 / 流動営業」に 3分割して変化を測る一組**であり、 **E03（NOA）を分解したもの。** → **どの部分が膨らんでいるかで、 問題の性質（貯め込み / 過剰投資 / 運転資本悪化）が分かる。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP DelNetFin — Richardson et al. 2005, JAE（OSAP再現 t=5.8, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - Richardson-Sloan-Soliman-Tuna (JAE 2005) Accrual reliability, earnings persistence and stock prices
+  - OSAP DelNetFin t=5.8
   notes: OSAP DelNetFin t=5.8
   notes_extra: null
   provenance:
@@ -2292,23 +2554,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E33
   name_ja: 非流動営業資産の変化
@@ -2316,8 +2579,10 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: delta_非流動営業資産 / 前期総資産
-  formula: null
-  inputs: null
+  formula: delta 非流動営業資産 / 前期TA
+  inputs:
+  - non_current_operating_assets
+  - TA
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -2335,22 +2600,28 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: '**リース（IFRS16）で非流動営業資産が不連続に増える。移行年をフラグする。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 前期 TA>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: E32 と同じ。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - E03
+  - E32
+  - E34
+  - C30
+  - C35
+  - B33
+  economic_rationale: '**OSAP ChNNCOA t=5.3。E03（NOA）の変化分解。** **非流動営業資産の増加＝設備投資と無形資産の取得**なので、 **C30（設備投資成長）/ C35（資産成長）と直接重なる。** → **Richardson et al. の分解の中で、 最も「投資アノマリー」に近い部分。** **E と C が同じ現象を測っていることが、 E33 で最も明確に見える。** → **Z12 では E33 が C30/C31/C35 と 同じクラスタに入るはず。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP ChNNCOA — Soliman 2008, AR（OSAP再現 t=5.3, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - Richardson-Sloan-Soliman-Tuna (JAE 2005)
+  - OSAP ChNNCOA t=5.3
   notes: OSAP ChNNCOA t=5.3。E03（NOA）の変化分解
   notes_extra: null
   provenance:
@@ -2364,23 +2635,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E34
   name_ja: 流動営業負債の変化
@@ -2388,8 +2660,10 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: delta_流動営業負債 / 前期総資産
-  formula: null
-  inputs: null
+  formula: delta 流動営業負債 / 前期TA
+  inputs:
+  - current_operating_liabilities
+  - TA
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -2407,22 +2681,28 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: 流動/非流動の区分（E02 と同じ）。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 前期 TA>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: E32 と同じ。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - E32
+  - E33
+  - E02
+  - B21
+  - B34
+  - B35
+  economic_rationale: '**OSAP DelCOL t=4.5。符号が正であることに注意。** **流動営業負債（買掛金・未払金・前受金）が増えるのは、 運転資本が軽くなる**ということ。 → **B21（CCC）の説明で述べた 「負の CCC は強い競争優位」と同じ機構。** **仕入先に後で払える＝交渉力がある。** **前受金が増える＝顧客が先に払う。** → **E32/E33 が − なのに E34 だけ + なのは、 負債側だから**という単純な理由ではなく、 **「他人の金で事業を回している」ことが 実際に競争優位の証拠だから。** **B21/B34 と同じものを変化で測る。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP DelCOL — Richardson et al. 2005, JAE（OSAP再現 t=4.5, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - Richardson-Sloan-Soliman-Tuna (JAE 2005)
+  - OSAP DelCOL t=4.5
   notes: OSAP DelCOL t=4.5。符号が正（負債が増える＝運転資本が軽い）点に注意
   notes_extra: null
   provenance:
@@ -2436,21 +2716,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
