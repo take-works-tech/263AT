@@ -166,8 +166,10 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 発表額 / 時価総額
-  formula: null
-  inputs: null
+  formula: 自社株買い発表額 / MCAP
+  inputs:
+  - buyback_announcement
+  - MCAP
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -181,27 +183,32 @@
   - SEC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T3
+  evidence_tier: T1
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: MCAP>0。発表が無ければゼロ（欠損にしない）。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**発表しない企業がゼロなのは正しい。欠損ではない。** ゼロと欠損を混同すると分布が歪む。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - F04
+  - F09
+  - F10
+  - F14
+  - F15
+  - C35
+  economic_rationale: '**経営陣が自社株を割安と判断したシグナル**（Ikenberry-Lakonishok-Vermaelen JFE 1995 で4年間の異常リターンを報告）。 **ただし F04（実行率）と必ずセットで見る。** 発表だけして買わない企業が日本には多く、 **発表を単独で信じると「口だけ」を高評価してしまう。** C35（資産成長）と逆方向 — 資本を返す企業は将来リターンが高い。'
   references:
+  - Ikenberry-Lakonishok-Vermaelen (JFE 1995) Market underreaction to open market share repurchases
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP ShareRepurchase — Ikenberry, Lakonishok, Vermaelen 1995, JFE（OSAP再現 t=1.9, 月次0.17%, 品質=3_distant, 予測力=2_likely）
   notes: 発表と実行は別物。F04 と必ずセット
   notes_extra: null
   provenance:
@@ -215,23 +222,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F04
   name_ja: 自社株買いの実行率
@@ -239,8 +247,10 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 実際の買付額 / 発表上限額
-  formula: null
-  inputs: null
+  formula: 実際の買付総額 / 発表上限額
+  inputs:
+  - buyback_execution
+  - buyback_announcement
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -253,24 +263,30 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 発表額>0。発表が無ければ欠損（F03 と扱いが違う）。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本は月次で自己株式取得状況の開示義務があるので実測できる。 米国は四半期の 10-Q でしか分からず、粒度が粗い。** → 日本の方が精度が高い数少ない項目。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F03
+  - F15
+  - T11
+  - M14
+  - W13
+  economic_rationale: '**F03 の裏取り。実行率が低い企業は口だけ。** T11（経営陣の約束履行率）を資本政策で定量化した形で、 **「言ったことをやるか」という一貫した性質を測る**という点で F04 が低い企業は他の約束も守らないと推定できる。 **日本の月次開示があるおかげで、この検証は日本でのみ精密にできる。**'
+  references:
+  - 構造的判断。日本の自己株式取得状況の月次開示義務
   notes: 日本は月次で自己株式取得状況を開示。実行率が低い企業は口だけ
   notes_extra: null
   provenance:
@@ -284,22 +300,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F05
   name_ja: 増資・公募・第三者割当
@@ -387,8 +405,10 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: (新株予約権 + 転換社債 + SO) / 発行済株式数
-  formula: null
-  inputs: null
+  formula: (新株予約権 + 転換社債の潜在株式 + SO) / SHARES
+  inputs:
+  - potential_shares
+  - SHARES
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -401,24 +421,30 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**潜在株式の算定が基準で違う。** 日本は希薄化効果のあるもののみ、 米国は treasury stock method。**数値が直接比較できない。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: SHARES>0。潜在株式が無ければゼロ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**新株予約権の条件（行使価格・期限）まで取るには有報を読む必要がある。集計値だけでは MSワラントを識別できない。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F07
+  - F19
+  - F28
+  - F02
+  - D20
+  economic_rationale: '**MSワラント・MSCB は「下落を前提に設計された商品」で、 発行時点で株価下落がほぼ確定している。** 行使価格が株価に連動して下がるので、引受先は 空売りしながら行使することで確実に利益を得る。 **潜在希薄化率の水準より、その中身（MS型か固定価格型か）が決定的。** → **F06 を集計値のまま使うと、最も危険な資金調達を見逃す。** T12（開示文書の要点抽出）で条件を読ませるのが実務的な解。'
+  references:
+  - 構造的判断。日本の小型株の資金調達実務
   notes: 特に MSワラント・MSCB は極めて強い売り（下落を前提に設計された商品）
   notes_extra: null
   provenance:
@@ -432,22 +458,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F07
   name_ja: ストックオプション費用率
@@ -455,8 +483,10 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: SBC / 売上（米国）
-  formula: null
-  inputs: null
+  formula: 株式報酬費用 / REV
+  inputs:
+  - stock_based_compensation
+  - REV
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -469,24 +499,29 @@
   - SEC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
-  - JP
   - US
   industries: null
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**米国は SBC を P/L に計上した上で、非GAAP 利益ではそれを足し戻す慣行がある。** 日本は株式報酬の利用がまだ限定的で、水準が構造的に低い。**日米で分布が全く違う。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: REV>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本では小さすぎて意味を持たない銘柄が大半。実質的に米国のパラメータ。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F06
+  - E07
+  - B31
+  - W02
+  - U27
+  economic_rationale: '**実質的な人件費であり、現金が出ないだけで株主の持分は確実に薄まる。** 非GAAP 利益で SBC を除外している企業は、 **利益を過大に見せている。**（spec §2.1 で 263AT は GAAP のみを使うと決めた） E07（GAAP と非GAAP の差）と併せると、 **どの企業が SBC で利益を水増ししているかが分かる。** SaaS（U27-U32）で特に大きい。'
+  references:
+  - 構造的判断。spec §2.1（非GAAP の扱い）
   notes: 実質的な人件費。E07 と併せて非GAAP利益の妥当性を判定
   notes_extra: null
   provenance:
@@ -500,22 +535,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F08
   name_ja: 配当性向
@@ -523,8 +560,10 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 配当総額 / 純利益
-  formula: null
-  inputs: null
+  formula: 配当総額 / NI
+  inputs:
+  - dividends
+  - NI
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -537,24 +576,31 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**NI<=0 なら欠損。** 赤字企業の配当性向は負になり意味を持たない。無配ならゼロ。'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 赤字企業で欠損。**赤字企業は D カテゴリのゲートで落ちることが多いので実害は小さい。**
   normalization: rank_all
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F09
+  - F10
+  - F20
+  - A11
+  - C07
+  - B04
+  economic_rationale: ∩型。**高すぎ = 再投資機会がない or 減配リスク。 低すぎ = 資本効率の放置（現金を貯め込むだけ）。** x* は業種中央値でなく **B04（ROIC-WACC）で条件付けるべき** — **ROIC が WACC を上回る企業は配当性向が低い方がよく、 下回る企業は高い方がよい。** これは C カテゴリで整理した 「アウトプット成長 vs インプット成長」の符号分岐と同じ構造。 → **単純な∩型は近似にすぎない。** 交互作用で持つのが正しい。
+  references:
+  - 構造的判断。catalog §4-C の符号整理と同じ論理
   notes: 高すぎ = 成長機会なし or 減配リスク。低すぎ = 資本効率の放置
   notes_extra: null
   provenance:
@@ -568,24 +614,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
+    nonlinear: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F09
   name_ja: 連続増配年数
@@ -593,8 +640,9 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 増配が続いた年数
-  formula: null
-  inputs: null
+  formula: 増配が連続した年数
+  inputs:
+  - dividends
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -607,24 +655,31 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（年数）。減配・無配があればゼロにリセット。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**長い履歴が要るので若い企業でゼロになる。G40/G44 と同じく老舗に偏る。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F08
+  - F10
+  - F20
+  - F21
+  - B15
+  - T11
+  economic_rationale: '**経営の規律の代理変数。** 増配を続けると宣言した企業は 減配のコストが高いので、無理な投資を控える。 **日本でも累進配当を宣言する企業が増えており（F20）、 東証の要請と同じ流れにある。** ただし**「連続増配のために必要な投資を削る」逆効果もある**ので、 B26（R&D生産性）や C07（再投資率）と併せて見ないと 衰退企業を優良と誤認する。'
+  references:
+  - 構造的判断
   notes: 経営の規律の代理変数。日本でも増加中
   notes_extra: null
   provenance:
@@ -638,22 +693,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F10
   name_ja: 総還元性向
@@ -661,8 +718,11 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: (配当 + 自社株買い) / 純利益
-  formula: null
-  inputs: null
+  formula: (配当 + 自社株買い) / NI
+  inputs:
+  - dividends
+  - buyback_execution
+  - NI
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -675,24 +735,31 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: NI<=0 なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: F08 と同じ。
   normalization: rank_all
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F03
+  - F04
+  - F08
+  - F26
+  - F31
+  - C35
+  economic_rationale: ∩型。**100%超が続けば資本を毀損している**（借金して株主に返している）。 ただし**ネットキャッシュが厚い日本企業では、 100%超が数年続いても健全**な場合がある。 → **D 系（ネットキャッシュ）で条件付けるべき。** F31（純株式調達）は F10 と符号が逆で、 **F10 は資本を返す方向、F31 は集める方向を測る同一軸の両端。**
+  references:
+  - 構造的判断。F26/F31（OSAP）が同一軸の反対側
   notes: 100%超が続くなら資本を毀損している
   notes_extra: null
   provenance:
@@ -706,24 +773,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
+    nonlinear: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F11
   name_ja: 株式分割
@@ -731,8 +799,9 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 発表の有無
-  formula: null
-  inputs: null
+  formula: 株式分割の発表フラグと分割比率
+  inputs:
+  - stock_split
   sign: positive
   buy_class: aux
   sell_class: none
@@ -745,24 +814,29 @@
   - TD
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: na
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（フラグ）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**イベントなのでほぼ全銘柄でゼロ。疎な変数。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F18
+  - K34
+  - J07
+  - O06
+  economic_rationale: '**経済的には何も起きていない**（ピザを何枚に切るかの話）。 それでも日本で効くのは**最低投資単位が下がって個人が買えるようになる という純粋な需給効果**による。東証も最低投資金額の引き下げを要請している。 **経済的実体がないので★1 が妥当だが、 日本固有の制度に根ざした需給としては説明が書ける。** 数ヶ月で消える効果なので執行タイミング用。'
+  references:
+  - 東京証券取引所 投資単位の引下げに関する要請
+  - 構造的判断
   notes: 日本では最低投資単位が下がり個人の買いが入るという需給効果がある
   notes_extra: null
   provenance:
@@ -776,22 +850,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F12
   name_ja: 株主優待の新設 / 拡充
@@ -799,8 +875,9 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 発表の有無と利回り換算
-  formula: null
-  inputs: null
+  formula: 株主優待の新設・拡充フラグと優待利回り換算
+  inputs:
+  - shareholder_perks
   sign: positive
   buy_class: aux
   sell_class: none
@@ -813,24 +890,29 @@
   - TD
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: na
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: MCAP>0。優待が無ければゼロ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本固有。優待の金銭価値の換算に主観が入る。**'
   normalization: rank_all
-  nonlinear: null
+  nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F11
+  - F21
+  - K16
+  - K34
+  - K15
+  economic_rationale: ∩型。**個人にしか価値がないので機関が無視する日本固有の需給。** 263AT の「機関が見ていないもの」戦略と方向は一致する。 **ただし廃止時の下落が大きく非対称。** しかも東証は優待より配当を推奨しており、**制度的には逆風。** 近年は優待廃止が増えているので、**F12 が高い銘柄は 廃止リスクを抱えている**と読むべき側面がある。
+  references:
+  - 構造的判断。日本固有
   notes: 日本固有。個人の需給を呼ぶが、廃止時の下落も大きい（∩型）
   notes_extra: null
   provenance:
@@ -844,22 +926,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    nonlinear: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F13
   name_ja: 資本コスト開示 (東証要請)
@@ -867,8 +952,10 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 「資本コストを意識した経営」の開示有無と具体性
-  formula: null
-  inputs: null
+  formula: 「資本コストや株価を意識した経営」の開示の有無と具体性（LLM 0-10）
+  inputs:
+  - tdnet_disclosure
+  - LLM
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -882,24 +969,32 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
-  - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: na
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（採点）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**プライム49% / スタンダード19% と市場区分で開示率が全く違う**（K39 と交互作用）。 未開示がゼロなのは正しく、欠損ではない。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F22
+  - K39
+  - A03
+  - B03
+  - B04
+  - M14
+  - T10
+  economic_rationale: '**LAW-47。東証の要請は 263AT にとって最大の構造的追い風。** PBR1倍割れ企業に是正を求める制度圧力があり、 **A（バリュー）が「安いまま放置される」というバリュートラップの 最大の原因に、制度が外から働きかけている。** → **日本のバリュー投資の前提条件が変わった。** スタンダード市場の開示率が19%ということは、 **81%にまだ再評価の余地がある**ということでもある。 ただし**開示の有無だけでは口だけを排除できない**ので、 F22（実際の ROE-WACC ギャップ）と必ずセットで使う。'
+  references:
+  - 東京証券取引所 資本コストや株価を意識した経営の実現に向けた対応（2023年3月）
+  - 構造的判断
   notes: LAW-47。スタンダード市場の開示率は19%（プライム49%）。今後開示する企業の再評価余地が大きい
   notes_extra: null
   provenance:
@@ -913,22 +1008,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F14
   name_ja: 自己株式（金庫株）保有比率
@@ -936,8 +1033,10 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 自己株式数 / 発行済株式数
-  formula: null
-  inputs: null
+  formula: 自己株式数 / SHARES（発行済総数ベース）
+  inputs:
+  - treasury_shares
+  - SHARES
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -950,24 +1049,29 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**spec §2 の SHARES は自己株式控除後（希薄化前）と定義済み。F14 の分母は控除前の総数を使う点に注意。**'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 発行済総数>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 全銘柄で取得可能。
   normalization: rank_all
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F15
+  - F03
+  - F06
+  - F19
+  economic_rationale: ∩型。**金庫株は両義的。** 消却されれば希薄化が解消するが、 再放出（M&A の対価、株式報酬）なら実質的な希薄化。 **どちらに転ぶかは F15（消却の有無）でしか判定できない。** → **F14 単独では符号が定まらない。F15 と組でのみ意味を持つ。** 日本企業は金庫株を大量に抱えたまま消却しない例が多く、 **東証の要請でここも動き始めている。**
+  references:
+  - 構造的判断
   notes: 消却されれば希薄化解消、再放出なら希薄化。方向は F15 で判定
   notes_extra: null
   provenance:
@@ -981,24 +1085,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
+    nonlinear: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F15
   name_ja: 自己株式の消却
@@ -1006,8 +1111,10 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 消却の有無と規模
-  formula: null
-  inputs: null
+  formula: 自己株式の消却フラグと消却株数 / SHARES
+  inputs:
+  - share_cancellation
+  - SHARES
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -1020,24 +1127,30 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: SHARES>0。消却が無ければゼロ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: イベントなので疎。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F14
+  - F03
+  - F04
+  - F10
+  - M14
+  economic_rationale: '**消却は買戻しより強いシグナル。再放出の可能性が消えるので不可逆。** F03（発表）→ F04（実行）→ F15（消却）という **3段階のコミットメントの深さ**があり、 段階が進むほど経営陣の本気度が確定する。 **263AT では F15 を最も重く、F03 を最も軽く扱う。**'
+  references:
+  - 構造的判断。F03/F04 との3段階構造
   notes: 消却は買戻しより強いシグナル（再放出の可能性が消えるため）
   notes_extra: null
   provenance:
@@ -1051,22 +1164,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F16
   name_ja: 自社株買いのタイミング巧拙
@@ -1074,8 +1189,10 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 過去の買付平均価格 vs その後1年の株価
-  formula: null
-  inputs: null
+  formula: 自社株買いの平均取得単価 vs その後1年の平均株価
+  inputs:
+  - buyback_execution
+  - PRICE_adj
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -1088,24 +1205,31 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 自社株買いの実績が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**自社株買いを実施した企業のみ。しかも「その後1年」が要るので、 直近1年の自社株買いは評価できない。** 構造的に1年遅れる指標。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F03
+  - F04
+  - F15
+  - T41
+  - M14
+  - A22
+  economic_rationale: '**T41（経営陣の資本配分の質）の最も客観的な実測。** 高値で買い戻す経営陣は、自社の価値を判断できていない。 **LLM の定性評価（T22/T41）が信じられるかを検証する アンカーとして機能する**という点で、 **F16 は T カテゴリの較正材料でもある。** →「LLM が優秀と言った経営陣が、実際に高値で買っていないか」を照合できる。'
+  references:
+  - 構造的判断。T41 の定量的裏取り
   notes: 高値で買う経営陣は資本配分が下手。M41（資本配分の質）の実測
   notes_extra: null
   provenance:
@@ -1119,22 +1243,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F17
   name_ja: MSワラント・MSCB の発行
@@ -1222,8 +1348,9 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 実施の有無
-  formula: null
-  inputs: null
+  formula: 株式併合の実施フラグ
+  inputs:
+  - reverse_split
   sign: negative
   buy_class: useful
   sell_class: main
@@ -1236,24 +1363,30 @@
   - TD
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: na
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（フラグ）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 極めて疎。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F11
+  - N23
+  - N44
+  - K34
+  - D08
+  economic_rationale: '**F11（分割）と符号が逆。** 株式併合は**上場維持基準（株価・株主数）への対策**として 行われることが多く、**それ自体が苦境のシグナル。** 米国では上場廃止基準（1ドル割れ）回避が典型で、 **N23（整理・監理）や D08（倒産確率）と同じ方向を向く。** 経済的実体がないにもかかわらず情報を持つのは、 **なぜそれをやるかに情報がある**から。'
+  references:
+  - 構造的判断
   notes: 上場維持基準対策のことが多く、しばしば悪材料
   notes_extra: null
   provenance:
@@ -1267,22 +1400,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F19
   name_ja: 種類株・優先株の発行
@@ -1290,8 +1425,10 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 有無と条件
-  formula: null
-  inputs: null
+  formula: 種類株・優先株の発行の有無と条件
+  inputs:
+  - preferred_shares
+  - LLM
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -1304,24 +1441,30 @@
   - EDI
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**種類株の会計上の分類（負債か資本か）が条件で変わる。EQ と IBD の切り分けに影響する。**'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（フラグ）。発行が無ければゼロ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**条件（転換価格・配当率・議決権）を読むには有報が要る。集計値では判定できない。** F06 と同じ問題。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F06
+  - F28
+  - D01
+  - D20
+  - D22
+  economic_rationale: '**普通株主の劣後。** 優先株には配当・残余財産の優先権があるので、 普通株の価値はその分だけ削られる。 **しかも発行する企業は資金調達に窮していることが多い**ので、 D22（資金繰り余力）の悪化と同時に起きる。 **A（バリュー指標）の分母に潜在的な請求権が入っていない**ので、 **種類株を発行している企業の PBR は過小に計算されている。**'
+  references:
+  - 構造的判断
   notes: 普通株主の劣後
   notes_extra: null
   provenance:
@@ -1335,22 +1478,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F20
   name_ja: 配当方針の変更
@@ -1358,8 +1503,10 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: DOE導入、累進配当宣言、下限設定
-  formula: null
-  inputs: null
+  formula: 配当方針の変更フラグ（DOE導入 / 累進配当宣言 / 下限設定）
+  inputs:
+  - tdnet_disclosure
+  - LLM
   sign: positive
   buy_class: main
   sell_class: useful
@@ -1373,24 +1520,30 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: na
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（フラグ）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**文言の解釈が LLM 依存。「安定的な配当」と「累進配当」の差を正しく区別できるかに精度が依存する。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F09
+  - F08
+  - F13
+  - F29
+  - T07
+  - M14
+  economic_rationale: '**累進配当（減配しない）の宣言は、 経営陣が将来のキャッシュフローに自信を持っていることの コストのかかるシグナル。** 守れなければ評判を失うので、 嘘をつくコストが高い（signaling の古典的条件を満たす）。 **東証の要請（F13）を受けて日本で急増中**なので、 **今後数年で最も動きが大きい F パラメータ。** DOE（株主資本配当率）は日本固有の指標で、 **利益変動に左右されず資本に対して配当を決めるので、 F08（配当性向）より安定する。**'
+  references:
+  - 構造的判断。東証の資本コスト要請を受けた日本の動向
   notes: 累進配当（減配しない）の宣言は資本配分の規律の強いシグナル
   notes_extra: null
   provenance:
@@ -1404,22 +1557,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F21
   name_ja: 減配・無配転落
@@ -1427,8 +1582,9 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 実施の有無と幅
-  formula: null
-  inputs: null
+  formula: 減配・無配転落のフラグと減配率
+  inputs:
+  - dividends
   sign: negative
   buy_class: useful
   sell_class: main
@@ -1446,22 +1602,27 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 前期が無配なら欠損（減配率が定義できない）。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 無配企業で欠損。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - F09
+  - F20
+  - F08
+  - D08
+  - D22
+  - R07
+  economic_rationale: '**日本では特に嫌気される。個人株主の投げを誘発する。** Lintner (1956) 以来、経営陣は減配を極度に嫌うことが知られており、 **減配するということは、経営陣が「もう配れない」と 認めた最終段階**を意味する。 **F09（連続増配）が長い企業ほど、減配のショックが大きい** という非対称があり、**F09 と F21 は掛け合わせて使う。** 売り判定（R07/S カテゴリ）で最も明確なトリガーの一つ。'
   references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP DivOmit — Michaely, Thaler and Womack 1995, JF（OSAP再現 t=6.3, 月次0.916666667%, 品質=2_fair, 予測力=1_clear）
+  - Lintner (1956) Distribution of Incomes of Corporations
+  - 構造的判断
   notes: 日本では特に嫌気される。個人株主の投げを誘発する
   notes_extra: null
   provenance:
@@ -1475,23 +1636,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F22
   name_ja: 資本コストと ROE のギャップ
@@ -1499,8 +1661,11 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 開示された WACC と実績 ROE の差
-  formula: null
-  inputs: null
+  formula: 開示された WACC と実績 ROE の差
+  inputs:
+  - disclosed_wacc
+  - B03
+  - LLM
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1514,24 +1679,29 @@
   - TD
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: WACC の開示が無ければ欠損。**F13 がゼロの企業では必ず欠損する。**
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**F13（開示している企業）のみ。スタンダード市場では81%が欠損する。** しかも**開示するのは自信のある企業に偏る**ので、 観測できる範囲では ROE-WACC が良く見える（Z03 の典型例）。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F13
+  - B03
+  - B04
+  - A03
+  - M14
+  economic_rationale: '**F13 の定量版。** 開示の有無だけでは口だけを排除できない。 **企業が自ら公表した WACC を使う**ので、 B04（自分で推定した ROIC-WACC）と違って**企業の自己認識を測れる。** → **企業が「自社の資本コストは5%」と言いながら ROE が3%なら、それは自ら失格を宣言していることになる。** その企業が是正に動くかどうかがカタリストになる。 **B04 との乖離自体も情報**（自社に甘い WACC を置いていないか）。'
+  references:
+  - 構造的判断。東証要請への対応の質を測る
   notes: F13 の定量版。東証要請への対応の質を測る
   notes_extra: null
   provenance:
@@ -1545,22 +1715,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F23
   name_ja: 複合負債発行
@@ -1568,8 +1740,10 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 5年間の負債簿価の増加率 - 5年間の株式リターン
-  formula: null
-  inputs: null
+  formula: 5年間の負債簿価の増加率 - 5年間の株式リターン
+  inputs:
+  - IBD
+  - PRICE_adj
   sign: negative
   buy_class: main
   sell_class: main
@@ -1587,22 +1761,28 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: '**IBD にリースを含めるかで値が変わる**（spec §2）。IFRS16 移行年をまたぐと不連続。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 5年前の負債>0。5年の履歴が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**5年の履歴が要るので若い企業で欠損。** G26/G39 と同じ方向の偏り。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - F24
+  - F25
+  - F26
+  - F31
+  - C35
+  - D01
+  economic_rationale: '**OSAP CompositeDebtIssuance t=8.6 は F カテゴリ最大。** 負債を増やした企業は将来リターンが低い。 Pontiff-Woodgate や Daniel-Titman の composite issuance の系譜で、 **「経営陣は自社株が割高なときに資金を調達する」**という market timing 仮説で説明される。 **263AT はこれまで株式発行（F01/F02）しか見ていなかったが、 負債側の方が t が高い。** カタログの見落としを OSAP 突合が埋めた例。 **C35（資産成長）とほぼ同じ現象**なので Z12 で確認が要る。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP CompositeDebtIssuance — Lyandres, Sun and Zhang 2008, RFS（OSAP再現 t=8.6, 月次0.523%, 品質=1_good, 予測力=1_clear）
+  - Daniel-Titman (JF 2006) Market Reactions to Tangible and Intangible Information
+  - OSAP CompositeDebtIssuance t=8.6
   notes: OSAP CompositeDebtIssuance t=8.6。263AT は株式発行（F01/F02）しか見ていなかった。負債発行も同等以上に効く
   notes_extra: null
   provenance:
@@ -1616,23 +1796,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F24
   name_ja: 金融負債の変化
@@ -1640,8 +1821,10 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: delta_金融負債 / 平均総資産
-  formula: null
-  inputs: null
+  formula: delta(金融負債) / 平均総資産
+  inputs:
+  - IBD
+  - TA
   sign: negative
   buy_class: main
   sell_class: main
@@ -1659,22 +1842,28 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: AVG
+  consolidation: consolidated
+  accounting_standard_note: F23 と同じリースの問題。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 平均総資産>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 2期分の B/S が要るだけなので F23 より欠損が少ない。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - F23
+  - F25
+  - F26
+  - C35
+  - D01
+  - D02
+  economic_rationale: F23 の1年版（OSAP DelFINL t=8.0）。 **5年の複合より単年の変化の方が実装が簡単で、t もほぼ同じ。** → **実装順序では F24 を先に作る。** F23 は5年の履歴が要って若い企業で欠損するが、 F24 は2期あれば作れる。**同じ機構をより広いユニバースで測れる。**
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP DelFINL — Richardson et al. 2005, JAE（OSAP再現 t=8.0, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - Richardson-Sloan (2003) External Financing and Future Stock Returns
+  - OSAP DelFINL t=8.0
   notes: OSAP DelFINL t=8.0
   notes_extra: null
   provenance:
@@ -1688,23 +1877,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F25
   name_ja: 純負債調達
@@ -1712,8 +1902,10 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: (負債の増加 - 負債の返済) / 平均総資産
-  formula: null
-  inputs: null
+  formula: (負債による調達 - 負債の返済) / 平均総資産
+  inputs:
+  - cf_financing
+  - TA
   sign: negative
   buy_class: main
   sell_class: useful
@@ -1731,22 +1923,27 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: AVG
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**CF計算書の財務活動区分から取る。B/S の差分（F24）とは一致しない**（為替換算・非現金取引の差）。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 平均総資産>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: CF計算書が要る。**日本の四半期開示では CF が省略されることがある**（第1・第3四半期）。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - F24
+  - F23
+  - F26
+  - F31
+  - B10
+  economic_rationale: F24 を CF ベースで測った版（OSAP NetDebtFinance t=6.9）。 **B/S 差分（F24）と CF（F25）の両方を持つ理由は、 両者が食い違うときに何かが起きているから** — 為替換算、企業結合、非現金の債務引受など。 **Z05（ソース間不一致）の検出材料としても機能する。**
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP NetDebtFinance — Bradshaw, Richardson, Sloan 2006, JAE（OSAP再現 t=6.9, 月次0.675%, 品質=1_good, 予測力=1_clear）
+  - Bradshaw-Richardson-Sloan (JAE 2006) The relation between corporate financing activities
+  - OSAP NetDebtFinance t=6.9
   notes: OSAP NetDebtFinance t=6.9
   notes_extra: null
   provenance:
@@ -1760,23 +1957,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F26
   name_ja: 純外部資金調達
@@ -1784,8 +1982,11 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 純株式調達 + 純負債調達（総資産で正規化）
-  formula: null
-  inputs: null
+  formula: (純株式調達 + 純負債調達) / 平均総資産
+  inputs:
+  - F31
+  - F25
+  - TA
   sign: negative
   buy_class: main
   sell_class: main
@@ -1803,22 +2004,28 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: AVG
+  consolidation: consolidated
+  accounting_standard_note: F25 を継承。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 平均総資産>0。両方が必要。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: F25/F31 を継承。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - F23
+  - F24
+  - F25
+  - F31
+  - C35
+  - F10
+  economic_rationale: '**F の本命（OSAP XFIN t=5.7）。株式側と負債側を統合した総資金調達。** 「外から資金を集めた企業は将来リターンが低い」という 機構を1本で表す。**個別の t は F23（8.6）の方が高いが、 F26 は概念的に最も包括的。** **F10（総還元性向）と正反対の軸**で、 F26 が正 = 資本を集める、F10 が高い = 資本を返す。 **→ この2本で「資本の流れの向き」が完全に表現できる。** C35（資産成長）とは「集めた資金をどう使ったか」で繋がる。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP XFIN — Bradshaw, Richardson, Sloan 2006, JAE（OSAP再現 t=5.7, 月次1.29%, 品質=1_good, 予測力=1_clear）
+  - Bradshaw-Richardson-Sloan (JAE 2006)
+  - OSAP XFIN t=5.7
   notes: OSAP XFIN t=5.7。F01 と F23 を統合した本命指標
   notes_extra: null
   provenance:
@@ -1832,23 +2039,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F27
   name_ja: 複合株式発行
@@ -1856,8 +2064,10 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 5年間の時価総額増加率 - 5年間の株式リターン
-  formula: null
-  inputs: null
+  formula: 5年間の MCAP 増加率 - 5年間の株式リターン
+  inputs:
+  - MCAP
+  - PRICE_adj
   sign: negative
   buy_class: main
   sell_class: useful
@@ -1875,22 +2085,27 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: na
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 5年前の MCAP>0。5年の履歴が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: F23 と同じ。5年の履歴が要る。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - F02
+  - F23
+  - F26
+  - F31
+  - C35
+  economic_rationale: '**F02（株数の増加）の別定式化。株数でなく時価総額で測る** （OSAP CompEquIss t=4.4）。 **時価総額の増加のうち株価上昇で説明できない部分＝新株発行** という発想で、**株数データが正確でない場合でも計算できる。** → **分割・併合の調整ミス（spec §3）に対して頑健**という 実装上の利点がある。F02 と両方持つ理由はここ。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP CompEquIss — Daniel and Titman 2006, JF（OSAP再現 t=4.4, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - Daniel-Titman (JF 2006)
+  - OSAP CompEquIss t=4.4
   notes: OSAP CompEquIss t=4.4。F02 の別定式化（株数でなく時価総額で測る）
   notes_extra: null
   provenance:
@@ -1904,23 +2119,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F28
   name_ja: 転換社債の有無
@@ -1928,8 +2144,9 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 転換社債を発行しているか
-  formula: null
-  inputs: null
+  formula: 転換社債の発行残高の有無（フラグ）
+  inputs:
+  - convertible_debt
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -1947,22 +2164,26 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**転換社債の会計処理（一括法 / 区分法）が基準で違う。負債と資本の按分が変わる。**'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（フラグ）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**注記から取る必要がある。集計財務データでは識別できないことが多い。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - F06
+  - F19
+  - F23
+  - D01
+  - D20
+  economic_rationale: '**OSAP ConvDebt t=4.5。F06（潜在希薄化）の中でも転換社債は特に強い負のシグナル。** 転換社債を選ぶということは、**普通社債を出せる信用力がないか、 株を今の価格で出したくない（＝割安と思っていない）か**のどちらか。 **どちらも悪い。** 日本の小型株では MSCB（転換価格が下方修正される型）が 最悪の形で、F06 の説明の通り発行時点で下落がほぼ確定する。 **フラグ（有無）だけで t=4.5 が出るということは、 金額の大小より「使うかどうか」に情報がある**ということ。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP ConvDebt — Valta 2016, JFQA（OSAP再現 t=4.5, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - OSAP ConvDebt t=4.5
   notes: OSAP ConvDebt t=4.5。F06 の潜在希薄化の中でも転換社債は特に強い負のシグナル
   notes_extra: null
   provenance:
@@ -1976,23 +2197,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F29
   name_ja: 配当開始
@@ -2000,8 +2222,9 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 無配から配当を開始したか
-  formula: null
-  inputs: null
+  formula: 無配から配当を開始したフラグ
+  inputs:
+  - dividends
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -2015,27 +2238,32 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T2
+  evidence_tier: T1
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（フラグ）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: イベントなので疎。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - F20
+  - F09
+  - F08
+  - F21
+  - C08
+  economic_rationale: '**OSAP DivInit t=3.4。配当開始は「成長投資の局面が終わり、 安定的にキャッシュを生む段階に入った」という経営陣の宣言。** Michaely-Thaler-Womack (JF 1995) の initiation/omission 研究。 **F21（減配）と対をなす**が、**非対称**である — 減配のショック（F21）の方が、開始の好影響（F29）より大きい。 **これは投資家の損失回避と整合する。** 263AT の設計（1/10 が全部を賄う）の観点では、 **F29 のような穏やかなプラスより F21 のような急落の回避の方が重要。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP DivInit — Michaely, Thaler and Womack 1995, JF（OSAP再現 t=3.4, 月次0.625%, 品質=2_fair, 予測力=1_clear）
+  - Michaely-Thaler-Womack (JF 1995) Price Reactions to Dividend Initiations and Omissions
+  - OSAP DivInit t=3.4
   notes: OSAP DivInit t=3.4。F20 の一形態だが独立したイベントとして持つ
   notes_extra: null
   provenance:
@@ -2049,23 +2277,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F30
   name_ja: 配当の季節性
@@ -2073,8 +2302,9 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 過去の同月に配当を出していたか（次月の配当確率）
-  formula: null
-  inputs: null
+  formula: 過去の同月に配当を出していたか（翌月の配当確率）
+  inputs:
+  - dividends
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -2092,22 +2322,27 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 配当履歴が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**無配企業で欠損。しかも日本は3月・9月に極端に集中するので、 断面ランクが季節的にほぼ無意味になる**（K15 と同じ問題）。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - K15
+  - K16
+  - F29
+  - F08
+  - G38
+  economic_rationale: '**OSAP DivSeason t=16.2 は全 Predictor 中で最大。** しかし**これは実質的に「来月配当が出る銘柄は来月上がる」 という配当利回りの期間内効果を測っているだけ**の可能性が高く、 **経済的な新規性はほとんどない。** しかも**1ヶ月ホライズンなので 263AT の保有期間と全く合わない。** → **t が最大であることと有用であることは無関係**という、 OQ-33 と同じ論点の別の例。 **★2 に留め、G38-G45（季節性）と同じ扱いにする。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP DivSeason — Hartzmark and Salomon 2013, JFE（OSAP再現 t=16.2, 月次0.36%, 品質=1_good, 予測力=1_clear）
+  - Hartzmark-Solomon (JFE 2013) The dividend month premium
+  - OSAP DivSeason t=16.2
   notes: OSAP DivSeason t=16.2。全 Predictor 中で最大の t 値。 ただし1ヶ月ホライズンなので本プロジェクトでは執行タイミング用
   notes_extra: null
   provenance:
@@ -2121,23 +2356,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F31
   name_ja: 純株式調達
@@ -2145,8 +2381,10 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: (株式発行による収入 - 自社株買い - 配当) / 平均総資産
-  formula: null
-  inputs: null
+  formula: (株式発行による収入 - 自社株買い - 配当) / 平均総資産
+  inputs:
+  - cf_financing
+  - TA
   sign: negative
   buy_class: main
   sell_class: useful
@@ -2164,22 +2402,28 @@
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: AVG
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: F25 と同じく CF計算書から取る。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 平均総資産>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: F25 と同じ。四半期 CF の省略に注意。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - F26
+  - F10
+  - F03
+  - F02
+  - F27
+  - C35
+  economic_rationale: '**F26 の株式側（OSAP NetEquityFinance t=3.8）。** **F10（総還元性向）と符号が逆で、実質的に同じ軸の裏表。** F31 が負（＝自社株買いと配当が発行を上回る）は 資本を返している状態で、**F10 が高いのと同じこと。** → **F10 と F31 は Z12 で強い負の相関が出るはず。** 分母が NI（F10）か総資産（F31）かの違いだけなので、 **赤字企業でも計算できる F31 の方が実装上は優れている。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP NetEquityFinance — Bradshaw, Richardson, Sloan 2006, JAE（OSAP再現 t=3.8, 月次0.93%, 品質=1_good, 予測力=1_clear）
+  - Bradshaw-Richardson-Sloan (JAE 2006)
+  - OSAP NetEquityFinance t=3.8
   notes: OSAP NetEquityFinance t=3.8。F26（純外部資金調達）の株式側
   notes_extra: null
   provenance:
@@ -2193,21 +2437,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
