@@ -217,7 +217,12 @@ def detect_split_misadjustment(rows: Sequence[dict], bars: Sequence[Bar],
         if prev["close"] <= 0 or cur["close"] <= 0:
             continue
         r = math.log(cur["close"] / prev["close"])
-        expected = math.log(b.split_factor)
+        # **abs を取る。** 株式併合（比率 < 1）では ln が負になるので、
+        # abs を忘れると `abs(|r|) - 負の数` が閾値を超えず、
+        # **併合の調整漏れを一切検出できない。**
+        # 実データ 1,383 銘柄で 145 件の誤判定として現れた（2026-08-23）。
+        # 米国の極小型株は併合を繰り返すので、これは無視できない見落としだった。
+        expected = abs(math.log(b.split_factor))
         if abs(abs(r) - expected) < tol:
             out.append({
                 "date": b.date, "split_factor": b.split_factor,
@@ -313,13 +318,17 @@ def _test() -> int:
     already = [_bar("2026-01-05", 2848.0), _bar("2026-01-06", 2861.0, split_factor=5.0)]
     d = detect_split_misadjustment(adjust(already), already)
     check("**二重調整を検出する**", len(d) == 1 and "二重調整" in d[0]["diagnosis"])
+    # **株式併合（比率 < 1）でも検出できるか。** ln が負になるので abs が要る
+    rev = [_bar("2026-01-05", 0.20), _bar("2026-01-06", 0.21, split_factor=0.05)]
+    dr = detect_split_misadjustment(adjust(rev), rev)
+    check("**株式併合の調整漏れも検出する（ln が負になる罠）**", len(dr) == 1)
     # 正しく生価格が渡っていれば検出されない
     proper = [_bar("2026-01-05", 14240.0), _bar("2026-01-06", 2861.0, split_factor=5.0)]
     check("正しい生価格では検出しない",
           detect_split_misadjustment(adjust(proper), proper) == [])
 
     print("-" * 66)
-    print("%d/%d 通過" % (24 - len(fails), 24))
+    print("%d/%d 通過" % (25 - len(fails), 25))
     return 1 if fails else 0
 
 
