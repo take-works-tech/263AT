@@ -45,7 +45,18 @@ if hasattr(sys.stdout, "reconfigure"):
 
 import shrink as SH        # noqa: E402
 
-PARAMS = ["E29", "B22", "E03", "F24", "E01", "B02", "B06", "A04", "A03", "A06"]
+def params_in(rows: list[dict]) -> list[str]:
+    """**パネルに実際に入っている本数を使う。**
+
+    以前はここに10本を直書きしていた。**実装を増やしてもこの一覧を
+    直し忘れると、新しい本が黙って無視される**（重みが付かないのではなく、
+    そもそも候補に入らない）。パネルから読むようにして直書きをやめた。
+    """
+    seen: dict[str, int] = {}
+    for r in rows:
+        for k in r["z"]:
+            seen[k] = seen.get(k, 0) + 1
+    return sorted(seen, key=lambda k: (-seen[k], k))
 
 
 def load_panel(horizon_days: int) -> list[dict]:
@@ -105,6 +116,7 @@ def main() -> int:
     args = ap.parse_args()
 
     panel = load_panel(args.horizon_days)
+    PARAMS = params_in(panel) if panel else []
     if not panel:
         print("パネルが無い。tools/build_panel.py を先に実行する。")
         return 1
