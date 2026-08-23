@@ -14,7 +14,8 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 MODULES = ["guard.py", "bars.py", "universe.py", "normalize.py", "listing.py", "ff49.py", "facts.py", "periods.py", "prices.py", "params_us.py", "pipeline.py",
-           "sell.py", "sizing.py", "backtest.py", "portfolio.py", "shrink.py"]
+           "sell.py", "sizing.py", "backtest.py", "portfolio.py", "shrink.py",
+           "credentials.py", "jquants.py", "edinet.py"]
 
 if hasattr(sys.stdout, "reconfigure"):
     try:

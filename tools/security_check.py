@@ -68,9 +68,14 @@ SKIP_DIRS = {".git", ".venv", "venv", "__pycache__", "node_modules", "data", "fo
 ALLOW_SUBSTRINGS = [
     "tzero30208@gmail.com",          # SEC EDGAR の User-Agent 要件
     "noreply@anthropic.com",
-    "example.invalid",
-    "user@example.com",
 ]
+
+# RFC 2606 / 6761 が「実在しえない」と定めたドメイン。**個別のアドレスを
+# 列挙するのではなく、ドメインの側で許可する。** 列挙にすると、文書や
+# テストを書き足すたびに検査器を触ることになり、**そのうち面倒になって
+# 検査器の方を緩める。** 実在しえないものだけを、恒久的に除外する。
+RESERVED_MAIL_DOMAINS = re.compile(
+    r"@(example\.(com|org|net)|[\w.-]*\.(invalid|test|example|localhost))$", re.I)
 
 ENTROPY_MIN_LEN = 32
 ENTROPY_THRESHOLD = 4.3
@@ -119,7 +124,9 @@ def scan_text(rel, text, findings):
 
     # メールアドレス
     for m in re.finditer(r"[\w.+-]+@[\w-]+\.[\w.-]+", text):
-        if in_spans(m.start(), urls) or any(a in m.group(0) for a in ALLOW_SUBSTRINGS):
+        if (in_spans(m.start(), urls)
+                or any(a in m.group(0) for a in ALLOW_SUBSTRINGS)
+                or RESERVED_MAIL_DOMAINS.search(m.group(0))):
             continue
         line = text[:m.start()].count("\n") + 1
         findings.append(("MAIL", rel, line, "メールアドレス %s" % m.group(0)))
