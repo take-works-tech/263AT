@@ -46,3 +46,7 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+
+# --- 再取得できる大きめの研究データ（tools/probe_data_sources.py で再取得） ---
+research/*.parquet
+research/*.zip
