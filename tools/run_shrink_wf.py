@@ -147,7 +147,7 @@ def spread_ic(rows: list[dict], f: SH.Fit, q: float = 0.2,
     for r in rows:
         s = SH.score(r["z"], f)
         if s is not None and r.get("fwd") is not None:
-            scored.append((s, r["fwd"]))
+            scored.append((s, r["fwd"], r["ticker"]))
     if len(scored) < 50:
         return {"n": len(scored)}
     scored.sort(key=lambda x: -x[0])
@@ -179,7 +179,9 @@ def spread_ic(rows: list[dict], f: SH.Fit, q: float = 0.2,
             # **最終的な利益はこちらで決まる。**
             "top_n": (sum(x[1] for x in scored[:top_n]) / top_n
                       - allm) if len(scored) >= top_n else None,
-            "n_top": top_n}
+            "n_top": top_n,
+            # **実際に買う銘柄の顔ぶれ。** 前回との重複から回転率を測る
+            "names": tuple(x[2] for x in scored[:top_n])}
 
 
 def main() -> int:
@@ -272,12 +274,29 @@ def main() -> int:
                   "この設計では買わない銘柄が入る**" % (100 * lm))
         # 回転コスト。**上位分位を入れ替えるたびに両側で払う**
         turns_per_year = 365.0 / args.horizon_days
+
+        # **回転率を実測する。**
+        # これまでは「毎回100%入れ替わる」前提で計算していた。
+        # 実際には連続する生成日の上位銘柄はかなり重なるので、
+        # **コストを過大に見積もっていた**（保守側だが不正確）。
+        seqs = [st.get("names") for _, _, st in results if st.get("names")]
+        repl = []
+        for a, b in zip(seqs, seqs[1:]):
+            sa, sb = set(a), set(b)
+            if sb:
+                repl.append(len(sb - sa) / len(sb))
+        turnover = (sum(repl) / len(repl)) if repl else 1.0
+
         gross = mean * turns_per_year
-        cost = 2 * (args.cost_bps / 10000.0) * turns_per_year
+        # 片道 bps を、入れ替わった割合ぶんだけ往復で払う
+        cost = 2 * (args.cost_bps / 10000.0) * turns_per_year * turnover
         print()
         print("  **年率の粗超過        %+.2f%%**" % (100 * gross))
-        print("  年率の取引コスト      %.2f%%（片道 %.0fbps × 往復 × 年%.1f回）"
-              % (100 * cost, args.cost_bps, turns_per_year))
+        print("  **入れ替わり率（実測） %.0f%%**（上位%d銘柄が次回どれだけ変わるか）"
+              % (100 * turnover, args.top_n))
+        print("  年率の取引コスト      %.2f%%"
+              "（片道 %.0fbps × 往復 × 年%.1f回 × 入替 %.0f%%）"
+              % (100 * cost, args.cost_bps, turns_per_year, 100 * turnover))
         print("  **年率の正味超過      %+.2f%%**" % (100 * (gross - cost)))
         print()
         if gross - cost <= 0:
