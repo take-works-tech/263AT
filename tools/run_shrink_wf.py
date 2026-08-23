@@ -43,6 +43,7 @@ if hasattr(sys.stdout, "reconfigure"):
     except Exception:
         pass
 
+import prior as PRIOR      # noqa: E402
 import shrink as SH        # noqa: E402
 
 def params_in(rows: list[dict]) -> list[str]:
@@ -57,6 +58,20 @@ def params_in(rows: list[dict]) -> list[str]:
         for k in r["z"]:
             seen[k] = seen.get(k, 0) + 1
     return sorted(seen, key=lambda k: (-seen[k], k))
+
+
+def apply_prior(names: list[str], only: bool) -> list[str]:
+    """**候補集合を自分の成績を見ずに絞る**（src/prior.py）。
+
+    絞らない選択肢も残すのは、**規則が効いているかを比べるため。**
+    絞った方が良ければ規則が効いており、
+    悪ければ「他者の再現 t」という事前情報が
+    このユニバースには当てはまらない、という情報になる。
+    どちらも知りたい。
+    """
+    if not only:
+        return names
+    return [n for n in names if n in PRIOR.ADOPTED]
 
 
 def load_panel(horizon_days: int, branch: str = "") -> list[dict]:
@@ -187,6 +202,8 @@ def spread_ic(rows: list[dict], f: SH.Fit, q: float = 0.2,
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--horizon-days", type=int, default=90)
+    ap.add_argument("--all-params", action="store_true",
+                    help="**採用規則を無視して全部使う**（比較のため）")
     ap.add_argument("--panel", default="",
                     help="data/panel 配下の枝（対照条件を測るため）")
     ap.add_argument("--min-train-obs", type=int, default=1000)
@@ -197,7 +214,7 @@ def main() -> int:
     args = ap.parse_args()
 
     panel = load_panel(args.horizon_days, args.panel)
-    PARAMS = params_in(panel) if panel else []
+    PARAMS = apply_prior(params_in(panel), not args.all_params) if panel else []
     if not panel:
         print("パネルが無い。tools/build_panel.py を先に実行する。")
         return 1

@@ -48,6 +48,7 @@ import listing as LS       # noqa: E402
 import normalize as NZ     # noqa: E402
 import params_us as PU     # noqa: E402
 import params_px as PX     # noqa: E402
+import prior as PRIOR      # noqa: E402
 import portfolio as PF     # noqa: E402
 import prices as PR        # noqa: E402
 import universe as UV      # noqa: E402
@@ -68,6 +69,14 @@ SIGN = {"E29": +1, "B22": -1, "E03": -1, "F24": -1, "E01": -1,
         "H05": +1,          # 定義に負号が入っているので符号は +
         "I01": -1,
         "J10": -1, "J22": -1, "J25": +1}
+
+# **パネルは上位集合のまま作る。** 絞り込みは測定側（run_shrink_wf）で行う。
+#
+# ここで絞ると、**「絞る前」を後から測れなくなる。**
+# 採用集合（src/prior.py）は自分の成績を見ずに決めた凍結集合だが、
+# **その規則が効いているかどうかは、比べないと分からない。**
+# パネルに両方入れておけば、同じデータで両方を測れる。
+_NOT_ADOPTED = sorted(set(SIGN) - set(PRIOR.ADOPTED))
 
 # **J01（平均売買代金）はここに入れない。**
 # カタログの符号が `?` のまま解決していない。**推測で符号を付けると、
