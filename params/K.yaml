@@ -12,8 +12,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 信用買残株数 / 浮動株数
-  formula: null
-  inputs: null
+  formula: 信用買残株数 / 浮動株数
+  inputs:
+  - margin_long
+  - float_shares
   sign: negative
   buy_class: main
   sell_class: main
@@ -26,7 +28,7 @@
   - JQ
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   industries: null
@@ -34,15 +36,23 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: null
+  zero_denominator_policy: 浮動株数>0。浮動株の定義は取引所基準に従う。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**貸借銘柄・信用銘柄のみ。制度信用の対象外銘柄では欠損。** 小型株ほど欠損する。'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K02
+  - K03
+  - K04
+  - K05
+  - K37
+  - K38
+  economic_rationale: '**将来の売り圧力の在庫。** 信用買いは6ヶ月以内に決済する必要があるので、 買残は「期限付きの売り予約」に等しい。 **値の含み損が膨らんでいると投げ売りになる**ので、 K37（信用建玉の日柄）と組み合わせて「いつ投げるか」を見る。 日本固有の制度で、米国のマージン残高は個別銘柄で開示されない。'
+  references:
+  - 日本取引所グループ 信用取引残高等
+  - 構造的判断
   notes: 将来の売り圧力の在庫。個人の含み損が溜まっている銘柄は上値が重い
   notes_extra: null
   provenance:
@@ -56,21 +66,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K02
   name_ja: 信用売残 / 浮動株
@@ -78,8 +91,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 信用売残株数 / 浮動株数
-  formula: null
-  inputs: null
+  formula: 信用売残株数 / 浮動株数
+  inputs:
+  - margin_short
+  - float_shares
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -92,7 +107,7 @@
   - JQ
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   industries: null
@@ -100,15 +115,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: null
+  zero_denominator_policy: K01 と同じ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**貸借銘柄のみ（信用銘柄では売建てできない）ので K01 よりさらに狭い。**'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K01
+  - K03
+  - K06
+  - K19
+  - K21
+  economic_rationale: '**将来の買い戻し需要。踏み上げの燃料。** K01 と符号が逆になるのは、売残が「期限付きの買い予約」だから。 **米国の Short Interest（K19）と同じ機構だが、 日本は制度信用の6ヶ月期限があるため強制力が強い。** K19 が∩型（過度な空売りは赤信号でもある）なのに対し、 K02 を + にしたのは、日本では期限のある買い戻しが確実に来るため。'
+  references:
+  - 構造的判断。日本の制度信用の6ヶ月期限
   notes: 将来の買い戻し需要。踏み上げの燃料
   notes_extra: null
   provenance:
@@ -122,21 +143,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K03
   name_ja: 信用倍率
@@ -144,8 +168,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 信用買残 / 信用売残
-  formula: null
-  inputs: null
+  formula: 信用買残 / 信用売残
+  inputs:
+  - margin_long
+  - margin_short
   sign: negative
   buy_class: main
   sell_class: main
@@ -158,7 +184,7 @@
   - JQ
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   industries: null
@@ -166,15 +192,19 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: null
+  zero_denominator_policy: 売残がゼロなら欠損（比が発散する）。**上限クリップではなく欠損にする。**
   missing_policy: flag
-  missing_bias: null
+  missing_bias: K02 と同じ。売残ゼロの銘柄が多いので欠損が多い。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K01
+  - K02
+  - K07
+  economic_rationale: K01/K02 の比。**新規情報は少ないが、 需給の偏りを1本で表せるので実務で広く使われる。** 極端値（20倍超など）は仕手化のサインとされるが、 **これは実証ではなく経験則。** K01/K02 を別に持っているので、Z12 で冗長と出る可能性が高い。
+  references:
+  - 構造的判断。実務の慣習指標
   notes: 定番。低い（1未満）ほど需給が良い。極端値は仕手化のサイン
   notes_extra: null
   provenance:
@@ -188,21 +218,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K04
   name_ja: 信用買残の週次変化
@@ -210,8 +243,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: delta_信用買残 / 前週信用買残
-  formula: null
-  inputs: null
+  formula: (信用買残[t] - 信用買残[t-1w]) / 信用買残[t-1w]
+  inputs:
+  - margin_long
   sign: negative
   buy_class: useful
   sell_class: main
@@ -224,7 +258,7 @@
   - JQ
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   industries: null
@@ -232,15 +266,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: null
+  zero_denominator_policy: 前週の買残>0。ゼロからの増加は欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: K01 と同じ。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K01
+  - K05
+  - K37
+  - O06
+  - G04
+  economic_rationale: '**水準より変化。急増は個人の飛び付き買いで、 数週間後の投げ売りに繋がる。** O06（SNS言及量）や G04（短期上昇）と同時に急増していれば 過熱の合成サインになる。**263AT の「機関が見ていない銘柄」戦略では、 個人の過熱こそが最大の短期リスク。**'
+  references:
+  - 構造的判断。個人投資家行動（Barber-Odean 系）と整合
   notes: 水準より変化。急増は個人の飛び付き＝短期天井のサイン
   notes_extra: null
   provenance:
@@ -254,21 +294,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K05
   name_ja: 信用残の回転日数
@@ -276,8 +319,11 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 信用買残 / 平均出来高
-  formula: null
-  inputs: null
+  formula: (信用買残 + 信用売残) / 平均出来高(20d)
+  inputs:
+  - margin_long
+  - margin_short
+  - VOLUME
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -290,23 +336,29 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: null
+  pit_lag_days: 1
+  zero_denominator_policy: 平均出来高>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: K01/K02 を継承。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K01
+  - K02
+  - K20
+  - J01
+  - J10
+  economic_rationale: '**解消に何日かかるか。** 米国の Days to Cover（K20）の日本版。 出来高で正規化するので**銘柄規模の影響を除ける。** 大きいほど、需給の解消に時間がかかり価格への影響が長引く。'
+  references:
+  - 構造的判断
   notes: 解消にかかる日数
   notes_extra: null
   provenance:
@@ -320,21 +372,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K06
   name_ja: 逆日歩の発生
@@ -342,8 +397,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 品貸料の有無と水準
-  formula: null
-  inputs: null
+  formula: 逆日歩の有無と水準（円/株/日）
+  inputs:
+  - negative_interest
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -356,7 +412,7 @@
   - JQ
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   industries: null
@@ -364,15 +420,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: na
+  zero_denominator_policy: na（水準）。発生していなければゼロ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 貸借銘柄のみ。**逆日歩は入札で決まるので日次で大きく変動する。**
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K02
+  - K21
+  - K38
+  - K19
+  economic_rationale: '**株不足の直接的な証拠。米国の貸株コスト（K21）と同じ機構。** 逆日歩が付くと空売り側のコストが日々発生するので、 買い戻しが強制される。**踏み上げの最も確度の高い先行指標。** ただし持続は数日〜数週間と短い。'
+  references:
+  - 構造的判断。K21（米国の貸株コスト）の実証が対応する
   notes: 売り方の踏み上げ圧力。ただし短期現象
   notes_extra: null
   provenance:
@@ -386,21 +447,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K07
   name_ja: 貸借倍率
@@ -408,8 +472,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 制度信用の貸借残ベース
-  formula: null
-  inputs: null
+  formula: 貸借取引の貸株残 / 融資残
+  inputs:
+  - securities_lending
+  - securities_financing
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -422,7 +488,7 @@
   - JQ
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   industries: null
@@ -430,15 +496,19 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: na
+  zero_denominator_policy: 融資残>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 貸借銘柄のみ。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K03
+  - K06
+  - K02
+  economic_rationale: K03 の制度信用版。**一般信用を含まないので、 証券金融会社を通る分だけを見ている。** K06（逆日歩）は貸株残が融資残を超えたときに発生するので、 **K07 は K06 の先行指標として使える。**
+  references:
+  - 構造的判断
   notes: K03 の制度信用版
   notes_extra: null
   provenance:
@@ -452,21 +522,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K08
   name_ja: 空売り比率(日次)
@@ -474,8 +547,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 空売り出来高 / 総出来高
-  formula: null
-  inputs: null
+  formula: 空売り出来高 / 総出来高
+  inputs:
+  - short_volume
+  - VOLUME
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -488,23 +563,29 @@
   - JQ
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
+  - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: null
+  zero_denominator_policy: 総出来高>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**市場全体の空売り比率は40%前後あるが、 その大半はマーケットメイクとヘッジで、方向性の賭けではない。** この分離ができないのが最大の弱点。'
   normalization: rank_market
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K02
+  - K19
+  - K31
+  - J09
+  economic_rationale: ∩型。**高すぎれば買い戻し期待、低すぎれば警戒がない（＝悪材料が まだ知られていない可能性は逆に低い）。** ただし機械的な空売り（裁定・ヘッジ）と情報に基づく空売りを 区別できないので、**単独では信頼度が低い。**
+  references:
+  - 構造的判断
   notes: 高すぎは買い戻し期待、低すぎは警戒感なし
   notes_extra: null
   provenance:
@@ -518,23 +599,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    nonlinear: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K09
   name_ja: 空売り残高報告
@@ -542,8 +625,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 発行済株式数の0.5%以上を保有する空売り者の残高
-  formula: null
-  inputs: null
+  formula: 発行済株式総数の0.5%以上を保有する空売り者の残高合計
+  inputs:
+  - short_position_report
   sign: cap
   buy_class: useful
   sell_class: main
@@ -556,23 +640,30 @@
   - JQ
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 1
-  zero_denominator_policy: na
+  pit_lag_days: 2
+  zero_denominator_policy: 発行済株式総数>0。報告が無ければゼロ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**0.5%未満は報告されないので、小口の空売りは見えない。 大型株ほど0.5%が大きな金額になるため、報告のハードルが実質的に高い。**'
   normalization: rank_market
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K02
+  - K08
+  - K19
+  - E01
+  - D08
+  economic_rationale: ∩型。**報告義務があるので個別に追える。** K08（フロー）に対するストックで、**しかも誰が売っているかが分かる。** 特定のファンドが継続的にショートしている銘柄は、 **そのファンドが何を見つけたのかを調べる価値がある** — E カテゴリ（会計品質）や D カテゴリ（財務健全性）の 異常を見つけている可能性が高い。 **263AT では「空売り筋の調査結果をタダで使う」という使い方が本筋。**
+  references:
+  - 金融商品取引法 空売り残高報告制度
+  - 構造的判断
   notes: 報告義務があるので個別に追える。ファンドが明示的にショートしている銘柄は理由を調べる価値がある
   notes_extra: null
   provenance:
@@ -586,23 +677,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K10
   name_ja: 投資部門別売買動向
@@ -610,8 +703,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 外国人 / 個人 / 事業法人 / 信託銀行の売買差額
-  formula: null
-  inputs: null
+  formula: 外国人 / 個人 / 事業法人 / 信託銀行の週次売買代金（業種単位）
+  inputs:
+  - investor_flow
   sign: context
   buy_class: useful
   sell_class: useful
@@ -624,7 +718,7 @@
   - JQ
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   industries: null
@@ -632,15 +726,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: null
+  zero_denominator_policy: '**除算ではない。** definition の "/" は主体の列挙の区切りであって割り算ではない。 ビルダーが "/" を見て q05 を pending にするので、ここで明示的に打ち消す。 実際に必要なのは各主体の売買代金の差引（買い越し・売り越し）で、分母は無い。'
   missing_policy: flag
-  missing_bias: null
-  normalization: rank_market
+  missing_bias: '**個別銘柄では取れない。市場全体または業種単位のみ。** 断面ランクを取らない。'
+  normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K11
+  - P16
+  - P17
+  - G36
+  economic_rationale: 符号は文脈依存。**投資主体別売買動向は日本固有の統計で、 外国人の売買が日本株のドライバーであることは広く知られている。** ただし**個別銘柄に落ちないので、263AT では 市場レベルの状態変数（P カテゴリに近い扱い）としてしか使えない。** → 断面正規化は none。
+  references:
+  - 日本取引所グループ 投資部門別売買状況
+  - 構造的判断
   notes: 市場全体または業種単位。個別銘柄では取れない
   notes_extra: null
   provenance:
@@ -654,21 +754,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    markets: catalog
+    normalization: override
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K11
   name_ja: 外国人保有比率
@@ -676,8 +779,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 外国人保有株数 / 発行済株式数
-  formula: null
-  inputs: null
+  formula: 外国人保有株数 / 発行済株式総数
+  inputs:
+  - foreign_ownership
+  - SHARES
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -690,23 +795,29 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   industries: null
-  period_convention: POINT
+  period_convention: FY
   consolidation: consolidated
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: SHARES>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**有報でのみ開示なので年1回、しかも3ヶ月遅れ**（spec §1.2）。鮮度が極めて低い。'
   normalization: rank_market
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K22
+  - O02
+  - O03
+  - O11
+  - W12
+  economic_rationale: ∩型。**低い = 無関心（LAW-27）で 263AT の狙い目。** ただし**極端に低いのには英文開示が無い・IR をしない等の 構造的な理由がある**ので、単に安いのではなく「理由がある安さ」の 可能性がある。**O カテゴリ（ネグレクト）の中で最も直接的な指標だが、 年次開示なので鮮度が最悪。** 実務では O02/O03 で補う。
+  references:
+  - 構造的判断。LAW-27（Merton 1987 の投資家認知）
   notes: 低い = 未発見（LAW-27）。ただし極端に低いのは英文開示がない等の理由がある
   notes_extra: null
   provenance:
@@ -720,23 +831,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    nonlinear: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K12
   name_ja: TOPIX構成銘柄の除外予定
@@ -744,8 +857,11 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 2028年の1,200銘柄化に向けた除外候補判定
-  formula: null
-  inputs: null
+  formula: 2028年の TOPIX 1,200銘柄化における除外候補の判定
+  inputs:
+  - market_cap
+  - liquidity
+  - TOPIX_rules
   sign: negative
   buy_class: main
   sell_class: main
@@ -759,7 +875,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   industries: null
@@ -767,15 +883,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（判定）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**未来のルールなので過去データが存在しない。バックテスト不能。** 前向き記録のみ。'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K13
+  - K14
+  - K26
+  - K40
+  - J01
+  economic_rationale: '**今後数年の継続的なパッシブ売り圧力。日本市場に固有の、 しかも時期が確定している需給イベント。** 2028年に向けて段階的に除外されるので、**除外候補銘柄は 構造的な売り超過に晒される。** 逆に言えば**「除外が終わった銘柄」は売り圧力の消滅で無風になる** ので、除外完了後は買い場になりうる。 **263AT の保有期間（6ヶ月-5年）と時間軸が一致する 数少ない需給パラメータ。** 実装優先度は高い。'
+  references:
+  - 日本取引所グループ TOPIX 構成銘柄の見直し
+  - 構造的判断
   notes: 今後数年の継続的なパッシブ売り圧力。逆に「除外が終わった銘柄」は売り圧力の消滅で妙味
   notes_extra: null
   provenance:
@@ -789,21 +912,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K13
   name_ja: 指数採用イベント
@@ -811,8 +937,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 日経225 / JPX日経400 / TOPIX の採用・除外
-  formula: null
-  inputs: null
+  formula: 日経225 / JPX日経400 / TOPIX の採用・除外イベント
+  inputs:
+  - index_events
   sign: context
   buy_class: useful
   sell_class: main
@@ -825,23 +952,31 @@
   - 手
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
+  - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: null
+  zero_denominator_policy: na（イベント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**過去のイベント一覧を手で集める必要がある。自動取得できない。**'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K12
+  - K27
+  - K40
+  - K47
+  - N28
+  economic_rationale: 符号は文脈依存。**採用は一時的な買い（発表から組入まで）で、 組入後は反転する**（Petajisto 2011 の index turnover cost）。 **除外は継続的な売り（LAW-46）で影響が長い。** → **採用と除外を同じ変数に入れてはいけない。** 符号も時間軸も違う。K40/K47（事前予測）の方が 実際に儲かる形で、イベント確定後では遅い。
+  references:
+  - Petajisto (FAJ 2011) The Index Premium and Its Hidden Cost
+  - 構造的判断
   notes: 採用は一時的な買い（発表〜組入で織り込み）、除外は継続的な売り（LAW-46）
   notes_extra: null
   provenance:
@@ -855,21 +990,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K14
   name_ja: 日銀ETF保有の影響
@@ -877,8 +1015,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 保有ETFの構成比 × 将来の売却シナリオ
-  formula: null
-  inputs: null
+  formula: 日銀保有ETFの構成比 × 想定売却シナリオ
+  inputs:
+  - BOJ_ETF_holdings
+  - index_weights
   sign: negative
   buy_class: aux
   sell_class: useful
@@ -891,7 +1031,7 @@
   - MACRO
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   industries: null
@@ -901,13 +1041,19 @@
   pit_lag_days: 1
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**ETF 経由の間接保有なので個別銘柄への配分は推定。日銀は個別銘柄の保有を開示しない。**'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K12
+  - K26
+  - K46
+  - P05
+  economic_rationale: '**買い入れは停止済みだが、保有分（約37兆円規模）の 処分方針が数年単位の需給要因として残る。** 日経225 の構成比が高い銘柄（値がさ株）ほど 日銀保有比率が高いので、**処分が始まれば特定銘柄に集中して効く。** **時期が不確実なので★1 だが、起きたときの影響は大きい** — 期待値ではなくテールリスクとして持つべき変数。'
+  references:
+  - 日本銀行 保有ETFの動向
+  - 構造的判断
   notes: 買い入れは停止済だが、保有分の処分方針が今後の需給要因
   notes_extra: null
   provenance:
@@ -921,21 +1067,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K15
   name_ja: 立会外分売
@@ -943,8 +1092,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 実施の有無と規模
-  formula: null
-  inputs: null
+  formula: 権利付最終日までの営業日数と配当利回りの複合
+  inputs:
+  - ex_date
+  - dividend_yield
   sign: cap
   buy_class: useful
   sell_class: aux
@@ -957,7 +1108,7 @@
   - TD
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   industries: null
@@ -965,15 +1116,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 無配企業では欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 無配企業で欠損。**日本は3月・9月に極端に集中するので、断面ランクが季節的に無意味になる。**
   normalization: rank_market
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K16
+  - A11
+  - S16
+  - Y03
+  economic_rationale: ∩型。**日本は3月末に権利が集中し、配当・優待狙いの買いが入る。** ただし**権利落ちで配当分だけ下がるので、 理論上はゼロサム。** 実際に儲かるのは 「**税制の違いで落ち幅が配当額と一致しない**」場合だけで、 S16（税）を無視すると幻の利益を計上してしまう。
+  references:
+  - 構造的判断
   notes: 短期の需給悪化だが、流動性向上と株主数増加は中期的にはプラス
   notes_extra: null
   provenance:
@@ -987,23 +1143,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K16
   name_ja: 権利付最終日までの日数
@@ -1011,8 +1169,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 配当・優待の権利確定までの営業日
-  formula: null
-  inputs: null
+  formula: 配当・優待の権利確定日までの営業日数
+  inputs:
+  - ex_date
   sign: cap
   buy_class: aux
   sell_class: aux
@@ -1025,7 +1184,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   industries: null
@@ -1033,15 +1192,19 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（日数）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: K15 と同じ。
   normalization: rank_market
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K15
+  - A11
+  - S16
+  economic_rationale: ∩型。**優待は個人にしか価値がないので、 機関が無視する日本固有の需給要因。** 263AT の「機関が見ていないもの」戦略と方向は一致するが、 **1ヶ月スケールなので保有期間と合わない。** → **執行タイミングの調整にのみ使う。**
+  references:
+  - 構造的判断
   notes: 個人の需要で権利前に上がり、落ち後に下がる。執行日程の調整のみ
   notes_extra: null
   provenance:
@@ -1055,23 +1218,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K17
   name_ja: 政策保有株の解消進捗
@@ -1079,8 +1244,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 政策保有株式の簿価減少率（YoY）
-  formula: null
-  inputs: null
+  formula: 政策保有株式の簿価・時価の YoY 変化
+  inputs:
+  - cross_shareholdings
   sign: context
   buy_class: useful
   sell_class: useful
@@ -1093,23 +1259,30 @@
   - EDI
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   industries: null
-  period_convention: POINT
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: na
+  accounting_standard_note: '**有報の開示。時価と簿価の両方が開示される。**'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 前期の保有額>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**有報のみなので年1回、3ヶ月遅れ。** K11 と同じ鮮度問題。'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K11
+  - K36
+  - M08
+  - A19
+  - N43
+  economic_rationale: '**符号が二重で文脈依存。** (a) 自社が保有している株を減らす = 資本効率の改善（プラス） (b) 他社が自社株を減らす = 売り圧力（マイナス） **同じ「政策保有の解消」が、保有側と被保有側で逆向きに効く。** → **両者を別変数として持たなければならない。** 東証の資本コスト要請（LAW-47）で解消が加速しているので、 **今後数年で最も大きく動く日本固有の需給要因。** K36（安定株主比率）と組み合わせて被保有側の圧力を推定する。'
+  references:
+  - 東京証券取引所 資本コストや株価を意識した経営の実現に向けた対応
+  - 構造的判断
   notes: 解消は需給悪化（売り）だが、資本効率改善（買い）。両面あるので他と組み合わせて判定
   notes_extra: null
   provenance:
@@ -1123,21 +1296,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K18
   name_ja: 親会社・支配株主の保有比率
@@ -1145,8 +1321,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 親会社保有株数 / 発行済株式数
-  formula: null
-  inputs: null
+  formula: 親会社の保有比率
+  inputs:
+  - parent_ownership
+  - SHARES
   sign: cup
   buy_class: main
   sell_class: useful
@@ -1159,23 +1337,29 @@
   - EDI
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   industries: null
-  period_convention: POINT
+  period_convention: FY
   consolidation: consolidated
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: SHARES>0。親会社が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 親子上場のある企業のみ。**日本に多く米国にはほぼ無い。**
   normalization: rank_market
   nonlinear: abs_dev(x_star=sector_median, invert=true)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K35
+  - K36
+  - M10
+  - N14
+  - J07
+  economic_rationale: ∪型。**50-90% は完全子会社化（TOB）の期待（LAW-45）。 米国では親子上場自体がほぼ無い日本固有の機会。** 東証の要請でも解消が進んでいる。 **ただし DF-01 の測定で、TOB による上場廃止銘柄は 無料の価格データから消えることが分かっている** — つまり **K18 の成功例（＝TOB された銘柄）が バックテストのデータから消えている。** → **K18 は M10/N14 と同じく、バックテストで 構造的に過小評価される。OQ-30 の対象。**
+  references:
+  - 構造的判断。DF-01 の制約を受ける（docs/03_data_feasibility.md §7.0）
   notes: 50-90%は完全子会社化（TOB）の期待。LAW-45。少数株主軽視のリスクと表裏
   notes_extra: null
   provenance:
@@ -1189,23 +1373,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    nonlinear: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K19
   name_ja: Short Interest / Float
@@ -1213,8 +1399,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: 空売り残高 / 浮動株数
-  formula: null
-  inputs: null
+  formula: short interest / float shares
+  inputs:
+  - short_interest
+  - float_shares
   sign: cap
   buy_class: useful
   sell_class: main
@@ -1227,7 +1415,7 @@
   - 手
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T2
+  evidence_tier: T1
   markets:
   - US
   industries: null
@@ -1235,18 +1423,23 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: null
+  zero_denominator_policy: float>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**月2回公表（FINRA）なので鮮度が低い。** 日本の週次より遅い。'
   normalization: rank_market
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - K02
+  - K08
+  - K20
+  - K21
+  - K52
+  - E01
+  economic_rationale: ∩型。**極端な高水準はショートスクイーズの燃料であり 同時に赤信号でもある。** 実証では**空売り残高が高い銘柄は将来リターンが低い** （Asquith-Pathak-Ritter JFE 2005）ので、 平均的には赤信号側が勝つ。**263AT では∩型より 単純な − 型の方が正しい可能性が高い**が、 テール（スクイーズ）を無視すると 1/10 が全部を賄う という設計思想に反するので、∩型のまま残す。
   references:
+  - Asquith-Pathak-Ritter (JFE 2005) Short interest, institutional ownership, and stock returns
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP ShortInterest — Dechow et al. 2001, JFE（OSAP再現 t=n/a, 月次0.35%, 品質=2_fair, 予測力=2_likely）
   notes: 月2回公表。極端な高水準はショートスクイズの燃料であり同時に赤信号
   notes_extra: null
   provenance:
@@ -1260,24 +1453,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    nonlinear: override
+    accounting_standard_note: override
+    markets: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
+    status: verified
+    pending: []
   version: 1
 - id: K20
   name_ja: Days to Cover
@@ -1285,8 +1479,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: 空売り残高 / 平均出来高
-  formula: null
-  inputs: null
+  formula: short interest / mean(volume, 20d)
+  inputs:
+  - short_interest
+  - VOLUME
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -1299,23 +1495,27 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: null
+  pit_lag_days: 3
+  zero_denominator_policy: 平均出来高>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: K19 を継承。
   normalization: rank_market
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K19
+  - K05
+  - J01
+  economic_rationale: K19 の出来高正規化版。**日本の K05 と対応する。** 浮動株で割るか出来高で割るかで意味が違い、 **出来高で割ると「解消にかかる日数」になるので、 スクイーズの激しさを測るのに適する。**
+  references:
+  - 構造的判断。K19 の派生
   notes: K19 の流動性調整版
   notes_extra: null
   provenance:
@@ -1329,23 +1529,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    nonlinear: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K21
   name_ja: 借株コスト
@@ -1353,8 +1555,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: 株を借りるための年率フィー
-  formula: null
-  inputs: null
+  formula: annualized stock borrow fee
+  inputs:
+  - borrow_fee
   sign: negative
   buy_class: useful
   sell_class: main
@@ -1367,7 +1570,7 @@
   - 手
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - US
   industries: null
@@ -1375,15 +1578,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（年率）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**データベンダー依存で無料では取りにくい。263AT では取得できない可能性が高い。**'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K06
+  - K19
+  - K02
+  - E01
+  - D08
+  economic_rationale: '**日本の逆日歩（K06）に対応する米国版。** 高い借株コストを払ってでもショートしているということは、 **強い確信を持った赤信号**を意味する。 Drechsler-Drechsler の実証では、借株コストが高い銘柄は 将来リターンが著しく低い。**LAW-50（裁定制限）の直接指標**でもあり、 「安いのに買われない理由」を説明する。 **入手性が最大の課題**（OQ 対象）。'
+  references:
+  - Drechsler-Drechsler (2014) The Shorting Premium and Asset Pricing Anomalies
+  - 構造的判断
   notes: 高い = プロが強くショートしたがっている＝重大な赤信号。LAW-50（限定的裁定）の直接指標
   notes_extra: null
   provenance:
@@ -1397,21 +1607,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K22
   name_ja: 機関投資家保有比率
@@ -1419,8 +1632,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: 13F集計 / 発行済株式数
-  formula: null
-  inputs: null
+  formula: sum(13F holdings) / SHARES
+  inputs:
+  - form_13f
+  - SHARES
   sign: negative
   buy_class: main
   sell_class: useful
@@ -1433,23 +1648,31 @@
   - SEC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - US
   industries: null
   period_convention: POINT
-  consolidation: consolidated
+  consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: null
+  pit_lag_days: 45
+  zero_denominator_policy: SHARES>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**13F は運用資産1億ドル超の機関のみ。しかもロングのみでショートは 報告されない。** さらに**45日遅れ**（spec §1.2）。'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K11
+  - K23
+  - K24
+  - O02
+  - O11
+  - K52
+  economic_rationale: '**米国版の K11。低いほど無視されている（LAW-27）。** Merton (1987) の投資家認知モデルの直接的な代理変数で、 **263AT の中核戦略（機関が見ていない銘柄）そのものを測る。** 45日遅れでも**水準は緩やかにしか変わらない**ので、 K23（変化）と違って遅れが致命的にならない。'
+  references:
+  - Merton (1987) A Simple Model of Capital Market Equilibrium with Incomplete Information
+  - https://www.openassetpricing.com/
   notes: 低いほど未発見（LAW-27）。個人の優位性の中核指標
   notes_extra: null
   provenance:
@@ -1463,21 +1686,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K23
   name_ja: 機関保有比率の変化
@@ -1485,8 +1711,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: delta_機関保有比率（四半期）
-  formula: null
-  inputs: null
+  formula: delta( institutional ownership ) 四半期
+  inputs:
+  - form_13f
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1499,23 +1726,28 @@
   - SEC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - US
   industries: null
   period_convention: POINT
-  consolidation: consolidated
+  consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
+  pit_lag_days: 45
+  zero_denominator_policy: 前期の保有比率>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: K22 を継承。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K22
+  - K24
+  - K51
+  - M08
+  economic_rationale: '**増加はスマートマネーの参入。ただし45日遅れが致命的。** 価格はもう動いた後である可能性が高い。 **K22（水準）は遅れても使えるが、K23（変化）は遅れると価値が落ちる** — **同じデータ源でも、水準と変化で遅延の影響が全く違う**という Z04（シグナル鮮度）の教科書的な例。'
+  references:
+  - 構造的判断。Gompers-Metrick (QJE 2001)
   notes: 増加はスマートマネーの参入。ただし13Fは45日遅れ
   notes_extra: null
   provenance:
@@ -1529,21 +1761,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K24
   name_ja: 機関保有者の数
@@ -1551,8 +1786,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: 13F提出者のうち保有している機関の件数
-  formula: null
-  inputs: null
+  formula: 13F 提出者のうち当該銘柄を保有している機関の件数
+  inputs:
+  - form_13f
   sign: negative
   buy_class: useful
   sell_class: aux
@@ -1565,23 +1801,28 @@
   - SEC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - US
   industries: null
   period_convention: POINT
-  consolidation: consolidated
+  consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
+  pit_lag_days: 45
+  zero_denominator_policy: na（件数）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: K22 を継承。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K22
+  - K51
+  - O02
+  - O01
+  economic_rationale: K22 の代替。**保有比率が同じでも、 1社が大量に持つのと100社が少しずつ持つのでは意味が違う。** 件数が少ない = 発見されていない。 **K51（保有者の広がりの変化）の方が t=4.0 で実証があるので、 K24 は水準、K51 は変化という関係。** K22/K23 と同じ構造。
+  references:
+  - 構造的判断。K51（OSAP DelBreadth）が変化版
   notes: K22 の代替
   notes_extra: null
   provenance:
@@ -1595,21 +1836,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K25
   name_ja: 特定の有名投資家の保有
@@ -1617,8 +1861,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: 追跡対象ファンドのリストとの照合
-  formula: null
-  inputs: null
+  formula: 追跡対象ファンド（著名投資家）の保有リストとの照合
+  inputs:
+  - form_13f
+  - LLM
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -1632,23 +1878,28 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - US
   industries: null
   period_convention: POINT
-  consolidation: consolidated
+  consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
+  pit_lag_days: 45
+  zero_denominator_policy: na（フラグ）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**「著名」の定義が主観。リストの選び方に後知恵バイアスが入る。**'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K22
+  - K23
+  - K48
+  - M08
+  economic_rationale: '**コバンザメ投資。45日遅れなので単独では使えない**が、 他シグナルの裏取りとしては価値がある。 **最大の注意: 「過去に成功した投資家」を今のリストに入れると、 そのリスト自体が後知恵。** 実装するなら **リストを事前に固定して forward_log で記録する**必要がある。 → **バックテストでは使わない**と決めるのが正しい。'
+  references:
+  - 構造的判断。後知恵バイアスの危険が高い
   notes: コバンザメ投資。45日遅れなので単独では使えない。他シグナルの裏取りに
   notes_extra: null
   provenance:
@@ -1662,21 +1913,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K26
   name_ja: ETF保有比率
@@ -1684,8 +1938,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: パッシブファンドの保有合計 / 浮動株
-  formula: null
-  inputs: null
+  formula: パッシブファンドの保有合計 / 発行済株式総数
+  inputs:
+  - etf_holdings
+  - SHARES
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -1698,23 +1954,30 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
+  - JP
   - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: null
+  zero_denominator_policy: SHARES>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**ETF の保有明細は日次開示されるが、集計に手間がかかる。無料では網羅が難しい。**'
   normalization: rank_market
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K12
+  - K14
+  - K46
+  - K22
+  - J09
+  economic_rationale: ∩型。**高いと指数連動が強くなり、個別要因が価格に反映されにくくなる** — これは 263AT にとって**逆風**（ファンダメンタルが効かなくなる）。 低いと流動性が薄い。**パッシブ化が進んだ市場では、 指数に入っていない銘柄の方がファンダメンタル分析が効く** という論点があり、K26 が低い銘柄群は **O カテゴリ（ネグレクト）と同じ狙い目になる。**
+  references:
+  - 構造的判断
   notes: 高いと指数連動が強くなり個別要因が反映されにくい
   notes_extra: null
   provenance:
@@ -1728,23 +1991,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    nonlinear: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K27
   name_ja: 指数リバランス
@@ -1752,8 +2017,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: Russell 1000/2000 の年次再構成、S&P採用
-  formula: null
-  inputs: null
+  formula: Russell 1000/2000 の年次再構成、S&P 採用のスケジュール
+  inputs:
+  - index_calendar
   sign: context
   buy_class: useful
   sell_class: useful
@@ -1766,7 +2032,7 @@
   - 手
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - US
   industries: null
@@ -1774,15 +2040,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: null
+  zero_denominator_policy: na（イベント）
   missing_policy: flag
-  missing_bias: null
-  normalization: rank_market
+  missing_bias: '**カレンダーは公開されているので欠損しない。**'
+  normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K13
+  - K47
+  - K46
+  - K26
+  economic_rationale: 符号は文脈依存。**Russell の6月再構成は米国最大の 予定された需給イベント**で、日付が事前に分かっている。 **予定されているので予測が可能 = K47（事前予測）に価値がある。** K13 と同じく、**イベント確定後では遅い。**
+  references:
+  - 構造的判断。Russell Reconstitution は広く知られたイベント
   notes: Russell再構成（6月）は毎年の大きな需給イベント
   notes_extra: null
   provenance:
@@ -1796,21 +2067,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    markets: catalog
+    normalization: override
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K28
   name_ja: Put/Call レシオ
@@ -1818,8 +2092,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: オプション出来高比
-  formula: null
-  inputs: null
+  formula: put volume / call volume
+  inputs:
+  - option_volume
   sign: cap
   buy_class: aux
   sell_class: useful
@@ -1832,7 +2107,7 @@
   - OPT
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: T1
+  evidence_tier: T3
   markets:
   - US
   industries: null
@@ -1840,18 +2115,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: コール出来高>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本の個別株オプションはほぼ流動性が無いので、実質米国のみ。** 米国でも小型株では板が薄い。**263AT のユニバース（小型・ネグレクト）と オプションが存在する銘柄はほとんど重ならない。**'
   normalization: rank_market
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - K29
+  - K30
+  - K50
+  - K53
+  - K56
+  economic_rationale: ∩型（極端値が逆指標）。**ただし個別銘柄では流動性が薄く、 ノイズが支配する。** K53（IV スプレッド）の方が t=8.2 と はるかに強いので、**K28 は実質 K53 の劣化版。**
   references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP CPVolSpread — Bali and Hovakimian 2009, MS（OSAP再現 t=4.2, 月次1.045%, 品質=1_good, 予測力=1_clear）
+  - 構造的判断。K53 が同じ機構の実証版
   notes: 極端値が逆指標。個別銘柄では流動性が要る
   notes_extra: null
   provenance:
@@ -1865,24 +2143,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
+    status: verified
+    pending: []
   version: 1
 - id: K29
   name_ja: オプション建玉の集中
@@ -1890,8 +2169,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: 最大OIの権利行使価格と現値の距離
-  formula: null
-  inputs: null
+  formula: 最大 open interest の権利行使価格と現値の距離
+  inputs:
+  - option_oi
+  - PRICE
   sign: context
   buy_class: aux
   sell_class: useful
@@ -1904,7 +2185,7 @@
   - OPT
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: T2
+  evidence_tier: T3
   markets:
   - US
   industries: null
@@ -1912,18 +2193,19 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: OI>0。
   missing_policy: flag
-  missing_bias: null
-  normalization: rank_market
+  missing_bias: K28 と同じ。
+  normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - K28
+  - K30
+  - K56
+  economic_rationale: 符号は文脈依存。**ガンマの引力（マーケットメイカーの デルタヘッジで価格が特定水準に吸い寄せられる）。** **限月近辺の数日スケールなので、 保有 6ヶ月-5年 の 263AT では優先度が最も低い部類。** 残すが★1。
   references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP OptionVolume1 — Johnson and So 2012, JFE（OSAP再現 t=3.5, 月次0.916%, 品質=2_fair, 予測力=1_clear）
+  - 構造的判断。時間軸が合わない
   notes: ガンマの引力。満期近辺の短期現象なので長期戦略では優先度低
   notes_extra: null
   provenance:
@@ -1937,22 +2219,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    normalization: override
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
+    status: verified
+    pending: []
   version: 1
 - id: K30
   name_ja: 異常なオプション出来高
@@ -1960,8 +2244,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: 出来高 / 平均建玉 の上位検出
-  formula: null
-  inputs: null
+  formula: option volume / mean(option volume, 20d) の上位検出
+  inputs:
+  - option_volume
   sign: context
   buy_class: aux
   sell_class: useful
@@ -1974,7 +2259,7 @@
   - OPT
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - US
   industries: null
@@ -1982,15 +2267,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 平均出来高>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: K28 と同じ。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K28
+  - K56
+  - K57
+  - K58
+  - M02
+  - N01
+  economic_rationale: 符号は文脈依存。**インサイダー的な先行売買の検出を狙う** （M&A の事前リーク等）が、**ノイズが多い。** K56（オプション出来高/株式出来高、OSAP t=3.5）が 同じ発想の実証版なので、**K30 は K56 で置き換えるべき。**
+  references:
+  - 構造的判断。K56 が実証版
   notes: インサイダー的な先行売買の検出を狙うが、ノイズが多い
   notes_extra: null
   provenance:
@@ -2004,21 +2296,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K31
   name_ja: 空売り規制・上場廃止基準
@@ -2026,8 +2321,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: Reg SHO threshold list 等
-  formula: null
-  inputs: null
+  formula: Reg SHO threshold list への掲載
+  inputs:
+  - reg_sho_list
   sign: negative
   buy_class: useful
   sell_class: main
@@ -2040,23 +2336,29 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 3
-  zero_denominator_policy: na
+  pit_lag_days: 1
+  zero_denominator_policy: na（フラグ）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**掲載銘柄は少ない。ほぼ全銘柄でゼロ。** 疎な二値変数。'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K19
+  - K21
+  - K08
+  - D08
+  economic_rationale: '**決済不履行が多発している = 構造的な問題がある。** naked short や決済トラブルが起きている銘柄で、 **K21（借株コスト）が取れない場合の代替**になる。 無料で取得できるのが利点。'
+  references:
+  - SEC Regulation SHO
+  - 構造的判断
   notes: 決済不履行が続く銘柄は構造的に問題がある
   notes_extra: null
   provenance:
@@ -2070,21 +2372,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K32
   name_ja: 会社四季報予想
@@ -2092,8 +2397,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 東洋経済の独自予想（会社予想とは別）
-  formula: null
-  inputs: null
+  formula: 会社四季報の独自予想 EPS
+  inputs:
+  - shikiho_forecast
   sign: positive
   buy_class: main
   sell_class: main
@@ -2106,23 +2412,29 @@
   - 手
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   industries: null
-  period_convention: POINT
-  consolidation: na
+  period_convention: GUIDE_CO
+  consolidation: consolidated
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: 予想が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**四季報は全上場企業をカバーするので、O01（カバレッジゼロ）銘柄でも 予想が存在する。263AT にとって決定的に重要な性質。** ただし**取得が有料かつスクレイピング規約の問題がある** （docs/04_security.md §6 の観点でも慎重に扱う）。'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K33
+  - N09
+  - N31
+  - O01
+  - T07
+  economic_rationale: '**日本の小型株で唯一使える第三者予想。** アナリストがカバーしない銘柄（＝263AT の狙い目）でも 四季報記者が予想を出す。**O01（カバレッジゼロ）の銘柄に対して N02/N10（コンセンサス系）が全滅する中で、 K32/K33 だけが機能する。** → **日本の中核戦略にとって最も価値のある代替データ。** 入手方法の確保が実装上の最優先課題の一つ。'
+  references:
+  - 構造的判断。日本固有。入手性が課題
   notes: 日本の小型株で唯一入手できる第三者予想。アナリスト不在（O01）の穴を塞ぐ
   notes_extra: null
   provenance:
@@ -2136,21 +2448,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K33
   name_ja: 四季報予想と会社予想の乖離
@@ -2158,8 +2473,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: (四季報予想 - 会社予想) / abs(会社予想)
-  formula: null
-  inputs: null
+  formula: (四季報予想 - 会社予想) / abs(会社予想)
+  inputs:
+  - shikiho_forecast
+  - company_guidance
   sign: positive
   buy_class: main
   sell_class: main
@@ -2172,23 +2489,29 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   industries: null
-  period_convention: POINT
-  consolidation: na
+  period_convention: GUIDE_CO
+  consolidation: consolidated
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: null
+  pit_lag_days: 3
+  zero_denominator_policy: 会社予想がゼロ・負なら欠損（比が発散する）。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: K32 を継承。**会社予想を出さない企業（一部の IFRS 適用企業）では欠損。**
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K32
+  - N09
+  - N31
+  - T07
+  - E14
+  economic_rationale: '**四季報が会社予想より強気 = 会社が保守的に置いている可能性。** 日本企業は期初に保守的な予想を出し、期中に上方修正する 傾向があるので、**この乖離は上方修正（N09）の先行指標になる。** **第三者の目で会社予想のバイアスを測るという発想は、 E カテゴリ（会計品質）を予想に適用したもの。**'
+  references:
+  - 構造的判断。日本の会社予想の保守性は実務上広く知られる
   notes: 四季報が強気＝会社予想が保守的の可能性。上方修正の先行指標
   notes_extra: null
   provenance:
@@ -2202,21 +2525,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K34
   name_ja: 株主数の変化
@@ -2224,8 +2550,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 株主数(t) / 株主数(t-1) - 1
-  formula: null
-  inputs: null
+  formula: 株主数(t) / 株主数(t-1) - 1
+  inputs:
+  - shareholder_count
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -2238,23 +2565,29 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   industries: null
-  period_convention: POINT
+  period_convention: FY
   consolidation: consolidated
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 前期の株主数>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**有報でのみ開示なので年1回。** K11/K17 と同じ鮮度問題。'
   normalization: rank_market
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K35
+  - K36
+  - O06
+  - K04
+  - N44
+  economic_rationale: ∩型。**急増は個人の飛び付き（過熱）だが、 急減は上場維持基準（N44）に抵触するリスク。** 東証の再編で株主数基準が課されているので、 **急減は上場廃止に向かう構造的な問題を示す。** 年次開示なので鮮度は最悪だが、**N44 のゲートの入力として必要。**
+  references:
+  - 構造的判断。東証の上場維持基準
   notes: 急増は個人の飛び付き（過熱）。急減は上場維持基準リスク（N44）
   notes_extra: null
   provenance:
@@ -2268,23 +2601,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    nonlinear: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K35
   name_ja: 大株主上位10名の合計比率
@@ -2292,8 +2627,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 上位10名の保有比率合計
-  formula: null
-  inputs: null
+  formula: 上位10株主の保有比率合計
+  inputs:
+  - major_shareholders
+  - SHARES
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -2306,23 +2643,29 @@
   - EDI
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   industries: null
-  period_convention: POINT
+  period_convention: FY
   consolidation: consolidated
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: SHARES>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 有報のみ。年1回。
   normalization: rank_market
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K18
+  - K34
+  - K36
+  - J07
+  - M08
+  economic_rationale: ∩型。**高すぎると浮動株が少なく流動性が枯れる（J07）。 低すぎると安定株主が不在で買収されやすい。** 後者は 263AT にとってはむしろプラス（TOB 期待）だが、 **DF-01 の制約でバックテストではその成功例が消えている** ので、K18 と同じ問題を抱える。
+  references:
+  - 構造的判断
   notes: 高すぎると浮動株が少ない（J07）。低すぎると安定株主不在
   notes_extra: null
   provenance:
@@ -2336,23 +2679,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K36
   name_ja: 安定株主比率
@@ -2360,8 +2705,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 金融機関 + 事業法人 + 自己株式 の合計
-  formula: null
-  inputs: null
+  formula: (金融機関 + 事業法人 + 自己株式) / SHARES
+  inputs:
+  - ownership_breakdown
+  - SHARES
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -2374,23 +2721,30 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   industries: null
-  period_convention: POINT
+  period_convention: FY
   consolidation: consolidated
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: SHARES>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 有報のみ。年1回。
   normalization: rank_market
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K17
+  - K18
+  - K35
+  - M08
+  - N43
+  economic_rationale: ∩型。**高いと株価が動かない（安定株主が売らないので ファンダメンタルが価格に反映されない）。 しかし東証の政策保有解消要請（LAW-47）で崩れると 大きな売り圧力になり、同時に浮動株が増えて再評価される。** → **K36 が高い銘柄は「今は死んでいるが、 解消が始まれば大きく動く」という非対称な期待値を持つ。** 263AT の「1/10 が全部を賄う」設計に合致する数少ない需給パラメータ。 K17（政策保有の変化）と必ずセットで使う。
+  references:
+  - 東京証券取引所 資本コスト経営の要請
+  - 構造的判断
   notes: 高いと株価が動かない。東証改革で解消が進むと需給イベントになる（K17）
   notes_extra: null
   provenance:
@@ -2404,23 +2758,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K37
   name_ja: 信用期日の到来
@@ -2428,8 +2784,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 6ヶ月前の信用買残急増日からの経過日数
-  formula: null
-  inputs: null
+  formula: 信用買残が急増した時点からの経過営業日数
+  inputs:
+  - margin_long
   sign: negative
   buy_class: useful
   sell_class: main
@@ -2442,23 +2799,28 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
+  pit_lag_days: 1
+  zero_denominator_policy: 急増イベントが無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 'K01 を継承。「急増」の閾値を決める必要がある（暫定: 前週比+50%）。'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K01
+  - K04
+  - K05
+  - K38
+  economic_rationale: '**制度信用は6ヶ月（約120営業日）で強制決済。 買残が急増してから6ヶ月後に、必ず売りが出る。** **時期が機械的に確定している数少ない需給要因**で、 K04（急増の検出）と組み合わせると 「いつ売り圧力が来るか」が計算できる。 **日本の制度に完全に依存するので米国では作れない。**'
+  references:
+  - 構造的判断。日本の制度信用の6ヶ月期限
   notes: 制度信用の期日到来による需給悪化
   notes_extra: null
   provenance:
@@ -2472,21 +2834,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K38
   name_ja: 一般信用の貸株料率
@@ -2494,8 +2859,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 貸株コスト
-  formula: null
-  inputs: null
+  formula: 一般信用の貸株コスト（年率）
+  inputs:
+  - borrow_cost_jp
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -2508,23 +2874,28 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 3
-  zero_denominator_policy: na
+  pit_lag_days: 1
+  zero_denominator_policy: na（年率）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**証券会社ごとに料率が違う。SBI の値を使うなら、それが標準とは限らない。**'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K06
+  - K21
+  - K02
+  - K37
+  economic_rationale: '**米国の K21 に対応する日本版。** 高いほど売り圧力が強い（それだけコストを払ってもショートしたい）。 **K06（逆日歩、制度信用）が制度枠内の需給を測るのに対し、 K38 は一般信用なので枠外の需給も含む。** ただし証券会社ごとに違うので、**単一ソースの値を 市場全体の指標として使うことには限界がある**（Z05 で記録）。'
+  references:
+  - 構造的判断。K21 の実証が対応する
   notes: 日本版 K21。高いほど売り圧力が強い
   notes_extra: null
   provenance:
@@ -2538,21 +2909,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K39
   name_ja: 東証の市場区分
@@ -2560,8 +2934,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: プライム / スタンダード / グロース
-  formula: null
-  inputs: null
+  formula: プライム / スタンダード / グロースの区分
+  inputs:
+  - market_segment
   sign: context
   buy_class: useful
   sell_class: useful
@@ -2574,23 +2949,30 @@
   - JQ
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 1
-  zero_denominator_policy: null
+  pit_lag_days: 0
+  zero_denominator_policy: na（分類）
   missing_policy: flag
-  missing_bias: null
-  normalization: rank_market
+  missing_bias: '**全銘柄で取得可能。欠損しない。**'
+  normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K12
+  - K26
+  - J01
+  - O02
+  - N44
+  economic_rationale: '**ユニバース定義に必須の分類変数で、 断面ランクを取るものではない**（→ normalization: none）。 **263AT にとってはスタンダード市場が主戦場。** プライムは機関がカバーし尽くしており、 グロースは赤字企業が多く D/E カテゴリのゲートで落ちる。 **スタンダードは資本コスト経営（LAW-47）の開示率が プライムより低く、改善余地が大きい。** → **K39 は交互作用の条件変数として使うのが本筋**で、 それ自体がスコアに入るものではない。'
+  references:
+  - 東京証券取引所 市場区分
+  - 構造的判断
   notes: ユニバース分割に必須。スタンダードは資本コスト開示率19%で伸びしろが大きい
   notes_extra: null
   provenance:
@@ -2604,21 +2986,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    markets: catalog
+    normalization: override
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    markets: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K40
   name_ja: 日経225 / JPX日経400 の採用確率
@@ -2626,8 +3011,12 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 定量基準からの距離
-  formula: null
-  inputs: null
+  formula: 日経225 / JPX日経400 の採用基準に対する充足度から算出した採用確率
+  inputs:
+  - index_criteria
+  - market_cap
+  - liquidity
+  - B03
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -2640,23 +3029,30 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
+  pit_lag_days: 3
+  zero_denominator_policy: na（確率）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日経225 の採用は委員会の裁量が大きく、機械的に予測できない部分が残る。JPX日経400 は ROE 等の定量基準なので予測しやすい。**'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K13
+  - K12
+  - K47
+  - B03
+  - B04
+  economic_rationale: '**K13（イベント確定後）では遅い。事前に予測することに価値がある。** JPX日経400 は **ROE・営業利益・時価総額の定量基準**なので、 **B03（ROE）が改善している銘柄は採用確率が上がる** という形で、ファンダメンタルと需給が繋がる。 **「ROE 改善 → 指数採用 → パッシブ買い」という 日本固有の増幅経路**があり、東証の資本コスト要請と方向が一致する。'
+  references:
+  - JPX日経インデックス400 算出要領
+  - 構造的判断
   notes: K13 の事前予測版
   notes_extra: null
   provenance:
@@ -2670,21 +3066,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K41
   name_ja: ToSTNeT・立会外バスケット
@@ -2692,8 +3091,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 日本固有
   definition: 大口の立会外取引の発生
-  formula: null
-  inputs: null
+  formula: ToSTNeT・立会外取引の売買代金 / 総売買代金
+  inputs:
+  - off_auction_volume
+  - VOLUME
   sign: context
   buy_class: useful
   sell_class: useful
@@ -2706,7 +3107,7 @@
   - JQ
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   industries: null
@@ -2714,15 +3115,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: na
+  zero_denominator_policy: 総売買代金>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**立会外は発生する銘柄が限られる。ほぼ全銘柄でゼロ。** 疎な変数。'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K17
+  - K36
+  - F09
+  - N43
+  - M08
+  economic_rationale: 符号は文脈依存。**立会外取引は自己株式取得（プラス）と 政策保有の売却（マイナス）の両方に使われる。** → **どちらかを識別しないと符号が定まらない。** TDnet の適時開示と突合すれば識別できるので、 **T33（開示の重要度分類）と組み合わせて使う。** K17（政策保有）の解消が加速している今、 **立会外での大口売却は日本市場で増えている。**
+  references:
+  - 構造的判断
   notes: 持ち合い解消や自社株買いの実行を示唆する
   notes_extra: null
   provenance:
@@ -2736,21 +3143,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K42
   name_ja: 10b5-1 プラン該当
@@ -2758,8 +3168,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: Form 4 の該当フラグ
-  formula: null
-  inputs: null
+  formula: Form 4 の 10b5-1 プラン該当フラグ
+  inputs:
+  - form_4
   sign: negative
   buy_class: main
   sell_class: useful
@@ -2772,23 +3183,29 @@
   - SEC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - US
   industries: null
   period_convention: POINT
-  consolidation: consolidated
+  consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（フラグ）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**2023年の規則改正でプラン採用日の開示が強化された。それ以前のデータでは識別精度が低い。**'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - M02
+  - M03
+  - M04
+  - K49
+  economic_rationale: '**M03（インサイダー売り）の情報量をゼロにする識別子。** 10b5-1 プランによる売却は事前に日程が決まっているので、 **経営者が今何を知っているかとは無関係。** これを除かないと、**「経営者が売った」という ノイズだらけの信号を情報だと誤認する。** → **M カテゴリを使うための前提条件であり、 K42 なしに M03 は使ってはいけない。**'
+  references:
+  - SEC Rule 10b5-1
+  - Cohen-Malloy-Pomorski (JF 2012) Decoding Inside Information
   notes: 事前計画売買はルーティン＝情報量ゼロ。M03 の非ルーティン判定に必須
   notes_extra: null
   provenance:
@@ -2802,21 +3219,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K43
   name_ja: Buyback blackout 期間
@@ -2824,8 +3244,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: 決算前の自社株買い停止期間
-  formula: null
-  inputs: null
+  formula: 決算発表前の自社株買い停止期間フラグ
+  inputs:
+  - earnings_date
   sign: negative
   buy_class: aux
   sell_class: aux
@@ -2838,7 +3259,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - US
   industries: null
@@ -2846,15 +3267,19 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（フラグ）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**ブラックアウト期間は企業ごとの内規なので、決算日から推定するしかない。**'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F09
+  - K42
+  - N08
+  economic_rationale: '**自社株買いの一時的な空白。** 継続的に自社株買いをしている企業は それ自体が下値の買い手なので、**ブラックアウト中は その支えが消えて下がりやすい。** **数週間スケールなので保有判断ではなく執行タイミング用。**'
+  references:
+  - 構造的判断
   notes: 需給の一時的な空白
   notes_extra: null
   provenance:
@@ -2868,21 +3293,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K44
   name_ja: Reg SHO threshold リスト
@@ -3047,8 +3475,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: 該当銘柄の組入比率が高い ETF の純フロー
-  formula: null
-  inputs: null
+  formula: 当該銘柄を組入比率上位に持つ ETF の資金フロー加重和
+  inputs:
+  - etf_flows
+  - etf_holdings
   sign: context
   buy_class: aux
   sell_class: useful
@@ -3061,23 +3491,29 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
+  - JP
   - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: ETF に組み入れられていなければゼロ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**ETF に入っていない銘柄ではゼロ。263AT の狙う小型株の多くがこれ。**'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K26
+  - K14
+  - K12
+  - K27
+  economic_rationale: 符号は文脈依存。**パッシブ資金の流入は機械的な買いを生むが、 ファンダメンタルとは無関係なので、その反動もある。** **263AT の中核ユニバース（ETF に入っていない小型株）では 構造的にゼロになる**ので、**実際に効く範囲が狭い。** → 大型株を持つ場合のリスク管理には有用。
+  references:
+  - 構造的判断
   notes: パッシブ需給
   notes_extra: null
   provenance:
@@ -3091,21 +3527,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K47
   name_ja: S&P / Russell の採用確率
@@ -3113,8 +3552,12 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: 定量基準からの距離
-  formula: null
-  inputs: null
+  formula: S&P / Russell の採用基準に対する充足度から算出した採用確率
+  inputs:
+  - index_criteria
+  - market_cap
+  - liquidity
+  - profitability
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -3127,23 +3570,28 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
+  pit_lag_days: 3
+  zero_denominator_policy: na（確率）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**S&P は委員会裁量。Russell は時価総額の機械的な順位なので予測可能。**'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K27
+  - K13
+  - K40
+  - K26
+  economic_rationale: K40 の米国版。**Russell は5月末時点の時価総額順位で 機械的に決まるので、事前予測の精度が高い。** **予測できる需給イベントは、予測できた分だけ既に 織り込まれている**はずだが、実証では 再構成前後の価格インパクトが残っている（Petajisto 2011）。 **LAW-50（裁定制限）で説明される。**
+  references:
+  - Petajisto (FAJ 2011) The Index Premium and Its Hidden Cost
   notes: K27 の事前予測版
   notes_extra: null
   provenance:
@@ -3157,21 +3605,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K48
   name_ja: 13D / 13G の提出
@@ -3179,8 +3630,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: 5%超の実質保有者の届出
-  formula: null
-  inputs: null
+  formula: Schedule 13D / 13G の提出
+  inputs:
+  - sec_13d
   sign: positive
   buy_class: main
   sell_class: useful
@@ -3193,23 +3645,29 @@
   - SEC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - US
   industries: null
   period_convention: POINT
-  consolidation: consolidated
+  consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（フラグ）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**5%超のみ。しかも 13D（経営関与目的）と 13G（純投資）を必ず分ける。混ぜると意味が消える。**'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - M08
+  - M11
+  - K25
+  - K23
+  - N43
+  economic_rationale: '**13D はアクティビストの参戦宣言。** Brav et al. (JF 2008) の実証では、13D 提出前後で 平均7%の異常リターン、その後も持続する。 **263AT の「カタリストが必要」という設計思想 （割安なだけでは動かない）に最も直接的に応える変数。** 日本の大量保有報告書（M11）と対応するが、 **米国は目的別の区分があるので識別精度が高い。**'
+  references:
+  - Brav-Jiang-Partnoy-Thomas (JF 2008) Hedge Fund Activism, Corporate Governance, and Firm Performance
   notes: 米国版アクティビスト検出。経営関与目的の 13D は特に強い
   notes_extra: null
   provenance:
@@ -3223,21 +3681,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K49
   name_ja: Form 4 の届出遅延
@@ -3245,8 +3706,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: 取引日から届出までの日数
-  formula: null
-  inputs: null
+  formula: Form 4 の取引日から提出日までの営業日数
+  inputs:
+  - form_4
   sign: negative
   buy_class: aux
   sell_class: useful
@@ -3259,23 +3721,30 @@
   - SEC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - US
   industries: null
   period_convention: POINT
-  consolidation: consolidated
+  consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: Form 4 の提出が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: インサイダー取引があった銘柄のみ。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - M02
+  - M03
+  - K42
+  - E22
+  - W13
+  economic_rationale: '**2営業日以内が義務。遅延はガバナンスの緩さの兆候。** Form 4 を期限内に出せない企業は、 **他の開示も雑である可能性が高い**ので、 **E カテゴリ（会計品質）や W13（ガバナンス）の代理変数**になる。 「小さなルール違反は大きな問題の兆候」という発想で、 **直接の需給指標というより品質指標。**'
+  references:
+  - SEC Section 16(a)
+  - 構造的判断
   notes: 遅い届出はガバナンス規律の欠如
   notes_extra: null
   provenance:
@@ -3289,21 +3758,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K50
   name_ja: オプションのスキュー
@@ -3311,8 +3783,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: 25デルタ Put IV - Call IV
-  formula: null
-  inputs: null
+  formula: IV(25-delta put) - IV(25-delta call)
+  inputs:
+  - option_iv
   sign: negative
   buy_class: useful
   sell_class: main
@@ -3325,7 +3798,7 @@
   - OPT
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - US
   industries: null
@@ -3333,15 +3806,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 両方の IV が取れなければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: K28 と同じ。**オプションが存在する銘柄のみ = 大型株に偏る。**
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K53
+  - K54
+  - K28
+  - I10
+  - I18
+  economic_rationale: '**下落リスクの市場価格。** K53（Put IV - Call IV）と 実質同じものを、デルタを固定して測る。 **K53 が OSAP t=8.2 なのに対し K50 に実証が無いのは、 定義の細部（どのデルタを使うか）の違いによる。** → **K53 を主、K50 を従として扱う。**'
+  references:
+  - 構造的判断。K53 が実証版
   notes: 下方リスクの市場価格。流動性のある銘柄のみ
   notes_extra: null
   provenance:
@@ -3355,21 +3834,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K51
   name_ja: 保有者の広がりの変化
@@ -3377,8 +3859,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: 保有する機関投資家数の四半期変化
-  formula: null
-  inputs: null
+  formula: delta( 保有する13F機関の件数 ) 四半期
+  inputs:
+  - form_13f
   sign: positive
   buy_class: main
   sell_class: useful
@@ -3396,21 +3879,25 @@
   - US
   industries: null
   period_convention: POINT
-  consolidation: consolidated
+  consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
+  pit_lag_days: 45
+  zero_denominator_policy: 前期の件数>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: K22 を継承。45日遅れ。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - K24
+  - K22
+  - K23
+  - O02
+  economic_rationale: '**保有者の広がりの変化。Chen-Hong-Stein (JFE 2002) の breadth of ownership 仮説: 空売り制約下では、 保有者が減ることが悲観情報が価格に反映されないまま 蓄積していることを示す。** **K24（件数の水準）が静的なのに対し、K51 は変化を捉える** ので t=4.0 と実証がある。 **LAW-50（裁定制限）の実証的な現れ。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP DelBreadth — Chen, Hong and Stein 2002, JFE（OSAP再現 t=4.0, 月次0.673333333%, 品質=1_good, 予測力=1_clear）
+  - Chen-Hong-Stein (JFE 2002) Breadth of ownership and stock returns
+  - OSAP DelBreadth t=4.0
   notes: OSAP DelBreadth t=4.0。K24（保有機関数）は水準だけだった。変化が本体
   notes_extra: null
   provenance:
@@ -3424,22 +3911,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
+    status: verified
+    pending: []
   version: 1
 - id: K52
   name_ja: 空売り残高 × 機関保有
@@ -3447,8 +3936,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: ShortInterest × 機関保有比率 の交互作用
-  formula: null
-  inputs: null
+  formula: ShortInterest × institutional ownership の交互作用
+  inputs:
+  - K19
+  - K22
   sign: negative
   buy_class: useful
   sell_class: main
@@ -3461,26 +3952,30 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T2
+  evidence_tier: T1
   markets:
   - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
+  pit_lag_days: 45
+  zero_denominator_policy: 両方が必要。片方でも欠損なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**K19（3日遅れ）と K22（45日遅れ）で鮮度が全く違うものを掛ける。遅い方に律速される**（_defaults の pit_lag_rule）。'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - K19
+  - K22
+  - K21
+  - K51
+  economic_rationale: '**空売りが多く機関保有も多い銘柄は特に弱い**（OSAP IO_ShortInterest）。 機関保有が多い = 貸株が容易 = 空売りが実行可能。 **つまり「空売りしたい人が実際に空売りできている」状態で、 悲観情報が本物である確度が高い。** 逆に**機関保有が低い銘柄では空売りしたくてもできない**ので、 K19 が低くても安心材料にならない。 **K19 単独を使うことの危険を明示する変数。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP IO_ShortInterest — Asquith Pathak and Ritter 2005, JFE（OSAP再現 t=n/a, 月次0.98%, 品質=1_good, 予測力=2_likely）
+  - Asquith-Pathak-Ritter (JFE 2005)
+  - OSAP IO_ShortInterest
   notes: OSAP IO_ShortInterest。空売りが多く機関保有も多い銘柄は特に劣後
   notes_extra: null
   provenance:
@@ -3494,22 +3989,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
+    status: verified
+    pending: []
   version: 1
 - id: K53
   name_ja: プット・コール IV スプレッド
@@ -3517,8 +4014,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: Put IV - Call IV（オプション）
-  formula: null
-  inputs: null
+  formula: IV(put) - IV(call), ATM
+  inputs:
+  - option_iv
   sign: negative
   buy_class: main
   sell_class: main
@@ -3539,18 +4037,23 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 両方の IV が必要。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: K28 と同じ。**263AT の小型株ユニバースではほぼ欠損する。**
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - K50
+  - K54
+  - K55
+  - I10
+  - K28
+  economic_rationale: '**オプション系で最強（t=8.2 / 4.2）。** 情報を持つトレーダーはレバレッジが効くオプション市場に 先に現れるという仮説（Xing-Zhang-Zhao JFQA 2010）。 プットが割高になっているのは、**悪材料を知っている誰かが 先に保険を買っている**ことを示す。 **ただし 263AT の中核ユニバース（小型・ネグレクト）には オプションが存在しないので、実際に使える銘柄は限られる** — これは K カテゴリのオプション系全体に共通する制約。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP SmileSlope — Yan 2011, JFE（OSAP再現 t=8.2, 月次1.8%, 品質=1_good, 予測力=1_clear）
+  - Xing-Zhang-Zhao (JFQA 2010) What Does the Individual Option Volatility Smirk Tell Us?
+  - OSAP SmileSlope t=8.2
   notes: OSAP SmileSlope t=8.2 / CPVolSpread t=4.2。オプション系で最強。K50 の精緻化
   notes_extra: null
   provenance:
@@ -3564,22 +4067,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
+    status: verified
+    pending: []
   version: 1
 - id: K54
   name_ja: プット・コール IV スプレッドの変化
@@ -3587,8 +4092,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: delta_(Put IV - Call IV)
-  formula: null
-  inputs: null
+  formula: delta( IV(put) - IV(call) )
+  inputs:
+  - K53
   sign: negative
   buy_class: main
   sell_class: main
@@ -3609,18 +4115,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: K53 を継承。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: K53 を継承。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - K53
+  - K50
+  - K57
+  - K58
+  economic_rationale: '**水準より変化（OSAP dCPVolSpread t=6.8）。** K53 の水準は銘柄固有の性質（業種のリスク構造）を 含むが、変化は新しい情報の到着を示す。 **A（水準）と C（変化）を分ける発想が、 オプションでも同じく成り立つ。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP dCPVolSpread — An, Ang, Bali, Cakici 2014, JF（OSAP再現 t=6.8, 月次-1.68%, 品質=1_good, 予測力=1_clear）
+  - OSAP dCPVolSpread t=6.8
   notes: OSAP dCPVolSpread t=6.8。水準より変化
   notes_extra: null
   provenance:
@@ -3634,22 +4143,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
+    status: verified
+    pending: []
   version: 1
 - id: K55
   name_ja: 実現ボラ - IV スプレッド
@@ -3657,8 +4168,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: 実現ボラ - インプライドボラ
-  formula: null
-  inputs: null
+  formula: realized volatility - implied volatility
+  inputs:
+  - PRICE_adj
+  - option_iv
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -3679,18 +4192,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: IV と実現ボラの両方が必要。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: K53 と同じ。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - K53
+  - I01
+  - I15
+  - I05
+  economic_rationale: '**I15（ボラティリティリスクプレミアム）と同じもの。** 実現ボラが IV を上回っている = オプションが割安 = 市場がリスクを過小評価している。 **I15 の副次的検証としても使える**ので、 **同じ経済的機構を株式側とオプション側の両方から測る**という 冗長性に価値がある（片方が壊れても検出できる）。 OSAP RIVolSpread t=2.9。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP RIVolSpread — Bali and Hovakimian 2009, MS（OSAP再現 t=2.9, 月次0.732%, 品質=1_good, 予測力=1_clear）
+  - OSAP RIVolSpread t=2.9
   notes: OSAP RIVolSpread t=2.9。I15 の符号を実証で確認できる
   notes_extra: null
   provenance:
@@ -3704,22 +4220,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
+    status: verified
+    pending: []
   version: 1
 - id: K56
   name_ja: オプション出来高 / 株式出来高
@@ -3727,78 +4245,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: オプション出来高 / 株式出来高
-  formula: null
-  inputs: null
-  sign: positive
-  buy_class: useful
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 1M-3M
-    min_m: 1
-    max_m: 3
-  data_sources:
-  - OPT
-  evidence_stars: 2
-  prior_scale: 0.45
-  evidence_tier: T2
-  markets:
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: null
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_market
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP OptionVolume1 — Johnson and So 2012, JFE（OSAP再現 t=3.5, 月次0.916%, 品質=2_fair, 予測力=1_clear）
-  notes: OSAP OptionVolume1 t=3.5 / OptionVolume2 t=2.5。K30 の定式化
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    markets: catalog
-    evidence_tier: override
-    references: override
-  review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-  version: 1
-- id: K57
-  name_ja: コール IV の変化
-  category: K
-  category_name: 需給・市場マイクロストラクチャ
-  subsection: 米国固有
-  definition: delta_コールのインプライドボラ
-  formula: null
-  inputs: null
+  formula: option volume / stock volume
+  inputs:
+  - option_volume
+  - VOLUME
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -3819,18 +4269,99 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 株式出来高>0。オプションが無ければゼロ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: K53 と同じ。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - K28
+  - K30
+  - K53
+  - J09
+  economic_rationale: '**K30（異常なオプション出来高）の実証版。** オプション市場の相対的な活況は、 **情報を持つトレーダーがレバレッジを求めて そちらに集まっていることを示す**（Roll-Schwartz-Subrahmanyam JFE 2010）。 OSAP OptionVolume1 t=3.5 / OptionVolume2 t=2.5。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP dVolCall — An, Ang, Bali, Cakici 2014, JF（OSAP再現 t=3.5, 月次1.09%, 品質=1_good, 予測力=1_clear）
+  - 'Roll-Schwartz-Subrahmanyam (JFE 2010) O/S: The relative trading activity in options and stock'
+  - OSAP OptionVolume1 t=3.5
+  notes: OSAP OptionVolume1 t=3.5 / OptionVolume2 t=2.5。K30 の定式化
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    markets: override
+    evidence_tier: override
+    references: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: K57
+  name_ja: コール IV の変化
+  category: K
+  category_name: 需給・市場マイクロストラクチャ
+  subsection: 米国固有
+  definition: delta_コールのインプライドボラ
+  formula: delta( implied volatility of calls )
+  inputs:
+  - option_iv
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1M-3M
+    min_m: 1
+    max_m: 3
+  data_sources:
+  - OPT
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: コール IV が必要。
+  missing_policy: flag
+  missing_bias: K53 と同じ。
+  normalization: rank_market
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - K54
+  - K58
+  - K53
+  - K30
+  economic_rationale: '**コール IV の上昇 = 上値への需要 = 好材料の先行。** An-Ang-Bali-Cakici (JF 2014) の実証で、 **オプション市場の IV 変化が株式リターンを予測する。** K58（プット IV）と符号が逆になるのが本質で、 **必ず別変数として持つ。** OSAP dVolCall t=3.5。'
+  references:
+  - https://www.openassetpricing.com/
+  - An-Ang-Bali-Cakici (JF 2014) The Joint Cross Section of Stocks and Options
+  - OSAP dVolCall t=3.5
   notes: OSAP dVolCall t=3.5。情報を持つトレーダーはオプション市場に先に現れる
   notes_extra: null
   provenance:
@@ -3844,22 +4375,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
+    status: verified
+    pending: []
   version: 1
 - id: K58
   name_ja: プット IV の変化
@@ -3867,8 +4400,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: delta_プットのインプライドボラ
-  formula: null
-  inputs: null
+  formula: delta( implied volatility of puts )
+  inputs:
+  - option_iv
   sign: negative
   buy_class: useful
   sell_class: main
@@ -3881,7 +4415,7 @@
   - OPT
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T2
+  evidence_tier: T1
   markets:
   - US
   industries: null
@@ -3889,18 +4423,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: プット IV が必要。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: K53 と同じ。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - K57
+  - K54
+  - K53
+  - K50
+  economic_rationale: K57 の対。**プット IV の上昇 = 下値保険への需要 = 悪材料の先行。** **t=2.0 と K57（3.5）より弱い。** K53（水準のスプレッド t=8.2）に比べても弱いので、 **K53/K54 を主、K57/K58 を従として扱う。** ただし**符号が分かれる方向の情報を独立に持つ**ことに意味がある。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP dVolPut — An, Ang, Bali, Cakici 2014, JF（OSAP再現 t=2.0, 月次0.42%, 品質=1_good, 予測力=2_likely）
+  - An-Ang-Bali-Cakici (JF 2014)
+  - OSAP dVolPut t=2.0
   notes: OSAP dVolPut t=2.0
   notes_extra: null
   provenance:
@@ -3914,20 +4452,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
+    status: verified
+    pending: []
   version: 1

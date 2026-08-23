@@ -94,8 +94,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: P_{t-21} / P_{t-126} - 1
-  formula: null
-  inputs: null
+  formula: P_adj[t-21] / P_adj[t-126] - 1
+  inputs:
+  - PRICE_adj
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -117,18 +118,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: P>0。上場後126営業日未満は欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 新規上場銘柄のみ欠損。G01 より短いので欠損は少ない。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G01
+  - G03
+  - G13
+  - G35
+  economic_rationale: G01（12-1）より反応が速いがノイズも多い。**両方持つ理由は、 どちらが効くかが市場と局面で変わるから。** §1.9 の方針通り 選択せず両方入れて縮小に任せる。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP Mom6m — Jegadeesh and Titman 1993, JF（OSAP再現 t=2.4, 月次0.84%, 品質=1_good, 予測力=1_clear）
+  - Jegadeesh-Titman (JF 1993)
   notes: G01 より反応が速いがノイズも多い
   notes_extra: null
   provenance:
@@ -142,22 +146,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G03
   name_ja: 3-1モメンタム
@@ -165,8 +171,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: P_{t-21} / P_{t-63} - 1
-  formula: null
-  inputs: null
+  formula: P_adj[t-21] / P_adj[t-63] - 1
+  inputs:
+  - PRICE_adj
   sign: positive
   buy_class: aux
   sell_class: useful
@@ -175,280 +182,6 @@
     label: 1M-3M
     min_m: 1
     max_m: 3
-  data_sources:
-  - PX
-  evidence_stars: 2
-  prior_scale: 0.45
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: null
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: 執行タイミング用
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-  review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: G04
-  name_ja: 直近1ヶ月リターン
-  category: G
-  category_name: 価格モメンタム・トレンド
-  subsection: null
-  definition: P_t / P_{t-21} - 1
-  formula: null
-  inputs: null
-  sign: negative
-  buy_class: aux
-  sell_class: aux
-  gate_policy: null
-  horizon:
-    label: 1M
-    min_m: 1
-    max_m: 1
-  data_sources:
-  - PX
-  evidence_stars: 2
-  prior_scale: 0.45
-  evidence_tier: T1
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: null
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP STreversal — Jegadeesh 1990, JF（OSAP再現 t=12.4, 月次1.99%, 品質=1_good, 予測力=1_clear）
-  notes: 短期リバーサル（LAW-37）。買いの執行を数日遅らせる判断のみに使う
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    evidence_tier: override
-    references: override
-  review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
-  version: 1
-- id: G05
-  name_ja: 移動平均乖離(50日)
-  category: G
-  category_name: 価格モメンタム・トレンド
-  subsection: null
-  definition: P_t / SMA50 - 1
-  formula: null
-  inputs: null
-  sign: cap
-  buy_class: useful
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 1M-6M
-    min_m: 1
-    max_m: 6
-  data_sources:
-  - CALC
-  evidence_stars: 1
-  prior_scale: 0.15
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: null
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: abs_dev(x_star=sector_median)
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: 乖離しすぎは反落、下回りすぎは下降トレンド
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-  review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: G06
-  name_ja: 移動平均乖離(200日)
-  category: G
-  category_name: 価格モメンタム・トレンド
-  subsection: null
-  definition: P_t / SMA200 - 1
-  formula: null
-  inputs: null
-  sign: positive
-  buy_class: useful
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 6M-2Y
-    min_m: 6
-    max_m: 24
-  data_sources:
-  - CALC
-  evidence_stars: 2
-  prior_scale: 0.45
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: null
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: 長期トレンドフィルタ。200日線割れは長期保有の見直しトリガーとして実務的に強い
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-  review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: G07
-  name_ja: 52週高値近接度
-  category: G
-  category_name: 価格モメンタム・トレンド
-  subsection: null
-  definition: P_t / max(P_{t-252..t})
-  formula: null
-  inputs: null
-  sign: positive
-  buy_class: main
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 6M-2Y
-    min_m: 6
-    max_m: 24
   data_sources:
   - PX
   evidence_stars: 2
@@ -462,18 +195,332 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: P>0。上場後63営業日未満は欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 同上。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G01
+  - G02
+  - G04
+  - G21
+  economic_rationale: '**執行タイミング用。** 3ヶ月は短期反転（G04）とモメンタムの境界にあり、 符号が不安定。**単独の判断材料にはしない**と決めた上で残す。'
   references:
+  - Jegadeesh-Titman (JF 1993)
+  notes: 執行タイミング用
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: G04
+  name_ja: 直近1ヶ月リターン
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: P_t / P_{t-21} - 1
+  formula: P_adj[t] / P_adj[t-21] - 1
+  inputs:
+  - PRICE_adj
+  sign: negative
+  buy_class: aux
+  sell_class: aux
+  gate_policy: null
+  horizon:
+    label: 1M
+    min_m: 1
+    max_m: 1
+  data_sources:
+  - PX
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: P>0。
+  missing_policy: flag
+  missing_bias: ほぼ欠損しない。
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - G01
+  - G03
+  - G21
+  - G23
+  - J09
+  economic_rationale: '**短期反転（LAW-37）。符号が G01 と逆であることが本質。** 流動性供給の対価として説明される（Nagel RFS 2012）。 **ただし個人投資家がこれで儲けるのは難しい** — 実現には 高頻度の売買が要り、J カテゴリのコストが利益を食う。 263AT では**執行を数日遅らせる判断にのみ使う。**'
+  references:
+  - Jegadeesh (JF 1990)
+  - Nagel (RFS 2012) Evaporating Liquidity
+  notes: 短期リバーサル（LAW-37）。買いの執行を数日遅らせる判断のみに使う
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    evidence_tier: override
+    references: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: G05
+  name_ja: 移動平均乖離(50日)
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: P_t / SMA50 - 1
+  formula: P_adj[t] / SMA50 - 1
+  inputs:
+  - PRICE_adj
+  sign: cap
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1M-6M
+    min_m: 1
+    max_m: 6
+  data_sources:
+  - CALC
+  evidence_stars: 1
+  prior_scale: 0.15
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: SMA50>0。
+  missing_policy: flag
+  missing_bias: 上場後50営業日未満は欠損。
+  normalization: rank_all
+  nonlinear: abs_dev(x_star=0.0)
+  winsorize: null
+  correlated_with:
+  - G06
+  - G09
+  - G22
+  - G23
+  - G04
+  economic_rationale: ∩型。**離れすぎは反落、下回りすぎは下降トレンド。** x* は業種中央値ではなく **0（移動平均そのもの）** を使う — 理論値が明確な数少ない例で、_defaults の既定を上書きする。
+  references:
+  - 構造的判断。テクニカル指標の実証は弱い
+  notes: 乖離しすぎは反落、下回りすぎは下降トレンド
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    nonlinear: override
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: G06
+  name_ja: 移動平均乖離(200日)
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: P_t / SMA200 - 1
+  formula: P_adj[t] / SMA200 - 1
+  inputs:
+  - PRICE_adj
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 6M-2Y
+    min_m: 6
+    max_m: 24
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: SMA200>0。上場後200営業日未満は欠損。
+  missing_policy: flag
+  missing_bias: N24（IPO後間もない）と重複して欠損する。
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - G05
+  - G09
+  - G20
+  - G22
+  - G31
+  - G30
+  economic_rationale: '**長期トレンドフィルタ。263AT の保有期間に最も近い時間軸を持つ G。** 200日線割れは実際に多数の機関が売却トリガーとして使っているので、 **予言の自己成就の性質がある**（だから効く、という説明が成り立つ数少ないテクニカル）。 G30（クラッシュ回避）の入力として最重要。'
+  references:
+  - Moskowitz-Ooi-Pedersen (JFE 2012) Time Series Momentum
+  notes: 長期トレンドフィルタ。200日線割れは長期保有の見直しトリガーとして実務的に強い
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: G07
+  name_ja: 52週高値近接度
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: P_t / max(P_{t-252..t})
+  formula: P_adj[t] / max(P_adj[t-252..t])
+  inputs:
+  - PRICE_adj
+  sign: positive
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 6M-2Y
+    min_m: 6
+    max_m: 24
+  data_sources:
+  - PX
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: max>0。上場後252営業日未満は欠損。
+  missing_policy: flag
+  missing_bias: 同上。
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - G01
+  - G08
+  - G19
+  - G31
+  - O12
+  economic_rationale: '**アンカリング。投資家が52週高値を心理的な基準にするため、 そこに近い銘柄は「高すぎる」と感じて売られ、good news への反応が遅れる。** George-Hwang (JF 2004) はこれがモメンタムより頑健と報告。 **理由が明確に書けるテクニカルは稀**（LAW-25）で、 多くの G パラメータが T3 に留まる中でこれは T1。'
+  references:
+  - George-Hwang (JF 2004) The 52-Week High and Momentum Investing
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP High52 — George and Hwang 2004, JF（OSAP再現 t=2.0, 月次0.45%, 品質=1_good, 予測力=2_likely）
   notes: モメンタムより頑健という報告が多い。アンカリング由来。長期でも生きる数少ないテクニカル（LAW-25）
   notes_extra: null
   provenance:
@@ -487,22 +534,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G08
   name_ja: 52週安値からの乖離
@@ -510,8 +559,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: P_t / min(P_{t-252..t}) - 1
-  formula: null
-  inputs: null
+  formula: P_adj[t] / min(P_adj[t-252..t]) - 1
+  inputs:
+  - PRICE_adj
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -524,7 +574,7 @@
   - PX
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -533,15 +583,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: min>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 上場後252営業日未満は欠損。
   normalization: rank_all
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G07
+  - G01
+  - A22
+  - N23
+  economic_rationale: ∩型。**底での確認に使う。LAW-72（落ちるナイフを掴むな）の実装。** 安値からまだ全く戻っていない銘柄は下降が続いている可能性が高く、 A（割安）が点灯していても待つ。**バリュートラップ回避の実務的な道具。**
+  references:
+  - 構造的判断。LAW-72
   notes: 底打ち確認。LAW-72（落ちるナイフ）の実装に使う
   notes_extra: null
   provenance:
@@ -555,23 +610,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
+    nonlinear: override
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G09
   name_ja: 200日線の傾き
@@ -579,8 +636,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: slope( ln(SMA200), 過去60日 )
-  formula: null
-  inputs: null
+  formula: slope( ln(SMA200), 過去60営業日 )
+  inputs:
+  - PRICE_adj
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -593,7 +651,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -602,15 +660,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 推定に260営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: G06 より長い履歴が要るので欠損が増える。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G06
+  - G20
+  - G22
+  - G14
+  economic_rationale: '**G06（水準）に対する方向。** 200日線を上回っていても 線自体が下向きなら弱い。水準と方向を分けて持つのは C カテゴリで「水準 vs 変化」を分けたのと同じ発想。'
+  references:
+  - 構造的判断
   notes: 水準より方向。G06 と組で使う
   notes_extra: null
   provenance:
@@ -624,21 +687,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G10
   name_ja: 残差モメンタム
@@ -646,8 +712,10 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: ファクター回帰（市場・サイズ・バリュー）の残差の累積
-  formula: null
-  inputs: null
+  formula: cumsum( residual of r_i ~ [MKT, SMB, HML] over 12-1 window )
+  inputs:
+  - PRICE_adj
+  - factor_returns
   sign: positive
   buy_class: main
   sell_class: useful
@@ -660,7 +728,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T1
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -669,18 +737,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 推定に252営業日とファクター系列が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本のファクター系列の整備が米国より弱い。** Ken French の日本データは大型株偏重。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G01
+  - G11
+  - G13
+  - I05
+  - I06
+  economic_rationale: '**素のモメンタムよりシャープが高い**（Blitz-Huij-Martens JEF 2011）。 素の G01 は「業種の一時的な追い風」を拾ってしまうが、 残差モメンタムはそれを除く。**日本ではファクター系列の質が そのまま効くので、G10 の日本での信頼度は米国より低い。**'
   references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP ResidualMomentum — Blitz, Huij and Martens 2011, JEmpFin（OSAP再現 t=8.2, 月次0.933333333%, 品質=1_good, 予測力=1_clear）
+  - Blitz-Huij-Martens (JEF 2011) Residual Momentum
   notes: 素のモメンタムよりシャープが高い。業種の一時的な追い風を除去できる
   notes_extra: null
   provenance:
@@ -694,22 +765,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G11
   name_ja: 業種内相対モメンタム
@@ -717,8 +790,10 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: r_i(12-1) - r_業種中央値(12-1)
-  formula: null
-  inputs: null
+  formula: 'r_i(12-1) - median( r_j(12-1) : j in same industry )'
+  inputs:
+  - PRICE_adj
+  - industry
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -731,7 +806,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T1
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -740,18 +815,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 業種内 N>=30 でなければ欠損（spec §4）。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 小業種で欠損。日本の33業種は米国 GICS より粗いので影響が違う。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G10
+  - G01
+  - G36
+  - L01
+  economic_rationale: G10 の簡易版。**ファクター系列が不要なので日本で実装しやすい。** G36（業種モメンタム）とは符号が逆向きの情報で、 **G11 は「業種内で勝っている」、G36 は「業種そのものが勝っている」** を測る。両方入れると業種効果を分解できる。
   references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP IndMom — Grinblatt and Moskowitz 1999, JF（OSAP再現 t=4.7, 月次0.43%, 品質=1_good, 予測力=1_clear）
+  - Moskowitz-Grinblatt (JF 1999) Do Industries Explain Momentum?
   notes: G10 の簡易版
   notes_extra: null
   provenance:
@@ -765,22 +842,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G12
   name_ja: モメンタムの質（情報離散性）
@@ -788,8 +867,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: sign(累積r) × (%負の日 - %正の日)
-  formula: null
-  inputs: null
+  formula: sign(cum_return) * (%positive_days - %negative_days) over 252d
+  inputs:
+  - PRICE_adj
   sign: negative
   buy_class: useful
   sell_class: aux
@@ -802,7 +882,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -811,15 +891,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 252営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 同上。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G01
+  - G14
+  - G17
+  - O01
+  economic_rationale: '**Frog-in-the-pan（Da-Gurun-Warachka RFS 2014）。** 同じ +50% でも、毎日少しずつ上がった銘柄の方が 投資家の注意を引かず、ドリフトが長く続く。 **O カテゴリ（ネグレクト）の価格版**で、263AT の戦略の中核思想と一致する。 ★1 のままだが、理論的な位置づけは他の G より良い。'
+  references:
+  - Da-Gurun-Warachka (RFS 2014) Frog in the Pan
   notes: Frog-in-the-pan。ジワジワ上がった銘柄の方がドリフトが続く
   notes_extra: null
   provenance:
@@ -833,21 +918,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G13
   name_ja: ボラティリティ調整モメンタム
@@ -855,8 +943,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 12-1モメンタム / sd(日次r, 252日)
-  formula: null
-  inputs: null
+  formula: r(12-1) / sd(daily r, 252d)
+  inputs:
+  - PRICE_adj
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -869,7 +958,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -878,15 +967,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: sd>0。売買停止が多い銘柄は欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 低流動性銘柄で sd が過小評価され、値が過大になる（J10 と併用して除く）。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G01
+  - G10
+  - I01
+  - I05
+  economic_rationale: '**日本のような弱いモメンタム市場ではこちらの方が生き残る** という報告がある。ボラで割ることで、 「大きく動いたから大きく上がった」銘柄を割り引く。 **I01（ボラティリティ）との交互作用を明示的に埋め込んだ形。**'
+  references:
+  - Barroso-Santa-Clara (JFE 2015) Momentum has its moments
   notes: シャープ型モメンタム。高ボラ銘柄の見かけ上のモメンタムを割り引く
   notes_extra: null
   provenance:
@@ -900,21 +994,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G14
   name_ja: トレンド強度
@@ -922,8 +1019,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: R^2( ln(P) ~ t, 過去126日 )
-  formula: null
-  inputs: null
+  formula: R^2 of ln(P) ~ t over 126d
+  inputs:
+  - PRICE_adj
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -936,7 +1034,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -945,15 +1043,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 126営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 同上。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G09
+  - G12
+  - G01
+  - I01
+  economic_rationale: トレンドの直線性。**G01 と掛け合わせる条件変数として使う。** 同じリターンでもジグザグしながら上げた銘柄は、 実体の変化ではなく需給で動いている可能性が高い。 G12 と近い発想だが、G12 が日数の非対称、G14 が当てはまりの良さを見る。
+  references:
+  - 構造的判断
   notes: 一直線に上がっているか、ジグザグか
   notes_extra: null
   provenance:
@@ -967,21 +1070,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G15
   name_ja: 新高値ブレイクからの日数
@@ -989,8 +1095,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 52週高値更新後の経過営業日
-  formula: null
-  inputs: null
+  formula: 経過営業日数 since 52週高値更新
+  inputs:
+  - PRICE_adj
   sign: cap
   buy_class: useful
   sell_class: aux
@@ -1003,7 +1110,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1012,15 +1119,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（日数）。一度も更新が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 下降トレンド銘柄で恒常的に欠損。**欠損すること自体が弱さの情報**なので Z01 のフラグが効く。
   normalization: rank_all
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G07
+  - G19
+  - G29
+  - N24
+  economic_rationale: ∩型。**ブレイク直後は追随買いが入るが、時間が経つと息切れする。** G07（高値からの距離）が水準を測るのに対し、G15 は経過時間を測る。 執行タイミング専用で、保有判断には使わない。
+  references:
+  - 構造的判断
   notes: ブレイク直後は追随買い、時間が経つと失速
   notes_extra: null
   provenance:
@@ -1034,23 +1146,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G16
   name_ja: 時系列モメンタム
@@ -1058,8 +1172,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: sign( P_t / P_{t-252} - 1 )
-  formula: null
-  inputs: null
+  formula: sign( P_adj[t] / P_adj[t-252] - 1 )
+  inputs:
+  - PRICE_adj
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1072,7 +1187,7 @@
   - PX
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -1081,15 +1196,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: P>0。上場後252営業日未満は欠損。
   missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
+  missing_bias: N24 と重複。
+  normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G01
+  - G06
+  - G30
+  - I26
+  economic_rationale: '**時系列モメンタム（Moskowitz-Ooi-Pedersen JFE 2012）。 断面でなく自分自身の過去との比較なので、断面ランクを取らない。** これは G カテゴリで唯一 normalization: none にするべき項目で、 **サイジングの調整（Q カテゴリ）に使う。** 符号だけを見るので極めて頑健。'
+  references:
+  - Moskowitz-Ooi-Pedersen (JFE 2012) Time Series Momentum
   notes: 断面でなく自分自身の過去。サイジングの調整に使う
   notes_extra: null
   provenance:
@@ -1103,21 +1223,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G17
   name_ja: ギャップの頻度と方向
@@ -1125,8 +1248,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 過去1年の上/下ギャップ回数と平均幅
-  formula: null
-  inputs: null
+  formula: 過去252日の上ギャップ回数・下ギャップ回数と平均幅
+  inputs:
+  - PRICE_adj
   sign: context
   buy_class: aux
   sell_class: useful
@@ -1139,7 +1263,7 @@
   - PX
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1148,15 +1272,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 252営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本は値幅制限があるのでギャップが人為的に抑えられる。日米で分布が違う。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G18
+  - J11
+  - J18
+  - I01
+  - N08
+  economic_rationale: 符号は文脈依存。**上ギャップは good news の織り込み（プラス）、 下ギャップの頻発は情報が漏れやすい／流動性が薄い（マイナス）。** 分けて持たないと打ち消し合う。J（流動性）と強く相関するので、 **G というより J の性格を持つ**というのが正確な位置づけ。
+  references:
+  - 構造的判断
   notes: 情報が価格に一気に反映される銘柄＝流動性が薄い可能性（Jと相関）
   notes_extra: null
   provenance:
@@ -1170,21 +1300,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G18
   name_ja: 業績モメンタムと価格モメンタムの一致
@@ -1192,8 +1325,10 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: sign(N10 リビジョン) == sign(G01)
-  formula: null
-  inputs: null
+  formula: 1[ sign(N10 revision) == sign(G01) ]
+  inputs:
+  - G01
+  - N10
   sign: positive
   buy_class: main
   sell_class: useful
@@ -1206,7 +1341,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -1215,15 +1350,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: N10 が欠損なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**アナリスト予想がある銘柄のみ。O01（カバレッジゼロ）とは排他。** 263AT の中核ユニバースで欠損しやすい。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G01
+  - N10
+  - N08
+  - O01
+  economic_rationale: '**価格と業績が同方向のときだけ信じる。** 乖離しているときは どちらかが間違っており、**どちらが正しいかは事前に分からない**ので そもそも手を出さない、という使い方をする。 ゲートに近い性格を持つが、**カバレッジゼロ銘柄では作れない**という 致命的な制約があるので、263AT の主戦場では使えないことが多い。'
+  references:
+  - Chan-Jegadeesh-Lakonishok (JF 1996) Momentum Strategies
   notes: 両方が同方向のときが最も強い。乖離時はどちらかが間違っている
   notes_extra: null
   provenance:
@@ -1237,21 +1377,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G19
   name_ja: 52週高値更新の頻度
@@ -1259,8 +1402,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 過去1年で新高値を更新した日数
-  formula: null
-  inputs: null
+  formula: 過去252営業日で新高値を更新した日数
+  inputs:
+  - PRICE_adj
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1273,7 +1417,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1282,15 +1426,19 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 252営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: N24 と重複。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G07
+  - G15
+  - G01
+  economic_rationale: G07 の頻度版。**高値圏に長く滞在した銘柄は、 アンカリングによる抵抗を繰り返し突破している。** G07 とほぼ同じ情報なので、縮小で片方が消える可能性が高い — それでも両方入れるのが §1.9 の方針。
+  references:
+  - 構造的判断。G07 の派生
   notes: G07 の頻度版
   notes_extra: null
   provenance:
@@ -1304,21 +1452,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G20
   name_ja: 200日線超えの持続日数
@@ -1326,8 +1477,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 連続して200日線を上回っている日数
-  formula: null
-  inputs: null
+  formula: SMA200 を連続して上回っている営業日数
+  inputs:
+  - PRICE_adj
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1340,7 +1492,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1349,15 +1501,19 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 200営業日が要る。下回っていればゼロ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: N24 と重複。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G06
+  - G09
+  - G22
+  economic_rationale: トレンドの成熟度。**長く続いたトレンドほど信頼できるが、 同時に終わりが近い**という相反する解釈がある。 符号を + と置いたのは前者を採ったからだが、 **実証が無いので★1 で強く縮小される。効かなければ縮小が消す。**
+  references:
+  - 構造的判断
   notes: トレンドの成熟度
   notes_extra: null
   provenance:
@@ -1371,21 +1527,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G21
   name_ja: RSI(14)
@@ -1393,8 +1552,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 相対力指数
-  formula: null
-  inputs: null
+  formula: RSI(14)
+  inputs:
+  - PRICE_adj
   sign: cap
   buy_class: aux
   sell_class: aux
@@ -1407,7 +1567,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T4
   markets:
   - JP
   - US
@@ -1416,15 +1576,19 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 14営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: ほぼ欠損しない。
   normalization: rank_all
-  nonlinear: abs_dev(x_star=sector_median)
+  nonlinear: abs_dev(x_star=50.0)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G04
+  - G03
+  - G23
+  economic_rationale: ∩型、x*=50。**執行タイミングのみ。保有判断には使わない。** テクニカル指標の中でも実証が弱く、**広く知られているので LAW-100（公表後の減衰）が最大限に効いているはず。** 残しているのは短期の執行改善であって、アルファ源としてではない。
+  references:
+  - T4（実証が弱い）。執行用途に限定して採用
   notes: 執行タイミングのみ。長期判断には使わない
   notes_extra: null
   provenance:
@@ -1438,23 +1602,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G22
   name_ja: 移動平均の並び
@@ -1462,8 +1628,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 5>25>75>200 の充足度 0-1
-  formula: null
-  inputs: null
+  formula: 1[SMA5>SMA25] + 1[SMA25>SMA75] + 1[SMA75>SMA200], /3
+  inputs:
+  - PRICE_adj
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1476,7 +1643,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T4
   markets:
   - JP
   - US
@@ -1485,15 +1652,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 200営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: N24 と重複。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G05
+  - G06
+  - G09
+  - G20
+  economic_rationale: G06/G09 の複合。**新規情報はほぼ無く、既存パラメータの再表現。** §1.9 の方針で削除はしないが、**q09 の観点では最も冗長な部類**で、 Z12 の相関行列が出たら真っ先に統合候補になる。
+  references:
+  - T4。G06/G09 の再表現であり独立した根拠は無い
   notes: パーフェクトオーダー。G06/G09 の複合
   notes_extra: null
   provenance:
@@ -1507,21 +1679,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G23
   name_ja: VWAP乖離（20日）
@@ -1529,8 +1704,10 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: P_t / VWAP20 - 1
-  formula: null
-  inputs: null
+  formula: P_adj[t] / VWAP20 - 1
+  inputs:
+  - PRICE_adj
+  - VOLUME
   sign: cap
   buy_class: aux
   sell_class: aux
@@ -1543,7 +1720,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1552,15 +1729,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: VWAP20>0。出来高ゼロ日を含む場合は当該日を除外。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**VWAP が取れないデータ源では終値近似になる**（J-Quants の無料枠）。近似したことを Z05 で記録する。'
   normalization: rank_all
-  nonlinear: abs_dev(x_star=sector_median)
+  nonlinear: abs_dev(x_star=0.0)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G05
+  - G04
+  - J02
+  - J12
+  economic_rationale: ∩型、x*=0。**執行の基準価格。** 直近20日の出来高加重平均より 大きく上で買うと、平均的な参加者より不利な価格を掴む。 G05（SMA乖離）が単純平均なのに対し、G23 は出来高で重み付けするので **実際に取引が成立した価格帯を反映する**点が違う。
+  references:
+  - 構造的判断。執行の実務標準
   notes: 執行の基準価格
   notes_extra: null
   provenance:
@@ -1574,23 +1756,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
+    nonlinear: override
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G24
   name_ja: OBV のトレンド
@@ -1598,8 +1782,10 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: オンバランスボリュームの傾き（60日）
-  formula: null
-  inputs: null
+  formula: slope( OBV, 60d )
+  inputs:
+  - PRICE_adj
+  - VOLUME
   sign: positive
   buy_class: aux
   sell_class: useful
@@ -1612,7 +1798,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T4
   markets:
   - JP
   - US
@@ -1621,15 +1807,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 60営業日が要る。出来高ゼロ日が多い銘柄は欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 低流動性銘柄で不安定。J10 で除外される銘柄と重なる。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G25
+  - G29
+  - J09
+  - G33
+  economic_rationale: 出来高を伴った価格変化。**J09（出来高ショック）や G33（OSAP MomVol t=5.8） と同じ「出来高が裏付ける動きは続く」という発想の古い実装。** G33 が T1 で実証があるので、**G24 は実質 G33 の劣化版。** ★1 のままにする。
+  references:
+  - T4。G33（OSAP MomVol）が同じ発想の実証版
   notes: 出来高を伴った価格変化か
   notes_extra: null
   provenance:
@@ -1643,21 +1834,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G25
   name_ja: 上昇日 / 下落日の出来高比
@@ -1665,8 +1859,10 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: mean(上昇日の出来高) / mean(下落日の出来高)
-  formula: null
-  inputs: null
+  formula: mean(volume on up days) / mean(volume on down days), 60d
+  inputs:
+  - PRICE_adj
+  - VOLUME
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1679,7 +1875,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1688,15 +1884,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 下落日が0日なら欠損。60営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: G24 と同じ。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G24
+  - G29
+  - J09
+  - K02
+  economic_rationale: 買い圧力の非対称。**上昇日に出来高が集中していれば、 買い手が主導している。** ただし**因果が逆の可能性が高い** — 上がったから出来高が増えただけかもしれない。 実証が無いので★1。
+  references:
+  - 構造的判断。因果の方向が不明
   notes: 買い圧力の質
   notes_extra: null
   provenance:
@@ -1710,21 +1911,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G26
   name_ja: 週足・月足での位置
@@ -1732,8 +1936,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 月足の60ヶ月移動平均からの乖離
-  formula: null
-  inputs: null
+  formula: P_adj[t] / SMA(60 months) - 1
+  inputs:
+  - PRICE_adj
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1746,7 +1951,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1755,15 +1960,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 60ヶ月の履歴が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**5年の履歴が要るので、新興企業と IPO 銘柄で大量に欠損する。** 生存者バイアスと同じ方向に効くので注意。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G06
+  - G16
+  - A22
+  - C26
+  - H03
+  economic_rationale: '**263AT の保有期間（6ヶ月-5年）に唯一時間軸が合う G パラメータ。** ただし5年スケールでは価格は平均回帰する（H03 の長期反転）ので、 **符号が G06（+）と逆になる可能性がある。** ここは実測で決めるべき点で、**符号を + と置いたのは暫定。** A22（自己バリュエーション位置）の価格版として扱うなら符号は −。 → **OQ として記録する必要がある。**'
+  references:
+  - 構造的判断。符号が未確定（H03 との整合が要る）
   notes: 保有期間が長いので、本来は長い足での位置が主役であるべき
   notes_extra: null
   provenance:
@@ -1777,21 +1988,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G27
   name_ja: 相対力（対指数）
@@ -1799,8 +2013,10 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: slope( P_i / P_index , 126日 )
-  formula: null
-  inputs: null
+  formula: slope( P_i / P_index, 126d )
+  inputs:
+  - PRICE_adj
+  - index
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1813,7 +2029,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -1822,15 +2038,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 126営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日米で使う指数が違う**（TOPIX / S&P500）ので、統合ランクは取らない。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G10
+  - G11
+  - G01
+  - I06
+  economic_rationale: G10/G11 の最も簡単な版。**市場全体の動きを除いた相対力。** ファクター系列も業種分類も要らないので、**データが揃わない段階で 最初に実装できる残差モメンタム。** 実装順序上の価値がある。
+  references:
+  - Blitz-Huij-Martens (JEF 2011) の簡易近似
   notes: 単純だが頑健。G10/G11 の簡易版
   notes_extra: null
   provenance:
@@ -1844,21 +2065,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G28
   name_ja: 下落局面での相対耐性
@@ -1866,8 +2090,10 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 市場が下落した日だけの相対リターン平均
-  formula: null
-  inputs: null
+  formula: 'mean( r_i - r_index : days where r_index < -1% )'
+  inputs:
+  - PRICE_adj
+  - index
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1880,7 +2106,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -1889,15 +2115,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 下落日が20日未満なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**強気相場が長く続くと下落日が足りず、全銘柄で欠損する。** 最も必要な時に作れない。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - I10
+  - I18
+  - I06
+  - G30
+  - D03
+  economic_rationale: '**下方ベータの直接測定。** I10/I18（下方リスク）と同じものを 実測で出す。**263AT の目的（1銘柄で他の損を賄う）から見ると、 下落耐性より上昇余地の方が重要**なので、 これは**サイジング（Q）とゲートには使うが、買いスコアには使わない。**'
+  references:
+  - Ang-Chen-Xing (RFS 2006) Downside Risk
   notes: 下げに強い銘柄は長期で優位。I10/I18 と関連
   notes_extra: null
   provenance:
@@ -1911,21 +2143,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G29
   name_ja: 出来高を伴うブレイク
@@ -1933,8 +2168,10 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 1[新高値] × 1[出来高 > 2 × MA60]
-  formula: null
-  inputs: null
+  formula: 1[new 52w high] * 1[volume > 2 * MA60(volume)]
+  inputs:
+  - PRICE_adj
+  - VOLUME
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -1947,7 +2184,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1956,15 +2193,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: MA60(volume)>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 低流動性銘柄では出来高倍率が跳ねやすく、誤検出が増える。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G07
+  - G15
+  - G19
+  - J09
+  - G24
+  economic_rationale: '**執行トリガー。** 出来高を伴わない高値更新は薄商いの 見せかけである可能性が高い。**J09（出来高ショック）と G07（52週高値）の交互作用を離散化した形。** 離散化するので情報が落ちるが、執行ルールとしては使いやすい。'
+  references:
+  - 構造的判断
   notes: 執行トリガー
   notes_extra: null
   provenance:
@@ -1978,21 +2221,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G30
   name_ja: モメンタム・クラッシュ・リスク
@@ -2000,8 +2246,11 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 市場ボラ高 かつ 市場が底打ち直後（過去の敗者が急反発する局面）
-  formula: null
-  inputs: null
+  formula: 1[market drawdown < -20%] * 1[past loser] （過去の敗者が急反発する局面の検出）
+  inputs:
+  - PRICE_adj
+  - index
+  - I01
   sign: negative
   buy_class: useful
   sell_class: main
@@ -2014,7 +2263,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -2023,15 +2272,23 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 市場指数と252営業日が要る。
   missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
+  missing_bias: 市場レベルの状態変数なので銘柄で欠損しない。
+  normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G16
+  - G13
+  - I01
+  - P16
+  - Q03
+  - D03
+  economic_rationale: '**モメンタム戦略最大の弱点。2009年3月、2020年4月のような ベアマーケットからの急反発で、モメンタム戦略は数週間で 数十%を失う。**（Daniel-Moskowitz JFE 2016 で定量化） G30 は**その局面を検出してモメンタム系の重みをゼロにする**ための 状態変数で、**断面ランクを取らない**（市場全体の状態だから）。 **G カテゴリで最も実務的に重要。** G13（ボラ調整）と 合わせるとクラッシュの多くを回避できると報告されている。'
+  references:
+  - Daniel-Moskowitz (JFE 2016) Momentum Crashes
+  - Barroso-Santa-Clara (JFE 2015)
   notes: モメンタム戦略最大の弱点。レジーム転換時に一気に負ける
   notes_extra: null
   provenance:
@@ -2045,21 +2302,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G31
   name_ja: トレンド・ファクター
@@ -2067,8 +2327,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 複数期間の移動平均を横断回帰で合成した予測値
-  formula: null
-  inputs: null
+  formula: 複数期間の移動平均を説明変数とする回帰の予測値（Han-Zhou-Zhu の Trend Factor）
+  inputs:
+  - PRICE_adj
   sign: positive
   buy_class: main
   sell_class: useful
@@ -2090,18 +2351,23 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 各移動平均の期間分の履歴が要る。最長で1000営業日。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**長期移動平均を含むので、若い銘柄で欠損する。G26 と同じ方向の偏り。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G05
+  - G06
+  - G09
+  - G22
+  - G01
+  economic_rationale: '**OSAP 全 Predictor 中で最大級の t=15.0。** ただし**移動平均を回帰で組み合わせるという構造上、 インサンプルで当てはめた結果である疑いが強い。** §0 の T1-T4 の枠組みでは実証度は高いが、 **「t が高すぎるものを疑う」という Harvey-Liu-Zhu の精神からは むしろ警戒すべき対象。** LAW-100 の減衰を強めに見込む。 G05/G06/G09/G22 を包含するので、Z12 で強い相関が出るはず。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP TrendFactor — Han, Zhou, Zhu 2016, JFE（OSAP再現 t=15.0, 月次1.63%, 品質=1_good, 予測力=1_clear）
+  - Han-Zhou-Zhu (JFE 2016) Trend Factor
+  - OSAP TrendFactor t=15.0
   notes: OSAP TrendFactor t=15.0。全 Predictor 中で最大級。G05/G06/G22 を個別に持つより合成した方が強い
   notes_extra: null
   provenance:
@@ -2115,22 +2381,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G32
   name_ja: 中間モメンタム
@@ -2138,8 +2406,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: P_{t-147} / P_{t-252} - 1（7〜12ヶ月前の区間だけ）
-  formula: null
-  inputs: null
+  formula: P_adj[t-147] / P_adj[t-252] - 1
+  inputs:
+  - PRICE_adj
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -2161,18 +2430,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 252営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: N24 と重複。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G01
+  - G02
+  - G39
+  - G40
+  economic_rationale: '**中間期モメンタム（Novy-Marx JFE 2012）。 「7-12ヶ月前」の方が「直近1-6ヶ月」より予測力が高いという発見。** 素直な G01 の解釈（最近勝った銘柄が勝ち続ける）を否定する結果で、 **モメンタムの本質が「最近」ではないことを示す。** G01 と別に持つ理由が明確な数少ない例。OSAP IntMom t=5.8。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP IntMom — Novy-Marx 2012, JFE（OSAP再現 t=5.8, 月次1.2%, 品質=1_good, 予測力=1_clear）
+  - Novy-Marx (JFE 2012) Is momentum really momentum?
+  - OSAP IntMom t=5.8
   notes: OSAP IntMom t=5.8。直近を除いた「中間期」の方が予測力が高い。G01 の分解
   notes_extra: null
   provenance:
@@ -2186,22 +2459,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G33
   name_ja: 出来高を伴うモメンタム
@@ -2209,8 +2484,10 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 12-1モメンタム × 1[出来高上位]
-  formula: null
-  inputs: null
+  formula: r(12-1) * 1[volume in top tercile]
+  inputs:
+  - PRICE_adj
+  - VOLUME
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -2232,18 +2509,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 252営業日と出来高が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: J10（出来高ゼロ日）で除外される銘柄と重なる。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G01
+  - G24
+  - G25
+  - J09
+  economic_rationale: '**出来高が高い銘柄でモメンタムが強い**（Lee-Swaminathan JF 2000）。 G24（OBV）が測ろうとしていたものの実証版。 OSAP MomVol t=5.8。**J09 との交互作用を明示的に持つ。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP MomVol — Lee and Swaminathan 2000, JF（OSAP再現 t=5.8, 月次1.55%, 品質=1_good, 予測力=1_clear）
+  - Lee-Swaminathan (JF 2000) Price Momentum and Trading Volume
+  - OSAP MomVol t=5.8
   notes: OSAP MomVol t=5.8。J09 との交互作用
   notes_extra: null
   provenance:
@@ -2257,22 +2538,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G34
   name_ja: 企業年齢調整モメンタム
@@ -2280,8 +2563,10 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 若い企業に限定したモメンタム
-  formula: null
-  inputs: null
+  formula: r(12-1) * 1[firm age in bottom tercile]
+  inputs:
+  - PRICE_adj
+  - listing_date
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -2303,18 +2588,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 上場からの経過年数が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**上場日が正しく取れるかに依存。市場変更・再上場の扱いで誤りが入りやすい。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G01
+  - N24
+  - O10
+  - G35
+  economic_rationale: '**若い企業でモメンタムが強い**（Zhang JF 2006 の情報不確実性仮説）。 不確実性が高いほど、投資家の過小反応が大きく、ドリフトが長い。 **O カテゴリ（ネグレクト）と同じ機構がモメンタムに現れた形**で、 263AT の中核戦略と整合する。OSAP FirmAgeMom t=7.2。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP FirmAgeMom — Zhang 2006, JF（OSAP再現 t=7.2, 月次2.9%, 品質=1_good, 予測力=1_clear）
+  - Zhang (JF 2006) Information Uncertainty and Stock Returns
+  - OSAP FirmAgeMom t=7.2
   notes: OSAP FirmAgeMom t=7.2。N24 との交互作用
   notes_extra: null
   provenance:
@@ -2328,22 +2617,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G35
   name_ja: 低クオリティ株のモメンタム
@@ -2351,8 +2642,10 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 6ヶ月モメンタム × 1[クオリティ下位]
-  formula: null
-  inputs: null
+  formula: r(6-1) * 1[credit quality in bottom tercile]
+  inputs:
+  - PRICE_adj
+  - credit_quality
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -2374,18 +2667,24 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 126営業日と信用度指標が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**格付けの無い銘柄では D08/D09（Altman/Ohlson）で代替する。日本は格付け取得企業が少ないので代替が主。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G01
+  - G02
+  - G34
+  - D08
+  - D09
+  - D25
+  economic_rationale: G34 と同じ「情報不確実性でモメンタムが強まる」機構を 信用度で測った版（Avramov et al. JF 2007）。 **ただし低格付け銘柄はそもそも D カテゴリのゲートで 落ちる可能性が高い**ので、263AT では実際に効く範囲が狭い。 OSAP Mom6mJunk t=4.3。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP Mom6mJunk — Avramov et al 2007, JF（OSAP再現 t=4.3, 月次2.12%, 品質=1_good, 予測力=1_clear）
+  - Avramov-Chordia-Jostova-Philipov (JF 2007) Momentum and Credit Rating
+  - OSAP Mom6mJunk t=4.3
   notes: OSAP Mom6mJunk t=4.3
   notes_extra: null
   provenance:
@@ -2399,22 +2698,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G36
   name_ja: 業種モメンタム
@@ -2422,8 +2723,10 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 所属業種の過去リターン
-  formula: null
-  inputs: null
+  formula: 'mean( r_j(past) : j in same industry )'
+  inputs:
+  - PRICE_adj
+  - industry
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -2445,18 +2748,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 業種内 N>=30。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 小業種で欠損。**業種分類の粒度に強く依存する**（SP-03/SP-04）。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G11
+  - L01
+  - L02
+  - X14
+  economic_rationale: '**G11 と正反対の情報。** G11 は業種内での相対力、 G36 は業種そのものの勢い。**両方入れると 「弱い業種の中の強い銘柄」と「強い業種の中の弱い銘柄」を 区別できる。** L01（同業大型株のリードラグ）とも近く、 Z12 で L カテゴリとの相関を確認する必要がある。 OSAP IndMom t=4.7。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP IndMom — Grinblatt and Moskowitz 1999, JF（OSAP再現 t=4.7, 月次0.43%, 品質=1_good, 予測力=1_clear）
+  - Moskowitz-Grinblatt (JF 1999)
+  - OSAP IndMom t=4.7
   notes: OSAP IndMom t=4.7。G11（業種相対）とは逆で、業種そのものの動き
   notes_extra: null
   provenance:
@@ -2470,22 +2777,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G37
   name_ja: 収益サプライズの連続性
@@ -2493,8 +2802,10 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 連続してプラスサプライズを出した四半期数
-  formula: null
-  inputs: null
+  formula: 連続してプラスサプライズを出した四半期数
+  inputs:
+  - EPS_actual
+  - EPS_consensus
   sign: positive
   buy_class: main
   sell_class: main
@@ -2513,21 +2824,25 @@
   - US
   industries: null
   period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
+  consolidation: consolidated
+  accounting_standard_note: サプライズの定義（GAAP か非GAAP か）が米国で問題になる。**263AT は GAAP を使う**（spec §2.1）。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: コンセンサスが無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**アナリストカバレッジが要るので、O01（カバレッジゼロ）と排他。 263AT の中核ユニバースで最も欠損する。** 日本は会社予想（GUIDE_CO）で代替できるが、性質が違う。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - N08
+  - N10
+  - G18
+  - C21
+  - E14
+  economic_rationale: '**OSAP EarningsStreak t=9.5 は、N08（PEAD の四半期版）より高い。** 単発のサプライズより連続性の方が予測力が強いという結果で、 **経営陣が実力で出しているのか運なのかを連続性が区別している** と解釈できる。**ただし E カテゴリの利益調整 （わずかに超える形に調整する）を拾っている可能性があり、 E14 と併せて見ないと騙される。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP EarningsStreak — Loh and Warachka 2012, MS（OSAP再現 t=9.5, 月次0.957%, 品質=1_good, 予測力=1_clear）
+  - OSAP EarningsStreak t=9.5
   notes: OSAP EarningsStreak t=9.5。N08 の四半期版で t が非常に高い
   notes_extra: null
   provenance:
@@ -2541,22 +2856,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G38
   name_ja: 季節性リターン（前年同月）
@@ -2564,8 +2881,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 前年の同じ月のリターン
-  formula: null
-  inputs: null
+  formula: r_i(same calendar month, 1 year ago)
+  inputs:
+  - PRICE_adj
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -2587,18 +2905,26 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 1年の履歴が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: N24 と重複。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G39
+  - G40
+  - G41
+  - G42
+  - G43
+  - G44
+  - G45
+  - Y01
+  economic_rationale: '**カタログ §3.4/LAW-38 では「季節性は原則不採用」としたが、 OSAP の実測 t=7.6 は無視できない。** ここが最も判断の割れる部分なので明示する: **理論的な説明が弱いにもかかわらず t が高い**（Heston-Sadka JFE 2008）。 263AT の立場は「**採用するが★2 に留め、★3 には上げない**」 — LAW-100 の減衰が最も効きやすい類型だから。 さらに G38-G45 の8本は互いに強く相関するので、 **縮小が効かないと季節性だけで重みを占有する危険がある。** Z12 で最初に確認すべき塊。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP MomSeasonShort — Heston and Sadka 2008, JFE（OSAP再現 t=7.6, 月次1.15%, 品質=1_good, 予測力=1_clear）
+  - Heston-Sadka (JFE 2008) Seasonality in the cross-section
+  - OSAP MomSeasonShort t=7.6
   notes: OSAP MomSeasonShort t=7.6。LAW-38 で季節性を「原則不採用」としたが、実証は強い。要再考
   notes_extra: null
   provenance:
@@ -2612,22 +2938,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G39
   name_ja: 季節性リターン（2〜5年前の同月）
@@ -2635,8 +2963,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 過去2〜5年の同月リターンの平均
-  formula: null
-  inputs: null
+  formula: mean( r_i(same calendar month, years t-2..t-5) )
+  inputs:
+  - PRICE_adj
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -2658,18 +2987,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 5年の履歴が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**5年の履歴が要るので G26 と同じく若い銘柄で欠損。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G38
+  - G40
+  - G41
+  - G43
+  - G44
+  economic_rationale: G38 の多年平均版。**平均を取るのでノイズが減り、 単年の G38 より頑健なはず**だが、t は 5.3 と G38 より低い。 **この不整合自体が、季節性シグナルの脆さを示している。** OSAP MomSeason t=5.3。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP MomSeason — Heston and Sadka 2008, JFE（OSAP再現 t=5.3, 月次0.67%, 品質=1_good, 予測力=1_clear）
+  - OSAP MomSeason t=5.3
   notes: OSAP MomSeason t=5.3
   notes_extra: null
   provenance:
@@ -2683,22 +3016,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G40
   name_ja: 季節性リターン（6〜10年前の同月）
@@ -2706,8 +3041,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 過去6〜10年の同月リターンの平均
-  formula: null
-  inputs: null
+  formula: mean( r_i(same calendar month, years t-6..t-10) )
+  inputs:
+  - PRICE_adj
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -2729,18 +3065,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 10年の履歴が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**10年の履歴が要る。日本の中小型株では上場後10年未満が多く、 大量に欠損する。しかも欠損は「若い企業」に偏るので、 G34（若い企業でモメンタムが強い）と正反対の方向にユニバースを歪める。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G38
+  - G39
+  - G41
+  - G44
+  - G45
+  economic_rationale: '**10年以上前の同じ月が効くという主張には、 経済的な説明が存在しない。** それでも t=6.2 が出る。 **263AT の立場: 採用するが、q10 に説明を書けないので catalog §6.6 の「説明できないものは採用しない」原則に抵触する。** → **例外として採用し、★2 で強く縮小する。** これは §1.9（選択せず縮小する）が 「説明できないが実証があるもの」をどう扱うかの試金石になる。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP MomSeason06YrPlus — Heston and Sadka 2008, JFE（OSAP再現 t=6.2, 月次0.68%, 品質=1_good, 予測力=1_clear）
+  - OSAP MomSeason06YrPlus t=6.2
   notes: OSAP MomSeason06YrPlus t=6.2。10年以上前の同月まで効くのは不気味だが、複数論文で再現されている
   notes_extra: null
   provenance:
@@ -2754,22 +3094,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G41
   name_ja: 季節性リターン（11〜15年前）
@@ -2777,8 +3119,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 同上
-  formula: null
-  inputs: null
+  formula: mean( r_i(same calendar month, years t-11..t-15) )
+  inputs:
+  - PRICE_adj
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -2800,18 +3143,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 15年の履歴が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: G40 よりさらに厳しい。**上場15年以上の銘柄のみ = 実質的に大型・老舗に限定される。**
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G38
+  - G39
+  - G40
+  - G44
+  economic_rationale: G40 と同じ扱い。**欠損の偏りが極端で、 実際に値を持つのは老舗大型株だけ。** 263AT が狙う「機関が見ていない銘柄」とは ユニバースがほぼ重ならないので、**実用上の価値は低い。**
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP MomSeason11YrPlus — Heston and Sadka 2008, JFE（OSAP再現 t=6.4, 月次0.66%, 品質=1_good, 予測力=1_clear）
+  - OSAP MomSeason11YrPlus t=6.4
   notes: OSAP MomSeason11YrPlus t=6.4
   notes_extra: null
   provenance:
@@ -2825,22 +3171,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G42
   name_ja: オフシーズン・モメンタム
@@ -2848,8 +3196,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 同月を除いた期間のリターン
-  formula: null
-  inputs: null
+  formula: mean( r_i(months other than the same calendar month), 1 year ago )
+  inputs:
+  - PRICE_adj
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -2871,18 +3220,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 1年の履歴が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: G38 と同じ。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G38
+  - G43
+  - G45
+  economic_rationale: '**G38 の補集合で符号が逆になる。** これは季節性シグナルが「同じ月」という 特定性に依存していることの確認になっている — **補集合で符号が反転するなら、単なるモメンタムではない。** G38-G45 の中で最も検証的な価値がある。OSAP MomOffSeason t=5.6。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP MomOffSeason — Heston and Sadka 2008, JFE（OSAP再現 t=5.6, 月次1.25%, 品質=1_good, 予測力=1_clear）
+  - OSAP MomOffSeason t=5.6
   notes: OSAP MomOffSeason t=5.6。G38-G41 の補集合で符号が逆になる
   notes_extra: null
   provenance:
@@ -2896,22 +3247,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G43
   name_ja: 季節性を除いたモメンタム
@@ -2919,8 +3272,10 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 12-1モメンタム - 季節性成分
-  formula: null
-  inputs: null
+  formula: r(12-1) - seasonal component
+  inputs:
+  - PRICE_adj
+  - G38
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -2942,18 +3297,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 252営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: G38 を継承。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G01
+  - G38
+  - G42
+  - G10
+  economic_rationale: '**G01 から季節成分を除いた残り。** G10（残差モメンタム）がファクターを除くのに対し、 G43 は季節性を除く。**素の G01 が季節性で説明できてしまう部分を 切り分けられる**ので、G01 と G38 のどちらが本体かを判定できる。 OSAP Mom12mOffSeason t=4.2。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP Mom12mOffSeason — Heston and Sadka 2008, JFE（OSAP再現 t=4.2, 月次1.17%, 品質=1_good, 予測力=1_clear）
+  - OSAP Mom12mOffSeason t=4.2
   notes: OSAP Mom12mOffSeason t=4.2
   notes_extra: null
   provenance:
@@ -2967,22 +3325,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G44
   name_ja: 季節性リターン（16〜20年前）
@@ -2990,8 +3350,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 過去16〜20年の同月リターン平均
-  formula: null
-  inputs: null
+  formula: mean( r_i(same calendar month, years t-16..t-20) )
+  inputs:
+  - PRICE_adj
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -3013,18 +3374,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 20年の履歴が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**20年の履歴。上場20年以上の銘柄のみ。 しかも「20年間上場し続けた」= 生存者そのものなので、 §8-2 の生存者バイアスと構造的に絡む。** バックテストで良く出ても、それが偏りなのか実体なのか分離できない。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G38
+  - G39
+  - G40
+  - G41
+  economic_rationale: '**20年前の同じ月が効くというのは、常識的に信じがたい。** t=4.6 は G38-G41 の中で最も低く、**系列が長くなるほど t が下がる という傾向とも整合しない**（G41 の 6.4 > G44 の 4.6）。 **263AT では最も低い信頼度で扱い、 Z12 で G38-G45 が一塊になるなら代表1本に統合する候補の筆頭。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP MomSeason16YrPlus — Heston and Sadka 2008, JFE（OSAP再現 t=4.6, 月次0.52%, 品質=1_good, 予測力=1_clear）
+  - OSAP MomSeason16YrPlus t=4.6
   notes: OSAP MomSeason16YrPlus t=4.6。20年前の同月が効くという結果は理屈がつかない。データマイニングを疑いつつ保持（OQ-25）
   notes_extra: null
   provenance:
@@ -3038,22 +3402,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: G45
   name_ja: オフシーズン反転（6〜10年）
@@ -3061,8 +3427,9 @@
   category_name: 価格モメンタム・トレンド
   subsection: null
   definition: 同月を除いた6〜10年前のリターン
-  formula: null
-  inputs: null
+  formula: mean( r_i(months other than the same calendar month), years t-6..t-10 )
+  inputs:
+  - PRICE_adj
   sign: negative
   buy_class: useful
   sell_class: aux
@@ -3084,18 +3451,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 10年の履歴が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: G40 と同じ。老舗大型株に限定される。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - G40
+  - G42
+  - G38
+  economic_rationale: G42 の長期版。**G40 の補集合として符号が反転することを確認する役割。** 単独で使う意味は薄く、**G40 の妥当性検査として持つ**というのが正確な位置づけ。 OSAP MomOffSeason06YrPlus t=4.6。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP MomOffSeason06YrPlus — Heston and Sadka 2008, JFE（OSAP再現 t=4.6, 月次0.55%, 品質=1_good, 予測力=1_clear）
+  - OSAP MomOffSeason06YrPlus t=4.6
   notes: OSAP MomOffSeason06YrPlus t=4.6
   notes_extra: null
   provenance:
@@ -3109,20 +3478,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
