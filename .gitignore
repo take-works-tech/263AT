@@ -1,0 +1,48 @@
+# --- secrets / credentials ---
+.env
+.env.*
+*.key
+*.pem
+credentials.json
+secrets/
+config.local.*
+
+# --- data (large / licensed) ---
+data/raw/
+data/interim/
+data/cache/
+data/*.parquet
+data/*.csv
+data/*.db
+data/*.sqlite*
+*.h5
+
+# --- python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+
+# --- node ---
+node_modules/
+.next/
+.turbo/
+
+# --- results / logs (keep summaries, ignore bulk) ---
+results/runs/
+logs/
+*.log
+
+# --- os / editor ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
