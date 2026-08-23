@@ -533,7 +533,7 @@
   correlated_with: null
   economic_rationale: null
   references: []
-  notes: 1.8未満で危険圏。業種版を間違えると無意味。日本企業への適用は係数の再推定が望ましい
+  notes: 1.8未満で危険圏。業種版を間違えると無意味。日本企業への適用は係数の再推定が望ましい（LAW-40）
   notes_extra: null
   provenance:
     name_ja: catalog

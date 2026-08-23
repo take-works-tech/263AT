@@ -55,3 +55,4 @@ research/*.zip
 data/pit/
 forward_log/*.jsonl
 research/oap_cache/
+research/oq24_run.txt

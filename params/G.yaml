@@ -56,7 +56,7 @@
   - https://images.aqr.com/-/media/AQR/Documents/Journal-Articles/JPM-Momentum-in-Japan---The-Exception-That-Proves-the-Rule.pdf
   - https://link.springer.com/article/10.1007/s11408-022-00417-8
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  notes: 直近1ヶ月除外は必須（短期リバーサル回避）。長期保有では主役を張れない
+  notes: 直近1ヶ月除外は必須（短期リバーサル回避）。長期保有では主役を張れない（LAW-23）
   notes_extra: null
   provenance:
     name_ja: catalog
@@ -474,7 +474,7 @@
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP High52 — George and Hwang 2004, JF（OSAP再現 t=2.0, 月次0.45%, 品質=1_good, 予測力=2_likely）
-  notes: モメンタムより頑健という報告が多い。アンカリング由来。長期でも生きる数少ないテクニカル
+  notes: モメンタムより頑健という報告が多い。アンカリング由来。長期でも生きる数少ないテクニカル（LAW-25）
   notes_extra: null
   provenance:
     name_ja: catalog

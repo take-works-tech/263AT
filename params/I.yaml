@@ -402,7 +402,7 @@
   references:
   - https://pages.stern.nyu.edu/~rwhitela/papers/max%20jfe.pdf
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  notes: §1.8の罠を防ぐ最重要フィルタ。上位decileは下位decileより月次1%超劣後
+  notes: §1.8の罠を防ぐ最重要フィルタ。上位decileは下位decileより月次1%超劣後（LAW-34）
   notes_extra: null
   provenance:
     name_ja: catalog

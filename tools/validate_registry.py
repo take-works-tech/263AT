@@ -169,6 +169,27 @@ def main():
                 if not (r.startswith("http") or "未確認" in r or r.startswith("原論文")):
                     warn(e, "reference is not a URL and not marked as unverified: %r" % r[:50])
 
+    # --- 法則とパラメータの対応 -------------------------------------------
+    # AssetGrowth の漏れ（LAW-32 を★★★としながらパラメータが1つも無かった）の再発防止。
+    # 実証的アノマリー（§3.2）の各法則が、最低1つのパラメータから参照されているかを見る。
+    cat_md = (ROOT / "docs" / "01_parameter_catalog.md").read_text(encoding="utf-8")
+    sec = cat_md.split("### 3.2")[-1].split("### 3.3")[0] if "### 3.2" in cat_md else ""
+    laws_32 = re.findall(r"^\|\s*LAW-(\d{2})\s*\|", sec, re.M)
+    referenced = set()
+    for e in entries:
+        for fld in ("notes", "notes_extra", "economic_rationale", "gate_policy"):
+            v = e.get(fld) or ""
+            referenced.update(re.findall(r"LAW-(\d{2})", str(v)))
+    orphan = [l for l in laws_32 if l not in referenced]
+    if orphan:
+        names = {}
+        for l in orphan:
+            m = re.search(r"^\|\s*LAW-" + l + r"\s*\|\s*([^|]+)\|", sec, re.M)
+            names[l] = m.group(1).strip() if m else "?"
+        warnings.append("法則→パラメータの対応リンクが無い実証アノマリー"
+                        "（パラメータが存在しない可能性と、単に注記でLAW番号に触れていないだけの可能性がある。両方とも直すべき）: "
+                        + ", ".join("LAW-%s(%s)" % (l, names[l][:20]) for l in orphan))
+
     # --- レポート -----------------------------------------------------------
     n = len(entries)
     verified = sum(1 for e in entries if e["review"]["status"] == "verified")

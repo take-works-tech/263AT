@@ -47,7 +47,7 @@
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP LRreversal — De Bondt and Thaler 1985, JF（OSAP再現 t=3.3, 月次0.105%, 品質=1_good, 予測力=1_clear）
-  notes: 本プロジェクトのホライズンに最も合致。バリューと強く相関するので二重計上に注意
+  notes: 本プロジェクトのホライズンに最も合致。バリューと強く相関するので二重計上に注意（LAW-24）
   notes_extra: null
   provenance:
     name_ja: catalog

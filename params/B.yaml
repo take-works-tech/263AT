@@ -403,7 +403,7 @@
   - https://mysimon.rochester.edu/novy-marx/research/OSoV.pdf
   - https://www.nber.org/papers/w15940
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  notes: Novy-Marx。純利益系より頑健。バリューと負相関で組み合わせ効果が高い
+  notes: Novy-Marx。純利益系より頑健。バリューと負相関で組み合わせ効果が高い（LAW-22）
   notes_extra: null
   provenance:
     name_ja: catalog
@@ -897,7 +897,7 @@
   correlated_with: null
   economic_rationale: null
   references: []
-  notes: 高くて安定を評価。堀の実証的な裏取り
+  notes: 高くて安定を評価。堀の実証的な裏取り（LAW-43）
   notes_extra: null
   provenance:
     name_ja: catalog
@@ -1124,7 +1124,7 @@
   references:
   - http://www.econ.yale.edu/~shiller/behfin/2013_04-10/asness-frazzini-pedersen.pdf
   - https://www.nber.org/system/files/working_papers/w19681/w19681.pdf
-  notes: Asness-Frazzini-Pedersen。まずこれを丸ごと再現するのが最短ルート
+  notes: Asness-Frazzini-Pedersen。まずこれを丸ごと再現するのが最短ルート（LAW-21）
   notes_extra: null
   provenance:
     name_ja: catalog
@@ -1197,7 +1197,7 @@
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - OSAP PS — Piotroski 2000, JAR（OSAP再現 t=5.6, 月次1.958333333%, 品質=2_fair, 予測力=1_clear）
-  notes: 低PBR群に絞ってから使うと効果が最大。全体に適用すると薄まる
+  notes: 低PBR群に絞ってから使うと効果が最大。全体に適用すると薄まる（LAW-41）
   notes_extra: null
   provenance:
     name_ja: catalog

@@ -842,7 +842,7 @@
   correlated_with: null
   economic_rationale: null
   references: []
-  notes: 採用は一時的な買い（発表〜組入で織り込み）、除外は継続的な売り
+  notes: 採用は一時的な買い（発表〜組入で織り込み）、除外は継続的な売り（LAW-46）
   notes_extra: null
   provenance:
     name_ja: catalog

@@ -54,7 +54,7 @@
   references:
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
   - https://www.nber.org/system/files/working_papers/w23394/w23394.pdf
-  notes: 赤字企業で定義不能。E/P で持ち符号を保つ（PERだと赤字がプラス無限大に化ける）
+  notes: 赤字企業で定義不能。E/P で持ち符号を保つ（PERだと赤字がプラス無限大に化ける）（LAW-20）
   notes_extra: null
   provenance:
     name_ja: catalog
