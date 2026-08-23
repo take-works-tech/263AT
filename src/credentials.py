@@ -86,12 +86,57 @@ def require(name: str, path: pathlib.Path | None = None) -> str:
             "  2. %s=値 の行を足す\n"
             "  3. **.env は git に入れない**（.gitignore 済み）\n"
             "  取得方法は docs/06_accounts.md を参照" % (name, name))
+    why = problem(name, v)
+    if why:
+        # **値はあるが本物でない。** ここで落とさないと 401 になり、
+        # 呼び出し側が「データが無い」と解釈する — 未設定より質が悪い
+        raise MissingCredential(
+            "%s の値が成立していない: %s" % (name, why)
+            + "\n  .env の該当行を、実際に発行された値に書き換える"
+            + "\n  手順は docs/06_accounts.md")
     # **return を忘れていて None を返していた**（2026-08-23、自己テストが検出）。
     # このモジュールは「認証の失敗がデータの不在に化けるのを防ぐ」ために
     # 書いたのに、**実装がまさにその失敗を起こしていた。**
     # None を API キーとして渡すと 401 になり、呼び出し側が
     # 「データが無い」と解釈する — 防ぎたかった経路そのもの。
     return v
+
+
+# docs/06_accounts.md がテンプレートとして載せている文言。
+# **これをそのまま .env に書き写す事故が実際に起きた。**
+PLACEHOLDERS = {
+    "登録したメールアドレス", "登録したパスワード", "発行されたキー",
+    "you@example.com", "xxxxxxxx", "値", "ここにキー",
+}
+
+
+def problem(name: str, value: str) -> str | None:
+    """**値が本物らしいか。** 問題があれば理由を返す。無ければ None。
+
+    なぜ要るか。
+    `.env` に説明文をそのまま書き写しても、`get()` は「値がある」と答える。
+    **`require()` も通ってしまい、API が 401 を返し、
+    呼び出し側がそれを「データが無い」と解釈する。**
+    このモジュールが防ぐと宣言した経路に、**別の入口から入られる。**
+
+    実際に起きた（2026-08-23）:
+      JQUANTS_PASSWORD=登録したパスワード
+      EDINET_API_KEY=発行されたキー
+    に対して status() が **「すべて揃っている」と答えた。**
+
+    形の検査は最小限にする。**本物かどうかは通信するまで分からない**ので、
+    ここで弾くのは「明らかに本物でないもの」だけに留める。
+    """
+    if value in PLACEHOLDERS:
+        return "**説明文のまま**（docs/06_accounts.md の例をそのまま書いている）"
+    if any(ord(c) > 127 for c in value):
+        return "**日本語が入っている**（認証情報は通常 ASCII）"
+    if value != value.strip() or " " in value:
+        return "空白が入っている"
+    if name.endswith("MAILADDRESS"):
+        if "@" not in value or "." not in value.split("@")[-1]:
+            return "**メールアドレスの形になっていない**（@ が無い）"
+    return None
 
 
 def mask(secret: str | None) -> str:
@@ -115,14 +160,26 @@ def status(path: pathlib.Path | None = None) -> str:
         ("EDINET_API_KEY", "EDINET API v2 のサブスクリプションキー"),
     ]
     lines = [".env: %s" % ("あり" if (path or ENV).exists() else "**未作成**")]
+    missing, bad = [], []
     for k, desc in keys:
         v = get(k, path)
+        why = problem(k, v) if v else None
+        if not v:
+            missing.append(k)
+        elif why:
+            bad.append(k)
         lines.append("  %-22s %-12s %s" % (k, mask(v), desc))
-    missing = [k for k, _ in keys if not get(k, path)]
+        if why:
+            lines.append("  %-22s → %s" % ("", why))
+    if bad:
+        # **「未設定」より強く言う。** 設定済みに見えるぶん気づきにくい
+        lines.append("  → **%d 件が値として成立していない。**" % len(bad))
+        lines.append("     **この状態で API を叩くと 401 になり、"
+                     "「データが無い」ように見える。**")
     if missing:
         lines.append("  → **%d 件が未設定。** docs/06_accounts.md の手順を参照"
                      % len(missing))
-    else:
+    if not bad and not missing:
         lines.append("  → すべて揃っている")
     return "\n".join(lines)
 
@@ -179,6 +236,40 @@ def _test() -> int:
         check("**マスクした値から元が復元できない**",
               "cdefghij" not in mask("abcdefghij"))
 
+        # --- 値が成立しているかの検査 -------------------------------------
+        # **説明文をそのまま .env に書き写す事故が実際に起きた**ので、
+        # ここは実例そのままを検査に入れる
+        check("**説明文のままなら弾く（パスワード）**",
+              problem("JQUANTS_PASSWORD", "登録したパスワード") is not None)
+        check("**説明文のままなら弾く（キー）**",
+              problem("EDINET_API_KEY", "発行されたキー") is not None)
+        check("**@ の無い値はメールアドレスとして弾く**",
+              problem("JQUANTS_MAILADDRESS", "abcdefghij") is not None)
+        check("**日本語が入っていたら弾く**",
+              problem("EDINET_API_KEY", "キー") is not None)
+        check("空白が入っていたら弾く",
+              problem("EDINET_API_KEY", "abc def") is not None)
+        check("本物らしい値は通す",
+              problem("EDINET_API_KEY", "a1b2c3d4e5f6") is None)
+        check("本物らしいメールアドレスは通す",
+              problem("JQUANTS_MAILADDRESS", "user@example.com") is None)
+
+        # **require もここで落とす。** get は通るが require は通さない
+        pp = pathlib.Path(d) / "ph.env"
+        pp.write_text("EDINET_API_KEY=発行されたキー" + chr(10), encoding="utf-8")
+        check("get は値があると答える", get("EDINET_API_KEY", pp) is not None)
+        try:
+            require("EDINET_API_KEY", pp)
+            check("**説明文のままなら require が落ちる**", False)
+        except MissingCredential as ex:
+            check("**説明文のままなら require が落ちる**", True)
+            check("何が問題か例外文に書く", "説明文" in str(ex))
+
+        st2 = status(pp)
+        check("**status が「揃っている」と言わない**",
+              "すべて揃っている" not in st2)
+        check("**401 に化けることを警告する**", "401" in st2)
+
         st = status(p)
         check("状態が読める", "JQUANTS_MAILADDRESS" in st)
         check("**足りないものを明示する**", "未設定" in st)
@@ -199,7 +290,7 @@ def _test() -> int:
         check("その場合 status は未作成と言う", "未作成" in status(p2))
 
     print("-" * 80)
-    total = 21
+    total = 33
     print("%d/%d 通過" % (total - len(fails), total))
     return 1 if fails else 0
 
