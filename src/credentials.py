@@ -19,8 +19,7 @@
 
 `.env` の書き方
 ---------------
-    JQUANTS_MAILADDRESS=you@example.com
-    JQUANTS_PASSWORD=xxxxxxxx
+    JQUANTS_API_KEY=xxxxxxxx
     EDINET_API_KEY=xxxxxxxx
 
 **このファイルは絶対に git に入れない。**
@@ -155,8 +154,9 @@ def mask(secret: str | None) -> str:
 def status(path: pathlib.Path | None = None) -> str:
     """**何が揃っていて何が足りないか**を人が読む形で返す。"""
     keys = [
-        ("JQUANTS_MAILADDRESS", "J-Quants の登録メールアドレス"),
-        ("JQUANTS_PASSWORD", "J-Quants のパスワード"),
+        # **V2 は API キー1本。** パスワードは使わない
+        # （V1 のメール+パスワード方式は 2026-06-01 に終了した）
+        ("JQUANTS_API_KEY", "J-Quants API キー（ダッシュボードで発行）"),
         ("EDINET_API_KEY", "EDINET API v2 のサブスクリプションキー"),
     ]
     lines = [".env: %s" % ("あり" if (path or ENV).exists() else "**未作成**")]
@@ -271,7 +271,7 @@ def _test() -> int:
         check("**401 に化けることを警告する**", "401" in st2)
 
         st = status(p)
-        check("状態が読める", "JQUANTS_MAILADDRESS" in st)
+        check("状態が読める", "JQUANTS_API_KEY" in st)
         check("**足りないものを明示する**", "未設定" in st)
         check("**status に生の秘密が出ない**", "pw12345678" not in st)
 
