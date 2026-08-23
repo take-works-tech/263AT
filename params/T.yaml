@@ -823,8 +823,10 @@
   category_name: LLM派生パラメータ
   subsection: 事業・競争環境の定性評価
   definition: 「この事業を3文で説明し、収益ドライバーを3つ挙げよ」成否
-  formula: null
-  inputs: null
+  formula: 1 if LLM が (a) 事業を3文で説明でき かつ (b) 収益ドライバーを3つ特定できる else 0
+  inputs:
+  - company_description
+  - financial_statements
   sign: positive
   buy_class: gate
   sell_class: none
@@ -837,7 +839,7 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -846,15 +848,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**開示が薄い企業ほど説明できず不合格になる。** それは「理解できない」の正しい検出でもあるが、 同時に「無名だが良い企業」を外す方向にも働く。O カテゴリ（ネグレクト＝加点）と **正面から衝突するゲート**であり、閾値の設定が戦略の性格を決める（OQ-23 で較正）。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - T10
+  - T14
+  - T21
+  - E17
+  - O09
+  economic_rationale: 構造的制約。LAW-61（Munger）の実装。**理解していない事業の株価が下がったとき、 買い増すべきか売るべきかを判断できない。** 判断できないポジションは、 結局は最も感情的な瞬間に処分することになる（LAW-98 パニック売り）。 263AT は機械的に運用するが、テーゼ検証（T25）と最終承認は人間が行うので、 人間が理解できることは要件である。
+  references:
+  - 構造的制約。統計的エッジではなく運用規律
   notes: LAW-61。失敗したら投資しない。LLMが説明できない事業は自分も理解していない
   notes_extra: null
   provenance:
@@ -868,22 +876,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     gate_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: T14
   name_ja: 経済的堀の強さ

@@ -497,8 +497,10 @@
   category_name: 業種固有KPI
   subsection: 金融（銀行・保険・証券）
   definition: 規制上の健全性指標
-  formula: null
-  inputs: null
+  formula: ソルベンシー・マージン総額 / (リスクの合計額 * 0.5) * 100
+  inputs:
+  - solvency_margin
+  - total_risk
   sign: positive
   buy_class: gate
   sell_class: useful
@@ -511,25 +513,31 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries:
   - 金融（銀行・保険・証券）
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: 日本の算出方法は金融庁告示で定まっており、**米国の RBC 比率とは計算式が違う**。 日米で直接比較してはいけない。それぞれの規制基準（日本200%、米国 RBC 200%）で判定する。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: リスク合計額 > 0。ゼロなら判定不能として欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 保険業にのみ適用。他業種では常に欠損＝適用外（U カテゴリの設計通り）。
   normalization: rank_industry
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U06
+  - U07
+  - D02
+  - D08
+  economic_rationale: 構造的制約。**規制当局が介入する水準を割った保険会社は、 増資・事業縮小・最悪は破綻に至る。** 保険業は通常の財務指標（D01/D02）が そのままでは意味を持たないため、業種固有のゲートが必須になる。
+  references:
+  - '日本: 保険業法第130条、平成8年大蔵省告示第50号'
+  - '米国: NAIC Risk-Based Capital'
   notes: 保険。200%割れは規制介入の対象
   notes_extra: null
   provenance:
@@ -543,23 +551,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     gate_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: U09
   name_ja: NAV倍率

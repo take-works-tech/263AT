@@ -2890,8 +2890,9 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: 決済不履行銘柄リストへの掲載
-  formula: null
-  inputs: null
+  formula: 1 if Reg SHO threshold list に掲載中、または解除後30日以内 else 0
+  inputs:
+  - reg_sho_threshold_list
   sign: negative
   buy_class: gate
   sell_class: main
@@ -2904,7 +2905,7 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - US
   industries: null
@@ -2912,15 +2913,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 米国のみ。日本には対応する制度がないので日本株では常に欠損＝適用外。
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K19
+  - K20
+  - K21
+  - K31
+  - K45
+  economic_rationale: 構造的制約。決済不履行（fail to deliver）が継続する銘柄は、 **株券の貸借が逼迫しているか、市場構造に問題がある。** どちらにせよ、価格形成が正常でない状態で長期保有すべきではない。
+  references:
+  - SEC Regulation SHO Rule 203(b)(3)
   notes: K31 の具体化
   notes_extra: null
   provenance:
@@ -2934,22 +2941,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    markets: catalog
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    markets: override
     gate_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K45
   name_ja: 空売り機関のレポート発行
@@ -2957,8 +2967,10 @@
   category_name: 需給・市場マイクロストラクチャ
   subsection: 米国固有
   definition: Muddy Waters / Hindenburg 等の公表
-  formula: null
-  inputs: null
+  formula: 1 if 空売り機関のレポートが公表され、72時間以内に精査が完了していない else 0
+  inputs:
+  - NEWS
+  - short_seller_reports
   sign: negative
   buy_class: gate
   sell_class: gate
@@ -2972,23 +2984,30 @@
   - LLM
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
+  - JP
   - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**検出はニュース監視に依存する。** 小型株ほど報道されにくく、 逆に小型株ほど標的にされやすいので、**見逃しが最も起きやすい領域で最も危険**という 最悪の組み合わせになる。T36（発信源の信頼度）と併せて監視範囲を広げる必要がある。'
   normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K19
+  - K21
+  - K44
+  - E04
+  - E12
+  economic_rationale: 構造的制約。空売り機関は自らの資金を賭けて数ヶ月〜数年の調査を行っており、 **個人が数時間でできる分析より情報量が多い。** 内容が正しいかは別として、 「無視する」という選択肢は合理的でない。判定できない場合は除外を維持する（LAW-61）。
+  references:
+  - 構造的制約。レポートの主張の当否ではなく、精査が済むまで判断を保留するという規律
   notes: 即座に精査する。多くは事実を含んでおり、無視すると大損する
   notes_extra: null
   provenance:
@@ -3002,22 +3021,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    markets: catalog
+    accounting_standard_note: override
+    markets: override
     gate_policy: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
+    status: verified
+    pending: []
   version: 1
 - id: K46
   name_ja: 関連ETF の資金流出入

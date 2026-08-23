@@ -12,8 +12,10 @@
   category_name: 流動性・執行可能性
   subsection: null
   definition: mean( 終値 × 出来高, 20日 )
-  formula: null
-  inputs: null
+  formula: mean(CLOSE * VOLUME, 20営業日)
+  inputs:
+  - PRICE
+  - VOLUME
   sign: context
   buy_class: gate
   sell_class: useful
@@ -37,16 +39,21 @@
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**分割時に出来高を調整し忘れると値が飛ぶ**（spec §9-4）。 上場20営業日未満で欠損。円換算しないと日米比較にならない（J19）。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - J02
+  - J03
+  - J05
+  - J06
+  - J13
+  - J23
+  economic_rationale: 構造的制約であり、263AT のユニバース定義そのもの（spec §6）。 閾値600万円は「60万円の建玉を参加率10%で3日以内に処分できる」から逆算している。 **資金規模を変えたら必ず再計算する。** OSAP の `DolVol` として予測力も報告されているが、 ここでは予測ではなく執行可能性の制約として使う。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP DolVol — Brennan, Chordia, Subra 1998, JFE（OSAP再現 t=2.9, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - OSAP DolVol — Past trading volume, t=2.9
   notes: 低いほど非効率＝チャンスだが、執行できなければ意味がない。∩ではなくゲート＋加点の二段構え
   notes_extra: null
   provenance:
@@ -60,23 +67,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
     gate_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: J02
   name_ja: 流動化日数
@@ -84,8 +93,10 @@
   category_name: 流動性・執行可能性
   subsection: null
   definition: 想定建玉 / (平均売買代金 × 参加率上限10%)
-  formula: null
-  inputs: null
+  formula: target_position_jpy / (J01 * participation_limit)
+  inputs:
+  - J01
+  - target_position_jpy
   sign: negative
   buy_class: gate
   sell_class: main
@@ -98,7 +109,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -107,15 +118,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: J01 = 0（出来高ゼロ）なら無限大 → 無条件で不合格。J10 でも捕捉される。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: J01 の欠損を継承する。参加率上限（10%）は仮定であり実測されていない。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - J01
+  - J03
+  - J10
+  - J13
+  - I24
+  economic_rationale: 構造的制約。LAW-80「自分が売る時に買う人がいるか」の実装。 **出口が確保できないサイズは最初から建てない。** 保有期間が長い設計なので、 建てる時より「危機時に売れるか」が効く。I24（流動性調整後リスク）の入力でもある。 OQ-17 の実測で、マイクロキャップ除外で死ぬ9シグナルの大半が流動性系だったことは、 **このゲートがエッジそのものを削っている可能性**を示している（OQ-23 で較正する）。
+  references:
+  - 構造的制約。マーケットインパクトの平方根則（S02）と対
   notes: 3日超なら建てない。300万円 × 20% = 60万円の建玉なら、日商600万円が最低ライン
   notes_extra: null
   provenance:
@@ -129,22 +146,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
     gate_policy: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: J03
   name_ja: Amihud非流動性
@@ -645,8 +665,9 @@
   category_name: 流動性・執行可能性
   subsection: null
   definition: 過去60日の出来高ゼロ日数 / 60
-  formula: null
-  inputs: null
+  formula: count(VOLUME == 0, 直近60営業日)
+  inputs:
+  - VOLUME
   sign: negative
   buy_class: gate
   sell_class: main
@@ -668,20 +689,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: na（カウント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 売買停止日を出来高ゼロと誤カウントしないこと（spec §3）。 **米国のデータソースによっては出来高ゼロ日が行として存在しない**ため、 日付の連続性を取引所カレンダーで検証する必要がある。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - J01
+  - J02
+  - J03
+  - J18
+  economic_rationale: 構造的制約。**1日でも約定がない銘柄は、売りたい日に売れない可能性が実証されている。** OSAP の `zerotrade1M/6M/12M` は予測力を持つ（t=3.5-4.4）が、 それは「非流動性プレミアム」であり、**個人が取りに行くべきプレミアムではない** （売れないリスクの対価であって、フリーランチではない）。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP zerotrade1M — Liu 2006, JFE（OSAP再現 t=3.5, 月次0.56%, 品質=1_good, 予測力=1_clear）
-  - OSAP zerotrade6M — Liu 2006, JFE（OSAP再現 t=4.1, 月次0.806%, 品質=1_good, 予測力=1_clear）
-  - OSAP zerotrade12M — Liu 2006, JFE（OSAP再現 t=4.4, 月次0.846%, 品質=1_good, 予測力=1_clear）
+  - OSAP zerotrade12M t=4.4 / zerotrade6M t=4.1 / zerotrade1M t=3.5
   notes: 日本の超小型株に実在する。1日でもあれば強い警戒
   notes_extra: null
   provenance:
@@ -695,23 +717,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
     evidence_tier: override
     references: override
     gate_policy: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: J11
   name_ja: 値幅制限張り付き頻度
@@ -853,8 +877,10 @@
   category_name: 流動性・執行可能性
   subsection: null
   definition: 目標建玉 / (日次売買代金 × 参加率上限) の買い側
-  formula: null
-  inputs: null
+  formula: target_position_jpy / (J01 * participation_limit)（買い側）
+  inputs:
+  - J01
+  - target_position_jpy
   sign: negative
   buy_class: gate
   sell_class: none
@@ -867,7 +893,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -876,15 +902,19 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: J02 と同じ。J01=0 なら無条件で不合格。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: J01 の欠損を継承。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - J01
+  - J02
+  - J03
+  economic_rationale: 構造的制約。J02（出口）の入口版。**建てるのに5営業日以上かかると、 建てている最中に価格が動いて想定エントリー価格が崩れる。** バックテストは瞬時約定を仮定するため、この乖離はバックテストに現れない誤差になる。
+  references:
+  - 構造的制約。S02（マーケットインパクト）と同根
   notes: J02 の入口版。建てるのにも時間がかかる
   notes_extra: null
   provenance:
@@ -898,22 +928,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
     gate_policy: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: J14
   name_ja: 売買代金のトレンド

@@ -240,8 +240,17 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 8変数（DSRI, GMI, AQI, SGI, DEPI, SGAI, LVGI, TATA）
-  formula: null
-  inputs: null
+  formula: -4.84 + 0.92*DSRI + 0.528*GMI + 0.404*AQI + 0.892*SGI + 0.115*DEPI - 0.172*SGAI + 4.679*TATA - 0.327*LVGI
+  inputs:
+  - REV
+  - AR
+  - GP
+  - TA
+  - DA
+  - SGA
+  - NI
+  - CFO
+  - TL
   sign: negative
   buy_class: gate
   sell_class: main
@@ -254,24 +263,33 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: 8変数すべてが前期比を取るため、**決算期変更（Z06）や会計基準変更（Z07）があると全て異常値になる**。 該当年は判定不能として扱う。米国データで推定された係数であり日本での妥当性は未検証。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 前期値がゼロ・負になる変数（GMI の粗利率、SGI の売上）で発散する。 **各変数を個別に 1%/99% でクリップしてから合成する**。クリップされた変数が3つ以上なら判定不能。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 8変数すべてに2期分のデータが要るので、上場2年未満と決算期変更企業で欠損。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - E01
+  - E02
+  - E10
+  - E18
+  - E20
+  - B23
+  economic_rationale: 利益操作の兆候を8つの角度から集約する。**単独では偽陽性が多い**（正常な急成長企業も高スコアになる） ため、263AT では M>-1.78 だけでは除外せず、E01/E10/E08/E20 のいずれかとの複合で除外する。 会計不正は1件で他の全銘柄の利益を吹き飛ばすため、偽陽性のコストより偽陰性のコストが遥かに高い。
+  references:
+  - '原論文: Beneish (1999) Financial Analysts Journal 55(5) 24-36'
+  - https://journals.sagepub.com/doi/10.1177/21582440251386174
+  - https://www.researchgate.net/publication/347761022_Beneish_M-score_and_Altman_Z-score_as_a_catalyst_for_corporate_fraud_detection
   notes: -1.78 超で操作の疑い。単独では偽陽性が多いので他と合議させる
   notes_extra: null
   provenance:
@@ -285,23 +303,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     gate_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E05
   name_ja: 実効税率の異常
@@ -518,8 +538,9 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 直近3年の変更有無・大手→中小への変更
-  formula: null
-  inputs: null
+  formula: 1 if 監査法人が直近3年に変更された（大手→中小） else 0
+  inputs:
+  - auditor_history
   sign: negative
   buy_class: gate
   sell_class: main
@@ -533,24 +554,30 @@
   - SEC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: consolidated
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 監査法人の履歴を機械的に取るには EDINET / EDGAR の連続取得が要る。 **法人の合併・名称変更を「変更」と誤検出する**のが主な誤り。T33 で除外する。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - E12
+  - E22
+  - E24
+  - E09
+  - D13
+  economic_rationale: 構造的制約。監査法人の交代自体は正常な事象だが、**大手から中小への変更は 「大手が降りた」可能性を示す**。会計上の見解の相違で監査法人が辞任した場合、 企業側は自発的な変更として開示することが多く、外部からは区別がつかない。 区別がつかないなら保守側に倒す。
+  references:
+  - 構造的制約。監査人交代の理由は開示されるが、実質的な理由は判別困難
   notes: 大手から中小への変更は強い赤信号
   notes_extra: null
   provenance:
@@ -564,23 +591,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     gate_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E09
   name_ja: 決算発表の遅延
@@ -793,8 +822,10 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 訂正報告書の提出有無
-  formula: null
-  inputs: null
+  formula: 1 if 訂正報告書（有価証券報告書等の訂正）の提出あり else 0
+  inputs:
+  - EDINET_amendment
+  - SEC_10KA
   sign: negative
   buy_class: gate
   sell_class: gate
@@ -808,24 +839,30 @@
   - SEC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: consolidated
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**軽微な訂正（誤字・様式）と実質的な訂正（数値の修正）を区別する必要がある。** 区別せずに全部を不合格にするとユニバースが痩せすぎる。T33 で分類し、 数値の訂正のみを対象とする。分類の誤りは「合格」側に倒れると危険。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - E08
+  - E22
+  - E24
+  - E21
+  - D13
+  economic_rationale: 構造的制約。過去に提出した財務諸表が誤っていたということは、 **現在の財務諸表も信用できない**ことを意味する。263AT の全パラメータは財務諸表を入力とするので、 土台が崩れたら他の全スコアが無意味になる。訂正後2期分を確認するまで再参入しない。
+  references:
+  - 構造的制約。会計不正の事後的な現れであることが多い
   notes: 発生したら即座にゲート閉鎖
   notes_extra: null
   provenance:
@@ -839,23 +876,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     gate_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E13
   name_ja: 開示テキストの経年変化度
@@ -1477,8 +1516,9 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 無限定適正 / 限定付 / 意見不表明
-  formula: null
-  inputs: null
+  formula: 1 if 監査意見 != 無限定適正 else 0
+  inputs:
+  - audit_opinion
   sign: negative
   buy_class: gate
   sell_class: gate
@@ -1492,24 +1532,31 @@
   - SEC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: 日本は「無限定適正 / 限定付適正 / 不適正 / 意見不表明」。米国は unqualified / qualified / adverse / disclaimer。**用語は違うが意味は対応する**ので統一コードに写像する。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 監査報告書のテキスト抽出に依存。定型文なので取りこぼしは少ないが、英文開示のない日本企業では和文解析が要る。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - E23
+  - E24
+  - E08
+  - E12
+  - D13
+  economic_rationale: 構造的制約であり、本カタログで最も議論の余地がないゲート。 **無限定適正でないということは、独立した専門家が「この数字を信用してよいと言えない」 と公式に述べたということ。** 例外を作る理由が存在しない。
+  references:
+  - '日本: 監査基準（企業会計審議会）'
+  - '米国: PCAOB AS 3101'
   notes: 無限定適正以外は即除外
   notes_extra: null
   provenance:
@@ -1523,23 +1570,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     gate_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E23
   name_ja: 監査上の主要な検討事項 (KAM)
@@ -1616,8 +1665,9 @@
   category_name: 会計品質・不正検知
   subsection: null
   definition: 開示すべき重要な不備の有無
-  formula: null
-  inputs: null
+  formula: 1 if 内部統制報告書に開示すべき重要な不備あり else 0
+  inputs:
+  - internal_control_report
   sign: negative
   buy_class: gate
   sell_class: gate
@@ -1631,24 +1681,30 @@
   - SEC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: 日本は J-SOX（金商法24条の4の4）、米国は SOX 404。**米国の非加速filer は 監査人による内部統制監査が免除される**ため、小型株では経営者評価のみになる点に注意。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**米国の小型株（non-accelerated filer）は監査人の内部統制監査が無い**ので、 不備が発見されにくい。つまり「不備なし」の信頼度が企業規模で違う。 263AT のユニバースは小型株中心なので、この偏りは無視できない。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - E22
+  - E12
+  - E08
+  - E23
+  economic_rationale: 構造的制約。内部統制の重要な不備は、**財務数値が誤る仕組みが社内に存在する**ことを意味する。 E12（実際に訂正が起きた）の先行指標であり、まだ訂正されていないだけの可能性がある。
+  references:
+  - '日本: 金融商品取引法 第24条の4の4（内部統制報告制度）'
+  - '米国: Sarbanes-Oxley Act Section 404'
   notes: 不備ありは即除外
   notes_extra: null
   provenance:
@@ -1662,23 +1718,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     gate_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: E25
   name_ja: セグメント間の内部取引比率

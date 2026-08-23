@@ -1567,8 +1567,10 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: 改善期間入りの有無
-  formula: null
-  inputs: null
+  formula: 1 if 整理銘柄・監理銘柄に指定、または上場廃止基準に抵触して改善期間中 else 0
+  inputs:
+  - TD_disclosure
+  - exchange_designation
   sign: negative
   buy_class: gate
   sell_class: gate
@@ -1581,7 +1583,7 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1590,15 +1592,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 日本は東証が明示的に指定するので機械的に取れる。**米国は取引所ごとに deficiency notice の形式が違い、8-K に埋もれる**ため検出率が下がる。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N44
+  - N22
+  - D13
+  - J06
+  - K34
+  economic_rationale: 構造的制約。上場廃止は**最悪のテールリスク**で、廃止後の売却は極端に困難になる （DF-01 で実測した通り、廃止銘柄は価格データすら消える）。 改善期間中は「改善すれば戻る」という賭けになるが、それは 263AT の設計思想 （多数の弱いシグナルの合成）と別物のイベント投資であり、混ぜるべきでない。
+  references:
+  - 東証 有価証券上場規程 第2章第4節（上場廃止基準）
   notes: 上場廃止は最悪のテールリスク。即ゲート
   notes_extra: null
   provenance:
@@ -1612,22 +1620,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     gate_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N24
   name_ja: 上場からの経過年数
@@ -2991,8 +3002,11 @@
   category_name: カタリスト・イベント
   subsection: null
   definition: 流通株式時価総額・株主数などの基準に対する余裕率
-  formula: null
-  inputs: null
+  formula: min(流通株式時価総額/基準, 流通株式比率/基準, 株主数/基準)
+  inputs:
+  - float_market_cap
+  - float_ratio
+  - shareholder_count
   sign: positive
   buy_class: gate
   sell_class: main
@@ -3006,7 +3020,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -3015,15 +3029,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: na
+  zero_denominator_policy: 基準値は制度で定まっているのでゼロにならない。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 流通株式時価総額と株主数は**年1回の開示**なので最大1年古い（Z04）。 株主数の急減（K34）は基準抵触の先行指標だが、これも年次。**先行指標としての解像度が粗い。**
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N23
+  - J06
+  - J07
+  - K34
+  - K36
+  economic_rationale: 構造的制約。N23（抵触してから）では遅い。**余裕度が薄い銘柄を先に外す。** 東証の市場区分見直しで基準が厳格化しており、スタンダード市場の小型株では 現実的なリスクになっている。ただし**抵触リスクがある企業ほど割安に見える**ため、 A カテゴリと逆相関する典型的なバリュートラップ要因。
+  references:
+  - https://www.jpx.co.jp/english/equities/follow-up/02.html
+  - 東証 有価証券上場規程（上場維持基準）
   notes: N23 の事前版。抵触してからでは遅い
   notes_extra: null
   provenance:
@@ -3037,22 +3058,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     gate_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: N45
   name_ja: カタリストまでの推定期間

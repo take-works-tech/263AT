@@ -1142,8 +1142,10 @@
   category_name: 資本政策・希薄化
   subsection: null
   definition: 行使価額修正条項付き新株予約権の有無
-  formula: null
-  inputs: null
+  formula: 1 if 行使価額修正条項付新株予約権（MSワラント）または MSCB が未行使で存在する else 0
+  inputs:
+  - TD_disclosure
+  - potential_shares
   sign: negative
   buy_class: gate
   sell_class: gate
@@ -1156,24 +1158,31 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: na
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 日本では適時開示から機械的に検出できるが、**米国では PIPE / convertible note の 条件が Exhibit の中にあり抽出が難しい**。米国側の検出率が低くなる（＝見逃す）方向の偏り。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - F05
+  - F06
+  - F19
+  - F28
+  - D15
+  economic_rationale: 構造的制約。**株価が下がるほど発行株数が増える設計になっている金融商品**であり、 引受先は空売りと組み合わせて利益を出す。既存株主の希薄化が株価下落と自己強化的に進む。 「安いから買う」というバリュー判断が最も裏切られる典型で、 A カテゴリのスコアが高くなるほど危険という逆転が起きる。
+  references:
+  - 構造的制約。商品設計上、既存株主の利益と対立する
+  - https://www.sciencedirect.com/science/article/abs/pii/S0304405X09001007
   notes: 下落を前提に設計された商品。原則除外
   notes_extra: null
   provenance:
@@ -1187,23 +1196,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     gate_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: F18
   name_ja: 株式併合

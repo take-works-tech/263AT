@@ -608,3 +608,634 @@ D26:
   gate_policy: >-
     直近6ヶ月に格下げがあれば新規建てを停止する。投資適格から投機的等級への低下は除外。
     投機的等級内の1ノッチ低下はサイズ半減に留める。無格付企業（日本の小型株の大半）には適用しない。
+
+# =============================================================================
+# ゲート26件の完全検証（12問すべてに回答）
+#
+# ゲートは加算ではなく掛け算なので、**誤ると他がどれだけ良くても地雷を踏む**。
+# レビュー順の第1位（params/README.md）。
+#
+# 注意: ゲートの多くは「アノマリー」ではなく「構造的な制約」である。
+# 統計的な超過収益の証拠ではなく、論理的な必然（債務超過の企業を買わない、
+# 上場廃止予定の銘柄を買わない）が根拠になる。その場合は evidence_tier を T3 とし、
+# economic_rationale に「統計的エッジではなく構造的制約である」と明記する。
+# =============================================================================
+
+# --- D 財務健全性 -------------------------------------------------------------
+
+D01:
+  formula: "(IBD_incl_lease - CASH) / EBITDA_TTM"
+  inputs: [IBD, CASH, EBITDA]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    分子の IBD にリース負債を含める（spec §2 の既定）。IFRS16 / ASC842 適用前後で不連続になるため
+    Z07 の会計基準変更フラグが立つ年は判定の信頼度を下げる。分母の EBITDA は日本基準ののれん償却を
+    足し戻すので、基準間で比較可能な数少ない指標（A06 と同じ理由）。
+  zero_denominator_policy: >-
+    EBITDA <= 0 のとき比率は無意味。**欠損にせず「ゲート不合格」として扱う**（ND>0 の場合）。
+    ネットキャッシュ企業（ND<0）で EBITDA<=0 の場合は D07 と D22 で判定する。
+  missing_bias: >-
+    リース負債の開示がない旧基準の期間で IBD が過小になる。**古い期間ほどレバレッジが軽く見える**
+    ため、時系列でゲート通過率が変化する。Z07 と併せて監視する。
+  correlated_with: [D03, D04, D19, D25, B39]
+  economic_rationale: >-
+    統計的エッジではなく構造的制約。過大な負債は (a) 金利上昇局面で利払いが利益を食い、
+    (b) 借換ができないと即座に破綻する、という二重のテールリスクを持つ。
+    バリュー指標（A カテゴリ）は負債の多い企業ほど低く出るため、ゲートを掛けないと
+    「安いのには理由がある」企業を体系的に買い集めることになる（バリュートラップ）。
+    LAW-40 の実装。
+  evidence_tier: T3
+  references:
+    - "https://images.aqr.com/-/media/AQR/Documents/Insights/Journal-Article/The-Limits-to-Arbitrage-Revisited-The-Accrual-and-Asset-Growth-Anomalies.pdf"
+    - "構造的制約であり、単独のアノマリー論文に基づくものではない"
+  markets: [JP, US]
+  review: {status: verified}
+
+D02:
+  formula: "EQ / TA"
+  inputs: [EQ, TA]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    EQ は非支配株主持分と新株予約権を除く（spec §2）。IFRS はのれんを資産に残すため
+    分母 TA が大きくなり自己資本比率が低く出る。**業種内パーセンタイルで判定するので影響は限定的**。
+  zero_denominator_policy: "TA > 0 なので割り算は問題ない。EQ<0（債務超過）は負値のまま保持し、無条件で不合格。"
+  missing_bias: 金融・不動産は構造的に低いので、業種内判定でないと当該業種が丸ごと除外される。
+  correlated_with: [D01, D03, D08, D09]
+  economic_rationale: >-
+    構造的制約。自己資本は損失を吸収する緩衝であり、薄いほど小さな損失で債務超過に至る。
+    業種によって適正水準が大きく違う（銀行は数%が正常、無借金メーカーは80%超もある）ため、
+    絶対値ではなく業種内順位で見るのが本質。
+  evidence_tier: T3
+  references:
+    - "構造的制約。Altman Z（D08）の構成要素でもある"
+  markets: [JP, US]
+  review: {status: verified}
+
+D04:
+  formula: "EBIT_TTM / INTEREST_TTM"
+  inputs: [EBIT, INTEREST]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    支払利息の範囲が基準で異なる（リース利息を含むか等）。IFRS16 適用企業はリース利息が
+    支払利息に計上されるためカバレッジが低く出る。D19 と併せて解釈する。
+  zero_denominator_policy: >-
+    **実質無借金（支払利息が営業利益の1%未満）の企業では分母が小さすぎて比率が発散する。
+    この判定を適用せず、D01/D07 に委ねる。** これを忘れると優良な無借金企業が異常値で弾かれる。
+  missing_bias: 支払利息を独立開示しない企業で欠損。小型株にやや多い。欠損時は D01 で代替判定する。
+  correlated_with: [D01, D03, D25, D22]
+  economic_rationale: >-
+    構造的制約。利払いは契約上の義務であり、業績が悪化しても減らせない。
+    カバレッジが2倍を切ると、営業利益が半減しただけで利払いができなくなる。
+    **金利上昇局面で最初に壊れる指標**であり、日本の金利正常化局面では特に重要（D25 と対）。
+  evidence_tier: T3
+  references:
+    - "構造的制約。格付機関の与信判断で標準的に使われる指標"
+  markets: [JP, US]
+  review: {status: verified}
+
+D07:
+  formula: "CASH / DEBT_ST"
+  inputs: [CASH, DEBT_ST]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    CASH に短期有価証券を含める（spec §2）。DEBT_ST に1年内返済予定の長期借入金を含める。
+    区分の仕方が企業により異なるので、Z05（ソース間不一致）で監視する。
+  zero_denominator_policy: >-
+    DEBT_ST = 0（1年内の返済義務なし）の場合は**合格として扱う**。欠損にしない。
+    ゼロ除算を欠損にすると、最も財務が健全な企業が弾かれるという逆転が起きる。
+  missing_bias: 短期借入の内訳を開示しない企業で欠損。日本の小型株にやや多い。
+  correlated_with: [D01, D04, D05, D06, D22, D11]
+  economic_rationale: >-
+    構造的制約。**直近1年の資金繰りが回るかという最も差し迫った問い**。
+    利益が出ていても現金が尽きれば倒産する（黒字倒産）。
+    D01（レバレッジの水準）が中期的な問題を測るのに対し、これは短期の生死を測る。
+  evidence_tier: T3
+  references:
+    - "構造的制約。流動性リスクの標準的な測定"
+  markets: [JP, US]
+  review: {status: verified}
+
+D08:
+  formula: "1.2*WC/TA + 1.4*RE/TA + 3.3*EBIT/TA + 0.6*MCAP/TL + 1.0*REV/TA（製造業版）"
+  inputs: [TA, TL, EQ, EBIT, REV, MCAP]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    係数は米国の1960年代のデータで推定されたもの。**日本企業への適用は係数の再推定が望ましい**。
+    それまでは D09（Ohlson O）との合議を優先し、単独では判定しない。
+  zero_denominator_policy: "TA > 0、TL > 0 なので通常は問題ない。TL=0（完全無借金）は合格扱い。"
+  missing_bias: >-
+    利益剰余金（RE）の開示形式が国・基準で異なるため、抽出漏れが起きる。
+    **業種版を間違えると全く別の判定になる**（製造業版 1.8 / 非製造業版 Z'' 1.1）ので、
+    業種分類の欠損は即ゲート判定不能として扱う。
+  correlated_with: [D01, D02, D09, D10, B39]
+  economic_rationale: >-
+    倒産確率の要約統計量。単独指標より複合の方が頑健という点で A32（複合バリュー）と同じ思想。
+    263AT では**加点ではなくゲート**に使う。低スコアの企業を「安いから買う」と体系的に
+    バリュートラップを踏むため（LAW-40）。
+  evidence_tier: T2
+  references:
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+    - "原論文: Altman (1968) Journal of Finance 23(4) 589-609"
+    - "https://journals.sagepub.com/doi/10.1177/21582440251386174"
+  markets: [JP, US]
+  review: {status: verified}
+
+D09:
+  formula: "ロジット型の9変数線形結合 → 倒産確率 P = 1/(1+exp(-O))"
+  inputs: [TA, TL, EQ, NI, CFO, REV]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    D08 と同じく米国データで推定された係数。日本への適用は要再推定。
+    OSAP に `OScore` として収録されており再現可能。
+  zero_denominator_policy: "TA > 0。債務超過（EQ<0）はモデルが想定している状態なのでそのまま計算する。"
+  missing_bias: 過去2期の純利益が必要なため、上場2年未満の企業で欠損。N24 と方向が一致する。
+  correlated_with: [D08, D01, D02, D10]
+  economic_rationale: >-
+    D08 より統計的な設計（判別分析でなくロジット）で、倒産確率を直接推定する。
+    **D08 と結論が食い違ったときは保守側（厳しい方）を採る**という運用にすることで、
+    片方のモデルの弱点を他方が補う。
+  evidence_tier: T1
+  references:
+    - "https://www.openassetpricing.com/"
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+    - "原論文: Ohlson (1980) Journal of Accounting Research 18(1) 109-131"
+  markets: [JP, US]
+  review: {status: verified}
+
+D13:
+  formula: "1 if 継続企業の前提に関する注記 or 重要事象等の記載あり else 0"
+  inputs: [EDINET_notes, SEC_going_concern]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: >-
+    日本は「継続企業の前提に関する注記」と「重要事象等」の2段階。米国は going concern の
+    substantial doubt 開示。**日本の「重要事象等」は注記より軽い段階だが、263AT では同等に扱う**
+    （見逃すコストの方が大きい）。
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: >-
+    注記の抽出はテキスト解析に依存するため、開示形式が非定型な企業で取りこぼす。
+    **取りこぼしは「合格」側に倒れる＝危険な方向**なので、T33（開示の重要度分類）の精度が
+    そのままこのゲートの信頼性になる。
+  correlated_with: [D08, D09, D22, D23, E22, E24, N23]
+  economic_rationale: >-
+    構造的制約。**監査人と経営者自身が「この会社は続かないかもしれない」と書いた**という、
+    外部者が得られる最も強い警告。統計的な優位性の話ではなく、
+    これを無視して買う合理的な理由が存在しない。
+  evidence_tier: T3
+  references:
+    - "日本: 財務諸表等規則第8条の27 / 監査基準委員会報告書570"
+    - "米国: ASU 2014-15 (ASC 205-40)"
+  markets: [JP, US]
+  review: {status: verified}
+
+D22:
+  formula: "(CASH + 未使用コミットメントライン) / (月次固定費)"
+  inputs: [CASH, commitment_line, SGA, INTEREST]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    コミットメントラインの未使用枠は注記からの抽出になり、開示形式が定型でない。
+    月次固定費は販管費から変動費を分離する必要があり、推定が入る（B20 と同じ困難）。
+  zero_denominator_policy: "固定費の推定がゼロ・負になる場合は判定不能として欠損にし、D07 で代替する。"
+  missing_bias: >-
+    コミットメントラインの開示は大企業に偏る。**小型株ほど枠が無いのか開示が無いのか区別できない**
+    ため、欠損を「枠なし」と扱うと小型株が不当に厳しく判定される。欠損は判定不能として扱う。
+  correlated_with: [D07, D23, D15, D04]
+  economic_rationale: >-
+    構造的制約。**赤字企業が何ヶ月生き延びられるか**を直接測る。
+    黒字企業には適用しない（営業CFが2期連続で負の企業にのみ適用）。
+    小型グロース株の最大の下落要因である増資（F05）の事前予測にもなる（D15 と対）。
+  evidence_tier: T3
+  references:
+    - "構造的制約。スタートアップのランウェイ分析と同じ考え方"
+  markets: [JP, US]
+  review: {status: verified}
+
+D26:
+  formula: "1 if 信用格付が直近6ヶ月に引き下げられた else 0"
+  inputs: [credit_rating_history]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: >-
+    **日本の小型株の大半は無格付**。欠損が母集団の大半を占めるため、
+    このゲートは実質的に大型株・米国株にしか効かない。**欠損を不合格にしてはいけない**
+    （ユニバースが壊滅する）。Z03 で偏りを監視する。
+  correlated_with: [D08, D09, D10, D17, D01]
+  economic_rationale: >-
+    OSAP `CredRatDG` の t=11.0 は Predictor 全体で最上位クラス。
+    格付機関は企業の非公開情報にアクセスできるため、格下げは**外部者が得られる情報の中で
+    最も情報量が多いイベントの一つ**。D14（格付水準）は既に価格に織り込まれているが、
+    格下げという**変化**には未織り込みの情報が残る（B18/B29 と同じ「水準より方向」の構図）。
+  evidence_tier: T1
+  references:
+    - "https://www.openassetpricing.com/"
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+    - "OSAP CredRatDG — Credit Rating Downgrade, t=11.0"
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- E 会計品質 ---------------------------------------------------------------
+
+E04:
+  formula: "-4.84 + 0.92*DSRI + 0.528*GMI + 0.404*AQI + 0.892*SGI + 0.115*DEPI - 0.172*SGAI + 4.679*TATA - 0.327*LVGI"
+  inputs: [REV, AR, GP, TA, DA, SGA, NI, CFO, TL]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    8変数すべてが前期比を取るため、**決算期変更（Z06）や会計基準変更（Z07）があると全て異常値になる**。
+    該当年は判定不能として扱う。米国データで推定された係数であり日本での妥当性は未検証。
+  zero_denominator_policy: >-
+    前期値がゼロ・負になる変数（GMI の粗利率、SGI の売上）で発散する。
+    **各変数を個別に 1%/99% でクリップしてから合成する**。クリップされた変数が3つ以上なら判定不能。
+  missing_bias: 8変数すべてに2期分のデータが要るので、上場2年未満と決算期変更企業で欠損。
+  correlated_with: [E01, E02, E10, E18, E20, B23]
+  economic_rationale: >-
+    利益操作の兆候を8つの角度から集約する。**単独では偽陽性が多い**（正常な急成長企業も高スコアになる）
+    ため、263AT では M>-1.78 だけでは除外せず、E01/E10/E08/E20 のいずれかとの複合で除外する。
+    会計不正は1件で他の全銘柄の利益を吹き飛ばすため、偽陽性のコストより偽陰性のコストが遥かに高い。
+  evidence_tier: T2
+  references:
+    - "原論文: Beneish (1999) Financial Analysts Journal 55(5) 24-36"
+    - "https://journals.sagepub.com/doi/10.1177/21582440251386174"
+    - "https://www.researchgate.net/publication/347761022_Beneish_M-score_and_Altman_Z-score_as_a_catalyst_for_corporate_fraud_detection"
+  markets: [JP, US]
+  review: {status: verified}
+
+E08:
+  formula: "1 if 監査法人が直近3年に変更された（大手→中小） else 0"
+  inputs: [auditor_history]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: >-
+    監査法人の履歴を機械的に取るには EDINET / EDGAR の連続取得が要る。
+    **法人の合併・名称変更を「変更」と誤検出する**のが主な誤り。T33 で除外する。
+  correlated_with: [E12, E22, E24, E09, D13]
+  economic_rationale: >-
+    構造的制約。監査法人の交代自体は正常な事象だが、**大手から中小への変更は
+    「大手が降りた」可能性を示す**。会計上の見解の相違で監査法人が辞任した場合、
+    企業側は自発的な変更として開示することが多く、外部からは区別がつかない。
+    区別がつかないなら保守側に倒す。
+  evidence_tier: T3
+  references:
+    - "構造的制約。監査人交代の理由は開示されるが、実質的な理由は判別困難"
+  markets: [JP, US]
+  review: {status: verified}
+
+E12:
+  formula: "1 if 訂正報告書（有価証券報告書等の訂正）の提出あり else 0"
+  inputs: [EDINET_amendment, SEC_10KA]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: >-
+    **軽微な訂正（誤字・様式）と実質的な訂正（数値の修正）を区別する必要がある。**
+    区別せずに全部を不合格にするとユニバースが痩せすぎる。T33 で分類し、
+    数値の訂正のみを対象とする。分類の誤りは「合格」側に倒れると危険。
+  correlated_with: [E08, E22, E24, E21, D13]
+  economic_rationale: >-
+    構造的制約。過去に提出した財務諸表が誤っていたということは、
+    **現在の財務諸表も信用できない**ことを意味する。263AT の全パラメータは財務諸表を入力とするので、
+    土台が崩れたら他の全スコアが無意味になる。訂正後2期分を確認するまで再参入しない。
+  evidence_tier: T3
+  references:
+    - "構造的制約。会計不正の事後的な現れであることが多い"
+  markets: [JP, US]
+  review: {status: verified}
+
+E22:
+  formula: "1 if 監査意見 != 無限定適正 else 0"
+  inputs: [audit_opinion]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: >-
+    日本は「無限定適正 / 限定付適正 / 不適正 / 意見不表明」。米国は unqualified / qualified /
+    adverse / disclaimer。**用語は違うが意味は対応する**ので統一コードに写像する。
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: 監査報告書のテキスト抽出に依存。定型文なので取りこぼしは少ないが、英文開示のない日本企業では和文解析が要る。
+  correlated_with: [E23, E24, E08, E12, D13]
+  economic_rationale: >-
+    構造的制約であり、本カタログで最も議論の余地がないゲート。
+    **無限定適正でないということは、独立した専門家が「この数字を信用してよいと言えない」
+    と公式に述べたということ。** 例外を作る理由が存在しない。
+  evidence_tier: T3
+  references:
+    - "日本: 監査基準（企業会計審議会）"
+    - "米国: PCAOB AS 3101"
+  markets: [JP, US]
+  review: {status: verified}
+
+E24:
+  formula: "1 if 内部統制報告書に開示すべき重要な不備あり else 0"
+  inputs: [internal_control_report]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: >-
+    日本は J-SOX（金商法24条の4の4）、米国は SOX 404。**米国の非加速filer は
+    監査人による内部統制監査が免除される**ため、小型株では経営者評価のみになる点に注意。
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: >-
+    **米国の小型株（non-accelerated filer）は監査人の内部統制監査が無い**ので、
+    不備が発見されにくい。つまり「不備なし」の信頼度が企業規模で違う。
+    263AT のユニバースは小型株中心なので、この偏りは無視できない。
+  correlated_with: [E22, E12, E08, E23]
+  economic_rationale: >-
+    構造的制約。内部統制の重要な不備は、**財務数値が誤る仕組みが社内に存在する**ことを意味する。
+    E12（実際に訂正が起きた）の先行指標であり、まだ訂正されていないだけの可能性がある。
+  evidence_tier: T3
+  references:
+    - "日本: 金融商品取引法 第24条の4の4（内部統制報告制度）"
+    - "米国: Sarbanes-Oxley Act Section 404"
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- F 資本政策 ---------------------------------------------------------------
+
+F17:
+  formula: "1 if 行使価額修正条項付新株予約権（MSワラント）または MSCB が未行使で存在する else 0"
+  inputs: [TD_disclosure, potential_shares]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: >-
+    日本では適時開示から機械的に検出できるが、**米国では PIPE / convertible note の
+    条件が Exhibit の中にあり抽出が難しい**。米国側の検出率が低くなる（＝見逃す）方向の偏り。
+  correlated_with: [F05, F06, F19, F28, D15]
+  economic_rationale: >-
+    構造的制約。**株価が下がるほど発行株数が増える設計になっている金融商品**であり、
+    引受先は空売りと組み合わせて利益を出す。既存株主の希薄化が株価下落と自己強化的に進む。
+    「安いから買う」というバリュー判断が最も裏切られる典型で、
+    A カテゴリのスコアが高くなるほど危険という逆転が起きる。
+  evidence_tier: T3
+  references:
+    - "構造的制約。商品設計上、既存株主の利益と対立する"
+    - "https://www.sciencedirect.com/science/article/abs/pii/S0304405X09001007"
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- J 流動性 -----------------------------------------------------------------
+
+J01:
+  formula: "mean(CLOSE * VOLUME, 20営業日)"
+  inputs: [PRICE, VOLUME]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  missing_bias: >-
+    **分割時に出来高を調整し忘れると値が飛ぶ**（spec §9-4）。
+    上場20営業日未満で欠損。円換算しないと日米比較にならない（J19）。
+  correlated_with: [J02, J03, J05, J06, J13, J23]
+  economic_rationale: >-
+    構造的制約であり、263AT のユニバース定義そのもの（spec §6）。
+    閾値600万円は「60万円の建玉を参加率10%で3日以内に処分できる」から逆算している。
+    **資金規模を変えたら必ず再計算する。** OSAP の `DolVol` として予測力も報告されているが、
+    ここでは予測ではなく執行可能性の制約として使う。
+  evidence_tier: T1
+  references:
+    - "https://www.openassetpricing.com/"
+    - "OSAP DolVol — Past trading volume, t=2.9"
+  markets: [JP, US]
+  review: {status: verified}
+
+J02:
+  formula: "target_position_jpy / (J01 * participation_limit)"
+  inputs: [J01, target_position_jpy]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "J01 = 0（出来高ゼロ）なら無限大 → 無条件で不合格。J10 でも捕捉される。"
+  missing_bias: J01 の欠損を継承する。参加率上限（10%）は仮定であり実測されていない。
+  correlated_with: [J01, J03, J10, J13, I24]
+  economic_rationale: >-
+    構造的制約。LAW-80「自分が売る時に買う人がいるか」の実装。
+    **出口が確保できないサイズは最初から建てない。** 保有期間が長い設計なので、
+    建てる時より「危機時に売れるか」が効く。I24（流動性調整後リスク）の入力でもある。
+    OQ-17 の実測で、マイクロキャップ除外で死ぬ9シグナルの大半が流動性系だったことは、
+    **このゲートがエッジそのものを削っている可能性**を示している（OQ-23 で較正する）。
+  evidence_tier: T3
+  references:
+    - "構造的制約。マーケットインパクトの平方根則（S02）と対"
+  markets: [JP, US]
+  review: {status: verified}
+
+J10:
+  formula: "count(VOLUME == 0, 直近60営業日)"
+  inputs: [VOLUME]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（カウント）"
+  missing_bias: >-
+    売買停止日を出来高ゼロと誤カウントしないこと（spec §3）。
+    **米国のデータソースによっては出来高ゼロ日が行として存在しない**ため、
+    日付の連続性を取引所カレンダーで検証する必要がある。
+  correlated_with: [J01, J02, J03, J18]
+  economic_rationale: >-
+    構造的制約。**1日でも約定がない銘柄は、売りたい日に売れない可能性が実証されている。**
+    OSAP の `zerotrade1M/6M/12M` は予測力を持つ（t=3.5-4.4）が、
+    それは「非流動性プレミアム」であり、**個人が取りに行くべきプレミアムではない**
+    （売れないリスクの対価であって、フリーランチではない）。
+  evidence_tier: T1
+  references:
+    - "https://www.openassetpricing.com/"
+    - "OSAP zerotrade12M t=4.4 / zerotrade6M t=4.1 / zerotrade1M t=3.5"
+  markets: [JP, US]
+  review: {status: verified}
+
+J13:
+  formula: "target_position_jpy / (J01 * participation_limit)（買い側）"
+  inputs: [J01, target_position_jpy]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "J02 と同じ。J01=0 なら無条件で不合格。"
+  missing_bias: J01 の欠損を継承。
+  correlated_with: [J01, J02, J03]
+  economic_rationale: >-
+    構造的制約。J02（出口）の入口版。**建てるのに5営業日以上かかると、
+    建てている最中に価格が動いて想定エントリー価格が崩れる。**
+    バックテストは瞬時約定を仮定するため、この乖離はバックテストに現れない誤差になる。
+  evidence_tier: T3
+  references:
+    - "構造的制約。S02（マーケットインパクト）と同根"
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- K 需給（米国） -----------------------------------------------------------
+
+K44:
+  formula: "1 if Reg SHO threshold list に掲載中、または解除後30日以内 else 0"
+  inputs: [reg_sho_threshold_list]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: 米国のみ。日本には対応する制度がないので日本株では常に欠損＝適用外。
+  correlated_with: [K19, K20, K21, K31, K45]
+  economic_rationale: >-
+    構造的制約。決済不履行（fail to deliver）が継続する銘柄は、
+    **株券の貸借が逼迫しているか、市場構造に問題がある。**
+    どちらにせよ、価格形成が正常でない状態で長期保有すべきではない。
+  evidence_tier: T3
+  references:
+    - "SEC Regulation SHO Rule 203(b)(3)"
+  markets: [US]
+  review: {status: verified}
+
+K45:
+  formula: "1 if 空売り機関のレポートが公表され、72時間以内に精査が完了していない else 0"
+  inputs: [NEWS, short_seller_reports]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: >-
+    **検出はニュース監視に依存する。** 小型株ほど報道されにくく、
+    逆に小型株ほど標的にされやすいので、**見逃しが最も起きやすい領域で最も危険**という
+    最悪の組み合わせになる。T36（発信源の信頼度）と併せて監視範囲を広げる必要がある。
+  correlated_with: [K19, K21, K44, E04, E12]
+  economic_rationale: >-
+    構造的制約。空売り機関は自らの資金を賭けて数ヶ月〜数年の調査を行っており、
+    **個人が数時間でできる分析より情報量が多い。** 内容が正しいかは別として、
+    「無視する」という選択肢は合理的でない。判定できない場合は除外を維持する（LAW-61）。
+  evidence_tier: T3
+  references:
+    - "構造的制約。レポートの主張の当否ではなく、精査が済むまで判断を保留するという規律"
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- N カタリスト -------------------------------------------------------------
+
+N23:
+  formula: "1 if 整理銘柄・監理銘柄に指定、または上場廃止基準に抵触して改善期間中 else 0"
+  inputs: [TD_disclosure, exchange_designation]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: >-
+    日本は東証が明示的に指定するので機械的に取れる。**米国は取引所ごとに
+    deficiency notice の形式が違い、8-K に埋もれる**ため検出率が下がる。
+  correlated_with: [N44, N22, D13, J06, K34]
+  economic_rationale: >-
+    構造的制約。上場廃止は**最悪のテールリスク**で、廃止後の売却は極端に困難になる
+    （DF-01 で実測した通り、廃止銘柄は価格データすら消える）。
+    改善期間中は「改善すれば戻る」という賭けになるが、それは 263AT の設計思想
+    （多数の弱いシグナルの合成）と別物のイベント投資であり、混ぜるべきでない。
+  evidence_tier: T3
+  references:
+    - "東証 有価証券上場規程 第2章第4節（上場廃止基準）"
+  markets: [JP, US]
+  review: {status: verified}
+
+N44:
+  formula: "min(流通株式時価総額/基準, 流通株式比率/基準, 株主数/基準)"
+  inputs: [float_market_cap, float_ratio, shareholder_count]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "基準値は制度で定まっているのでゼロにならない。"
+  missing_bias: >-
+    流通株式時価総額と株主数は**年1回の開示**なので最大1年古い（Z04）。
+    株主数の急減（K34）は基準抵触の先行指標だが、これも年次。**先行指標としての解像度が粗い。**
+  correlated_with: [N23, J06, J07, K34, K36]
+  economic_rationale: >-
+    構造的制約。N23（抵触してから）では遅い。**余裕度が薄い銘柄を先に外す。**
+    東証の市場区分見直しで基準が厳格化しており、スタンダード市場の小型株では
+    現実的なリスクになっている。ただし**抵触リスクがある企業ほど割安に見える**ため、
+    A カテゴリと逆相関する典型的なバリュートラップ要因。
+  evidence_tier: T3
+  references:
+    - "https://www.jpx.co.jp/english/equities/follow-up/02.html"
+    - "東証 有価証券上場規程（上場維持基準）"
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- T LLM 派生 ---------------------------------------------------------------
+
+T13:
+  formula: "1 if LLM が (a) 事業を3文で説明でき かつ (b) 収益ドライバーを3つ特定できる else 0"
+  inputs: [company_description, financial_statements]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: >-
+    **開示が薄い企業ほど説明できず不合格になる。** それは「理解できない」の正しい検出でもあるが、
+    同時に「無名だが良い企業」を外す方向にも働く。O カテゴリ（ネグレクト＝加点）と
+    **正面から衝突するゲート**であり、閾値の設定が戦略の性格を決める（OQ-23 で較正）。
+  correlated_with: [T10, T14, T21, E17, O09]
+  economic_rationale: >-
+    構造的制約。LAW-61（Munger）の実装。**理解していない事業の株価が下がったとき、
+    買い増すべきか売るべきかを判断できない。** 判断できないポジションは、
+    結局は最も感情的な瞬間に処分することになる（LAW-98 パニック売り）。
+    263AT は機械的に運用するが、テーゼ検証（T25）と最終承認は人間が行うので、
+    人間が理解できることは要件である。
+  evidence_tier: T3
+  references:
+    - "構造的制約。統計的エッジではなく運用規律"
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- U 業種固有 ---------------------------------------------------------------
+
+U08:
+  formula: "ソルベンシー・マージン総額 / (リスクの合計額 * 0.5) * 100"
+  inputs: [solvency_margin, total_risk]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: >-
+    日本の算出方法は金融庁告示で定まっており、**米国の RBC 比率とは計算式が違う**。
+    日米で直接比較してはいけない。それぞれの規制基準（日本200%、米国 RBC 200%）で判定する。
+  zero_denominator_policy: "リスク合計額 > 0。ゼロなら判定不能として欠損。"
+  missing_bias: "保険業にのみ適用。他業種では常に欠損＝適用外（U カテゴリの設計通り）。"
+  correlated_with: [U06, U07, D02, D08]
+  economic_rationale: >-
+    構造的制約。**規制当局が介入する水準を割った保険会社は、
+    増資・事業縮小・最悪は破綻に至る。** 保険業は通常の財務指標（D01/D02）が
+    そのままでは意味を持たないため、業種固有のゲートが必須になる。
+  evidence_tier: T3
+  references:
+    - "日本: 保険業法第130条、平成8年大蔵省告示第50号"
+    - "米国: NAIC Risk-Based Capital"
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- Z メタ -------------------------------------------------------------------
+
+Z14:
+  formula: "assert all(available_at <= t) for すべての参照データ"
+  inputs: [available_at, evaluation_timestamp]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（真偽検査）"
+  missing_bias: >-
+    **available_at が記録されていないデータは検査できない。** つまり
+    「検査に通った」ではなく「検査できなかった」状態が、通過として扱われる危険がある。
+    available_at が無いソースは、それ自体を不合格として扱う。
+  correlated_with: [Z04, Z05, Z06, Z07]
+  economic_rationale: >-
+    これはパラメータというより**検証機構**である。統計的エッジとは無関係。
+    PIT 違反は 1件でも通すと、そのバックテスト結果全体が信用できなくなる
+    （catalog §8-1）。実測では companyfacts で同一 (tag, 期間) の 91% が複数回提出され、
+    AAPL の2009年6月期の純利益は 1,229 と 1,828 で 48.7% 違った。
+    **素直に読むと必ず踏む罠**なので、検査を自動化する以外に防ぐ方法がない。
+  evidence_tier: T3
+  references:
+    - "https://www.hec.ca/finance/Fichier/McLean.pdf"
+    - "実測: docs/03_data_feasibility.md §2.1"
+  markets: [JP, US]
+  review: {status: verified}

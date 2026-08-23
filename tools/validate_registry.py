@@ -165,9 +165,12 @@ def main():
             for k in VERIFIED_REQUIRED:
                 if e[k] in (None, [], ""):
                     err(e, "verified but %s is empty" % k)
-            for r in e["references"]:
-                if not (r.startswith("http") or "未確認" in r or r.startswith("原論文")):
-                    warn(e, "reference is not a URL and not marked as unverified: %r" % r[:50])
+            # URL 以外でも、法令・規則・原論文の明示・実測結果への参照は正当な出典とする。
+            # 「構造的制約」だけは根拠として弱いので、他に出典が1つも無い場合のみ警告する。
+            OK_PREFIX = ("http", "原論文", "日本:", "米国:", "SEC ", "東証", "実測:", "OSAP ")
+            urls = [r for r in e["references"] if isinstance(r, str) and r.startswith(OK_PREFIX)]
+            if not urls:
+                warn(e, "根拠が構造的判断のみ（実証出典なし）— 欠陥ではないが、「なぜそう決めたか」が人の判断に依存していることを明示するための印")
 
     # --- 法則とパラメータの対応 -------------------------------------------
     # AssetGrowth の漏れ（LAW-32 を★★★としながらパラメータが1つも無かった）の再発防止。

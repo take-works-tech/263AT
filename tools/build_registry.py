@@ -84,6 +84,49 @@ Q_FIELD = {
 }
 
 
+
+def load_yaml_merging_dups(path):
+    """
+    トップレベルの重複キーを **黙って後勝ちにせず、深くマージする** ローダー。
+
+    PyYAML の既定は後勝ちなので、_overrides.yaml に同じ ID を2回書くと
+    先に書いた項目（例: gate_policy）が音もなく消える。実際に消えて気づいた。
+    「静かに壊れる」のが最悪なので、マージしたうえで件数を報告する。
+    """
+    if not path.exists():
+        return {}, []
+    merged, dups = {}, []
+
+    class _Loader(yaml.SafeLoader):
+        pass
+
+    def _mapping(loader, node, deep=False):
+        loader.flatten_mapping(node)
+        out = {}
+        for k_node, v_node in node.value:
+            k = loader.construct_object(k_node, deep=True)
+            v = loader.construct_object(v_node, deep=True)
+            if k in out and isinstance(out[k], dict) and isinstance(v, dict):
+                out[k].update(v)
+            else:
+                out[k] = v
+        return out
+
+    _Loader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _mapping)
+
+    # トップレベルの重複を検出するため、ドキュメントを行単位で走査する
+    seen = set()
+    for line in path.read_text(encoding="utf-8").splitlines():
+        m = re.match(r"^([A-Z]\d{2}):\s*$", line)
+        if m:
+            if m.group(1) in seen:
+                dups.append(m.group(1))
+            seen.add(m.group(1))
+
+    merged = yaml.load(path.read_text(encoding="utf-8"), Loader=_Loader) or {}
+    return merged, sorted(set(dups))
+
+
 def clean(s: str) -> str:
     s = s.strip()
     s = re.sub(r"~~(.+?)~~", r"\1", s)
@@ -314,9 +357,11 @@ def main():
     args = ap.parse_args()
 
     D = yaml.safe_load(DEFAULTS_F.read_text(encoding="utf-8"))
-    OV_OAP = (yaml.safe_load(OVERRIDES_OAP_F.read_text(encoding="utf-8"))
-              if OVERRIDES_OAP_F.exists() else {}) or {}
-    OV = yaml.safe_load(OVERRIDES_F.read_text(encoding="utf-8")) or {}
+    OV_OAP, dup_oap = load_yaml_merging_dups(OVERRIDES_OAP_F)
+    OV, dup_ov = load_yaml_merging_dups(OVERRIDES_F)
+    if dup_ov or dup_oap:
+        print("重複キーをマージした（後勝ちで消える事故を防止）: %s"
+              % ", ".join(dup_ov + dup_oap))
     rows, anomalies = extract(CATALOG.read_text(encoding="utf-8"))
 
     by_cat, cat_names, unknown_all = collections.OrderedDict(), {}, []

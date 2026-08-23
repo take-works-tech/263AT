@@ -12,8 +12,11 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: (有利子負債 - 現金) / EBITDA
-  formula: null
-  inputs: null
+  formula: (IBD_incl_lease - CASH) / EBITDA_TTM
+  inputs:
+  - IBD
+  - CASH
+  - EBITDA
   sign: negative
   buy_class: gate
   sell_class: main
@@ -26,27 +29,31 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T1
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: 分子の IBD にリース負債を含める（spec §2 の既定）。IFRS16 / ASC842 適用前後で不連続になるため Z07 の会計基準変更フラグが立つ年は判定の信頼度を下げる。分母の EBITDA は日本基準ののれん償却を 足し戻すので、基準間で比較可能な数少ない指標（A06 と同じ理由）。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: EBITDA <= 0 のとき比率は無意味。**欠損にせず「ゲート不合格」として扱う**（ND>0 の場合）。 ネットキャッシュ企業（ND<0）で EBITDA<=0 の場合は D07 と D22 で判定する。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: リース負債の開示がない旧基準の期間で IBD が過小になる。**古い期間ほどレバレッジが軽く見える** ため、時系列でゲート通過率が変化する。Z07 と併せて監視する。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - D03
+  - D04
+  - D19
+  - D25
+  - B39
+  economic_rationale: 統計的エッジではなく構造的制約。過大な負債は (a) 金利上昇局面で利払いが利益を食い、 (b) 借換ができないと即座に破綻する、という二重のテールリスクを持つ。 バリュー指標（A カテゴリ）は負債の多い企業ほど低く出るため、ゲートを掛けないと 「安いのには理由がある」企業を体系的に買い集めることになる（バリュートラップ）。 LAW-40 の実装。
   references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP BookLeverage — Fama and French 1992, JF（OSAP再現 t=5.3, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - https://images.aqr.com/-/media/AQR/Documents/Insights/Journal-Article/The-Limits-to-Arbitrage-Revisited-The-Accrual-and-Asset-Growth-Anomalies.pdf
+  - 構造的制約であり、単独のアノマリー論文に基づくものではない
   notes: 3超で警戒、5超で原則除外（業種調整あり）。金利上昇局面では基準を厳しく
   notes_extra: null
   provenance:
@@ -60,24 +67,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
     gate_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D02
   name_ja: 自己資本比率
@@ -85,8 +93,10 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: 自己資本 / 総資産
-  formula: null
-  inputs: null
+  formula: EQ / TA
+  inputs:
+  - EQ
+  - TA
   sign: positive
   buy_class: gate
   sell_class: useful
@@ -99,24 +109,29 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: EQ は非支配株主持分と新株予約権を除く（spec §2）。IFRS はのれんを資産に残すため 分母 TA が大きくなり自己資本比率が低く出る。**業種内パーセンタイルで判定するので影響は限定的**。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: TA > 0 なので割り算は問題ない。EQ<0（債務超過）は負値のまま保持し、無条件で不合格。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 金融・不動産は構造的に低いので、業種内判定でないと当該業種が丸ごと除外される。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D01
+  - D03
+  - D08
+  - D09
+  economic_rationale: 構造的制約。自己資本は損失を吸収する緩衝であり、薄いほど小さな損失で債務超過に至る。 業種によって適正水準が大きく違う（銀行は数%が正常、無借金メーカーは80%超もある）ため、 絶対値ではなく業種内順位で見るのが本質。
+  references:
+  - 構造的制約。Altman Z（D08）の構成要素でもある
   notes: 金融・不動産は別基準。業種内パーセンタイルで判定
   notes_extra: null
   provenance:
@@ -130,23 +145,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     gate_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D03
   name_ja: D/Eレシオ
@@ -227,8 +244,10 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: EBIT / 支払利息
-  formula: null
-  inputs: null
+  formula: EBIT_TTM / INTEREST_TTM
+  inputs:
+  - EBIT
+  - INTEREST
   sign: positive
   buy_class: gate
   sell_class: main
@@ -241,24 +260,29 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: 支払利息の範囲が基準で異なる（リース利息を含むか等）。IFRS16 適用企業はリース利息が 支払利息に計上されるためカバレッジが低く出る。D19 と併せて解釈する。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**実質無借金（支払利息が営業利益の1%未満）の企業では分母が小さすぎて比率が発散する。 この判定を適用せず、D01/D07 に委ねる。** これを忘れると優良な無借金企業が異常値で弾かれる。'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 支払利息を独立開示しない企業で欠損。小型株にやや多い。欠損時は D01 で代替判定する。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D01
+  - D03
+  - D25
+  - D22
+  economic_rationale: 構造的制約。利払いは契約上の義務であり、業績が悪化しても減らせない。 カバレッジが2倍を切ると、営業利益が半減しただけで利払いができなくなる。 **金利上昇局面で最初に壊れる指標**であり、日本の金利正常化局面では特に重要（D25 と対）。
+  references:
+  - 構造的制約。格付機関の与信判断で標準的に使われる指標
   notes: 2倍未満は危険水域。金利上昇時に最初に壊れる指標
   notes_extra: null
   provenance:
@@ -272,23 +296,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     gate_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D05
   name_ja: 流動比率
@@ -432,8 +458,10 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: 現金同等物 / 1年内返済予定の有利子負債
-  formula: null
-  inputs: null
+  formula: CASH / DEBT_ST
+  inputs:
+  - CASH
+  - DEBT_ST
   sign: positive
   buy_class: gate
   sell_class: main
@@ -446,24 +474,31 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: CASH に短期有価証券を含める（spec §2）。DEBT_ST に1年内返済予定の長期借入金を含める。 区分の仕方が企業により異なるので、Z05（ソース間不一致）で監視する。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: DEBT_ST = 0（1年内の返済義務なし）の場合は**合格として扱う**。欠損にしない。 ゼロ除算を欠損にすると、最も財務が健全な企業が弾かれるという逆転が起きる。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 短期借入の内訳を開示しない企業で欠損。日本の小型株にやや多い。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D01
+  - D04
+  - D05
+  - D06
+  - D22
+  - D11
+  economic_rationale: 構造的制約。**直近1年の資金繰りが回るかという最も差し迫った問い**。 利益が出ていても現金が尽きれば倒産する（黒字倒産）。 D01（レバレッジの水準）が中期的な問題を測るのに対し、これは短期の生死を測る。
+  references:
+  - 構造的制約。流動性リスクの標準的な測定
   notes: 直近の資金繰り。1未満は借換リスク
   notes_extra: null
   provenance:
@@ -477,23 +512,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     gate_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D08
   name_ja: Altman Z-Score
@@ -501,8 +538,14 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: 5変数の線形結合（製造業版 / 非製造業版 / 新興国版を使い分け）
-  formula: null
-  inputs: null
+  formula: 1.2*WC/TA + 1.4*RE/TA + 3.3*EBIT/TA + 0.6*MCAP/TL + 1.0*REV/TA（製造業版）
+  inputs:
+  - TA
+  - TL
+  - EQ
+  - EBIT
+  - REV
+  - MCAP
   sign: positive
   buy_class: gate
   sell_class: main
@@ -515,24 +558,32 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: 係数は米国の1960年代のデータで推定されたもの。**日本企業への適用は係数の再推定が望ましい**。 それまでは D09（Ohlson O）との合議を優先し、単独では判定しない。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: TA > 0、TL > 0 なので通常は問題ない。TL=0（完全無借金）は合格扱い。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 利益剰余金（RE）の開示形式が国・基準で異なるため、抽出漏れが起きる。 **業種版を間違えると全く別の判定になる**（製造業版 1.8 / 非製造業版 Z'' 1.1）ので、 業種分類の欠損は即ゲート判定不能として扱う。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D01
+  - D02
+  - D09
+  - D10
+  - B39
+  economic_rationale: 倒産確率の要約統計量。単独指標より複合の方が頑健という点で A32（複合バリュー）と同じ思想。 263AT では**加点ではなくゲート**に使う。低スコアの企業を「安いから買う」と体系的に バリュートラップを踏むため（LAW-40）。
+  references:
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - '原論文: Altman (1968) Journal of Finance 23(4) 589-609'
+  - https://journals.sagepub.com/doi/10.1177/21582440251386174
   notes: 1.8未満で危険圏。業種版を間違えると無意味。日本企業への適用は係数の再推定が望ましい（LAW-40）
   notes_extra: null
   provenance:
@@ -546,23 +597,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     gate_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D09
   name_ja: Ohlson O-Score
@@ -570,8 +623,14 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: ロジット型の倒産確率
-  formula: null
-  inputs: null
+  formula: ロジット型の9変数線形結合 → 倒産確率 P = 1/(1+exp(-O))
+  inputs:
+  - TA
+  - TL
+  - EQ
+  - NI
+  - CFO
+  - REV
   sign: negative
   buy_class: gate
   sell_class: useful
@@ -590,21 +649,25 @@
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: D08 と同じく米国データで推定された係数。日本への適用は要再推定。 OSAP に `OScore` として収録されており再現可能。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: TA > 0。債務超過（EQ<0）はモデルが想定している状態なのでそのまま計算する。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 過去2期の純利益が必要なため、上場2年未満の企業で欠損。N24 と方向が一致する。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - D08
+  - D01
+  - D02
+  - D10
+  economic_rationale: D08 より統計的な設計（判別分析でなくロジット）で、倒産確率を直接推定する。 **D08 と結論が食い違ったときは保守側（厳しい方）を採る**という運用にすることで、 片方のモデルの弱点を他方が補う。
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP OScore — Dichev 1998, JF（OSAP再現 t=3.4, 月次1.17%, 品質=1_good, 予測力=1_clear）
+  - '原論文: Ohlson (1980) Journal of Accounting Research 18(1) 109-131'
   notes: Z-Score より統計的な設計。両方持って合議させる
   notes_extra: null
   provenance:
@@ -618,24 +681,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
     gate_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D10
   name_ja: Merton Distance to Default
@@ -849,8 +913,10 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: GC注記・重要事象の記載有無
-  formula: null
-  inputs: null
+  formula: 1 if 継続企業の前提に関する注記 or 重要事象等の記載あり else 0
+  inputs:
+  - EDINET_notes
+  - SEC_going_concern
   sign: negative
   buy_class: gate
   sell_class: gate
@@ -864,24 +930,33 @@
   - SEC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: consolidated
-  accounting_standard_note: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: 日本は「継続企業の前提に関する注記」と「重要事象等」の2段階。米国は going concern の substantial doubt 開示。**日本の「重要事象等」は注記より軽い段階だが、263AT では同等に扱う** （見逃すコストの方が大きい）。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 注記の抽出はテキスト解析に依存するため、開示形式が非定型な企業で取りこぼす。 **取りこぼしは「合格」側に倒れる＝危険な方向**なので、T33（開示の重要度分類）の精度が そのままこのゲートの信頼性になる。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D08
+  - D09
+  - D22
+  - D23
+  - E22
+  - E24
+  - N23
+  economic_rationale: 構造的制約。**監査人と経営者自身が「この会社は続かないかもしれない」と書いた**という、 外部者が得られる最も強い警告。統計的な優位性の話ではなく、 これを無視して買う合理的な理由が存在しない。
+  references:
+  - '日本: 財務諸表等規則第8条の27 / 監査基準委員会報告書570'
+  - '米国: ASU 2014-15 (ASC 205-40)'
   notes: 記載があれば即座に除外。例外なし
   notes_extra: null
   provenance:
@@ -895,23 +970,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     gate_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D14
   name_ja: 信用格付 / 格付変更
@@ -1469,8 +1546,12 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: (現金 + コミットメントライン未使用枠) / 月次固定費
-  formula: null
-  inputs: null
+  formula: (CASH + 未使用コミットメントライン) / (月次固定費)
+  inputs:
+  - CASH
+  - commitment_line
+  - SGA
+  - INTEREST
   sign: positive
   buy_class: gate
   sell_class: main
@@ -1484,24 +1565,29 @@
   - LLM
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: コミットメントラインの未使用枠は注記からの抽出になり、開示形式が定型でない。 月次固定費は販管費から変動費を分離する必要があり、推定が入る（B20 と同じ困難）。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 固定費の推定がゼロ・負になる場合は判定不能として欠損にし、D07 で代替する。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: コミットメントラインの開示は大企業に偏る。**小型株ほど枠が無いのか開示が無いのか区別できない** ため、欠損を「枠なし」と扱うと小型株が不当に厳しく判定される。欠損は判定不能として扱う。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - D07
+  - D23
+  - D15
+  - D04
+  economic_rationale: 構造的制約。**赤字企業が何ヶ月生き延びられるか**を直接測る。 黒字企業には適用しない（営業CFが2期連続で負の企業にのみ適用）。 小型グロース株の最大の下落要因である増資（F05）の事前予測にもなる（D15 と対）。
+  references:
+  - 構造的制約。スタートアップのランウェイ分析と同じ考え方
   notes: 何ヶ月生き延びられるか。赤字企業の評価には必須
   notes_extra: null
   provenance:
@@ -1515,23 +1601,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     gate_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: D23
   name_ja: 営業CFの連続黒字年数
@@ -1744,8 +1832,9 @@
   category_name: 財務健全性・破綻リスク
   subsection: null
   definition: 信用格付が引き下げられたか（直近6ヶ月）
-  formula: null
-  inputs: null
+  formula: 1 if 信用格付が直近6ヶ月に引き下げられた else 0
+  inputs:
+  - credit_rating_history
   sign: negative
   buy_class: gate
   sell_class: main
@@ -1758,27 +1847,32 @@
   - 手
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T3
+  evidence_tier: T1
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: POINT
   consolidation: na
-  accounting_standard_note: null
+  accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本の小型株の大半は無格付**。欠損が母集団の大半を占めるため、 このゲートは実質的に大型株・米国株にしか効かない。**欠損を不合格にしてはいけない** （ユニバースが壊滅する）。Z03 で偏りを監視する。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - D08
+  - D09
+  - D10
+  - D17
+  - D01
+  economic_rationale: OSAP `CredRatDG` の t=11.0 は Predictor 全体で最上位クラス。 格付機関は企業の非公開情報にアクセスできるため、格下げは**外部者が得られる情報の中で 最も情報量が多いイベントの一つ**。D14（格付水準）は既に価格に織り込まれているが、 格下げという**変化**には未織り込みの情報が残る（B18/B29 と同じ「水準より方向」の構図）。
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP CredRatDG — Dichev and Piotroski 2001, JF（OSAP再現 t=11.0, 月次1.316666667%, 品質=4_lack_data, 予測力=1_clear）
+  - OSAP CredRatDG — Credit Rating Downgrade, t=11.0
   notes: OSAP CredRatDG t=11.0。この一覧で最上位クラスの t 値。D14 は水準だけだったが、変化（格下げ）が本体
   notes_extra: null
   provenance:
@@ -1792,22 +1886,23 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
     gate_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1

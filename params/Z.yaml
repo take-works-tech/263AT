@@ -883,8 +883,10 @@
   category_name: メタ・データ品質
   subsection: null
   definition: 発表日より前のデータ参照を検知するテスト
-  formula: null
-  inputs: null
+  formula: assert all(available_at <= t) for すべての参照データ
+  inputs:
+  - available_at
+  - evaluation_timestamp
   sign: negative
   buy_class: gate
   sell_class: gate
@@ -897,7 +899,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -906,15 +908,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（真偽検査）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**available_at が記録されていないデータは検査できない。** つまり 「検査に通った」ではなく「検査できなかった」状態が、通過として扱われる危険がある。 available_at が無いソースは、それ自体を不合格として扱う。'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Z04
+  - Z05
+  - Z06
+  - Z07
+  economic_rationale: これはパラメータというより**検証機構**である。統計的エッジとは無関係。 PIT 違反は 1件でも通すと、そのバックテスト結果全体が信用できなくなる （catalog §8-1）。実測では companyfacts で同一 (tag, 期間) の 91% が複数回提出され、 AAPL の2009年6月期の純利益は 1,229 と 1,828 で 48.7% 違った。 **素直に読むと必ず踏む罠**なので、検査を自動化する以外に防ぐ方法がない。
+  references:
+  - https://www.hec.ca/finance/Fichier/McLean.pdf
+  - '実測: docs/03_data_feasibility.md §2.1'
   notes: §8-1 の自動化。実装必須。これがないと全ての検証結果が信用できない
   notes_extra: null
   provenance:
@@ -928,20 +936,23 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     gate_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
