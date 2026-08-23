@@ -9,17 +9,17 @@ generated_from:
 generated_by: tools/build_registry.py
 generated_on: '2026-08-23'
 total_parameters: 769
-verified: 82
-draft: 687
+verified: 118
+draft: 651
 open_questions_by_id:
-  q01: 244
-  q04: 244
-  q05: 254
-  q06: 687
-  q09: 687
-  q10: 687
-  q11: 536
-  q12: 631
+  q01: 208
+  q04: 208
+  q05: 233
+  q06: 651
+  q09: 651
+  q10: 651
+  q12: 595
+  q11: 513
   q08: 53
 categories:
 - letter: A

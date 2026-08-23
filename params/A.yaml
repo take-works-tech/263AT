@@ -92,8 +92,10 @@
   category_name: バリュエーション
   subsection: null
   definition: EPS_会社予想 / 株価
-  formula: null
-  inputs: null
+  formula: EPS_GUIDE / PRICE
+  inputs:
+  - EPS_guidance
+  - PRICE
   sign: positive
   buy_class: main
   sell_class: useful
@@ -107,24 +109,33 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: GUIDE_CO
+  consolidation: consolidated
+  accounting_standard_note: '**日本は会社予想が義務開示、米国のガイダンスは任意。** 同じ「予想益回り」でも 日本は全銘柄で会社予想が取れ、米国は出さない企業が多くコンセンサスで代替することになる。 **同一 ID で日米の中身が違うのは危険**なので、GUIDE_CO 版と GUIDE_CONS 版を 別 ID に分けるべき（OQ-22 と同根）。現状は GUIDE_CO を割り当てている。'
   pit_lag_days: 1
-  zero_denominator_policy: null
+  zero_denominator_policy: PRICE>0。予想が赤字なら負のまま保持（A01 と同じく E/P の向きで持つ）。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**米国では予想を出さない企業が体系的に欠損する。** 出さないのは不確実性が高い企業に 偏るので、欠損自体が弱いネガティブ情報を持つ。日本では義務開示なのでほぼ欠損しない — **これは日本株を扱う数少ない構造的な優位**（LAW-114）。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - A01
+  - A17
+  - A26
+  - N09
+  - N31
+  - N10
+  economic_rationale: A01（実績益回り）が過去を見るのに対し、これは市場が織り込むべき将来を見る。 日本では会社予想が保守的に出される傾向があり（N09）、**予想益回りが高い銘柄の中には 「保守的な予想を出す企業」が混じる**。N09（予想の保守性）で調整して初めて実力が見える。
+  references:
+  - https://www.openassetpricing.com/
+  - OSAP sfe — Earnings Forecast to price, t=5.0
+  - https://www2.econ.osaka-u.ac.jp/econ_society/dp/2125.pdf
   notes: 日本は会社予想、米国はコンセンサス。予想の出所を必ず分けて持つ
   notes_extra: null
   provenance:
@@ -138,22 +149,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: A03
   name_ja: B/P（PBR逆数）
@@ -699,8 +712,11 @@
   category_name: バリュエーション
   subsection: null
   definition: (配当総額 + 自社株買い実額) / 時価総額
-  formula: null
-  inputs: null
+  formula: (DIV_PAID_TTM + BUYBACK_TTM) / MCAP
+  inputs:
+  - DIV_PAID
+  - BUYBACK
+  - MCAP
   sign: positive
   buy_class: main
   sell_class: useful
@@ -713,28 +729,34 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T2
+  evidence_tier: T1
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: 自社株買いは**キャッシュフロー計算書の実額**を使う（発表額ではない。F03/F04 参照）。 日本は月次で自己株式取得状況が開示されるので合算が要る。米国は 10-Q から直接取れる。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: MCAP>0。無配・無買戻しはゼロで正当（欠損にしない）。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本は自社株買いの実額集計に月次開示のスクレイピングが要る**ので、 取得が不安定な小型株で欠損しやすい。欠損を「還元ゼロ」と扱うと過小評価になる。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - A11
+  - A32
+  - F03
+  - F04
+  - F10
+  - F26
+  - F31
+  economic_rationale: 配当単独（A11）より予測力が高い。理由は、企業が株主に現金を返す方法は配当と自社株買いの 2つあり、片方だけ見ると還元姿勢を測り損ねるから。O'Shaughnessy の大規模検証では 1928-2009 で大型株を年1.18%上回り、自社株買いを加えるとさらに1.92%上乗せされた（LAW-120）。 **F26（純外部資金調達）と符号が逆の同じ概念**で、企業が現金を出しているか入れているかを測る。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP NetPayoutYield — Boudoukh et al. 2007, JF（OSAP再現 t=2.8, 月次0.37%, 品質=2_fair, 予測力=1_clear）
-  - OSAP PayoutYield — Boudoukh et al. 2007, JF（OSAP再現 t=3.9, 月次0.28%, 品質=2_fair, 予測力=1_clear）
+  - OSAP NetPayoutYield t=2.8 / PayoutYield t=3.9
+  - https://mebfaber.com/wp-content/uploads/2023/05/Shareholder-Yield.pdf
   notes: 配当単独より予測力が高い（LAW-39）。自社株買いは「発表」でなく「実額」を使う
   notes_extra: null
   provenance:
@@ -748,23 +770,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: A11
   name_ja: 配当利回り
@@ -1122,8 +1145,11 @@
   category_name: バリュエーション
   subsection: null
   definition: (現金 + 短期有価証券 - 有利子負債) / 時価総額
-  formula: null
-  inputs: null
+  formula: (CASH - IBD) / MCAP
+  inputs:
+  - CASH
+  - IBD
+  - MCAP
   sign: positive
   buy_class: main
   sell_class: useful
@@ -1143,20 +1169,27 @@
   industries: null
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: CASH に短期有価証券を含め、IBD にリース負債を含める（spec §2）。 **IFRS16 適用でリース負債が乗ると、同じ企業のネットキャッシュが突然マイナスに転じる。** Z07 のフラグ年は判定を保留する。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: MCAP>0。負値（ネットデット）はそのまま保持する。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 有利子負債の内訳を開示しない企業で欠損。小型株にやや多い。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - A17
+  - A15
+  - A29
+  - D01
+  - D07
+  - M10
+  - N14
+  economic_rationale: '**日本の小型株の代表的な歪み。** 時価総額を超える現金を持つ企業が実在する。 M10（アクティビスト標的スコア）と N14（TOB期待）の主要な構成要素でもある。 ただし裏面があり、**現金を貯め込むこと自体は資本効率が悪い**（B04 が薄まる）。 「安いから買う」だけでは、万年割安のまま放置される可能性が高い。 **東証の資本コスト要請（LAW-47）とアクティビスト圧力（LAW-44）という 是正メカニズムが働き始めた今だから意味を持つ、時限的な性格のパラメータ。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP Cash — Palazzo 2012, JFE（OSAP再現 t=2.1, 月次0.69%, 品質=1_good, 予測力=1_clear）
+  - OSAP Cash — Cash to assets, t=2.1
+  - https://corpgov.law.harvard.edu/2025/10/21/tokyo-stock-exchange-initiative-on-cost-of-capital-and-stock-price-conscious-management/
   notes: 日本の小型株の代表的な歪み。TOB・アクティビストのターゲットにもなる（M10, N13）
   notes_extra: null
   provenance:
@@ -1170,23 +1203,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: A17
   name_ja: 実質PER
@@ -1194,8 +1228,12 @@
   category_name: バリュエーション
   subsection: null
   definition: (時価総額 - ネットキャッシュ) / 純利益 の逆数
-  formula: null
-  inputs: null
+  formula: NI_TTM / (MCAP - (CASH - IBD))
+  inputs:
+  - NI
+  - MCAP
+  - CASH
+  - IBD
   sign: positive
   buy_class: main
   sell_class: useful
@@ -1208,24 +1246,30 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: A01 と A16 の会計基準差を継承。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '**分母（実質事業価値）がゼロ・負になる企業が実在する** — ネットキャッシュが時価総額を 超える場合。そのとき比率は意味を失うので**欠損にし、A16 で評価する**。 負のまま保持すると「実質PER が極端にマイナス＝超割安」という誤判定になる。'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: ネットキャッシュ潤沢な小型株で欠損しやすい。**263AT が狙う銘柄と重なる**（B03 と同型）。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - A01
+  - A16
+  - A37
+  - A06
+  economic_rationale: A16 を反映した「本当の事業価値ベースの益回り」。現金は事業リスクを負っていないので、 事業の収益力を測るなら控除すべきという発想。 **ただし控除しすぎると、現金を持つこと自体のコスト（B04 の希薄化）を無視することになる。** A01 と A17 を両方持ち、乖離が大きい銘柄を「現金が論点の銘柄」として識別するのが実務的。
+  references:
+  - https://www.openassetpricing.com/
+  - OSAP EntMult / Cash との関連。この形での直接の実証は無い
   notes: A16 を反映した本当の事業価値ベースの益回り
   notes_extra: null
   provenance:
@@ -1239,22 +1283,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: A18
   name_ja: 保有有価証券含み益率
@@ -1535,8 +1581,10 @@
   category_name: バリュエーション
   subsection: null
   definition: percentile( 現PER, 過去5年の自社PER )
-  formula: null
-  inputs: null
+  formula: percentile( 現PER, 過去5年の自社PER の分布 )
+  inputs:
+  - A01
+  - PRICE
   sign: negative
   buy_class: main
   sell_class: main
@@ -1549,24 +1597,29 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: 5年間に会計基準変更（Z07）や決算期変更（Z06）があると、過去の PER と現在の PER が 別物になる。**フラグ年を含む期間は欠損にする。**
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 赤字期は PER が定義できないので、**E/P の分布でパーセンタイルを取る**（A01 と同じ向き）。 5年間に計算可能な四半期が10未満なら欠損。
   missing_policy: flag
-  missing_bias: null
-  normalization: rank_sector
+  missing_bias: '**上場5年未満で丸ごと欠損する。** F02/B13/B28 と同じ偏りで、ユニバースが暗黙に 成熟企業へ寄る（Z03 で監視）。IPO 後の若い企業には別の評価軸が要る。'
+  normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - A01
+  - A23
+  - A24
+  - A33
+  economic_rationale: '**業種を跨いだ比較を可能にする最重要の変換。** 銀行の PER が低いのは業種特性であって 割安ではない、という問題を、自分自身の過去と比べることで回避する。 時系列バリューは断面バリューより頑健という報告があり、A25（業種内相対）と 別の角度から同じ問題に対処している。**両方持って縮小に任せる。** normalization を `rank_all` にしているのは、パーセンタイル自体は既に自己履歴で 正規化済みなので、あとは他パラメータと足せるよう断面で z 化するだけでよいため。'
+  references:
+  - 構造的判断。時系列バリューの実証はあるが、この具体形での検証は未実施
   notes: 業種を跨いだ比較を可能にする最重要変換。時系列バリューは断面バリューより頑健という報告あり
   notes_extra: null
   provenance:
@@ -1580,22 +1633,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: A23
   name_ja: 自己バリュエーション位置(PBR)
@@ -1603,8 +1658,10 @@
   category_name: バリュエーション
   subsection: null
   definition: percentile( 現PBR, 過去5年の自社PBR )
-  formula: null
-  inputs: null
+  formula: percentile( 現PBR, 過去5年の自社PBR の分布 )
+  inputs:
+  - A03
+  - PRICE
   sign: negative
   buy_class: main
   sell_class: main
@@ -1617,24 +1674,30 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: A03 と A22 の注意を継承。IFRS ののれん非償却で自己資本が趨勢的に増えると、PBR が趨勢的に下がる点に注意。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 債務超過期は PBR が負になるため、その期を除いて分布を作る。除外後に10四半期未満なら欠損。
   missing_policy: flag
-  missing_bias: null
-  normalization: rank_sector
+  missing_bias: A22 と同じ（上場5年未満で欠損）。
+  normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - A03
+  - A22
+  - A24
+  - A34
+  economic_rationale: A22 の PBR 版。PBR は PER より安定（赤字でも定義できる、自己資本は利益より滑らか）なので、 **自己履歴との比較にはこちらの方が向いている。** 日本では東証の PBR1倍割れ改革（LAW-47）があり、**「自社の過去と比べて安い」ことが 実際に是正される制度的な後押しがある**という点で、他国より意味を持つ。
+  references:
+  - https://corpgov.law.harvard.edu/2025/10/21/tokyo-stock-exchange-initiative-on-cost-of-capital-and-stock-price-conscious-management/
+  - 構造的判断。この具体形での検証は未実施
   notes: 同上
   notes_extra: null
   provenance:
@@ -1648,22 +1711,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: A24
   name_ja: 自己バリュエーション位置(EV/EBITDA)
@@ -1821,8 +1886,12 @@
   category_name: バリュエーション
   subsection: null
   definition: 現株価を正当化する永久成長率 g を逆算
-  formula: null
-  inputs: null
+  formula: 現株価を DCF で正当化する永久成長率 g を逆算する
+  inputs:
+  - PRICE
+  - FCF
+  - WACC
+  - SHARES
   sign: negative
   buy_class: useful
   sell_class: main
@@ -1841,21 +1910,26 @@
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: FCF の定義（spec §2）と WACC の推定（B04）に依存する。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: '**FCF<=0 または g >= WACC のとき解が存在しない。** その場合は欠損にする。 解が存在しないこと自体が「現在の株価はDCFでは説明できない」という情報だが、 数値としては表現できないのでフラグで持つ。'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: FCF が負の成長企業で欠損。**成長株ほど欠損する**ので、バリュー株に偏った指標になる。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - A27
+  - A28
+  - A42
+  - C26
+  - N47
+  - B04
+  economic_rationale: '**「市場は年 X% の永久成長を織り込んでいる」を数値化する。** それが現実的かを問うのが本質で、10%を超えていれば永久には続かない。 **売り判定で特に強力**（sell=main）で、保有中に g が非現実的な水準まで上がったら テーゼの成否と無関係に高すぎるということ。 C26（平均回帰調整済み成長率）と N47（長期成長率予想は劣後する）と同じ思想。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP sfe — Elgers, Lo and Pfeiffer 2001, AR（OSAP再現 t=5.0, 月次1.466666667%, 品質=2_fair, 予測力=1_clear）
+  - OSAP fgr5yrLag t=4.9 — 長期成長率予想が高い銘柄は劣後する
   notes: 「市場は年 X% の成長を織り込んでいる」を数値化。売り判定で特に強力
   notes_extra: null
   provenance:
@@ -1869,23 +1943,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: A27
   name_ja: DCF 価値倍率
@@ -1893,8 +1968,12 @@
   category_name: バリュエーション
   subsection: null
   definition: DCF内在価値 / 株価
-  formula: null
-  inputs: null
+  formula: DCF内在価値（下限・中央・上限） / 株価
+  inputs:
+  - FCF
+  - WACC
+  - growth_assumptions
+  - LLM
   sign: positive
   buy_class: useful
   sell_class: main
@@ -1908,24 +1987,30 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: FCF の定義に依存。IFRS16 の CFO 嵩上げが直接効く。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: PRICE>0。FCF<=0 なら DCF が組めないので欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**仮定を LLM に置かせるので、LLM が知っている有名企業ほど「もっともらしい」仮定が出る。** 無名銘柄では仮定の質が落ちる — つまり O カテゴリ（ネグレクト）と逆方向に偏る。 さらに §6.5 のルックアヘッド（LLM が結末を知っている）のリスクが最も高い項目の一つ。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - A26
+  - A28
+  - A29
+  - A30
+  - T29
+  economic_rationale: LAW-60（安全域）の実装。**ただし点推定を信じてはいけない。** 仮定に極めて敏感で、成長率を1%変えるだけで内在価値が数十%動く。 **必ず幅（下限/中央/上限）で持ち、下限を Gate 的に使う**のが実務的な使い方。 A28（RIM）の方がターミナル依存度が低く安定するので、A27 単独では判断しない。
+  references:
+  - 構造的判断。DCF 自体の実証研究ではなく評価手法。LLM 依存部分は §6.4 の検証が必要
   notes: 仮定に敏感。幅（下限/中央/上限）で持ち、点推定を信じない
   notes_extra: null
   provenance:
@@ -1939,22 +2024,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: A28
   name_ja: 残余利益モデル倍率
@@ -1962,8 +2049,12 @@
   category_name: バリュエーション
   subsection: null
   definition: RIM価値 / 株価、V = B + SUM (ROE-r)B/(1+r)^t
-  formula: null
-  inputs: null
+  formula: (EQ + SUM_t (ROE_t - r) * EQ_{t-1} / (1+r)^t) / MCAP
+  inputs:
+  - EQ
+  - B01
+  - WACC
+  - SHARES
   sign: positive
   buy_class: useful
   sell_class: main
@@ -1976,24 +2067,30 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: '**クリーンサープラス関係（純資産の変化 = 利益 - 配当）を前提にするが、 その他の包括利益があると崩れる。** E28（実質ダーティサープラス）が大きい企業では RIM の前提が成立しない。IFRS 企業では OCI が大きくなりやすい。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: MCAP>0。EQ<=0（債務超過）では RIM が組めないので欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 債務超過企業と OCI の大きい企業で信頼度が落ちる。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - A03
+  - A27
+  - A34
+  - B01
+  - B13
+  economic_rationale: '**A27（DCF）よりターミナル依存度が低く、実務的に安定する。** 現在の簿価から出発し、資本コストを超える ROE の超過分だけを積む構造なので、 **B01（ROE）と A03（B/P）を同時に使っていることになる。** A34（理論PBR乖離）と数学的に近い関係にあるので、Z12 の主成分分析で まとまる可能性が高い。'
+  references:
+  - 構造的判断。Ohlson (1995) の残余利益モデルに基づくが、この形での予測力の実証は未確認
   notes: DCFよりターミナル依存度が低く、実務的に安定
   notes_extra: null
   provenance:
@@ -2007,22 +2104,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: A29
   name_ja: 清算価値倍率
@@ -2314,8 +2413,9 @@
   category_name: バリュエーション
   subsection: null
   definition: 予想PER(t) / 予想PER(t-63) - 1
-  formula: null
-  inputs: null
+  formula: 予想PER(t) / 予想PER(t-63営業日) - 1
+  inputs:
+  - A02
   sign: negative
   buy_class: useful
   sell_class: main
@@ -2328,24 +2428,30 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: GUIDE_CO
+  consolidation: consolidated
+  accounting_standard_note: A02 を継承。予想の出所が期中に変わると不連続になる。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 3ヶ月前の予想PERが負（赤字予想）なら比率が意味を失うので欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: A02 の欠損を継承。米国では予想を出さない企業で計算できない。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - A02
+  - A01
+  - G01
+  - N10
+  - N07
+  economic_rationale: '**株価の変化を「利益予想の変化」と「倍率の変化」に分解する。** 株価が上がっても、利益予想がそれ以上に上がっていれば倍率は下がっている（＝まだ割安）。 G01（価格モメンタム）と N10（業績モメンタム）の差分を、バリュエーション側から見た形。 G18（両モメンタムの一致）と表裏の関係。'
+  references:
+  - 構造的判断。G18 の実証と整合するが、この形での直接の実証は無い
   notes: バリュエーション・モメンタム。株価変化を「利益予想の変化」と「倍率の変化」に分解する
   notes_extra: null
   provenance:
@@ -2359,22 +2465,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: A34
   name_ja: 理論PBRからの乖離
@@ -2382,8 +2490,13 @@
   category_name: バリュエーション
   subsection: null
   definition: 実PBR / 予測PBR - 1。予測PBRは PBR ~ ROE + 成長 + ボラ + サイズ の断面回帰
-  formula: null
-  inputs: null
+  formula: 実PBR / 予測PBR - 1。予測PBR は PBR ~ ROE + 成長 + ボラ + log(MCAP) の断面回帰
+  inputs:
+  - A03
+  - B01
+  - C02
+  - I01
+  - J05
   sign: negative
   buy_class: main
   sell_class: main
@@ -2396,24 +2509,31 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: A03 と B01 の会計基準差を継承。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 予測PBR が負・ゼロになる場合は欠損。**回帰は必ず時点 t までのデータのみで推定する** — 全期間で回帰すると典型的なルックアヘッド（Z14 が検出する）。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 回帰の説明変数（ROE・成長・ボラ・サイズ）がすべて揃う銘柄でのみ計算できるので、 **欠損が多い小型株で計算できず、A03（素のB/P）しか使えない**という逆転が起きる。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - A03
+  - A23
+  - A28
+  - B01
+  - B40
+  economic_rationale: '**「ROE が低いから安い」を除いた純粋な割安度。** 素の低PBRは、 低収益・高リスク・低成長という「安い理由」を含んでいる。それを回帰で説明し、 残った部分だけをミスプライシングとみなす。素の A03 より頑健という報告がある。 ただし**説明変数の選び方で結果が変わる**ので、変数選択自体が多重検定になる点に注意（§8-3）。'
+  references:
+  - https://www.openassetpricing.com/
+  - OSAP AccrualsBM / BPEBM など、B/P の分解系との関連
   notes: 「ROEが低いから安い」を除いた純粋な割安度。素の低PBRより頑健
   notes_extra: null
   provenance:
@@ -2427,22 +2547,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: A35
   name_ja: DDM価値倍率
@@ -2518,8 +2640,12 @@
   category_name: バリュエーション
   subsection: null
   definition: セグメント別に業種倍率を適用した合計 / EV
-  formula: null
-  inputs: null
+  formula: SUM_seg( セグメント利益 × 同業種の中央値倍率 ) / EV
+  inputs:
+  - V03
+  - V10
+  - sector_multiples
+  - EV
   sign: positive
   buy_class: main
   sell_class: main
@@ -2533,24 +2659,33 @@
   - LLM
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: '**セグメント区分は企業が自由に決められる**（マネジメント・アプローチ）ので、 企業間で粒度が揃わない。セグメント変更があった年は前年比が壊れる（V06 で検出）。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: '赤字セグメントに倍率を掛けると負の価値になる。**赤字セグメントは価値ゼロとして扱うか、 売上倍率で評価するかを明示的に決める必要がある**（暫定: 売上倍率で評価）。'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**単一セグメント企業では A06（EV/EBITDA）と同じ値になり、情報量がゼロ。** 多角化企業でのみ意味を持つので、V01（セグメント数）が2未満なら欠損にする。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - A06
+  - A07
+  - V01
+  - V03
+  - V04
+  - V10
+  - N15
+  economic_rationale: '**コングロマリット・ディスカウントの定量化。** 全社を1つの倍率で評価すると、 高収益事業が低収益事業に隠される。分けて評価した合計より時価総額が小さければ、 **事業売却・スピンオフ（N15）で価値が顕在化する余地がある。** V04（価値破壊セグメントの構成比）と組み合わせると、アクティビストの標的（M10）になりやすい 企業が特定できる。日本の東証改革の文脈で実際に再編が進んでいる領域。'
+  references:
+  - https://corpgov.law.harvard.edu/2025/10/21/tokyo-stock-exchange-initiative-on-cost-of-capital-and-stock-price-conscious-management/
+  - 構造的判断。SOTP は実務手法であり、この形での予測力の実証は未確認
   notes: コングロマリット・ディスカウントの定量化。V カテゴリと対で使う
   notes_extra: null
   provenance:
@@ -2564,22 +2699,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: A37
   name_ja: 実質事業EV/EBIT
@@ -2655,8 +2792,10 @@
   category_name: バリュエーション
   subsection: null
   definition: FCF/EV - 長期国債利回り
-  formula: null
-  inputs: null
+  formula: A09 - 長期国債利回り
+  inputs:
+  - A09
+  - MACRO_10y
   sign: positive
   buy_class: main
   sell_class: useful
@@ -2669,24 +2808,30 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: A09 を継承。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: na（差分）。A09 が欠損なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日米で使う国債が違う**（日本10年 / 米国10年）ので、同じ尺度にならない。 円建て・ドル建ての金利差（P21）がそのまま乗る。**日米統合ランクを取ってはいけない パラメータ**で、市場内ランク（rank_market）にすべき可能性が高い（要検証）。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - A09
+  - A12
+  - A39
+  - P01
+  - P02
+  economic_rationale: '**金利レジームを跨いだ比較を可能にする。** FCF利回り5%は、金利0%の時代と 金利5%の時代では全く意味が違う。日本の金利正常化局面（P05）では、 このスプレッドが縮小することで**同じ株価でも割安度が下がる**。 A12（益回りスプレッド）の FCF 版で、より操作されにくい。'
+  references:
+  - 構造的判断。イールドスプレッドは実務標準だが、断面での予測力の実証は限定的
   notes: 金利レジームを跨いだ比較。A12 の FCF 版
   notes_extra: null
   provenance:
@@ -2700,22 +2845,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: A39
   name_ja: 維持FCF利回り
@@ -2859,8 +3006,10 @@
   category_name: バリュエーション
   subsection: null
   definition: 自社バリュー複合 z - 同業内最安値銘柄の z
-  formula: null
-  inputs: null
+  formula: 自社の A32 の z値 - 同業種内で最も安い銘柄の z値
+  inputs:
+  - A32
+  - sector_classification
   sign: negative
   buy_class: useful
   sell_class: main
@@ -2873,24 +3022,30 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: A32 を継承。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（差分）。同業種の銘柄数が5未満なら比較にならないので欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 業種分類の欠損で計算不能。GICS が日本株に付与できるかは未解決（spec SP-03）。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - A25
+  - A32
+  - Q09
+  - Q10
+  - T21
+  economic_rationale: '**「この業種に賭けるなら、この銘柄が最善か」という問い。** Q09（業種内相対順位）と 同じ発想だが、順位ではなく最安値との距離を測るので、 **「2位だが1位とほぼ同じ」と「2位だが1位から大きく離れている」を区別できる。** 売り判定（sell=main）で価値が高く、保有銘柄より明確に安い同業他社が現れたら 乗り換えを検討する材料になる（R11 機会費用の業種内版）。'
+  references:
+  - 構造的判断。Q09/R11 と同じ論拠。この形での実証は無い
   notes: 「この業種で一番安いか」。Q09 と対
   notes_extra: null
   provenance:
@@ -2904,22 +3059,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: A42
   name_ja: インプライドROIC
@@ -2927,8 +3084,12 @@
   category_name: バリュエーション
   subsection: null
   definition: 現株価を正当化する ROIC を逆算
-  formula: null
-  inputs: null
+  formula: 現株価を残余利益モデルで正当化する ROIC を逆算する
+  inputs:
+  - PRICE
+  - EQ
+  - WACC
+  - SHARES
   sign: negative
   buy_class: useful
   sell_class: main
@@ -2941,24 +3102,30 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: A28 と同じくクリーンサープラスを前提にする。E28 が大きいと崩れる。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 解が存在しない場合（債務超過など）は欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: A28 と同じ。債務超過企業で計算不能。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - A26
+  - A28
+  - B03
+  - B04
+  - B13
+  economic_rationale: A26（インプライド成長率）の資本効率版。**市場が要求している ROIC が、 企業の実力（B03 の実績、B13 の持続性）を超えていないかを問う。** 超えていれば、成長率の仮定を変えなくても株価が正当化できないということ。 A26 と A42 の両方が非現実的なら、株価はどう転んでも高い。
+  references:
+  - 構造的判断。逆算アプローチは実務手法であり、断面での実証は未確認
   notes: A26 の資本効率版。市場の要求水準が実力を超えていないか
   notes_extra: null
   provenance:
@@ -2972,22 +3139,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: A43
   name_ja: 益回りの安定性
@@ -3279,8 +3448,10 @@
   category_name: バリュエーション
   subsection: null
   definition: B/P をアクルーアルで層別した複合（低アクルーアル × 高B/P）
-  formula: null
-  inputs: null
+  formula: z_sector(A03) を E01（アクルーアル）の分位で層別した複合
+  inputs:
+  - A03
+  - E01
   sign: positive
   buy_class: main
   sell_class: useful
@@ -3299,21 +3470,26 @@
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: A03 と E01 の会計基準差を継承。IFRS16 で E01 の分母（TA）が膨らむ点に注意。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: A03 と E01 のいずれかが欠損なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 四半期CF開示のない企業で E01 が欠損するため、日本の小型株で計算できないことがある。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - A03
+  - A25
+  - A32
+  - E01
+  - B17
+  economic_rationale: '**A03 と E01 の交互作用。単体より強い（OSAP `AccrualsBM` t=5.5）。** 「安い」だけでは不十分で、「安くて利益の質が良い」が本命という、 B17（低PBR × Piotroski）と同じ構図をアクルーアル1本で実現している。 **§1.9 が交互作用項を残す理由の実例**で、A03 単独・E01 単独と統合せず3本すべて持つ。'
   references:
   - https://www.openassetpricing.com/
   - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP AccrualsBM — Bartov and Kim 2004, RFQA（OSAP再現 t=5.5, 月次0.206%, 品質=1_good, 予測力=1_clear）
+  - OSAP AccrualsBM — Book-to-market and accruals, t=5.5
   notes: OSAP AccrualsBM t=5.5。A03 と E01 の交互作用。単体より強い。§1.9 が交互作用を残す理由の実例
   notes_extra: null
   provenance:
@@ -3327,23 +3503,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: A48
   name_ja: B/P のレバレッジ成分
