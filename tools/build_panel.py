@@ -117,8 +117,11 @@ def forward_return(bars: list[dict], t: str, horizon_days: int) -> float | None:
 
 
 def build_one(t: str, series, by_ticker, sic_asof, asof, bars_by_ticker,
-              horizon_days: int) -> list[dict]:
+              horizon_days: int, price_gate: bool = True) -> list[dict]:
     th = dataclasses.replace(UV.Thresholds.for_rho(1.0), require_age=False)
+    if not price_gate:
+        # **対照条件。** 空の辞書にすると judge が最低株価を見なくなる
+        th = dataclasses.replace(th, min_price_local={})
     raw = []
     for tk, s in series.items():
         m = by_ticker.get(tk)
@@ -198,8 +201,16 @@ def main() -> int:
                     help="将来リターンの期間。**263AT の保有は 6ヶ月-5年**だが、"
                          "重みの推定にはもっと短い窓が要る（観測数のため）")
     ap.add_argument("--rebuild", action="store_true")
+    ap.add_argument("--no-price-gate", action="store_true",
+                    help="**最低株価のゲートを切る。** ゲートの効果を測るための"
+                         "対照条件であって、運用の設定ではない")
+    ap.add_argument("--out", default="",
+                    help="出力先の枝（対照条件を別の場所に貯める）")
     args = ap.parse_args()
 
+    global CACHE
+    if args.out:
+        CACHE = CACHE / args.out
     CACHE.mkdir(parents=True, exist_ok=True)
     cached = sorted(p.stem for p in (ROOT / "data" / "prices").glob("*.json"))
     series = PR.load(cached)
@@ -239,7 +250,8 @@ def main() -> int:
             print("  --- %d年: 勘定 %d 件（%s 〜 %s）"
                   % (y, len(fs), qs[0], qs[-1]))
         rows = build_one(t, series, by_ticker, sic_asof, asof,
-                         bars_by_ticker, args.horizon_days)
+                         bars_by_ticker, args.horizon_days,
+                         price_gate=not args.no_price_gate)
         f.write_text(json.dumps(rows), encoding="utf-8")
         n_fwd = sum(1 for r in rows if r["fwd"] is not None)
         print("  %s  %4d 行（将来リターンあり %4d）" % (t, len(rows), n_fwd))

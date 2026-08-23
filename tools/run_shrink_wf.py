@@ -59,8 +59,10 @@ def params_in(rows: list[dict]) -> list[str]:
     return sorted(seen, key=lambda k: (-seen[k], k))
 
 
-def load_panel(horizon_days: int) -> list[dict]:
+def load_panel(horizon_days: int, branch: str = "") -> list[dict]:
     d = ROOT / "data" / "panel"
+    if branch:
+        d = d / branch
     rows = []
     for f in sorted(d.glob("*_h%d.json" % horizon_days)):
         rows += json.loads(f.read_text(encoding="utf-8"))
@@ -159,12 +161,14 @@ def spread_ic(rows: list[dict], f: SH.Fit, q: float = 0.2) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--horizon-days", type=int, default=90)
+    ap.add_argument("--panel", default="",
+                    help="data/panel 配下の枝（対照条件を測るため）")
     ap.add_argument("--min-train-obs", type=int, default=1000)
     ap.add_argument("--cost-bps", type=float, default=30.0,
                     help="片道コスト。**リバランスのたびに両側で払う**")
     args = ap.parse_args()
 
-    panel = load_panel(args.horizon_days)
+    panel = load_panel(args.horizon_days, args.panel)
     PARAMS = params_in(panel) if panel else []
     if not panel:
         print("パネルが無い。tools/build_panel.py を先に実行する。")
