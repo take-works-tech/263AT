@@ -84,6 +84,55 @@ def usable_at(row: dict, T: str, horizon_days: int) -> bool:
     return resolved <= T
 
 
+def survivorship(dates: list[str]) -> list[tuple[str, int, int, float]]:
+    """**その時点に存在した企業のうち、今もデータがある割合。**
+
+    銘柄一覧を `company_tickers.json`（**今日のスナップショット**）から
+    作っているため、過去に遡るほど**「今日まで生き残った企業」だけ**を
+    見ることになる。
+
+    DERA の `sub.txt` は提出日で区切られているので、
+    **その時点に実際に存在した企業の数**が分かる。
+    今日の登録簿と突き合わせれば、消えた企業の割合が測れる。
+
+    実測（2026-08-23）:
+        2013年に年次報告を出した 7,130 社のうち、
+        **今も登録があるのは 2,500 社（35.1%）**
+
+    → **2013年を対象にした検証は、生き残った 35% だけを見ている。**
+      上場廃止の理由は倒産・業績不振が多いので、**成績は上振れする。**
+      買収による廃止（勝ち組）も混じるので一方向ではないが、
+      Bessembinder (2018) の通り分布は極端に歪んでおり、
+      **打ち消し合うと考える根拠は無い。**
+
+    無料データでは直せない。**yfinance は上場廃止銘柄の価格を返さない。**
+    直せない以上、**測って出し続ける**のが唯一の正しい扱いである。
+    """
+    import json
+    try:
+        import pandas as pd
+    except Exception:
+        return []
+    d = ROOT / "data" / "pit" / "subs"
+    f = ROOT / "data" / "listing" / "company_tickers.json"
+    if not d.exists() or not f.exists():
+        return []
+    df = pd.concat([pd.read_parquet(x) for x in sorted(d.glob("*.parquet"))],
+                   ignore_index=True)
+    df = df[df.form.isin({"10-K", "20-F", "40-F"})]
+    df["yr"] = df["filed"].astype(str).str[:4]
+    j = json.loads(f.read_text(encoding="utf-8"))
+    alive = {int(v["cik_str"]) for v in j.values()}
+    out = []
+    for y in sorted({t[:4] for t in dates}):
+        s = set(df[df.yr == y].cik)
+        if not s:
+            continue
+        k = len(s & alive)
+        out.append((y, len(s), k, k / len(s)))
+    return out
+
+
 def spread_ic(rows: list[dict], f: SH.Fit, q: float = 0.2) -> dict:
     """推定した重みで、**上位分位と下位分位のリターン差**を測る。
 
@@ -221,6 +270,28 @@ def main() -> int:
             print("  参考: t 値 = %.2f（見かけの %d 個）→ **%.2f（独立 %.1f 個）**"
                   % (t_naive, len(sp), t_indep, n_indep))
             print("     Harvey-Liu-Zhu は **t > 3.0** を要求する（§0）。")
+        # --- **生存者バイアスの警告。これが無いと成績を読み違える** ----------
+        sv = survivorship(dates)
+        if sv:
+            print()
+            print("  " + "!" * 60)
+            print("  **生存者バイアスの警告**")
+            print("  " + "!" * 60)
+            print("  銘柄一覧を**今日のスナップショット**から作っているため、")
+            print("  過去ほど「今日まで生き残った企業」だけを見ている。")
+            print("  %-6s %10s %10s %8s" % ("年", "当時の社数", "今も登録", "残存率"))
+            worst = 1.0
+            for y, n_then, n_now, rate in sv:
+                mark = " **" if rate < 0.6 else ""
+                print("  %-6s %10d %10d %7.1f%%%s"
+                      % (y, n_then, n_now, 100 * rate, mark))
+                worst = min(worst, rate)
+            print("  → **最も薄い年で残存率 %.1f%%。**" % (100 * worst))
+            print("     上場廃止は倒産・業績不振が多いので、**成績は上振れする。**")
+            print("     **無料データでは直せない**"
+                  "（yfinance は廃止銘柄の価格を返さない）。")
+            print("     直せない以上、**測って出し続ける**しかない。")
+
         print("  **これは検証ではない**（docs/05 §1.3）。")
         print("  パラメータの選定と符号を 2024年までのデータを見て決めているため、")
         print("  2025年以降の期間でもカタログ設計の漏れが残る。")
