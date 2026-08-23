@@ -116,56 +116,79 @@ def forward_return(bars: list[dict], t: str, horizon_days: int) -> float | None:
     return ex[1] / entry[1] - 1.0 if entry[1] > 0 else None
 
 
-def build_one(t: str, series, by_ticker, sic_asof, asof, bars_by_ticker,
-              horizon_days: int, price_gate: bool = True) -> list[dict]:
+def scan_one(tk: str, mes: list[str], horizons: list[int]) -> dict:
+    """**1銘柄を1回だけ読み、全月末ぶんの価格系を作る。**
+
+    なぜこうするか（2026-08-24）。
+    ユニバースを SEC 全銘柄（10,403）に広げたところ、
+    **価格キャッシュがディスクで 7.3GB になった。**
+    これを `{ticker: adjust(bars)}` として全部メモリに持つと、
+    1バーが dict（11キー）なので **30GB を超える。** 載らない。
+
+    銘柄ごとに読んで捨てれば、**同時にメモリにあるのは1銘柄ぶんだけ**になる。
+    断面（正規化）が要るのは**計算した値**であって、バーではない。
+    → **価格を触る処理を先に全部終わらせ、断面はその後で組む。**
+
+    返すのは `{月末: {"snap":..., "vals":..., "fwd":...}}`。
+    """
+    ser = PR.load([tk]).get(tk)
+    if ser is None or len(ser.bars) < 60:
+        return {}
+    rows = BR.adjust(ser.bars)
+    out = {}
+    for t in mes:
+        i = _index_at(rows, t)
+        if i is None or i + 1 < 60:
+            continue
+        vals = {k: x.value for k, x in PX.compute_all(rows, i).items()
+                if x.value is not None and k in SIGN}
+        out[t] = {
+            "close": rows[i]["close"],
+            "adv20": sum(x["turnover"] for x in rows[i - 19: i + 1]) / 20.0,
+            "zero60": sum(1 for x in rows[i - 59: i + 1] if x["volume"] <= 0),
+            "vals": vals,
+            # **将来リターンは保有期間ごとに持つ。**
+            # 第1段はゲートにも保有期間にも依存しないので、
+            # **一度の走査から複数のパネルを作れる。**
+            "fwd": {h: forward_return(rows, t, h) for h in horizons},
+        }
+    return out
+
+
+def build_one(t: str, scan_t: dict, by_ticker, sic_asof, asof,
+              price_gate: bool = True, horizon: int = 90) -> list[dict]:
+    """時点 t の断面を組む。**バーはもう見ない。**"""
     th = dataclasses.replace(UV.Thresholds.for_rho(1.0), require_age=False)
     if not price_gate:
         # **対照条件。** 空の辞書にすると judge が最低株価を見なくなる
         th = dataclasses.replace(th, min_price_local={})
+
     raw = []
-    for tk, s in series.items():
+    for tk, d in scan_t.items():
         m = by_ticker.get(tk)
         if not m or not m.cik:
             continue
-        # **PR.snapshot を使わない。**
-        # あれは呼ばれるたびに `bars.adjust` で全系列を再調整し、
-        # さらに `adv` / `zero_volume_days` を**全日付ぶん**計算して
-        # 末尾だけ取る。1,383銘柄 × 173ヶ月 = **24万回**やると終わらない。
-        # ここでは調整済みの行を使い回し、**末尾の窓だけ**を数える。
-        rows_t = bars_by_ticker.get(tk)
-        i_t = _index_at(rows_t, t) if rows_t else None
-        if i_t is None or i_t + 1 < 60:
-            continue
-        snap = {
-            "close": rows_t[i_t]["close"],
-            "adv20": sum(x["turnover"]
-                         for x in rows_t[i_t - 19: i_t + 1]) / 20.0,
-            "zero_vol_60": sum(1 for x in rows_t[i_t - 59: i_t + 1]
-                               if x["volume"] <= 0),
-        }
         cik = int(m.cik)
         sh = asof.latest_period(cik, "SHARES", 0, t, max_lag_days=400)
-        mcap = sh.value * snap["close"] * FX if sh else None
+        mcap = sh.value * d["close"] * FX if sh else None
         cand = UV.Candidate(
             ticker=tk, listed=True, months_listed=None,
-            adv_jpy=(snap["adv20"] or 0) * FX,
-            zero_volume_days=snap["zero_vol_60"], mcap_jpy=mcap,
-            supervised=False, going_concern_note=False, audit_clean=True,
+            adv_jpy=d["adv20"] * FX, zero_volume_days=d["zero60"],
+            mcap_jpy=mcap, supervised=False, going_concern_note=False,
+            audit_clean=True,
             # **最低株価のゲート。** 現地通貨（米国株なのでドル）で渡す。
             # 円換算すると、日本の 200円 と米国の $1.3 が同じ扱いになる。
-            price_local=snap["close"], market="US")
+            price_local=d["close"], market="US")
         if UV.judge(cand, th):
             continue
         v = PU.compute(asof, cik, t, mcap)
         vals = {k: x.value for k, x in v.items() if x.value is not None}
-        # **価格系を足す。** 財務が無い銘柄でも価格系だけで行が立つ
-        for k, x in PX.compute_all(rows_t, i_t).items():
-            if x.value is not None and k in SIGN:
-                vals[k] = x.value
+        vals.update(d["vals"])
         if len(vals) < 3:
             continue
         raw.append({"ticker": tk, "sector": ff49.industry(sic_asof.get(cik, t)),
-                    "vals": vals, "adv_jpy": cand.adv_jpy})
+                    "vals": vals, "adv_jpy": cand.adv_jpy,
+                    "fwd": d["fwd"].get(horizon)})
     if not raw:
         return []
 
@@ -187,9 +210,8 @@ def build_one(t: str, series, by_ticker, sic_asof, asof, bars_by_ticker,
         z = zs[r["ticker"]]
         if not z:
             continue
-        fwd = forward_return(bars_by_ticker[r["ticker"]], t, horizon_days)
         out.append({"date": t, "ticker": r["ticker"], "sector": r["sector"],
-                    "z": z, "fwd": fwd, "adv_jpy": r["adv_jpy"]})
+                    "z": z, "fwd": r["fwd"], "adv_jpy": r["adv_jpy"]})
     return out
 
 
@@ -197,65 +219,89 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--start", default="2024-11-30")
     ap.add_argument("--end", default="2026-06-30")
-    ap.add_argument("--horizon-days", type=int, default=90,
+    ap.add_argument("--horizons", type=int, nargs="*", default=[90],
                     help="将来リターンの期間。**263AT の保有は 6ヶ月-5年**だが、"
                          "重みの推定にはもっと短い窓が要る（観測数のため）")
     ap.add_argument("--rebuild", action="store_true")
-    ap.add_argument("--no-price-gate", action="store_true",
-                    help="**最低株価のゲートを切る。** ゲートの効果を測るための"
-                         "対照条件であって、運用の設定ではない")
-    ap.add_argument("--out", default="",
-                    help="出力先の枝（対照条件を別の場所に貯める）")
+    ap.add_argument("--max-tickers", type=int, default=0,
+                    help="走査する銘柄数の上限（**動作確認用**。0 で無制限）")
+    ap.add_argument("--gates", default="on",
+                    choices=["on", "off", "both"],
+                    help="最低株価のゲート。**both は対照実験**"
+                         "（同じ走査結果から有無だけを変えた2本を作る）")
     args = ap.parse_args()
 
-    global CACHE
-    if args.out:
-        CACHE = CACHE / args.out
-    CACHE.mkdir(parents=True, exist_ok=True)
-    cached = sorted(p.stem for p in (ROOT / "data" / "prices").glob("*.json"))
-    series = PR.load(cached)
+    base = CACHE          # モジュール定数をそのまま使う（再代入しない）
     by_ticker = {r.ticker: r for r in LS.fetch_us(use_cache=True)}
     sic_asof = LS.SicAsOf.from_dera()
-    bars_by_ticker = {t: BR.adjust(s.bars) for t, s in series.items()}
-    # **価格を持っている銘柄の CIK だけ読む。**
-    # DERA は 5,000-8,000 社ぶんあるが、使うのは 1,383 銘柄。
-    need_ciks = {int(by_ticker[t].cik) for t in series
-                 if by_ticker.get(t) and by_ticker[t].cik}
-    print("価格 %d 銘柄 / 勘定を読む CIK %d" % (len(series), len(need_ciks)))
+    mes = month_ends(args.start, args.end)
+    cached = sorted(p.stem for p in (ROOT / "data" / "prices").glob("*.json"))
+    if args.max_tickers:
+        cached = cached[: args.max_tickers]
+    conds = ([("gate", True), ("nogate", False)] if args.gates == "both"
+             else [("gate", True)] if args.gates == "on"
+             else [("nogate", False)])
 
-    # **勘定データは年ごとに窓を切って読む。**
-    # 69四半期を一度に持つと 2,462万ファクトになり、
-    # Python オブジェクトで数GBに達する（読み込みだけで2分超）。
-    # `latest_period` が最大400日遡るので、**3年ぶんあれば足りる。**
+    # --- 第1段: 価格を触る処理を全部済ませる ------------------------------
+    # **1銘柄ずつ読んで捨てる。** 同時にメモリにあるのは1銘柄ぶんだけ。
+    # ディスク 7.6GB を全部オブジェクトにすると 30GB を超えて載らない。
+    #
+    # **この段はゲートにも保有期間にも依存しない。**
+    # だから一度走らせれば、条件違いのパネルを何本でも作れる。
+    print("価格 %d 銘柄 / 月末 %d 点 / 保有期間 %s / 条件 %s"
+          % (len(cached), len(mes), args.horizons, [c[0] for c in conds]))
+    scan: dict[str, dict] = {t: {} for t in mes}
+    kept = 0
+    for k, tk in enumerate(cached):
+        try:
+            per = scan_one(tk, mes, args.horizons)
+        except Exception as e:
+            print("    NG %s: %s" % (tk, str(e)[:60]))
+            continue
+        if per:
+            kept += 1
+            for t, d in per.items():
+                scan[t][tk] = d
+        if (k + 1) % 1000 == 0:
+            print("  走査 %d/%d（値が取れた %d）" % (k + 1, len(cached), kept))
+    print("**第1段おわり: %d 銘柄で値が取れた**" % kept)
+
+    need_ciks = {int(by_ticker[t].cik) for t in cached
+                 if by_ticker.get(t) and by_ticker[t].cik}
+    print("勘定を読む CIK %d" % len(need_ciks))
+
+    # --- 第2段: 断面を組む（**バーはもう見ない**）--------------------------
     def quarters_for(year: int) -> list[str]:
         return ["%dq%d" % (y, q)
                 for y in range(year - LOOKBACK_YEARS, year + 1)
                 for q in (1, 2, 3, 4)]
 
+    for name, _ in conds:
+        (base / name).mkdir(parents=True, exist_ok=True)
+
     total = 0
     cur_year, asof = None, None
-    for t in month_ends(args.start, args.end):
-        f = CACHE / ("%s_h%d.json" % (t, args.horizon_days))
-        if f.exists() and not args.rebuild:
-            n = len(json.loads(f.read_text(encoding="utf-8")))
-            print("  %s  キャッシュ %d 行" % (t, n))
-            total += n
-            continue
+    for t in mes:
         y = int(t[:4])
         if y != cur_year:
-            qs = quarters_for(y)
-            fs = FA.load(qs, ciks=need_ciks)
+            fs = FA.load(quarters_for(y), ciks=need_ciks)
             asof = FA.AsOf(fs)
             cur_year = y
-            print("  --- %d年: 勘定 %d 件（%s 〜 %s）"
-                  % (y, len(fs), qs[0], qs[-1]))
-        rows = build_one(t, series, by_ticker, sic_asof, asof,
-                         bars_by_ticker, args.horizon_days,
-                         price_gate=not args.no_price_gate)
-        f.write_text(json.dumps(rows), encoding="utf-8")
-        n_fwd = sum(1 for r in rows if r["fwd"] is not None)
-        print("  %s  %4d 行（将来リターンあり %4d）" % (t, len(rows), n_fwd))
-        total += len(rows)
+            print("  --- %d年: 勘定 %d 件" % (y, len(fs)))
+        line = []
+        for name, gate in conds:
+            for h in args.horizons:
+                f = base / name / ("%s_h%d.json" % (t, h))
+                if f.exists() and not args.rebuild:
+                    rows = json.loads(f.read_text(encoding="utf-8"))
+                else:
+                    rows = build_one(t, scan[t], by_ticker, sic_asof, asof,
+                                     price_gate=gate, horizon=h)
+                    f.write_text(json.dumps(rows), encoding="utf-8")
+                line.append("%s/h%d %4d" % (name, h, len(rows)))
+                total += len(rows)
+        print("  %s  %s" % (t, "  ".join(line)))
+        scan[t] = {}          # **使い終わった月は捨てる**
     print("合計 %d 行 → %s" % (total, CACHE.relative_to(ROOT)))
     return 0
 

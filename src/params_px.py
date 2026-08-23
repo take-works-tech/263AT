@@ -99,35 +99,61 @@ def _ret(rows: Sequence[dict], i: int, a: int, b: int) -> float | None:
     return pa / pb - 1.0
 
 
-def _monthly(rows: Sequence[dict], i: int) -> dict[tuple[int, int], float]:
-    """`rows[0..i]` から暦月ごとのリターンを作る。
+# 月次系列の使い回し。**同じ銘柄で8本の季節性が同じものを作り直すのを防ぐ。**
+_MONTHLY_CACHE: dict[int, list[tuple[int, int, float, int]]] = {}
 
-    **月の最初の営業日の前日終値から、最後の営業日の終値まで。**
-    月をまたぐ最初の1ヶ月は前日が無いので落とす。
 
-    **`i` までで打ち切るので、対象月の当年ぶんは入らない**
-    （まだ月が終わっていない）。ここが季節性のルックアヘッド防止。
+def _monthly_full(rows: Sequence[dict]) -> list[tuple[int, int, float, int]]:
+    """暦月ごとのリターンを**一度だけ**作る。
+
+    返すのは `(年, 月, リターン, その月の最終行の位置)` の一覧。
+
+    **最後の要素が「その月がいつ閉じたか」であることが重要。**
+    時点 t での季節性は「t までに**確定した**月」だけを使う。
+    位置を持たせておけば、`i` ごとに作り直さずに絞り込める。
+
+    ここを作り直していたせいで、**8本の季節性がそれぞれ全系列を
+    走査していた**（1銘柄 × 173月末 × 8本 × 全バー）。
+    ユニバースを 9,631 銘柄に広げた時点で、計算が終わらなくなった。
     """
-    out: dict[tuple[int, int], float] = {}
+    key = id(rows)
+    got = _MONTHLY_CACHE.get(key)
+    if got is not None:
+        return got
+    out: list[tuple[int, int, float, int]] = []
     prev_close: float | None = None
     cur: tuple[int, int] | None = None
     first_prev: float | None = None
     last_close: float | None = None
-    for j in range(0, min(i, len(rows) - 1) + 1):
+    last_idx = -1
+    for j in range(len(rows)):
         d = rows[j]["date"]
         y, m = int(d[:4]), int(d[5:7])
         c = rows[j]["close"]
         if cur is None:
-            cur, first_prev, last_close = (y, m), prev_close, c
+            cur, first_prev, last_close, last_idx = (y, m), prev_close, c, j
         elif (y, m) != cur:
             if first_prev and last_close and first_prev > 0:
-                out[cur] = last_close / first_prev - 1.0
-            cur, first_prev, last_close = (y, m), prev_close, c
+                out.append((cur[0], cur[1], last_close / first_prev - 1.0,
+                            last_idx))
+            cur, first_prev, last_close, last_idx = (y, m), prev_close, c, j
         else:
-            last_close = c
+            last_close, last_idx = c, j
         prev_close = c
-    # **最後の月は閉じない。** `i` が月の途中なら未確定だから
+    # **最後の月は閉じない。** 途中かもしれないから
+    if len(_MONTHLY_CACHE) > 8:
+        _MONTHLY_CACHE.clear()      # 銘柄を跨いで溜めない
+    _MONTHLY_CACHE[key] = out
     return out
+
+
+def _monthly(rows: Sequence[dict], i: int) -> dict[tuple[int, int], float]:
+    """`rows[0..i]` から暦月ごとのリターンを作る。
+
+    **`i` より後に閉じた月は入れない。**
+    対象月の当年ぶんは、その月がまだ閉じていないので構造的に入らない。
+    """
+    return {(y, m): r for y, m, r, j in _monthly_full(rows) if j < i}
 
 
 def _season(rows, i, lo_years: int, hi_years: int,
@@ -154,9 +180,19 @@ def _season(rows, i, lo_years: int, hi_years: int,
 
 
 def _logrets(rows: Sequence[dict], i: int, window: int) -> list[float]:
-    """直近 window 日の対数リターン。**欠損（停止・出来高0）は落とす。**"""
-    lr = B.log_return(rows[: i + 1])
-    w = lr[max(0, i + 1 - window): i + 1]
+    """直近 window 日の対数リターン。**欠損（停止・出来高0）は落とす。**
+
+    **必要な区間だけを渡す。**
+    以前は `B.log_return(rows[:i+1])` と全系列を計算してから末尾を取っていた。
+    月末ごとに呼ばれるので、**1銘柄あたり 173 回 × 全バー**を走査していた。
+    16,268 本の銘柄では、60日ぶんが欲しいだけで毎回16,268本を計算していた。
+
+    先頭に1本余分に渡すのは、**最初の日のリターンに前日の終値が要る**から。
+    """
+    lo = max(0, i + 1 - window - 1)
+    seg = rows[lo: i + 1]
+    lr = B.log_return(seg)
+    w = lr[-window:] if len(lr) > window else lr
     return [x for x in w if x is not None]
 
 
