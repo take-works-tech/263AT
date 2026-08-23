@@ -12,8 +12,11 @@
   category_name: 情報伝播・リードラグ
   subsection: null
   definition: 同一業種の大型株の直近リターン
-  formula: null
-  inputs: null
+  formula: 同一業種の時価総額上位20%銘柄の直近1ヶ月の等加重リターン
+  inputs:
+  - PRICE
+  - sector_classification
+  - J05
   sign: positive
   buy_class: main
   sell_class: main
@@ -35,18 +38,23 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 同業の大型株が3銘柄未満なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 業種分類の欠損で計算不能。GICS の日本株付与が未解決（spec SP-03）ので、東証33業種で代替する。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - L02
+  - L08
+  - L09
+  - G36
+  - G11
+  - N21
+  economic_rationale: OSAP `IndRetBig` t=11.0 は Predictor 全体で最上位クラス。大型株に先に織り込まれた 業種情報が、小型株に遅れて伝わる。**「大型株を見てから小型株を買う」という 単純な戦略が機能するという主張**で、263AT のユニバース（機関が入れない小型株）と 構造的に相性が良い。ただし有効期間が 1M-6M と短く、6M〜5Y の設計では 銘柄選択ではなく執行タイミングに使うのが妥当（OQ-26）。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP IndRetBig — Hou 2007, RFS（OSAP再現 t=11.0, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - OSAP IndRetBig t=11.0
   notes: OSAP IndRetBig t=11.0。Predictor 全体で最上位クラス。大型株に出た業種情報が小型株に遅れて伝わる
   notes_extra: null
   provenance:
@@ -60,22 +68,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: L02
   name_ja: 同業大型株の決算サプライズ
@@ -83,8 +93,11 @@
   category_name: 情報伝播・リードラグ
   subsection: null
   definition: 同一業種の大型株の SUE
-  formula: null
-  inputs: null
+  formula: 同一業種の大型株の SUE（N02）の加重平均
+  inputs:
+  - N02
+  - sector_classification
+  - J05
   sign: positive
   buy_class: main
   sell_class: main
@@ -102,22 +115,27 @@
   - JP
   - US
   industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
+  period_convention: GUIDE_CONS
+  consolidation: consolidated
+  accounting_standard_note: N02 を継承。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 同業大型株の SUE が計算できなければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**大型株側は予想データが揃うので、日本でも計算できる。** N02 が自社では欠損する小型株でも、L02 は使えるという逆転が起きる — O カテゴリの 欠損問題（62%）を迂回できる数少ない経路。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - L01
+  - N02
+  - N04
+  - N06
+  - N50
+  - X15
+  economic_rationale: OSAP `EarnSupBig` t=8.9。**同業大手の決算を見てから小型株を買える。** 決算発表日が業種内で分散するため、大手が先に出す場合に情報優位が生まれる。 N02 が自社の決算を待つのに対し、L02 は他社の決算で先回りできる。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP EarnSupBig — Hou 2007, RFS（OSAP再現 t=8.9, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - OSAP EarnSupBig t=8.9
   notes: OSAP EarnSupBig t=8.9。同業大手の決算を見てから小型株を買える。N02 の他社版
   notes_extra: null
   provenance:
@@ -131,22 +149,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: L03
   name_ja: 価格遅延（回帰係数）
@@ -154,8 +174,10 @@
   category_name: 情報伝播・リードラグ
   subsection: null
   definition: 市場リターンのラグ項に対する回帰係数の和 / 全係数の和
-  formula: null
-  inputs: null
+  formula: 1 - R2(制約回帰) / R2(ラグ項を含む回帰)。市場リターンの当日+ラグ4週で回帰
+  inputs:
+  - PRICE
+  - market_return
   sign: positive
   buy_class: main
   sell_class: useful
@@ -168,7 +190,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T3
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -177,18 +199,24 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: R2 がゼロ近傍（市場と無相関）だと不安定。週次1年分の観測が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 上場1年未満で欠損。売買停止日が多い銘柄で推定が歪む（J18）。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - L04
+  - L05
+  - L09
+  - O01
+  - O03
+  - J03
+  - I05
+  economic_rationale: OSAP `PriceDelaySlope` t=7.7。**「情報が遅れて価格に入る度合い」を価格だけで直接測る。** O カテゴリが情報の供給側（アナリスト・機関）を測るのに対し、これは結果を測る。 データ源が価格のみなので**欠損しない**という決定的な利点があり、 O01 の62%欠損問題を完全に回避してネグレクトを定量化できる。 **263AT の O カテゴリの実質的な代替になりうる。**
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP PriceDelaySlope — Hou and Moskowitz 2005, RFS（OSAP再現 t=7.7, 月次1.21%, 品質=3_distant, 予測力=2_likely）
+  - OSAP PriceDelaySlope t=7.7
   notes: OSAP PriceDelaySlope t=7.7。「情報が遅れて価格に入る度合い」の直接測定
   notes_extra: null
   provenance:
@@ -202,22 +230,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: L04
   name_ja: 価格遅延（t値調整）
@@ -225,8 +255,10 @@
   category_name: 情報伝播・リードラグ
   subsection: null
   definition: 同上を推定精度で調整
-  formula: null
-  inputs: null
+  formula: L03 と同じ回帰のラグ係数を標準誤差で調整した版
+  inputs:
+  - PRICE
+  - market_return
   sign: positive
   buy_class: main
   sell_class: useful
@@ -239,7 +271,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T3
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -248,18 +280,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 標準誤差がゼロなら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: L03 と同じ。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - L03
+  - L05
+  - L09
+  economic_rationale: OSAP `PriceDelayTstat` t=7.4。L03 の推定精度を織り込んだ版で、 ノイズの多い銘柄の遅延を過大評価しない。**L03/L04/L05 は同じ現象の3通りの測り方**で 相関が非常に高いはずなので、Z12 の主成分分析で1本にまとまる可能性が高い。 §1.9 の方針に従い統合せず3本とも残す。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP PriceDelayTstat — Hou and Moskowitz 2005, RFS（OSAP再現 t=7.4, 月次1.1%, 品質=3_distant, 予測力=2_likely）
+  - OSAP PriceDelayTstat t=7.4
   notes: OSAP PriceDelayTstat t=7.4
   notes_extra: null
   provenance:
@@ -273,22 +307,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: L05
   name_ja: 価格遅延（R²ベース）
@@ -296,8 +332,10 @@
   category_name: 情報伝播・リードラグ
   subsection: null
   definition: ラグ項を入れた回帰の R² 改善分
-  formula: null
-  inputs: null
+  formula: ラグ項を加えたときの R2 の改善分
+  inputs:
+  - PRICE
+  - market_return
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -319,18 +357,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: L03 と同じ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**OQ-17 の実測で「マイクロキャップ除外で死ぬ9シグナル」の1つだった。** つまり非流動株でしか効かない可能性が高く、J01/J02/J10 のゲートと衝突する。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - L03
+  - L04
+  - J03
+  - J10
+  economic_rationale: OSAP `PriceDelayRsq` t=3.4。L03/L04 より弱く、しかもマイクロキャップ除外で消える。 **流動性そのものを測っている成分が大きい**と解釈でき、 L03（係数ベース）の方が情報の遅延を純粋に測れている可能性がある。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP PriceDelayRsq — Hou and Moskowitz 2005, RFS（OSAP再現 t=3.4, 月次0.31%, 品質=1_good, 予測力=1_clear）
+  - OSAP PriceDelayRsq t=3.4
   notes: OSAP PriceDelayRsq t=3.4。マイクロキャップ除外で死ぬ9シグナルの1つ（OQ-17 の実測）。流動性と不可分
   notes_extra: null
   provenance:
@@ -344,22 +385,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: L06
   name_ja: 仕入先モメンタム
@@ -367,8 +410,11 @@
   category_name: 情報伝播・リードラグ
   subsection: null
   definition: 主要仕入先企業群の直近リターン
-  formula: null
-  inputs: null
+  formula: 主要仕入先企業群の直近1ヶ月の売上加重リターン
+  inputs:
+  - LLM
+  - supplier_disclosure
+  - PRICE
   sign: positive
   buy_class: main
   sell_class: main
@@ -382,7 +428,7 @@
   - LLM
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T2
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -391,18 +437,23 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 仕入先が特定できなければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**仕入先の開示義務が無い。** 米国の産業連関表（BEA）で業種レベルの近似はできるが、 企業レベルの特定は LLM 頼み。**上場している仕入先しか捕捉できない**ので、 非上場サプライヤーに依存する企業では機能しない。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - L07
+  - L08
+  - N21
+  - X15
+  - T19
+  - Q16
+  economic_rationale: OSAP `iomom_supp` t=5.0。仕入先の株価が動くのは、その業界の需給が変化したから。 それが自社のコストに転嫁されるのは数四半期後。B36（価格転嫁力）が 転嫁できるかを測るのに対し、L06 は転嫁圧力の発生を先読みする。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP iomom_supp — Menzly and Ozbas 2010, JF（OSAP再現 t=5.0, 月次nan%, 品質=2_fair, 予測力=2_likely）
+  - OSAP iomom_supp t=5.0
   notes: OSAP iomom_supp t=5.0。産業連関表または LLM でサプライチェーンを特定する
   notes_extra: null
   provenance:
@@ -416,22 +467,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: L07
   name_ja: 顧客モメンタム
@@ -439,8 +492,11 @@
   category_name: 情報伝播・リードラグ
   subsection: null
   definition: 主要顧客企業群の直近リターン
-  formula: null
-  inputs: null
+  formula: 主要顧客企業群の直近1ヶ月の売上加重リターン
+  inputs:
+  - LLM
+  - customer_disclosure
+  - PRICE
   sign: positive
   buy_class: main
   sell_class: main
@@ -454,7 +510,7 @@
   - LLM
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T2
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -463,18 +519,24 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 顧客が特定できなければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本の有報は主要顧客を匿名（A社）で書くことが多い**ので、LLM の推定に頼る。 米国は売上10%以上の顧客の開示が義務（ASC 280）なので特定しやすい。**米国優位。**'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - L06
+  - L08
+  - N21
+  - N41
+  - X15
+  - I25
+  - T18
+  economic_rationale: OSAP `iomom_cust` t=4.1 / `CustomerMomentum` t=3.8。 **顧客の需要変化が自社の受注に反映されるまでのラグを取りに行く。** N21（顧客の業績変化）がファンダメンタルで捉える現象を価格で捉える版で、 価格の方が速い。X15（主要顧客の株価）と同一概念なので統合候補だが、 §1.9 に従い両方残す。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP iomom_cust — Menzly and Ozbas 2010, JF（OSAP再現 t=4.1, 月次nan%, 品質=2_fair, 予測力=2_likely）
+  - OSAP iomom_cust t=4.1 / CustomerMomentum t=3.8
   notes: OSAP iomom_cust t=4.1 / CustomerMomentum t=3.8。X15 の定量版。日本は有報の主要顧客開示から作れる
   notes_extra: null
   provenance:
@@ -488,22 +550,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: L08
   name_ja: コングロマリット・リターン
@@ -511,8 +575,12 @@
   category_name: 情報伝播・リードラグ
   subsection: null
   definition: 自社の各セグメントに対応する純粋事業会社群の加重リターン
-  formula: null
-  inputs: null
+  formula: 各セグメントに対応する純粋事業会社群の、売上構成比で加重したリターン
+  inputs:
+  - V01
+  - V07
+  - segment_revenue
+  - PRICE
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -531,21 +599,25 @@
   - US
   industries: null
   period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
+  consolidation: consolidated
+  accounting_standard_note: セグメント区分の企業間差（V01 の注）を継承。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 単一セグメント企業では意味を持たないので欠損（V01 < 2 で除外）。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 多角化企業のみ。A36（SOTP）と同じ適用範囲。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - A36
+  - L01
+  - V01
+  - V03
+  - V06
+  economic_rationale: OSAP `retConglomerate` t=5.5。**コングロマリットの株価は、 構成事業の純粋事業会社の株価の合成より遅れて動く。** 投資家が 複雑な企業を分析するコストを避けるため。A36（SOTP）が価値の水準を測るのに対し、 L08 は価値の変化の遅延を測る。**V カテゴリと L カテゴリを橋渡しする変数。**
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP retConglomerate — Cohen and Lou 2012, JFE（OSAP再現 t=5.5, 月次1.18%, 品質=1_good, 予測力=1_clear）
+  - OSAP retConglomerate t=5.5
   notes: OSAP retConglomerate t=5.5。V カテゴリ（セグメント構成）が入力になる
   notes_extra: null
   provenance:
@@ -559,22 +631,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: L09
   name_ja: 業種内の情報伝播順位
@@ -582,8 +656,10 @@
   category_name: 情報伝播・リードラグ
   subsection: null
   definition: 同業種内で、価格が動く順番の遅さ
-  formula: null
-  inputs: null
+  formula: 業種内で L03 を順位化した値
+  inputs:
+  - L03
+  - sector_classification
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -596,7 +672,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -605,15 +681,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 業種内の銘柄数が5未満なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: L03 と業種分類の欠損を継承。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - L03
+  - L04
+  - L05
+  - O10
+  economic_rationale: L03 の業種内相対版。業種によって情報伝播の速さが構造的に違う （公益は遅く、テックは速い）ので、**業種を跨いだ比較には正規化が要る。** ただし L カテゴリの既定は rank_all にしてある（日米間リードラグ L10 があるため）ので、 この変数だけが業種内正規化を明示的に行う位置づけ。自前定義で実証は無い。
+  references:
+  - 構造的判断。L03 の業種内正規化版であり、この形での実証は無い
   notes: L03-L05 の業種内相対版。自前定義
   notes_extra: null
   provenance:
@@ -627,21 +708,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: L10
   name_ja: 日米間のリードラグ
@@ -649,8 +733,10 @@
   category_name: 情報伝播・リードラグ
   subsection: null
   definition: 米国の同業種インデックスの前営業日リターン
-  formula: null
-  inputs: null
+  formula: 対応する米国業種指数の前営業日リターン（日本株の場合）
+  inputs:
+  - US_sector_index
+  - sector_mapping
   sign: positive
   buy_class: main
   sell_class: main
@@ -663,24 +749,29 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 業種の日米対応が付かなければ欠損。GICS があれば容易（spec SP-03）。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本株専用**（米国株には「前日の日本市場」が先行しない）。 日米の業種対応表が必要で、東証33業種と GICS の対応は1対1でない。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - L01
+  - P07
+  - P21
+  - P22
+  - G16
+  economic_rationale: '**日米両方を持つことの直接的な利点。** 米国市場は日本の引け後に動くので、 翌営業日の日本株に構造的に先行する。これは情報の遅延ではなく**時差による確定的な先行**で、 L01-L05 とは性質が違う。**ただし広く知られているので、既に織り込まれている可能性が高い。** 実際に残っているかは Phase 1 で実測する。'
+  references:
+  - 構造的判断。時差による先行は自明だが、超過収益として残っているかは要検証
   notes: 日米両方を持つことの直接的な利点。 米国市場は日本の引け後に動くので、翌営業日の日本株に構造的に先行する
   notes_extra: null
   provenance:
@@ -694,21 +785,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: L11
   name_ja: 情報伝播の非対称性
@@ -716,8 +810,11 @@
   category_name: 情報伝播・リードラグ
   subsection: null
   definition: 悪材料と好材料で伝播速度が違うか
-  formula: null
-  inputs: null
+  formula: 悪材料時と好材料時で L03 を別々に推定した差
+  inputs:
+  - L03
+  - NEWS
+  - T01
   sign: context
   buy_class: useful
   sell_class: main
@@ -730,7 +827,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -739,15 +836,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 好材料・悪材料それぞれ最低20観測が要る。不足なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: T01（ニュースセンチメント）の欠損を継承。ニュースが少ない小型株で推定不能。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - L03
+  - T01
+  - T04
+  - I20
+  - I29
+  economic_rationale: 悪材料の方が速く伝わるという報告がある（投資家は損失に敏感）。 もしそうなら、**好材料の遅延が大きい銘柄に買いの機会が偏る**ことになる。 I20（上方/下方ボラの非対称）と同じ非対称性を、 価格の大きさではなく伝播速度で捉えている。自前定義で実証は未確認。
+  references:
+  - 構造的判断。悪材料の伝播が速いという報告はあるが、この形での実証は無い
   notes: 悪材料の方が速く伝わるという報告。自前検証が要る
   notes_extra: null
   provenance:
@@ -761,19 +864,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1

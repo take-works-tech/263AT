@@ -12,8 +12,9 @@
   category_name: 人的資本・組織
   subsection: null
   definition: 従業員数(t) / 従業員数(t-1) - 1
-  formula: null
-  inputs: null
+  formula: 従業員数_t / 従業員数_{t-1} - 1
+  inputs:
+  - employee_count
   sign: context
   buy_class: useful
   sell_class: useful
@@ -26,24 +27,31 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
   industries: null
   period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: na
+  accounting_standard_note: C32 と同一の定義。連結・正社員ベースに統一する。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 前期がゼロなら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 年1回開示なので解像度が粗い。臨時雇用者の扱いが企業ごとに違う。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - C32
+  - B37
+  - B24
+  - C35
+  - W09
+  economic_rationale: '**C32 と完全に同じ量。** カタログで W01 の符号を「?」、C32 を「negative」と していたのは重複による不整合で、**実証では負**（OSAP `hire` t=5.8）。 W01 を C32 のエイリアスとして扱い、統合はしない（§1.9）が、 **符号は C32 に合わせて負に統一すべき**（Phase 1 で確認）。'
+  references:
+  - https://www.openassetpricing.com/
+  - OSAP hire t=5.8
   notes: 成長のサインでもコスト増でもある。B37 と併用して判断
   notes_extra: null
   provenance:
@@ -57,21 +65,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: W02
   name_ja: 平均年収
@@ -79,8 +90,9 @@
   category_name: 人的資本・組織
   subsection: null
   definition: 有報開示の平均年間給与
-  formula: null
-  inputs: null
+  formula: 有報開示の平均年間給与
+  inputs:
+  - EDINET_average_salary
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -93,24 +105,31 @@
   - EDI
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: FY
-  consolidation: consolidated
-  accounting_standard_note: na
+  consolidation: parent_only
+  accounting_standard_note: '**日本の有報は提出会社（単体）の平均給与を開示する。連結ではない。** 持株会社では本社機能の少数の従業員の給与しか出ないので、実態と乖離する。'
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本専用**（米国は CEO Pay Ratio で中央値が開示されるが定義が違う）。 持株会社形態では無意味な数字になる。**日本の持株会社移行が多い業種で歪む。**'
   normalization: rank_sector
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - W03
+  - W04
+  - W05
+  - B24
+  - B37
+  - M20
+  economic_rationale: ∩型。高すぎるとコスト、低すぎると人材流出。 **業種と地域で適正水準が全く違う**ので業種内中央値を x* とする。 水準より W03（変化）の方が情報量が多い。
+  references:
+  - 企業内容等の開示に関する内閣府令 第二号様式（従業員の状況）
+  - 構造的判断
   notes: 日本は開示義務。高すぎはコスト、低すぎは人材流出リスク
   notes_extra: null
   provenance:
@@ -124,23 +143,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: W03
   name_ja: 平均年収の変化
@@ -148,8 +169,9 @@
   category_name: 人的資本・組織
   subsection: null
   definition: YoY
-  formula: null
-  inputs: null
+  formula: 平均年収_t / 平均年収_{t-1} - 1
+  inputs:
+  - W02
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -162,24 +184,29 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: FY
-  consolidation: na
-  accounting_standard_note: na
+  consolidation: parent_only
+  accounting_standard_note: W02 を継承。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 前期が取れなければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: W02 と同じ。組織再編で対象従業員が変わると不連続になる。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - W02
+  - W06
+  - B36
+  - B31
+  - B37
+  economic_rationale: '**賃上げできる企業は価格転嫁できる企業。** インフレ局面では、 人件費の上昇を価格に転嫁できないと利益が圧迫される。 W03 が高くて B18（粗利率トレンド）も改善している企業は、 **転嫁が成功している証拠。** B36（価格転嫁力）を人件費側から見た形。'
+  references:
+  - 構造的判断。賃上げと株価の断面実証は未確認
   notes: 賃上げできる企業＝価格転嫁できる企業（B36 と相関する）
   notes_extra: null
   provenance:
@@ -193,21 +220,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: W04
   name_ja: 平均勤続年数
@@ -215,8 +245,9 @@
   category_name: 人的資本・組織
   subsection: null
   definition: 有報開示
-  formula: null
-  inputs: null
+  formula: 有報開示の平均勤続年数
+  inputs:
+  - EDINET_average_tenure
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -229,24 +260,28 @@
   - EDI
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: FY
-  consolidation: consolidated
-  accounting_standard_note: na
+  consolidation: parent_only
+  accounting_standard_note: W02 と同じ（単体ベース）。
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 日本専用。急成長企業は採用が多く勤続年数が下がるので、成長と混同しやすい。
   normalization: rank_sector
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - W02
+  - W05
+  - W06
+  - W01
+  economic_rationale: ∩型。短すぎると人が定着せずノウハウが蓄積しない。長すぎると組織が硬直する。 **W01（従業員数の成長）と同時に見ないと、成長による低下と離職による低下が区別できない。**
+  references:
+  - 構造的判断
   notes: 短いと定着せず、長すぎると組織が硬直
   notes_extra: null
   provenance:
@@ -260,23 +295,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: W05
   name_ja: 平均年齢
@@ -284,8 +321,9 @@
   category_name: 人的資本・組織
   subsection: null
   definition: 有報開示
-  formula: null
-  inputs: null
+  formula: 有報開示の平均年齢
+  inputs:
+  - EDINET_average_age
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -298,24 +336,27 @@
   - EDI
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: FY
-  consolidation: consolidated
-  accounting_standard_note: na
+  consolidation: parent_only
+  accounting_standard_note: W02 と同じ。
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 日本専用。
   normalization: rank_sector
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - W02
+  - W04
+  - W06
+  economic_rationale: ∩型。高齢化は人件費（年功序列）と事業継続の両面のリスクだが、 若すぎると経験不足。**日本固有の年功賃金制度があるため、 平均年齢の上昇はそのまま人件費の上昇を意味する**という、他国にない直接的な関係がある。
+  references:
+  - 構造的判断
   notes: 高齢化は人件費と事業継続の両面のリスク
   notes_extra: null
   provenance:
@@ -329,23 +370,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: W06
   name_ja: 離職率
@@ -353,8 +396,10 @@
   category_name: 人的資本・組織
   subsection: null
   definition: 開示または（従業員数変化 + 採用数）から推定
-  formula: null
-  inputs: null
+  formula: (期首従業員数 + 採用数 - 期末従業員数) / 期首従業員数
+  inputs:
+  - employee_count
+  - hiring_count
   sign: negative
   buy_class: useful
   sell_class: main
@@ -368,24 +413,31 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: na
+  accounting_standard_note: 採用数の開示は義務ではない。人的資本開示で任意に出す企業が増えている。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 期首従業員数がゼロなら欠損。採用数が取れなければ推定不能。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**採用数を開示する企業に強く偏る。** 開示するのは人的資本に自信がある企業なので、 **良い企業に偏るという最悪の形の選択バイアス。** 開示率が上がるまでは W11/W12（クチコミ）で代替する方が偏りが小さい。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - W01
+  - W04
+  - W11
+  - W12
+  - W13
+  - T41
+  economic_rationale: '**急上昇は内部崩壊の先行指標。** 決算に出るより早く、しかも 財務諸表からは絶対に見えない情報。W13（キーパーソンの退職）の 定量版で、組織の問題を早期に検出する。'
+  references:
+  - 構造的判断。人的資本開示は始まったばかりで実証が無い
   notes: 急上昇は内部崩壊の先行指標。決算に出る前に見える
   notes_extra: null
   provenance:
@@ -399,21 +451,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: W07
   name_ja: 女性管理職比率
@@ -421,8 +476,9 @@
   category_name: 人的資本・組織
   subsection: null
   definition: 開示義務項目
-  formula: null
-  inputs: null
+  formula: 女性管理職比率
+  inputs:
+  - EDINET_diversity
   sign: positive
   buy_class: aux
   sell_class: aux
@@ -435,24 +491,31 @@
   - EDI
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: na
+  accounting_standard_note: 日本は2023年3月期から有報で開示義務。米国は任意。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 管理職数がゼロなら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 日本は義務なのでほぼ全銘柄。米国は開示企業に偏る。業種差が非常に大きい。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - M27
+  - W08
+  - Y01
+  - Y02
+  - Y12
+  economic_rationale: '**単独ではリターンとの関係の証拠が弱い。** ESG カテゴリ（Y）と同じ扱いで、 **アルファ源ではなく需給要因**として持つ。ESG 指数の採用基準（Y12）に 含まれることがあり、GPIF の資金フローに影響しうる。 因果としての解釈（多様性が業績を生む）は主張しない。'
+  references:
+  - 女性活躍推進法・企業内容等の開示に関する内閣府令
+  - 構造的判断
   notes: 単独では弱い。ESG需給・指数採用への影響として扱う
   notes_extra: null
   provenance:
@@ -466,21 +529,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: W08
   name_ja: 人材投資額 / 人件費
@@ -488,8 +554,10 @@
   category_name: 人的資本・組織
   subsection: null
   definition: 研修費・教育投資
-  formula: null
-  inputs: null
+  formula: 人材投資額（研修費等） / 人件費総額
+  inputs:
+  - EDINET_human_capital
+  - personnel_expenses
   sign: positive
   buy_class: aux
   sell_class: aux
@@ -502,24 +570,30 @@
   - EDI
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: na
+  accounting_standard_note: '**定義が確立していない。** 何を人材投資に含めるかが企業ごとに違う。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 人件費がゼロなら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**開示が始まったばかりで比較可能性が極めて低い。** W06 と同じく 開示企業に偏り、しかも定義がバラバラ。**現時点では使えないに近い。**'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - W06
+  - W07
+  - B25
+  - C33
+  - E17
+  economic_rationale: 無形資産投資（B25 R&D、C33 広告）の人材版という位置づけだが、 **定義が固まっていないので実質的にノイズ。** ★1 の事前スケール 0.15 で 強く縮小されるので残しても害は小さいが、期待もできない。
+  references:
+  - 構造的判断。人的資本開示は2023年開始で実証が存在しない
   notes: 開示が始まったばかりで比較可能性が低い
   notes_extra: null
   provenance:
@@ -533,21 +607,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: W09
   name_ja: 求人数の推移
@@ -555,8 +632,9 @@
   category_name: 人的資本・組織
   subsection: null
   definition: 求人サイト・自社採用ページの掲載数
-  formula: null
-  inputs: null
+  formula: 求人サイト・自社採用ページの掲載求人数（月次）
+  inputs:
+  - job_postings
   sign: positive
   buy_class: main
   sell_class: main
@@ -569,24 +647,30 @@
   - 手
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: FY
+  period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（カウント）。企業規模で正規化すべき（従業員数で割る）。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**過去に遡れない。** スクレイピング時点からしか記録できないので、 T/X カテゴリと同じ前向き記録の問題を抱える（forward_log で今日から記録すべき）。 取得元によってカバー範囲が違い、日米で使うサイトが別。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - X06
+  - W01
+  - W10
+  - C32
+  - C01
+  economic_rationale: '**オルタナデータで最も実用的。事業拡大の先行指標。** 採用は事業計画に基づくので、売上の増加より先に動く。 ただし C32（従業員数の成長は劣後）と符号が衝突する可能性がある — **採用の意図（成長のため／離職の補充）を区別できないと符号が定まらない。** W10（職種構成）と W06（離職率）で切り分ける必要がある。'
+  references:
+  - 構造的判断。オルタナデータの実務利用は広いが公開された実証は限定的
   notes: オルタナデータで最も実用的。事業拡大の先行指標（X06 と同一）
   notes_extra: null
   provenance:
@@ -600,21 +684,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: W10
   name_ja: 求人職種の構成変化
@@ -622,8 +709,10 @@
   category_name: 人的資本・組織
   subsection: null
   definition: 営業 / 開発 / 管理 の比率変化
-  formula: null
-  inputs: null
+  formula: 求人の職種構成比（営業 / 開発 / 管理 / 製造）の変化
+  inputs:
+  - job_postings
+  - LLM
   sign: context
   buy_class: useful
   sell_class: useful
@@ -637,24 +726,30 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: FY
+  period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: null
+  zero_denominator_policy: 求人が10件未満なら構成比が不安定。欠損にする。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: W09 と同じ。職種分類を LLM に頼るので分類誤りが入る。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - W09
+  - X06
+  - C24
+  - B25
+  - T15
+  economic_rationale: '**戦略の変化は求人に先に出る。IR より正直。** 開発職の比率が上がれば新製品（C24）、営業職なら販売強化、 管理職なら組織拡大。**企業が公式に発表する前の意思決定が見える。** W09（総数）が量を測るのに対し、W10 は方向を測る。'
+  references:
+  - 構造的判断。実証は無い
   notes: 戦略の変化は求人に先に出る。IR より正直
   notes_extra: null
   provenance:
@@ -668,21 +763,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: W11
   name_ja: 従業員クチコミスコア
@@ -690,8 +788,9 @@
   category_name: 人的資本・組織
   subsection: null
   definition: OpenWork / Glassdoor 等
-  formula: null
-  inputs: null
+  formula: 従業員クチコミサイトの総合スコア
+  inputs:
+  - review_sites
   sign: positive
   buy_class: useful
   sell_class: main
@@ -704,24 +803,30 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: FY
+  period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: null
+  zero_denominator_policy: レビュー件数が20未満なら統計にならない。欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**レビュー件数が大企業に強く偏る。** 小型株は件数が足りず計算できない — **O カテゴリと逆方向の偏り。** さらに退職者が書く比率が高いので 水準が構造的に低く、企業間比較より W12（変化）の方が使える。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - W06
+  - W12
+  - W13
+  - X11
+  - Y06
+  economic_rationale: 水準はサンプル偏りが大きいので単独では弱い。 **組織の実態を外部から知る数少ない手段**という点に価値があり、 W06（離職率）が開示に依存するのに対し、W11 は開示に依存しない。
+  references:
+  - 構造的判断。実証は無い
   notes: 水準はサンプル偏りがある。W12 の方が使える
   notes_extra: null
   provenance:
@@ -735,21 +840,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: W12
   name_ja: クチコミスコアの変化
@@ -757,8 +865,9 @@
   category_name: 人的資本・組織
   subsection: null
   definition: YoY
-  formula: null
-  inputs: null
+  formula: W11 の前年比変化
+  inputs:
+  - W11
   sign: positive
   buy_class: useful
   sell_class: main
@@ -771,24 +880,29 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: FY
+  period_convention: POINT
   consolidation: na
   accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
+  pit_lag_days: 3
+  zero_denominator_policy: 前年のスコアが無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: W11 を継承。加えて**過去に遡れない**（サイトの過去スコアは取得できない）ので、 forward_log で今日から記録する対象。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - W06
+  - W11
+  - W13
+  - W14
+  economic_rationale: '**水準より変化。** サンプル偏りは水準に効くが変化には効きにくいので、 W11 より使える。低下は内部の問題の早期警戒で、W06（離職率上昇）と W13（キーパーソン退職）に先行する可能性がある。'
+  references:
+  - 構造的判断。実証は無い
   notes: 低下は内部の問題の早期警戒。W06 と組で見る
   notes_extra: null
   provenance:
@@ -802,21 +916,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    period_convention: override
+    pit_lag_days: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: W13
   name_ja: 経営陣・キーパーソンの退職
@@ -824,8 +941,11 @@
   category_name: 人的資本・組織
   subsection: null
   definition: 役員・重要人物の離職
-  formula: null
-  inputs: null
+  formula: 1 if 役員・重要な使用人の退任があった else 0（LLM が背景を分類）
+  inputs:
+  - LLM
+  - TD_disclosure
+  - EDINET
   sign: negative
   buy_class: useful
   sell_class: main
@@ -839,24 +959,31 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: FY
+  period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**役員退任は適時開示されるが、「重要な使用人」は開示されない。** 技術者や事業責任者の離脱は最も痛いのに最も見えない。 W09/W10/W11 の変化から間接的に推定するしかない。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - M21
+  - W06
+  - W12
+  - W14
+  - T41
+  - I25
+  economic_rationale: '**小型株では致命的になりうる。** 従業員100人の企業で開発責任者が辞めれば、 事業そのものが止まる。M21（社長交代）が組織の頂点を見るのに対し、 W13 は実務の中核を見る。**I25（単一要因への依存度）の人的版。**'
+  references:
+  - 構造的判断。個別事象なので断面実証は困難
   notes: 小型株では致命的になりうる。M21 と対
   notes_extra: null
   provenance:
@@ -870,21 +997,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: W14
   name_ja: 労働争議・労務問題
@@ -892,8 +1022,10 @@
   category_name: 人的資本・組織
   subsection: null
   definition: ハラスメント・未払残業・訴訟の発生
-  formula: null
-  inputs: null
+  formula: 1 if 労働争議・ハラスメント・未払残業等の問題が報道された else 0
+  inputs:
+  - NEWS
+  - LLM
   sign: negative
   buy_class: useful
   sell_class: main
@@ -907,24 +1039,31 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: FY
+  period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**報道依存なので小型株で見逃す**（N36/N37 と同型の偏り）。 O カテゴリと逆方向で、リスク管理上まずい。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - W06
+  - W11
+  - W12
+  - Y06
+  - Y07
+  - N37
+  economic_rationale: Y06（不祥事の履歴）の労務版。直接の金銭的影響は小さいことが多いが、 **採用難（W09）と離職（W06）を通じて中期的に効く。** 組織文化の問題は再発率が高い。
+  references:
+  - 構造的判断
   notes: Y06（不祥事）と連動
   notes_extra: null
   provenance:
@@ -938,19 +1077,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1

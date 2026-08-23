@@ -3873,3 +3873,2506 @@ N49:
     - "OSAP Recomm_ShortInterest t=4.1 / ConsRecomm t=3.2"
   markets: [US]
   review: {status: verified}
+
+# =============================================================================
+# L（情報伝播 11）+ V（セグメント 15）+ W（人的資本 14）+ Z（メタ 13）= 53件
+# カテゴリ完結を優先。L は OSAP 最上位群（t=11.0）だが 263AT のホライズンより短い。
+# =============================================================================
+
+# --- L 情報伝播・リードラグ ---------------------------------------------------
+
+L01:
+  formula: "同一業種の時価総額上位20%銘柄の直近1ヶ月の等加重リターン"
+  inputs: [PRICE, sector_classification, J05]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "同業の大型株が3銘柄未満なら欠損。"
+  missing_bias: "業種分類の欠損で計算不能。GICS の日本株付与が未解決（spec SP-03）ので、東証33業種で代替する。"
+  correlated_with: [L02, L08, L09, G36, G11, N21]
+  economic_rationale: >-
+    OSAP `IndRetBig` t=11.0 は Predictor 全体で最上位クラス。大型株に先に織り込まれた
+    業種情報が、小型株に遅れて伝わる。**「大型株を見てから小型株を買う」という
+    単純な戦略が機能するという主張**で、263AT のユニバース（機関が入れない小型株）と
+    構造的に相性が良い。ただし有効期間が 1M-6M と短く、6M〜5Y の設計では
+    銘柄選択ではなく執行タイミングに使うのが妥当（OQ-26）。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP IndRetBig t=11.0"]
+  markets: [JP, US]
+  review: {status: verified}
+
+L02:
+  formula: "同一業種の大型株の SUE（N02）の加重平均"
+  inputs: [N02, sector_classification, J05]
+  period_convention: GUIDE_CONS
+  consolidation: consolidated
+  accounting_standard_note: "N02 を継承。"
+  zero_denominator_policy: "同業大型株の SUE が計算できなければ欠損。"
+  missing_bias: >-
+    **大型株側は予想データが揃うので、日本でも計算できる。**
+    N02 が自社では欠損する小型株でも、L02 は使えるという逆転が起きる — O カテゴリの
+    欠損問題（62%）を迂回できる数少ない経路。
+  correlated_with: [L01, N02, N04, N06, N50, X15]
+  economic_rationale: >-
+    OSAP `EarnSupBig` t=8.9。**同業大手の決算を見てから小型株を買える。**
+    決算発表日が業種内で分散するため、大手が先に出す場合に情報優位が生まれる。
+    N02 が自社の決算を待つのに対し、L02 は他社の決算で先回りできる。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP EarnSupBig t=8.9"]
+  markets: [JP, US]
+  review: {status: verified}
+
+L03:
+  formula: "1 - R2(制約回帰) / R2(ラグ項を含む回帰)。市場リターンの当日+ラグ4週で回帰"
+  inputs: [PRICE, market_return]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "R2 がゼロ近傍（市場と無相関）だと不安定。週次1年分の観測が要る。"
+  missing_bias: "上場1年未満で欠損。売買停止日が多い銘柄で推定が歪む（J18）。"
+  correlated_with: [L04, L05, L09, O01, O03, J03, I05]
+  economic_rationale: >-
+    OSAP `PriceDelaySlope` t=7.7。**「情報が遅れて価格に入る度合い」を価格だけで直接測る。**
+    O カテゴリが情報の供給側（アナリスト・機関）を測るのに対し、これは結果を測る。
+    データ源が価格のみなので**欠損しない**という決定的な利点があり、
+    O01 の62%欠損問題を完全に回避してネグレクトを定量化できる。
+    **263AT の O カテゴリの実質的な代替になりうる。**
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP PriceDelaySlope t=7.7"]
+  markets: [JP, US]
+  review: {status: verified}
+
+L04:
+  formula: "L03 と同じ回帰のラグ係数を標準誤差で調整した版"
+  inputs: [PRICE, market_return]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "標準誤差がゼロなら欠損。"
+  missing_bias: "L03 と同じ。"
+  correlated_with: [L03, L05, L09]
+  economic_rationale: >-
+    OSAP `PriceDelayTstat` t=7.4。L03 の推定精度を織り込んだ版で、
+    ノイズの多い銘柄の遅延を過大評価しない。**L03/L04/L05 は同じ現象の3通りの測り方**で
+    相関が非常に高いはずなので、Z12 の主成分分析で1本にまとまる可能性が高い。
+    §1.9 の方針に従い統合せず3本とも残す。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP PriceDelayTstat t=7.4"]
+  markets: [JP, US]
+  review: {status: verified}
+
+L05:
+  formula: "ラグ項を加えたときの R2 の改善分"
+  inputs: [PRICE, market_return]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "L03 と同じ。"
+  missing_bias: >-
+    **OQ-17 の実測で「マイクロキャップ除外で死ぬ9シグナル」の1つだった。**
+    つまり非流動株でしか効かない可能性が高く、J01/J02/J10 のゲートと衝突する。
+  correlated_with: [L03, L04, J03, J10]
+  economic_rationale: >-
+    OSAP `PriceDelayRsq` t=3.4。L03/L04 より弱く、しかもマイクロキャップ除外で消える。
+    **流動性そのものを測っている成分が大きい**と解釈でき、
+    L03（係数ベース）の方が情報の遅延を純粋に測れている可能性がある。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP PriceDelayRsq t=3.4"]
+  markets: [JP, US]
+  review: {status: verified}
+
+L06:
+  formula: "主要仕入先企業群の直近1ヶ月の売上加重リターン"
+  inputs: [LLM, supplier_disclosure, PRICE]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "仕入先が特定できなければ欠損。"
+  missing_bias: >-
+    **仕入先の開示義務が無い。** 米国の産業連関表（BEA）で業種レベルの近似はできるが、
+    企業レベルの特定は LLM 頼み。**上場している仕入先しか捕捉できない**ので、
+    非上場サプライヤーに依存する企業では機能しない。
+  correlated_with: [L07, L08, N21, X15, T19, Q16]
+  economic_rationale: >-
+    OSAP `iomom_supp` t=5.0。仕入先の株価が動くのは、その業界の需給が変化したから。
+    それが自社のコストに転嫁されるのは数四半期後。B36（価格転嫁力）が
+    転嫁できるかを測るのに対し、L06 は転嫁圧力の発生を先読みする。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP iomom_supp t=5.0"]
+  markets: [JP, US]
+  review: {status: verified}
+
+L07:
+  formula: "主要顧客企業群の直近1ヶ月の売上加重リターン"
+  inputs: [LLM, customer_disclosure, PRICE]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "顧客が特定できなければ欠損。"
+  missing_bias: >-
+    **日本の有報は主要顧客を匿名（A社）で書くことが多い**ので、LLM の推定に頼る。
+    米国は売上10%以上の顧客の開示が義務（ASC 280）なので特定しやすい。**米国優位。**
+  correlated_with: [L06, L08, N21, N41, X15, I25, T18]
+  economic_rationale: >-
+    OSAP `iomom_cust` t=4.1 / `CustomerMomentum` t=3.8。
+    **顧客の需要変化が自社の受注に反映されるまでのラグを取りに行く。**
+    N21（顧客の業績変化）がファンダメンタルで捉える現象を価格で捉える版で、
+    価格の方が速い。X15（主要顧客の株価）と同一概念なので統合候補だが、
+    §1.9 に従い両方残す。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP iomom_cust t=4.1 / CustomerMomentum t=3.8"]
+  markets: [JP, US]
+  review: {status: verified}
+
+L08:
+  formula: "各セグメントに対応する純粋事業会社群の、売上構成比で加重したリターン"
+  inputs: [V01, V07, segment_revenue, PRICE]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: "セグメント区分の企業間差（V01 の注）を継承。"
+  zero_denominator_policy: "単一セグメント企業では意味を持たないので欠損（V01 < 2 で除外）。"
+  missing_bias: "多角化企業のみ。A36（SOTP）と同じ適用範囲。"
+  correlated_with: [A36, L01, V01, V03, V06]
+  economic_rationale: >-
+    OSAP `retConglomerate` t=5.5。**コングロマリットの株価は、
+    構成事業の純粋事業会社の株価の合成より遅れて動く。** 投資家が
+    複雑な企業を分析するコストを避けるため。A36（SOTP）が価値の水準を測るのに対し、
+    L08 は価値の変化の遅延を測る。**V カテゴリと L カテゴリを橋渡しする変数。**
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP retConglomerate t=5.5"]
+  markets: [JP, US]
+  review: {status: verified}
+
+L09:
+  formula: "業種内で L03 を順位化した値"
+  inputs: [L03, sector_classification]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "業種内の銘柄数が5未満なら欠損。"
+  missing_bias: "L03 と業種分類の欠損を継承。"
+  correlated_with: [L03, L04, L05, O10]
+  economic_rationale: >-
+    L03 の業種内相対版。業種によって情報伝播の速さが構造的に違う
+    （公益は遅く、テックは速い）ので、**業種を跨いだ比較には正規化が要る。**
+    ただし L カテゴリの既定は rank_all にしてある（日米間リードラグ L10 があるため）ので、
+    この変数だけが業種内正規化を明示的に行う位置づけ。自前定義で実証は無い。
+  evidence_tier: T3
+  references: ["構造的判断。L03 の業種内正規化版であり、この形での実証は無い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+L10:
+  formula: "対応する米国業種指数の前営業日リターン（日本株の場合）"
+  inputs: [US_sector_index, sector_mapping]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "業種の日米対応が付かなければ欠損。GICS があれば容易（spec SP-03）。"
+  missing_bias: >-
+    **日本株専用**（米国株には「前日の日本市場」が先行しない）。
+    日米の業種対応表が必要で、東証33業種と GICS の対応は1対1でない。
+  correlated_with: [L01, P07, P21, P22, G16]
+  economic_rationale: >-
+    **日米両方を持つことの直接的な利点。** 米国市場は日本の引け後に動くので、
+    翌営業日の日本株に構造的に先行する。これは情報の遅延ではなく**時差による確定的な先行**で、
+    L01-L05 とは性質が違う。**ただし広く知られているので、既に織り込まれている可能性が高い。**
+    実際に残っているかは Phase 1 で実測する。
+  evidence_tier: T3
+  references: ["構造的判断。時差による先行は自明だが、超過収益として残っているかは要検証"]
+  markets: [JP]
+  review: {status: verified}
+
+L11:
+  formula: "悪材料時と好材料時で L03 を別々に推定した差"
+  inputs: [L03, NEWS, T01]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "好材料・悪材料それぞれ最低20観測が要る。不足なら欠損。"
+  missing_bias: "T01（ニュースセンチメント）の欠損を継承。ニュースが少ない小型株で推定不能。"
+  correlated_with: [L03, T01, T04, I20, I29]
+  economic_rationale: >-
+    悪材料の方が速く伝わるという報告がある（投資家は損失に敏感）。
+    もしそうなら、**好材料の遅延が大きい銘柄に買いの機会が偏る**ことになる。
+    I20（上方/下方ボラの非対称）と同じ非対称性を、
+    価格の大きさではなく伝播速度で捉えている。自前定義で実証は未確認。
+  evidence_tier: T3
+  references: ["構造的判断。悪材料の伝播が速いという報告はあるが、この形での実証は無い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- V セグメント・事業構成 ---------------------------------------------------
+
+V01:
+  formula: "開示セグメントの数"
+  inputs: [segment_disclosure]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **マネジメント・アプローチ（IFRS8 / ASC280）なので、企業が経営管理上どう区分しているかで決まる。**
+    同業でも粒度が全く違う。セグメント変更は頻繁で、前年比が壊れる（V06 で検出）。
+  zero_denominator_policy: "na（カウント）。単一セグメント企業は1。"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: "セグメント開示が免除される小規模企業で欠損。"
+  correlated_with: [V02, V03, V06, A36, L08]
+  economic_rationale: >-
+    ∩型。1つだと事業リスクが集中し（I25）、多すぎるとコングロマリット・ディスカウントが生じる。
+    **A36（SOTP）と L08（コングロマリット・リターン）の適用可否を決める前提条件**でもある。
+  evidence_tier: T3
+  references: ["IFRS 8 / ASC 280（セグメント情報）", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+V02:
+  formula: "最大セグメントの売上 / 総売上"
+  inputs: [segment_revenue, REV]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "V01 を継承。"
+  zero_denominator_policy: "REV>0。単一セグメントなら1.0。"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: "V01 と同じ。"
+  correlated_with: [V01, V03, I25, T18, N41]
+  economic_rationale: >-
+    ∩型。集中は分かりやすさと経営資源の集中という利点があるが、
+    **一本足リスク**（I25）でもある。1.0（単一事業）と 0.3（4事業均等）のどちらが良いかは
+    業種と成長段階で違うので、業種内中央値を暫定 x* とする。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+V03:
+  formula: "max(セグメント別ROIC) - min(セグメント別ROIC)"
+  inputs: [segment_profit, segment_assets]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **セグメント資産を開示しない企業がある**（IFRS8 では経営者に報告されている場合のみ義務）。
+    その場合セグメント別 ROIC が計算できず、利益率で代替するしかない。
+  zero_denominator_policy: "セグメント資産がゼロ・未開示なら欠損。セグメントが2未満なら欠損。"
+  missing_bias: "セグメント資産の開示企業に偏る。日本の中小型では開示が薄い。"
+  correlated_with: [B38, V04, V05, V09, V10, A36]
+  economic_rationale: >-
+    **再編余地の大きさ。** 差が大きいほど、低収益事業を切り離したときの
+    全社 ROIC の改善幅が大きい。A36（SOTP）で価値を測り、V03 で改善余地を測る。
+    M10（アクティビスト標的スコア）の構成要素にすべき候補。
+  evidence_tier: T3
+  references: ["構造的判断。SOTP 分析の実務手法"]
+  markets: [JP, US]
+  review: {status: verified}
+
+V04:
+  formula: "SUM(ROIC < WACC のセグメントの売上) / REV"
+  inputs: [V03, B04, segment_revenue, REV]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "V03 と B04 を継承。WACC は全社共通を使うか事業別に推定するかで結果が変わる。"
+  zero_denominator_policy: "REV>0。セグメント別 ROIC が計算できなければ欠損。"
+  missing_bias: "V03 と同じ。WACC の事業別推定は実務上ほぼ不可能なので全社共通で代用する。"
+  correlated_with: [V03, V05, V10, B04, A36, M10, N15]
+  economic_rationale: >-
+    **切り離せば価値が上がる部分の大きさ。** アクティビストが最初に指摘する箇所で、
+    東証の資本コスト要請（LAW-47）が名指ししている領域でもある。
+    N15（事業売却・スピンオフ）の事前予測になる。
+    **日本の多角化企業で最も実際的な改善余地がある変数。**
+  evidence_tier: T3
+  references:
+    - "https://www.jpx.co.jp/english/equities/follow-up/02.html"
+    - "構造的判断。この形での断面実証は未確認"
+  markets: [JP, US]
+  review: {status: verified}
+
+V05:
+  formula: "最高ROICセグメントの売上成長率"
+  inputs: [V03, segment_revenue]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "V03 を継承。セグメント変更があると追跡できない。"
+  zero_denominator_policy: "前期の当該セグメント売上がゼロなら欠損。"
+  missing_bias: "V03 と同じ。セグメント再編で「最高ROICセグメント」が入れ替わると系列が壊れる。"
+  correlated_with: [V03, V04, V06, C01, B44, B18]
+  economic_rationale: >-
+    **ミックス改善による全社利益率の自動改善。** 最も見落とされる成長源で、
+    全社の売上成長率（C01）が横ばいでも、高収益事業の構成比が上がれば利益は伸びる。
+    B18（粗利率トレンド）や B44（総資産回転率の変化）に現れる改善の、
+    **原因側を特定する変数。**
+  evidence_tier: T3
+  references: ["構造的判断。ミックス改善は実務的に重要だが断面実証は未確認"]
+  markets: [JP, US]
+  review: {status: verified}
+
+V06:
+  formula: "SUM|セグメント売上構成比(t) - 構成比(t-1)|"
+  inputs: [segment_revenue]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **セグメント区分そのものが変更されると、構成比の比較が無意味になる。**
+    区分変更を検出して欠損にする必要があるが、機械的な検出は難しい（セグメント名の変更で近似）。
+  zero_denominator_policy: "na（差分の和）。前期のセグメント構成が取れなければ欠損。"
+  missing_bias: "セグメント変更を検出できないと、変更年に巨大な値が出る。誤検出が上位に来る。"
+  correlated_with: [V01, V03, V05, V12, C10, C28, N15]
+  economic_rationale: >-
+    事業ポートフォリオの変化の速さ。大きな変化は M&A（C10/C28）か
+    事業売却（N15）を伴うので、**イベントの検出器としても機能する。**
+    ただし符号は文脈依存で、良い再編と迷走の区別がつかない。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+V07:
+  formula: "地域別売上構成比（国内 / 北米 / 欧州 / 中国 / その他）"
+  inputs: [geographic_revenue]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **地域区分の粒度が企業ごとに違う。**「アジア」に中国を含める企業と分ける企業があり、
+    V08（中国エクスポージャー）の精度に直結する。
+  zero_denominator_policy: "REV>0。地域別開示が無ければ欠損。"
+  missing_bias: "国内専業企業は開示しないので、海外展開企業に偏る。"
+  correlated_with: [V08, C23, P07, P08, U26, Y08]
+  economic_rationale: >-
+    成長余地（海外市場の大きさ）と地政学リスクの両面。P08（為替感応度）の
+    ファンダメンタル側の説明変数でもあり、**統計推定の P08 と突合して整合性を確認できる。**
+  evidence_tier: T3
+  references: ["IFRS 8 / ASC 280（地域別情報）", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+V08:
+  formula: "中国向け売上比率 + 中国生産比率"
+  inputs: [V07, LLM, facility_locations]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "V07 の区分粒度の問題を継承。生産比率は開示義務が無く LLM 推定。"
+  zero_denominator_policy: "REV>0。"
+  missing_bias: >-
+    **生産拠点の中国依存は開示されないことが多い。** サプライヤー経由の間接依存は
+    さらに見えない。**過小評価に強く偏る**ので、リスク管理上は保守的に扱うべき。
+  correlated_with: [V07, Y08, T19, N38, P09]
+  economic_rationale: >-
+    **2026年時点で最大の地政学リスク要因。** 5年ホライズンでは
+    台湾情勢・輸出規制・サプライチェーン再編のいずれかが顕在化する確率が無視できない。
+    Y08（人権リスク）と T19（サプライチェーンリスク）と重なるが、
+    **単一国への集中という定量化しやすい形で持つ価値がある。**
+  evidence_tier: T3
+  references: ["構造的判断。地政学リスクの定量化は困難で、実証は存在しない"]
+  markets: [JP, US]
+  review: {status: verified}
+
+V09:
+  formula: "セグメント資産 / セグメント売上"
+  inputs: [segment_assets, segment_revenue]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "V03 と同じくセグメント資産の開示が要る。"
+  zero_denominator_policy: "セグメント売上がゼロなら欠損。"
+  missing_bias: "V03 と同じ。"
+  correlated_with: [V03, V04, B11, B44, C36]
+  economic_rationale: >-
+    **どこに資本が寝ているか。** 全社の総資産回転率（B11）を事業別に分解した形。
+    V04（価値破壊セグメント）が利益側から見るのに対し、V09 は資産側から見る。
+    資産効率の悪いセグメントは、切り離しても全社 ROIC が上がる候補になる。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+V10:
+  formula: "セグメント利益 - 全社費用を売上比で配賦した額"
+  inputs: [segment_profit, corporate_expenses, segment_revenue]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **全社費用（本社費・調整額）の配賦方法は開示されない。** 売上比で按分するのは
+    こちらの仮定であり、実際の因果とは違う可能性がある。
+  zero_denominator_policy: "配賦基準の売上がゼロなら欠損。"
+  missing_bias: "全社費用を独立開示しない企業で計算不能。"
+  correlated_with: [V03, V04, V05, V09]
+  economic_rationale: >-
+    **「本社費控除前は黒字」の罠を避ける。** セグメント利益は全社費用を
+    配賦する前の数字なので、全部を足しても営業利益にならない。
+    配賦後で見ないと、**実際には赤字のセグメントを黒字と誤認する。**
+    V04（価値破壊セグメント）の判定精度を上げるための前処理。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+V11:
+  formula: "持分法投資損益 / 経常利益"
+  inputs: [equity_method_income, ordinary_income]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **日本基準の「経常利益」に相当する概念が IFRS/US GAAP に無い。**
+    IFRS では持分法損益が営業利益の上か下かも企業判断。分母を税引前利益に統一する。
+  zero_denominator_policy: "経常利益がゼロ・負なら欠損。"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: "持分法適用会社を持たない企業ではゼロ。多い業種（商社・自動車）に偏る。"
+  correlated_with: [V01, B03, A06, C40, E25]
+  economic_rationale: >-
+    ∩型。持分法投資は**連結の外にある利益**なので、比率が高いと
+    連結財務諸表から実態が見えなくなる。**日本の商社・自動車で特に重要**で、
+    利益の大半が持分法という企業もある。ROIC（B03）の分母に持分法投資が入るが
+    分子の NOPAT に持分法損益が入るかは定義次第で、**B03 の定義揺れの主要因の一つ。**
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+V12:
+  formula: "1 if 非継続事業（売却予定・廃止予定）の開示あり else 0"
+  inputs: [discontinued_operations]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **IFRS5 / ASC205-20 で非継続事業は損益計算書上で区分表示される。**
+    日本基準には同等の区分が無く、特別損益に混じる。**日米で見え方が違う。**
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: "日本基準企業では検出しにくい。IFRS 適用企業に偏る。"
+  correlated_with: [V06, N15, E06, C10, Z06]
+  economic_rationale: >-
+    **時系列比較を壊す。** 非継続事業がある年は、売上も利益も継続事業ベースに
+    組み替えられるので、前年と比較できない。Z06（決算期変更）と同種の
+    「データが壊れる」フラグとして機能する。
+    同時に N15（事業売却）の先行指標でもあり、V04 の是正が始まった証拠にもなる。
+  evidence_tier: T3
+  references: ["IFRS 5 / ASC 205-20（非継続事業）", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+V13:
+  formula: "所属業種内の売上シェアの Herfindahl 指数"
+  inputs: [REV, sector_classification]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "上場企業のみで計算するので、非上場の競合が多い業種では過大になる。"
+  zero_denominator_policy: "業種内の銘柄数が3未満なら欠損。"
+  missing_bias: >-
+    **非上場企業と海外企業が母集団から抜ける。** 日本の内需業種では上場企業だけで
+    計算しても実態に近いが、グローバル競争のある業種（半導体・自動車）では無意味になる。
+  correlated_with: [V14, V15, B07, T37, T38]
+  economic_rationale: >-
+    OSAP `Herf` t=2.1。**集中した業種は競争が緩く、利益が守られる。**
+    T37（5フォース評価）の「既存競合」を定量化した形で、
+    LLM の定性判断（T14 堀）と突合できる客観指標。
+    ただし t=2.1 と弱く、業種分類と母集団の定義に強く依存する。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP Herf t=2.1"]
+  markets: [JP, US]
+  review: {status: verified}
+
+V14:
+  formula: "所属業種内の総資産シェアの Herfindahl 指数"
+  inputs: [TA, sector_classification]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "V13 と同じ。"
+  zero_denominator_policy: "V13 と同じ。"
+  missing_bias: "V13 と同じ。"
+  correlated_with: [V13, V15]
+  economic_rationale: >-
+    OSAP `HerfAsset` t=2.1。V13 の資産版。**資本集約的な業種では
+    資産シェアの方が参入障壁を反映する。** V13/V14/V15 は同じ概念の3通りの測り方で
+    相関が極めて高いはずなので、Z12 でまとまる可能性が高い。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP HerfAsset t=2.1"]
+  markets: [JP, US]
+  review: {status: verified}
+
+V15:
+  formula: "所属業種内の自己資本シェアの Herfindahl 指数"
+  inputs: [EQ, sector_classification]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "V13 と同じ。債務超過企業を含めると歪む。"
+  zero_denominator_policy: "V13 と同じ。EQ<0 の企業は母集団から除く。"
+  missing_bias: "V13 と同じ。"
+  correlated_with: [V13, V14]
+  economic_rationale: >-
+    OSAP `HerfBE` t=2.5。3つの Herfindahl の中では最も強い。
+    自己資本シェアは**過去の利益蓄積の集中**を反映するので、
+    売上シェア（V13）より持続的な優位を捉えている可能性がある。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP HerfBE t=2.5"]
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- W 人的資本・組織 ---------------------------------------------------------
+
+W01:
+  formula: "従業員数_t / 従業員数_{t-1} - 1"
+  inputs: [employee_count]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "C32 と同一の定義。連結・正社員ベースに統一する。"
+  zero_denominator_policy: "前期がゼロなら欠損。"
+  missing_bias: "年1回開示なので解像度が粗い。臨時雇用者の扱いが企業ごとに違う。"
+  correlated_with: [C32, B37, B24, C35, W09]
+  economic_rationale: >-
+    **C32 と完全に同じ量。** カタログで W01 の符号を「?」、C32 を「negative」と
+    していたのは重複による不整合で、**実証では負**（OSAP `hire` t=5.8）。
+    W01 を C32 のエイリアスとして扱い、統合はしない（§1.9）が、
+    **符号は C32 に合わせて負に統一すべき**（Phase 1 で確認）。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP hire t=5.8"]
+  markets: [JP, US]
+  review: {status: verified}
+
+W02:
+  formula: "有報開示の平均年間給与"
+  inputs: [EDINET_average_salary]
+  period_convention: FY
+  consolidation: parent_only
+  accounting_standard_note: >-
+    **日本の有報は提出会社（単体）の平均給与を開示する。連結ではない。**
+    持株会社では本社機能の少数の従業員の給与しか出ないので、実態と乖離する。
+  zero_denominator_policy: "na"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: >-
+    **日本専用**（米国は CEO Pay Ratio で中央値が開示されるが定義が違う）。
+    持株会社形態では無意味な数字になる。**日本の持株会社移行が多い業種で歪む。**
+  correlated_with: [W03, W04, W05, B24, B37, M20]
+  economic_rationale: >-
+    ∩型。高すぎるとコスト、低すぎると人材流出。
+    **業種と地域で適正水準が全く違う**ので業種内中央値を x* とする。
+    水準より W03（変化）の方が情報量が多い。
+  evidence_tier: T3
+  references: ["企業内容等の開示に関する内閣府令 第二号様式（従業員の状況）", "構造的判断"]
+  markets: [JP]
+  review: {status: verified}
+
+W03:
+  formula: "平均年収_t / 平均年収_{t-1} - 1"
+  inputs: [W02]
+  period_convention: FY
+  consolidation: parent_only
+  accounting_standard_note: "W02 を継承。"
+  zero_denominator_policy: "前期が取れなければ欠損。"
+  missing_bias: "W02 と同じ。組織再編で対象従業員が変わると不連続になる。"
+  correlated_with: [W02, W06, B36, B31, B37]
+  economic_rationale: >-
+    **賃上げできる企業は価格転嫁できる企業。** インフレ局面では、
+    人件費の上昇を価格に転嫁できないと利益が圧迫される。
+    W03 が高くて B18（粗利率トレンド）も改善している企業は、
+    **転嫁が成功している証拠。** B36（価格転嫁力）を人件費側から見た形。
+  evidence_tier: T3
+  references: ["構造的判断。賃上げと株価の断面実証は未確認"]
+  markets: [JP]
+  review: {status: verified}
+
+W04:
+  formula: "有報開示の平均勤続年数"
+  inputs: [EDINET_average_tenure]
+  period_convention: FY
+  consolidation: parent_only
+  accounting_standard_note: "W02 と同じ（単体ベース）。"
+  zero_denominator_policy: "na"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: "日本専用。急成長企業は採用が多く勤続年数が下がるので、成長と混同しやすい。"
+  correlated_with: [W02, W05, W06, W01]
+  economic_rationale: >-
+    ∩型。短すぎると人が定着せずノウハウが蓄積しない。長すぎると組織が硬直する。
+    **W01（従業員数の成長）と同時に見ないと、成長による低下と離職による低下が区別できない。**
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP]
+  review: {status: verified}
+
+W05:
+  formula: "有報開示の平均年齢"
+  inputs: [EDINET_average_age]
+  period_convention: FY
+  consolidation: parent_only
+  accounting_standard_note: "W02 と同じ。"
+  zero_denominator_policy: "na"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: "日本専用。"
+  correlated_with: [W02, W04, W06]
+  economic_rationale: >-
+    ∩型。高齢化は人件費（年功序列）と事業継続の両面のリスクだが、
+    若すぎると経験不足。**日本固有の年功賃金制度があるため、
+    平均年齢の上昇はそのまま人件費の上昇を意味する**という、他国にない直接的な関係がある。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP]
+  review: {status: verified}
+
+W06:
+  formula: "(期首従業員数 + 採用数 - 期末従業員数) / 期首従業員数"
+  inputs: [employee_count, hiring_count]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "採用数の開示は義務ではない。人的資本開示で任意に出す企業が増えている。"
+  zero_denominator_policy: "期首従業員数がゼロなら欠損。採用数が取れなければ推定不能。"
+  missing_bias: >-
+    **採用数を開示する企業に強く偏る。** 開示するのは人的資本に自信がある企業なので、
+    **良い企業に偏るという最悪の形の選択バイアス。** 開示率が上がるまでは
+    W11/W12（クチコミ）で代替する方が偏りが小さい。
+  correlated_with: [W01, W04, W11, W12, W13, T41]
+  economic_rationale: >-
+    **急上昇は内部崩壊の先行指標。** 決算に出るより早く、しかも
+    財務諸表からは絶対に見えない情報。W13（キーパーソンの退職）の
+    定量版で、組織の問題を早期に検出する。
+  evidence_tier: T3
+  references: ["構造的判断。人的資本開示は始まったばかりで実証が無い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+W07:
+  formula: "女性管理職比率"
+  inputs: [EDINET_diversity]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "日本は2023年3月期から有報で開示義務。米国は任意。"
+  zero_denominator_policy: "管理職数がゼロなら欠損。"
+  missing_bias: "日本は義務なのでほぼ全銘柄。米国は開示企業に偏る。業種差が非常に大きい。"
+  correlated_with: [M27, W08, Y01, Y02, Y12]
+  economic_rationale: >-
+    **単独ではリターンとの関係の証拠が弱い。** ESG カテゴリ（Y）と同じ扱いで、
+    **アルファ源ではなく需給要因**として持つ。ESG 指数の採用基準（Y12）に
+    含まれることがあり、GPIF の資金フローに影響しうる。
+    因果としての解釈（多様性が業績を生む）は主張しない。
+  evidence_tier: T3
+  references: ["女性活躍推進法・企業内容等の開示に関する内閣府令", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+W08:
+  formula: "人材投資額（研修費等） / 人件費総額"
+  inputs: [EDINET_human_capital, personnel_expenses]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "**定義が確立していない。** 何を人材投資に含めるかが企業ごとに違う。"
+  zero_denominator_policy: "人件費がゼロなら欠損。"
+  missing_bias: >-
+    **開示が始まったばかりで比較可能性が極めて低い。** W06 と同じく
+    開示企業に偏り、しかも定義がバラバラ。**現時点では使えないに近い。**
+  correlated_with: [W06, W07, B25, C33, E17]
+  economic_rationale: >-
+    無形資産投資（B25 R&D、C33 広告）の人材版という位置づけだが、
+    **定義が固まっていないので実質的にノイズ。** ★1 の事前スケール 0.15 で
+    強く縮小されるので残しても害は小さいが、期待もできない。
+  evidence_tier: T3
+  references: ["構造的判断。人的資本開示は2023年開始で実証が存在しない"]
+  markets: [JP, US]
+  review: {status: verified}
+
+W09:
+  formula: "求人サイト・自社採用ページの掲載求人数（月次）"
+  inputs: [job_postings]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（カウント）。企業規模で正規化すべき（従業員数で割る）。"
+  pit_lag_days: 3
+  missing_bias: >-
+    **過去に遡れない。** スクレイピング時点からしか記録できないので、
+    T/X カテゴリと同じ前向き記録の問題を抱える（forward_log で今日から記録すべき）。
+    取得元によってカバー範囲が違い、日米で使うサイトが別。
+  correlated_with: [X06, W01, W10, C32, C01]
+  economic_rationale: >-
+    **オルタナデータで最も実用的。事業拡大の先行指標。**
+    採用は事業計画に基づくので、売上の増加より先に動く。
+    ただし C32（従業員数の成長は劣後）と符号が衝突する可能性がある —
+    **採用の意図（成長のため／離職の補充）を区別できないと符号が定まらない。**
+    W10（職種構成）と W06（離職率）で切り分ける必要がある。
+  evidence_tier: T3
+  references: ["構造的判断。オルタナデータの実務利用は広いが公開された実証は限定的"]
+  markets: [JP, US]
+  review: {status: verified}
+
+W10:
+  formula: "求人の職種構成比（営業 / 開発 / 管理 / 製造）の変化"
+  inputs: [job_postings, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "求人が10件未満なら構成比が不安定。欠損にする。"
+  pit_lag_days: 3
+  missing_bias: "W09 と同じ。職種分類を LLM に頼るので分類誤りが入る。"
+  correlated_with: [W09, X06, C24, B25, T15]
+  economic_rationale: >-
+    **戦略の変化は求人に先に出る。IR より正直。**
+    開発職の比率が上がれば新製品（C24）、営業職なら販売強化、
+    管理職なら組織拡大。**企業が公式に発表する前の意思決定が見える。**
+    W09（総数）が量を測るのに対し、W10 は方向を測る。
+  evidence_tier: T3
+  references: ["構造的判断。実証は無い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+W11:
+  formula: "従業員クチコミサイトの総合スコア"
+  inputs: [review_sites]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "レビュー件数が20未満なら統計にならない。欠損。"
+  pit_lag_days: 3
+  missing_bias: >-
+    **レビュー件数が大企業に強く偏る。** 小型株は件数が足りず計算できない
+    — **O カテゴリと逆方向の偏り。** さらに退職者が書く比率が高いので
+    水準が構造的に低く、企業間比較より W12（変化）の方が使える。
+  correlated_with: [W06, W12, W13, X11, Y06]
+  economic_rationale: >-
+    水準はサンプル偏りが大きいので単独では弱い。
+    **組織の実態を外部から知る数少ない手段**という点に価値があり、
+    W06（離職率）が開示に依存するのに対し、W11 は開示に依存しない。
+  evidence_tier: T3
+  references: ["構造的判断。実証は無い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+W12:
+  formula: "W11 の前年比変化"
+  inputs: [W11]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "前年のスコアが無ければ欠損。"
+  pit_lag_days: 3
+  missing_bias: >-
+    W11 を継承。加えて**過去に遡れない**（サイトの過去スコアは取得できない）ので、
+    forward_log で今日から記録する対象。
+  correlated_with: [W06, W11, W13, W14]
+  economic_rationale: >-
+    **水準より変化。** サンプル偏りは水準に効くが変化には効きにくいので、
+    W11 より使える。低下は内部の問題の早期警戒で、W06（離職率上昇）と
+    W13（キーパーソン退職）に先行する可能性がある。
+  evidence_tier: T3
+  references: ["構造的判断。実証は無い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+W13:
+  formula: "1 if 役員・重要な使用人の退任があった else 0（LLM が背景を分類）"
+  inputs: [LLM, TD_disclosure, EDINET]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: >-
+    **役員退任は適時開示されるが、「重要な使用人」は開示されない。**
+    技術者や事業責任者の離脱は最も痛いのに最も見えない。
+    W09/W10/W11 の変化から間接的に推定するしかない。
+  correlated_with: [M21, W06, W12, W14, T41, I25]
+  economic_rationale: >-
+    **小型株では致命的になりうる。** 従業員100人の企業で開発責任者が辞めれば、
+    事業そのものが止まる。M21（社長交代）が組織の頂点を見るのに対し、
+    W13 は実務の中核を見る。**I25（単一要因への依存度）の人的版。**
+  evidence_tier: T3
+  references: ["構造的判断。個別事象なので断面実証は困難"]
+  markets: [JP, US]
+  review: {status: verified}
+
+W14:
+  formula: "1 if 労働争議・ハラスメント・未払残業等の問題が報道された else 0"
+  inputs: [NEWS, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: >-
+    **報道依存なので小型株で見逃す**（N36/N37 と同型の偏り）。
+    O カテゴリと逆方向で、リスク管理上まずい。
+  correlated_with: [W06, W11, W12, Y06, Y07, N37]
+  economic_rationale: >-
+    Y06（不祥事の履歴）の労務版。直接の金銭的影響は小さいことが多いが、
+    **採用難（W09）と離職（W06）を通じて中期的に効く。**
+    組織文化の問題は再発率が高い。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- Z メタ・データ品質 -------------------------------------------------------
+
+Z01:
+  formula: "その銘柄で欠損しているパラメータ数 / 計算対象パラメータ数"
+  inputs: [all_parameters]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "対象パラメータ数は常に正。"
+  missing_bias: >-
+    **これ自体が欠損の測定なので、メタな循環がある。**
+    「欠損率が高い」ことと「そもそも計算対象にしていない」ことを区別する必要がある
+    （U カテゴリは非該当業種で必ず欠損するので分母から除く）。
+  correlated_with: [Z02, Z03, Z10, J05, O01, O10]
+  economic_rationale: >-
+    **欠損が多い銘柄はスコアそのものが信用できない。** サイジングの信頼度に直結する。
+    そして 263AT にとって重要なのは、**欠損が小型株に偏る**こと（Z03）。
+    O カテゴリで加点した銘柄が Z01 で減点されるという構造的な緊張があり、
+    **「誰も見ていない」と「データが無い」を分けられるかがこのシステムの成否を左右する。**
+  evidence_tier: T3
+  references: ["構造的判断。データ品質のメタ指標であり実証の対象ではない"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Z02:
+  formula: "そのパラメータが計算できた銘柄数 / ユニバース銘柄数"
+  inputs: [all_parameters]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "ユニバース銘柄数は常に正。"
+  missing_bias: "na（これ自体が偏りの測定）"
+  correlated_with: [Z01, Z03, Z10]
+  economic_rationale: >-
+    **カバレッジが低いパラメータは断面正規化の母集団が歪む。**
+    30%の銘柄でしか計算できない変数をランク化すると、その30%の中での
+    順位になってしまい、残り70%と比較できない。
+    **spec §4 の「最小母集団 N<30 ならランク化しない」の判定に使う。**
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Z03:
+  formula: "corr( 欠損フラグ, log(MCAP) ) を各パラメータについて計算"
+  inputs: [Z01, J05]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "欠損がゼロまたは全件欠損なら相関が定義できない。欠損。"
+  missing_bias: "na"
+  correlated_with: [Z01, Z02, J05, O01, O10]
+  economic_rationale: >-
+    **263AT で最も重要なメタ指標。** 欠損が小型株に偏っていると、
+    欠損を中立（z=0）にしてもユニバースが暗黙に大型株へ寄る。
+    レビューで実際に見つかった偏り: F02（上場5年未満で欠損）、B13/B28（5年履歴）、
+    O01（無カバー62%）、C11-C15（開示企業のみ）、W06/W08（人的資本開示企業のみ）。
+    **これらはすべて「小型株ほど欠損する」方向で、狙っているユニバースを削る。**
+  evidence_tier: T3
+  references: ["構造的判断。docs/02_definition_spec.md §4 の欠損方針の根拠"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Z04:
+  formula: "各パラメータの available_at から評価時点までの日数"
+  inputs: [available_at]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（日数）"
+  missing_bias: >-
+    **available_at が記録されていないデータは鮮度を測れない。**
+    測れないものを「新しい」と扱うのが最も危険なので、
+    available_at が無いソースは最大値（無限に古い）として扱う。
+  correlated_with: [Z05, Z14, D26, K23, N04]
+  economic_rationale: >-
+    **決算は最大3ヶ月古い。13F は45日遅れ。日本のインサイダー報告は45日超**（OQ-29）。
+    同じスコアでも、構成する情報の鮮度がバラバラだと解釈が変わる。
+    サーキットブレーカー B5（docs/04_security.md §3.2）の入力でもあり、
+    **古いデータで発注しようとしたら止める**という安全装置に直結する。
+  evidence_tier: T3
+  references: ["構造的判断。docs/02_definition_spec.md §1.2 の開示ラグ表"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Z05:
+  formula: "同一項目の複数ソース間の相対差 |a-b| / max(|a|,|b|)"
+  inputs: [multi_source_data]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: >-
+    **ソースによって会計基準の扱いが違う**ことが不一致の主因になりうる。
+    「どちらかが間違っている」のではなく「定義が違う」場合を区別する必要がある。
+  zero_denominator_policy: "両方ゼロなら一致とみなす。"
+  missing_bias: "複数ソースを持つ項目でのみ計算できる。単一ソースの項目は検証不能。"
+  correlated_with: [Z04, Z06, Z07, Z14]
+  economic_rationale: >-
+    **不一致はどちらかが壊れている証拠。** ゲートの根拠になる（docs/04_security.md §3.2 B7）。
+    263AT では米国で SEC EDGAR（自前）と OSAP（CRSP由来）の2系統を持てるので、
+    **突合できる稀な状況にある。** ただし日本は J-Quants 単独になる見込みで、
+    **日本側では Z05 が機能しない**という非対称がある。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Z06:
+  formula: "1 if 過去5年に決算期変更があった else 0"
+  inputs: [fiscal_year_end_history]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: "決算期の履歴が必要。DERA の sub.txt に fye があるので米国は取得可能。"
+  correlated_with: [Z05, Z07, N27, V12, C02]
+  economic_rationale: >-
+    **時系列比較を壊す。バグの温床。** 変更期は月数が12でないので、
+    成長率が +50% などの異常値になる。**ウィンザライズで静かに消えるので気づけない**
+    のが最悪で、だからフラグで明示的に検出する。
+    レビューで判明した通り、C02/C06/B13/B28/E04/B17 など**多期間を跨ぐ変数はすべて壊れる。**
+  evidence_tier: T3
+  references: ["構造的判断。docs/02_definition_spec.md §1.4"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Z07:
+  formula: "1 if 過去5年に会計基準変更（日本基準↔IFRS、IFRS16適用等）があった else 0"
+  inputs: [accounting_standard_history]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "**この変数自体が会計基準差の管理装置。**"
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: >-
+    **IFRS16 は2019年前後に全企業が一斉に適用したので、その年は全銘柄でフラグが立つ。**
+    全件欠損にするとその年のデータが丸ごと失われる。
+    **影響を受ける変数（D01/D19/B03/C35/A16 等）だけを欠損にする**という
+    選択的な適用が必要。
+  correlated_with: [Z05, Z06, D01, D19, B03, C35, A16]
+  economic_rationale: >-
+    **のれん償却・リース・収益認識の3つが主な断層。**
+    レビューで繰り返し出てきた通り、C35（総資産成長）は IFRS16 適用年に
+    架空の資産急増を記録し、D01（Net Debt/EBITDA）は不連続に悪化する。
+    **これを検出せずに検証すると、2019年前後の全企業が誤判定される。**
+  evidence_tier: T3
+  references: ["構造的判断。docs/02_definition_spec.md §2.1"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Z08:
+  formula: "min(上場からの経過年数, データが実際に取得できている年数)"
+  inputs: [listing_date, data_history]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（年数）"
+  missing_bias: "米国の XBRL は2009年開始なので、それ以前の上場企業でも履歴は最大17年（DF 実測）。"
+  correlated_with: [N24, O24, Z01, Z10, B13, F02]
+  economic_rationale: >-
+    **N24（上場後経過年数）と概念が違う。** N24 は IPO 後の劣後（LAW-48）という
+    リターン予測の話だが、Z08 は「多期間パラメータが計算できるか」というデータの話。
+    F02（5年株式発行率）、B13/B28（5年 ROIC）、A22/A23（5年バリュエーション）は
+    すべて Z08 >= 5 が前提。**Z08 が短い銘柄では使えるパラメータが構造的に減る**ので、
+    Z01（欠損率）と強く相関する。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Z09:
+  formula: "そのパラメータでウィンザライズの上下限に張り付いた回数"
+  inputs: [all_parameters]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（カウント）"
+  missing_bias: "ランク化を標準にしているので、生値を使う変数でのみ発生する。"
+  correlated_with: [Z05, Z06, Z07, Z14]
+  economic_rationale: >-
+    **頻繁に切られる銘柄はデータか実態が異常。** Z06/Z07 の検出漏れを
+    事後的に拾う網でもある。ただし**ランク化を標準にしている以上、
+    ウィンザライズ自体が原則不要**（spec §4）なので、この変数の出番は限定的。
+    生値を使う場面（Kelly の分母のボラなど）でのみ意味を持つ。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Z10:
+  formula: "その時点で計算できたパラメータ数"
+  inputs: [all_parameters]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（カウント）"
+  missing_bias: "Z01 の裏返しなので同じ性質。"
+  correlated_with: [Z01, Z02, Z08, J05]
+  economic_rationale: >-
+    Z01（欠損率）の絶対数版。**スコアの信頼度に直結し、
+    サイジング（§1.6）の乗数として使う。** 100個で計算したスコアと
+    300個で計算したスコアを同じ確信度で扱ってはいけない。
+    §1.4 の期待リターン較正でも、Z10 が低い銘柄は b_h の推定誤差が大きくなる。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Z11:
+  formula: "各パラメータの1期ラグ自己相関"
+  inputs: [all_parameters]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "時系列が20観測未満なら欠損。"
+  missing_bias: "na"
+  correlated_with: [Z12, Z13, S12, S13]
+  economic_rationale: >-
+    **不安定なパラメータは回転率を上げ、コストを増やす（LAW-11）。**
+    OQ-24 の実測で、月0.25%のコストで9方式中8つが死んだ。
+    自己相関が低い変数を重視すると、意図せず高回転の戦略になる。
+    **6M〜5Y の保有期間を守るには、自己相関の高い変数に重みを寄せる必要がある**
+    — これは予測力とは別の軸での選好であり、§1.9 の縮小に加えるべき制約。
+  evidence_tier: T3
+  references: ["構造的判断。research/findings_2026-08-23.md §7 の実測が根拠"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Z12:
+  formula: "パラメータ間相関行列の固有値と主成分"
+  inputs: [all_parameters]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "共分散行列が特異なら固有値がゼロになる。正則化して扱う。"
+  missing_bias: >-
+    **欠損パターンが相関構造を歪める。** 一緒に欠損する変数どうしは
+    見かけの相関が高くなる。ペアワイズ削除か多重代入かで結果が変わる。
+  correlated_with: [Z01, Z03, Z11, Z13]
+  economic_rationale: >-
+    **§1.9.3 の主成分縮小（KNS 流）の直接の入力。**
+    770 パラメータは 770 次元ではなく、実質的に数十次元しかないはず。
+    レビューで判明した重複候補: L03/L04/L05、V13/V14/V15、O20-O23、A25/A32、
+    A28/A34。**Z12 を実測すれば、これらが本当に1本にまとまるかが分かる。**
+    そして q09（相関）の実測値を全 770 件に供給する唯一の手段でもある。
+  evidence_tier: T3
+  references: ["https://www.nber.org/system/files/working_papers/w24070/w24070.pdf", "KNS の主成分縮小の入力"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Z13:
+  formula: "各パラメータのローリング情報係数（IC）の時系列"
+  inputs: [all_parameters, forward_returns]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "断面の観測数が30未満の期間は欠損。"
+  missing_bias: "リターンデータが要る。DF-01 が解決するまで計算できない。"
+  correlated_with: [Z11, Z12, P23, P24]
+  economic_rationale: >-
+    ファクターの減衰（LAW-100、実測57%）と混雑（P23）の検出。
+    **ただし §1.9.4 の通り、これを見て採用を決めてはいけない。**
+    見て決めた瞬間に選択バイアスが入る。**診断としてのみ使い、
+    重み付けは事前分布と縮小で行う**というのが 263AT の方針。
+    この境界を曖昧にすると、多重検定の対策が全部無効になる。
+  evidence_tier: T3
+  references: ["https://www.hec.ca/finance/Fichier/McLean.pdf", "構造的判断＋§1.9.4 の方針"]
+  markets: [JP, US]
+  review: {status: verified}
+
+# =============================================================================
+# R（保有状態 23）+ S（税・コスト 19）+ Q（ポートフォリオ文脈 18）+ Y（ESG 12）= 72件
+#
+# R / S / Q は他カテゴリと性質が違う。**銘柄の属性ではなく、自分の状態の属性**である。
+# したがって断面正規化しない（normalization: none）、市場差が無い、
+# バックテストでは自分のポジションを模擬しないと計算できない、という共通の特徴を持つ。
+# **実運用でしか本当の値が得られない**ので、evidence_tier は原則 T3。
+# =============================================================================
+
+# --- R 保有状態依存（売り専用） ------------------------------------------------
+
+R01:
+  formula: "PRICE / avg_cost - 1"
+  inputs: [PRICE, SELF_avg_cost]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "取得単価>0。"
+  missing_bias: "保有銘柄のみ。日本は総平均法なので取得単価は一意。米国はロット指定が可能（R12）。"
+  correlated_with: [R05, R09, R13, S03, S08]
+  economic_rationale: >-
+    **これを単独で売り理由にしてはいけない（処分効果 LAW-94）。**
+    Barber-Odean が示した通り、個人は勝ちを早く売り負けを持ち続ける。
+    含み損益は**税（S03）とテーゼ健在度（R07）との交互作用でのみ**使う。
+    §2 の設計で「売りスコアの主項は水準ではなく劣化量」としたのは、この罠を避けるため。
+  evidence_tier: T1
+  references: ["https://faculty.haas.berkeley.edu/odean/papers%20current%20versions/individual_investor_performance_final.pdf", "Odean (1998) 処分効果"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R02:
+  formula: "現在日 - 建玉日（営業日）"
+  inputs: [SELF_entry_date]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（日数）"
+  missing_bias: "保有銘柄のみ。複数回買い増した場合の起点をどこにするかを決める必要がある（暫定: 初回建玉日）。"
+  correlated_with: [R03, R04, R19, S13, N45]
+  economic_rationale: >-
+    短期売買を抑制する項。**日本の税制では保有期間による優遇が無い**ので、
+    米国の長短キャピタルゲイン区分のような直接的な理由は存在しない。
+    それでも保有日数を持つのは、S13（保有期間で割った年率コスト）と
+    R03（想定保有期間の消化率）の入力になるため。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R03:
+  formula: "R02 / h*(建玉時)"
+  inputs: [R02, h_star_entry]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "h* がゼロなら建玉していないはず。欠損。"
+  missing_bias: "h* を記録していないポジションでは計算できない。**建玉時に必ず記録する運用が前提。**"
+  correlated_with: [R02, R04, R18, R19, N45]
+  economic_rationale: >-
+    **§1.5（保有期間の最適化）の核心。** 1 を超えても h* が再び伸びていれば売らない。
+    「予定より長く持っている」こと自体は売り理由にならず、
+    **h* が縮んでいる（R04）ことが売り理由になる。**
+  evidence_tier: T3
+  references: ["構造的判断。catalog §1.5 の設計"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R04:
+  formula: "h*(t) - h*(t-1)"
+  inputs: [h_star]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（差分）"
+  missing_bias: "h* の再計算を毎回行っていないと欠損。**運用の規律に依存する。**"
+  correlated_with: [R03, R05, R06, R18, R19]
+  economic_rationale: >-
+    **縮み続けているなら物語が終わりつつある。** h* は期待効用が最大になる期間なので、
+    それが縮むということは「この先の期待リターンが減った」ことを意味する。
+    R05（スコア劣化）が原因を測るのに対し、R04 は結果を測る。
+  evidence_tier: T3
+  references: ["構造的判断。catalog §1.5"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R05:
+  formula: "S_buy(建玉時) - S_buy(t)"
+  inputs: [S_buy]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（差分）"
+  missing_bias: "建玉時のスコアを記録していないと計算できない。**監査ログの必須項目。**"
+  correlated_with: [R06, R17, R07, R11, R16]
+  economic_rationale: >-
+    **売りスコアの主項。水準ではなく劣化量を使う。**
+    水準で売ると「買った時から常に上位10%だった超優良株」を長く持てず、
+    長期複利が成立しない（§2）。**263AT の売り設計で最も重要な一点。**
+  evidence_tier: T3
+  references: ["構造的判断。catalog §2 の設計"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R06:
+  formula: "slope( S_buy, 過去3ヶ月 )"
+  inputs: [S_buy]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "3ヶ月分のスコア履歴が無ければ欠損。"
+  missing_bias: "R05 と同じ。"
+  correlated_with: [R04, R05, R17]
+  economic_rationale: >-
+    **急激な劣化は緩やかな劣化より危険。** 同じ劣化量でも、
+    3ヶ月で落ちたのか3年かけて落ちたのかで意味が違う。
+    急落は新情報の到着を示唆するので、テーゼ検証（R07）を起動するトリガーにする。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R07:
+  formula: "T25（テーゼ健在度）と同一。LLM が 0-1 で判定"
+  inputs: [T23, T25, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（スコア）"
+  missing_bias: >-
+    **T23（テーゼ）を建玉時に記録していないと判定不能。**
+    しかも LLM 依存なので過去に遡れない（§6.4）。**forward_log で記録し始めた対象。**
+  correlated_with: [T23, T24, T25, R05, R16, R18]
+  economic_rationale: >-
+    **これが 0 に落ちたら、含み損益に関係なく売る。最も重要な売り条件。**
+    R01（含み損益）を単独で使わないための代替であり、
+    「なぜ買ったか」を記録していないと「なぜ売るか」も判断できない、という
+    運用規律の中核。T24（反証条件）を建玉時に定めておくことで、
+    後知恵での言い訳を防ぐ。
+  evidence_tier: T3
+  references: ["構造的判断。catalog §2 / §6.6。LLM 由来のため前向き記録が必要"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R08:
+  formula: "PRICE / 建玉時の想定目標価格"
+  inputs: [PRICE, SELF_target_price]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "目標価格>0。設定していなければ欠損。"
+  missing_bias: "目標価格を設定する運用をしていないと欠損。"
+  correlated_with: [A26, A27, A28, R05, R11]
+  economic_rationale: >-
+    **到達しても即売りではない。** 目標株価自体が更新されうる（企業が成長すれば
+    内在価値も上がる）。到達は「再評価のトリガー」であって「売却の指示」ではない。
+    ここを機械的に売ると、**利を伸ばせず勝ちを小さくする**（LAW-71 の逆）。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R09:
+  formula: "PRICE / max(PRICE, 保有期間中) - 1"
+  inputs: [PRICE, SELF_entry_date]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "保有期間の最高値>0。"
+  missing_bias: "保有銘柄のみ。日中高値を使うか終値を使うかで値が変わる（終値に統一）。"
+  correlated_with: [R01, R17, I11, I12, G09]
+  economic_rationale: >-
+    トレーリングストップの入力。**ただし mean reversion 型の銘柄では逆効果**
+    （H01 長期リバーサルを狙う銘柄で高値から落ちたら売るのは矛盾）。
+    **銘柄タイプで切り替える必要がある。** §1.6 で rho が高いほどストップを
+    広げるとしたのは、この矛盾を緩和するため。
+  evidence_tier: T2
+  references:
+    - "https://arxiv.org/pdf/1701.03960"
+    - "https://www.quant-investing.com/blog/stop-loss-strategies-complete-guide"
+  markets: [JP, US]
+  review: {status: verified}
+
+R10:
+  formula: "w_actual(i) - w_target(i)"
+  inputs: [SELF_positions, w_target]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（差分）"
+  missing_bias: "目標ウェイトを計算していないと欠損。"
+  correlated_with: [Q04, Q05, Q12, Q14, R11]
+  economic_rationale: >-
+    **「利を伸ばす」と「リスク管理」の折衷点。** 上がって膨らんだポジションを
+    全部売るのではなく、超過分だけ利確する。
+    §1.8 の非対称ペイオフ（勝ちを伸ばす）と §1.6 の w_max（1銘柄上限）が
+    衝突する箇所であり、**どちらを優先するかは rho で決める。**
+  evidence_tier: T3
+  references: ["構造的判断。catalog §1.6 / §1.8"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R11:
+  formula: "max_j( S_buy(j) ) - S_buy(i)、j は未保有かつ Gate=1 の銘柄"
+  inputs: [S_buy, SELF_positions]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（差分）"
+  missing_bias: "全ユニバースのスコアが要る。Z10 が低い時期は比較対象が減る。"
+  correlated_with: [R05, R22, A41, Q09, S12, S13]
+  economic_rationale: >-
+    **買いスコアには存在しない比較項（§2 の非対称性7）。**
+    売りは「この銘柄が悪い」だけでなく「もっと良い銘柄がある」でも起きる。
+    ただし**乗り換えには往復コストと税（S03/S12）がかかる**ので、
+    スコア差がそれを上回らなければ動かない。**この閾値が回転率を決める**ので、
+    OQ-24 の実測（月0.25%のコストで壊滅）を踏まえて保守的に設定する。
+  evidence_tier: T3
+  references: ["構造的判断。catalog §2 / research/findings §7"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R12:
+  formula: "各ロットの取得単価と含み損益（米国のみ）"
+  inputs: [SELF_lots]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: >-
+    **日本は総平均法が強制されるのでロット選択の余地が無い。**
+    米国は specific identification が使えるので、税務上有利なロットを選べる。
+    **制度差がそのまま使える/使えないを分ける。**
+  zero_denominator_policy: "na"
+  missing_bias: "日本では常に欠損（制度上存在しない）。"
+  correlated_with: [R01, R13, S03, S08, S09]
+  economic_rationale: >-
+    米国では**同じ銘柄でも売るロットを選ぶことで税負担が変わる。**
+    損失の出ているロットを先に売れば S08（損出し）になり、
+    利益の出ているロットを残せば課税を繰り延べられる。
+    日本ではこの最適化ができないので、**S04（NISA/特定口座の使い分け）が代替手段になる。**
+  evidence_tier: T3
+  references: ["米国: IRS Publication 550（specific identification）", "日本: 所得税法施行令 第118条（総平均法）"]
+  markets: [US]
+  review: {status: verified}
+
+R13:
+  formula: "受取配当の累計 / 取得額"
+  inputs: [SELF_dividends, SELF_cost]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "取得額>0。"
+  missing_bias: "保有銘柄のみ。税引前で持つか税引後で持つかを決める（税引後に統一。S16 参照）。"
+  correlated_with: [R01, A10, A11, S16, S03]
+  economic_rationale: >-
+    **実質的な取得単価の低下。** R01（含み損益）だけを見ると、
+    高配当株のトータルリターンを過小評価する。
+    5年保有で配当利回り4%なら20%が戻っている計算で、これは無視できない。
+    **売り判定はトータルリターンで行うべき**なので、R01 + R13 を合成した
+    指標を持つべき（未定義。次の改訂候補）。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R14:
+  formula: "1[R07 テーゼ健在] × 1[R06 スコア上昇中] × 1[w < w_max]"
+  inputs: [R07, R06, R10]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール積）"
+  missing_bias: "R07（LLM 依存）の欠損を継承。"
+  correlated_with: [R06, R07, R10, R20, R05]
+  economic_rationale: >-
+    **LAW-75（ナンピンは破滅の道）を構造で強制する。**
+    株価が下がったことだけを理由にした買い増しを禁止し、
+    **テーゼが健在で、かつスコアが上昇している場合にのみ**許可する。
+    「安くなったから買い増す」は、間違ったテーゼへの投入額を増やす行為であり、
+    §1.8 の非対称ペイオフ（損は切る、勝ちを伸ばす）と正反対。
+  evidence_tier: T3
+  references: ["構造的判断。catalog LAW-75"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R15:
+  formula: "このポジションを評価した回数"
+  inputs: [SELF_evaluation_log]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（カウント）"
+  missing_bias: "評価ログを残していないと計算できない。"
+  correlated_with: [R02, R23, R21]
+  economic_rationale: >-
+    **評価頻度そのものが設計変数。** §2 の非対称性5 の通り、
+    「売るか」は保有中毎日問われ続けるので、毎日評価するとノイズで売ってしまう。
+    LAW-90（売買しすぎ）の構造的な原因がここにある。
+    **記録することで「見すぎていないか」を自己監視する。**
+  evidence_tier: T1
+  references: ["https://faculty.haas.berkeley.edu/odean/papers%20current%20versions/individual_investor_performance_final.pdf", "LAW-90 売買しすぎ"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R16:
+  formula: "建玉時に想定した業績 vs 実際の業績の乖離率"
+  inputs: [T23, SELF_entry_assumptions, actual_results]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "比較対象の業績指標を建玉時に明示していないと計算できない。"
+  zero_denominator_policy: "想定値がゼロなら欠損。"
+  missing_bias: "T23（テーゼ）に定量的な想定を書いていないと欠損。**運用規律に依存。**"
+  correlated_with: [R05, R07, T23, T24, N18]
+  economic_rationale: >-
+    **T23 のテーゼを定量的に検証する。** T25（LLM によるテーゼ健在度）が
+    定性判断なのに対し、R16 は数字で検証する。両者が食い違ったら
+    **数字を信じる**（catalog §8-5 の「物語への過剰適合」対策）。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R17:
+  formula: "max(S_buy, 保有期間中) - S_buy(t)"
+  inputs: [S_buy]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（差分）"
+  missing_bias: "R05 と同じ。"
+  correlated_with: [R05, R06, R09]
+  economic_rationale: >-
+    **R05（エントリー比）とは別。買った後に一度良くなってから悪化した場合を捉える。**
+    エントリー時のスコアが低くても、その後改善してから劣化したなら、
+    R05 では検出できない。R09（保有中高値からの下落）の
+    スコア版で、価格ではなくファンダメンタルで見る。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R18:
+  formula: "1 if 建玉時に想定したカタリストが発生した else 0"
+  inputs: [T23, N45, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: "T23 に想定カタリストを書いていないと判定不能。LLM 依存で過去に遡れない。"
+  correlated_with: [N45, R03, R19, T23, T30]
+  economic_rationale: >-
+    **起きたなら利確を検討、起きないなら R19 で期限管理。**
+    LAW-73（噂で買って事実で売る）の実装で、T30（織り込み度）と組み合わせて
+    「もう織り込まれたか」を判定する。カタリスト投資の出口設計そのもの。
+  evidence_tier: T3
+  references: ["構造的判断。catalog LAW-73"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R19:
+  formula: "現在日 - 建玉時に想定したカタリスト発生予定日（正なら超過）"
+  inputs: [N45, SELF_entry_date]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（日数）"
+  missing_bias: "N45（LLM の期間推定）に依存。**その推定が較正されていない**（T44 待ち）。"
+  correlated_with: [N45, R03, R04, R11, R18]
+  economic_rationale: >-
+    **「いつまでも起きないカタリスト」が最も資本効率を毀損する。**
+    含み損も含み益も出ないまま資金が拘束され、その間の機会費用（R11）が積み上がる。
+    バリュートラップの本質は「安いまま」であって「下がる」ことではない。
+    **時間切れという明示的な売り理由を持つことで、塩漬けを構造的に防ぐ。**
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R20:
+  formula: "買い増した場合の新しい平均取得単価 / 現在の平均取得単価 - 1"
+  inputs: [R01, SELF_avg_cost, PRICE]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "日本は総平均法なので計算が一意。"
+  zero_denominator_policy: "取得単価>0。"
+  missing_bias: "保有銘柄のみ。"
+  correlated_with: [R01, R14, R10]
+  economic_rationale: >-
+    **単独で買い増し理由にしてはいけない。** 「取得単価が下がる」ことに
+    経済的な意味は無い（サンクコストの錯覚）。R14（買い増し可否）の
+    判断材料として持つだけで、**スコアには一切寄与させない**（buy/sell とも ✕）。
+    この変数を置いている理由は、**置かないと人が頭の中で計算してしまうから。**
+  evidence_tier: T3
+  references: ["構造的判断。LAW-75 の補助"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R21:
+  formula: "保有期間中の実現ボラティリティ / 建玉時の想定ボラティリティ"
+  inputs: [PRICE, I03]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "想定ボラがゼロなら欠損。"
+  missing_bias: "建玉時の想定ボラを記録していないと計算できない。"
+  correlated_with: [I01, I03, I23, R15]
+  economic_rationale: >-
+    **サイジング前提の事後検証。** Kelly の分母（I03）が実際より小さければ、
+    ポジションを過大に取っていたことになる。1.5 を超える状態が続くなら
+    ボラ予測モデルが壊れているので、**サイジング全体を見直す必要がある。**
+    個別銘柄の売り判定というより、システムの健全性の指標。
+  evidence_tier: T3
+  references: ["構造的判断。catalog §1.6"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R22:
+  formula: "同一テーマ内の保有銘柄における S_buy の順位"
+  inputs: [S_buy, Q06, SELF_positions]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "同テーマの保有が2未満なら欠損。"
+  missing_bias: "Q06（LLM によるテーマ判定）に依存。"
+  correlated_with: [Q06, Q01, R11, A41]
+  economic_rationale: >-
+    **R11（全体の機会費用）のテーマ内版。** 同じテーマに複数持っているなら、
+    最も劣る1本を売って他に寄せる方が効率的。テーマ分散を保ちながら
+    銘柄選択を改善できるので、**Q06（テーマ重複）の是正と同時に達成できる。**
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+R23:
+  formula: "現在日 - テーゼ記録の最終更新日"
+  inputs: [T23, SELF_thesis_log]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（日数）"
+  missing_bias: "テーゼを記録・更新する運用をしていないと意味を持たない。"
+  correlated_with: [R07, R15, R16, T23, T25]
+  economic_rationale: >-
+    **運用規律の指標。** 古い記録のまま判断していないかを監視する。
+    テーゼが1年更新されていないなら、それは「変わっていない」のではなく
+    「見ていない」可能性が高い。**プロセスの品質をパラメータとして持つ**という点で
+    Z カテゴリに近い性格。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- S 税・コスト -------------------------------------------------------------
+
+S01:
+  formula: "手数料 + スプレッド(J04) + マーケットインパクト(S02)"
+  inputs: [J04, S02, broker_fee]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  missing_bias: "J04（実効スプレッド）の推定に依存。小型株ほど推定誤差が大きい。"
+  correlated_with: [J03, J04, S02, S12, S13, J02]
+  economic_rationale: >-
+    **バックテストに必ず入れる。** 小型株ではスプレッドが手数料の数倍になる。
+    OQ-24 の実測で、月0.25%のコストを引くと9方式中8つが死んだ。
+    **コストの見積もりが甘いと、存在しないエッジを信じることになる。**
+  evidence_tier: T1
+  references: ["https://www.hec.ca/finance/Fichier/McLean.pdf", "research/findings_2026-08-23.md §7 の実測"]
+  markets: [JP, US]
+  review: {status: verified}
+
+S02:
+  formula: "k * sqrt( 建玉額 / 日次売買代金 ) * sigma"
+  inputs: [J01, I01, target_position]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "J01 がゼロなら無限大（J10 で既に除外）。"
+  missing_bias: >-
+    **係数 k は実測でしか決まらない。** 文献値（0.5〜1.0）を暫定で使うが、
+    日本の小型株での妥当性は未検証。**実運用の約定データが貯まるまで不確実。**
+  correlated_with: [J01, J02, J03, J13, S01, S12]
+  economic_rationale: >-
+    **平方根則。入れないと小型株戦略は必ず過大評価される。**
+    建玉が日商の10%なら sqrt(0.1)≈0.32 にボラを掛けた分だけ不利な価格で約定する。
+    **J02（流動化日数）のゲートと合わせて、サイズの上限を決める2本柱。**
+  evidence_tier: T2
+  references: ["構造的判断。平方根則は実務標準だが係数は市場・銘柄依存"]
+  markets: [JP, US]
+  review: {status: verified}
+
+S03:
+  formula: "含み益 × 0.20315（特定口座の場合）"
+  inputs: [R01, S04]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  missing_bias: "NISA 口座では常にゼロ（S04 で分岐）。"
+  correlated_with: [R01, S04, S07, S08, S09, R11]
+  economic_rationale: >-
+    **売却で確定する税。売りスコアの抑制項。**
+    含み益のある銘柄を売ると即座に20.315%が消えるので、
+    **乗り換え（R11）はスコア差がこれを上回らないと正当化できない。**
+    長期保有の税繰延効果はここから来る。
+  evidence_tier: T3
+  references: ["所得税法・租税特別措置法（上場株式等の譲渡所得 20.315%）"]
+  markets: [JP]
+  review: {status: verified}
+
+S04:
+  formula: "口座種別（NISA成長投資枠 / 特定口座 / 一般口座）"
+  inputs: [SELF_account_type]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（分類）"
+  missing_bias: "日本固有。米国は課税口座 / IRA / 401k が対応するが制度が違う。"
+  correlated_with: [S03, S05, S06, S07, S08, S14, S15, S16]
+  economic_rationale: >-
+    **NISA 内銘柄は「利確に税がかからない」が「損切りが救済されない」。**
+    損益通算も繰越控除もできないので、**同じ含み損でも NISA の方が実質コストが高い。**
+    したがって**売り閾値を口座別に変える必要がある** — これは 263AT の
+    売り設計に直接効く、日本固有の重要な分岐。
+  evidence_tier: T3
+  references: ["https://faq.sbisec.co.jp/answer/5ee86c0b144d40001145db08/", "租税特別措置法 第37条の14（NISA）"]
+  markets: [JP]
+  review: {status: verified}
+
+S05:
+  formula: "年間240万円 - 当年使用額、および 生涯1200万円 - 累計取得額"
+  inputs: [SELF_nisa_usage]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  missing_bias: "日本固有。年ごとにリセットされ、売却分は翌年復活する（S15）。"
+  correlated_with: [S04, S06, S14, S15, Q18]
+  economic_rationale: >-
+    **300万円規模なら成長投資枠（生涯1200万円）でほぼ全額カバーできる。**
+    枠は年240万円までなので、**5年かけて埋める**のが基本設計。
+    枠の使い方自体が最適化問題で、**期待リターンが最も高い銘柄から埋める**べき（S06）。
+  evidence_tier: T3
+  references: ["租税特別措置法 第37条の14（NISA成長投資枠）"]
+  markets: [JP]
+  review: {status: verified}
+
+S06:
+  formula: "その枠を次善の候補に使った場合の期待節税額との差"
+  inputs: [S05, mu_hat, S03]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "枠が残っていなければ計算不要。"
+  missing_bias: "期待リターン推定（§1.4）に依存。"
+  correlated_with: [S05, S14, Q18, R11]
+  economic_rationale: >-
+    **期待リターンが最も高い銘柄を NISA に入れるべき。**
+    非課税枠の価値は「その銘柄が生む利益 × 20.315%」なので、
+    低期待値の銘柄で枠を埋めるのは機会損失。
+    **ただし NISA は損切りが救済されないので、期待値が高くても
+    分散が大きい銘柄は特定口座の方が良い場合がある** — 単純な期待値順ではない。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP]
+  review: {status: verified}
+
+S07:
+  formula: "当年の特定口座における実現損益の累計"
+  inputs: [SELF_realized_pnl]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  missing_bias: "複数の証券会社にまたがる場合は合算が要る。"
+  correlated_with: [S03, S08, S09, S17]
+  economic_rationale: >-
+    年末の損益通算最適化（S08）の前提。
+    実現益が出ている年は損出しの価値が高く、実現損しかない年は価値が無い。
+    **年末に向けて売り判定が変わる**という、他に例のない時期依存性を生む。
+  evidence_tier: T3
+  references: ["所得税法（申告分離課税・損益通算）"]
+  markets: [JP]
+  review: {status: verified}
+
+S08:
+  formula: "実現可能な含み損 × 0.20315 × 1[当年に相殺可能な実現益がある]"
+  inputs: [R01, S07, S04]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  missing_bias: "**NISA では常にゼロ**（損益通算できない）。特定口座のみ。"
+  correlated_with: [S03, S04, S07, S09, R01, H11]
+  economic_rationale: >-
+    **年末の損出しクロス取引。** 含み損を実現して実現益と相殺し、
+    同じ銘柄を買い戻せば、ポジションを維持したまま税を減らせる。
+    ただし**往復コスト（S01）がかかる**ので、節税額がそれを上回る場合のみ。
+    そして**この行動が市場全体で起きるので H11（損出し一巡後の反発）が生まれる**
+    — 自分の税務行動と市場アノマリーが同じ現象の裏表になっている珍しい例。
+  evidence_tier: T2
+  references: ["所得税法（損益通算）", "H11 と同根の現象"]
+  markets: [JP]
+  review: {status: verified}
+
+S09:
+  formula: "過去3年の繰越損失残高"
+  inputs: [SELF_loss_carryforward]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  missing_bias: "確定申告をしていないと繰越できない。**運用に依存する。**"
+  correlated_with: [S03, S07, S08, S17]
+  economic_rationale: >-
+    繰越損失があるなら、**その範囲までの利確は実質非課税。**
+    S03（譲渡益税）の抑制効果が消えるので、
+    **繰越がある年は乗り換え（R11）の閾値を下げてよい。**
+    3年で失効するので、期限が近い年は積極的に使う。
+  evidence_tier: T3
+  references: ["租税特別措置法 第37条の12の2（譲渡損失の繰越控除）"]
+  markets: [JP]
+  review: {status: verified}
+
+S10:
+  formula: "米国配当の源泉10% + 国内20.315%、外国税額控除の見込み額を控除"
+  inputs: [A11, S04, foreign_tax_credit]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  missing_bias: "米国株のみ。日本株では常にゼロ。"
+  correlated_with: [A10, A11, S04, S16, R13]
+  economic_rationale: >-
+    **高配当米国株 × NISA は最悪の組み合わせ。**
+    NISA では外国税額控除が使えないので、米国の源泉10%が取り返せない。
+    つまり**同じ配当利回りでも、NISA に入れた米国株は日本株より実質利回りが低い。**
+    S04/S06（口座の使い分け）の判断に直接効く。
+  evidence_tier: T3
+  references: ["日米租税条約 第10条", "所得税法 第95条（外国税額控除）"]
+  markets: [US]
+  review: {status: verified}
+
+S11:
+  formula: "円ドル往復のスプレッド + 為替手数料"
+  inputs: [fx_spread, broker_fx_fee]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  missing_bias: "米国株のみ。証券会社によって大きく違う。"
+  correlated_with: [S01, S12, S13, S18, P07]
+  economic_rationale: >-
+    **米国株の実質的な参入障壁。** 片道25銭なら往復0.5%で、
+    それだけで OQ-24 の年率アルファ（2〜3%）の2割が消える。
+    ただし**長期保有なら薄まる**（S13）ので、6M〜5Y の設計とは相性が良い。
+    短期売買を米国株で行うのは、この一点だけで不利。
+  evidence_tier: T3
+  references: ["構造的判断。証券会社の手数料体系に依存"]
+  markets: [US]
+  review: {status: verified}
+
+S12:
+  formula: "S01 / 建玉額"
+  inputs: [S01, target_position]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "建玉額>0。"
+  missing_bias: "S01 の推定に依存。"
+  correlated_with: [S01, S02, S13, J02, J04]
+  economic_rationale: >-
+    **期待リターンから直接引く形にするための率表示。**
+    §1.4 の μ(i,h) から S12 を引いて初めて、正味の期待値になる。
+    **これを引く前の数字で判断するのが、バックテストが実運用と乖離する最大の原因。**
+  evidence_tier: T1
+  references: ["research/findings_2026-08-23.md §7 の実測", "https://www.hec.ca/finance/Fichier/McLean.pdf"]
+  markets: [JP, US]
+  review: {status: verified}
+
+S13:
+  formula: "S12 / h*(年)"
+  inputs: [S12, h_star]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "h* がゼロなら無限大。建玉しない。"
+  missing_bias: "h* の推定に依存。"
+  correlated_with: [S12, R03, N45, Z11]
+  economic_rationale: >-
+    **保有期間が長いほど有利であることの直接表現。**
+    往復1%のコストも、5年持てば年0.2%。1年で回せば年1%。
+    **OQ-24 の実測が示した通り、この差が生死を分ける**
+    （月0.03〜0.10%では7/9が生存、月0.25%では1/9）。
+    §1.5 の h* 選択の目的関数に入る項でもあり、
+    **「なぜ長期保有なのか」の定量的な答え。**
+  evidence_tier: T1
+  references: ["research/findings_2026-08-23.md §7", "catalog LAW-11 / §1.5"]
+  markets: [JP, US]
+  review: {status: verified}
+
+S14:
+  formula: "NISA保有銘柄の期待リターン合計 / 全候補上位N の期待リターン合計"
+  inputs: [S05, mu_hat, SELF_positions]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "分母がゼロなら欠損。"
+  missing_bias: "期待リターン推定に依存。"
+  correlated_with: [S05, S06, Q18]
+  economic_rationale: >-
+    S06（枠の機会費用）の測定版。**枠を最適に使えているかを事後的に採点する。**
+    1に近いほど良い。低い場合は、期待値の低い銘柄で枠を埋めてしまっている。
+    ただし**枠は一度使うと売却翌年まで戻らない**（S15）ので、
+    事後的に最適化できない不可逆な選択である点が重要。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP]
+  review: {status: verified}
+
+S15:
+  formula: "当年に売却した NISA 銘柄の取得価額合計"
+  inputs: [SELF_nisa_sales]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  missing_bias: "日本固有。"
+  correlated_with: [S04, S05, S14, S06]
+  economic_rationale: >-
+    **NISA 枠は売却した翌年に復活する**（簿価ベース）。
+    つまり**年末に売れば翌年すぐ使えるが、年初に売ると1年近く枠が寝る。**
+    売却タイミングの最適化に効く、日本固有の制度的な非対称。
+    S08（年末の損出し）とは逆方向の年末効果を生む。
+  evidence_tier: T3
+  references: ["租税特別措置法（NISA の非課税保有限度額の再利用）"]
+  markets: [JP]
+  review: {status: verified}
+
+S16:
+  formula: "配当 × 実効税率（日本株20.315% / 米国株は S10）"
+  inputs: [A11, S04, S10]
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  missing_bias: "無配企業ではゼロ。"
+  correlated_with: [A10, A11, R13, S04, S10]
+  economic_rationale: >-
+    **配当は受け取るたびに課税されるので、税繰延ができない。**
+    同じトータルリターンなら、**キャピタルゲインの方が税効率が良い**
+    （売るまで課税されない）。したがって A10/A11（配当・総還元利回り）を
+    加点する際は、税引後で評価しないと過大評価になる。
+    **NISA ではこの差が消える**ので、S04 との交互作用が本質。
+  evidence_tier: T3
+  references: ["所得税法（配当所得）", "日米租税条約"]
+  markets: [JP, US]
+  review: {status: verified}
+
+S17:
+  formula: "特定口座の源泉徴収の有無"
+  inputs: [SELF_account_type]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（分類）"
+  missing_bias: "日本固有。"
+  correlated_with: [S04, S07, S09]
+  economic_rationale: >-
+    源泉徴収ありなら確定申告不要だが、**繰越控除（S09）を使うには申告が必要。**
+    また申告すると合計所得金額が増え、**国民健康保険料や配偶者控除に波及する**
+    ことがある。**税率だけでなく社会保険料まで含めた実効負担で判断すべき**という、
+    見落としやすい論点。
+  evidence_tier: T3
+  references: ["所得税法（特定口座源泉徴収選択）", "国民健康保険法"]
+  markets: [JP]
+  review: {status: verified}
+
+S18:
+  formula: "米国株の円換算損益 - ドル建て損益の円換算"
+  inputs: [PRICE, fx_rate, SELF_cost]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（差分）"
+  missing_bias: "米国株のみ。取得時の為替レートを記録していないと計算できない。"
+  correlated_with: [P07, P08, S11, Q07, Q15]
+  economic_rationale: >-
+    **株価が下がっても円安で益が出ることがある。** そして
+    **日本の税制では円換算後の損益に課税される**ので、
+    ドル建てで損していても課税されることがある。
+    S03（譲渡益税）の計算に必須で、Q07（為替エクスポージャー）の
+    実現側でもある。
+  evidence_tier: T3
+  references: ["所得税法（外貨建取引の換算）"]
+  markets: [US]
+  review: {status: verified}
+
+S19:
+  formula: "貸株金利収入 / 保有評価額"
+  inputs: [SELF_lending_income]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "保有評価額>0。"
+  missing_bias: "貸株サービスを利用している場合のみ。NISA では利用できない証券会社が多い。"
+  correlated_with: [K21, K38, K19, S16, S04]
+  economic_rationale: >-
+    **長期保有の副収入。** 空売り需要の強い銘柄（K19/K38）ほど金利が高い。
+    ただし**配当が「配当金相当額」になり、配当控除が使えず雑所得扱いになる**ので、
+    税制上は不利になることがある。**高配当株では貸株しない方が有利。**
+    さらに貸株中は株主優待（F12）も受けられない。
+  evidence_tier: T3
+  references: ["構造的判断。証券会社の貸株サービス規約と税務上の取扱い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+# --- Q セクター・相関・ポートフォリオ文脈 --------------------------------------
+
+Q01:
+  formula: "max_j corr( r_i, r_j )、j は保有銘柄、日次252日"
+  inputs: [PRICE, SELF_positions]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "共通観測が60日未満なら欠損。"
+  missing_bias: "上場1年未満で欠損。売買停止日が多い銘柄で推定が歪む。"
+  correlated_with: [Q02, Q06, Q13, Q16, Q03]
+  economic_rationale: >-
+    **0.7超なら実質同じ銘柄。** §1.6 で集中設計（rho 高）を採るほど、
+    残す銘柄間の相関管理が重要になる。ただし**平時の相関は危機時に役に立たない**
+    （Q13）ので、これだけで分散できたと考えてはいけない。
+  evidence_tier: T2
+  references: ["構造的判断。分散の数学 LAW-06"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Q02:
+  formula: "mean_j corr( r_i, r_j )"
+  inputs: [PRICE, SELF_positions]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "Q01 と同じ。"
+  missing_bias: "Q01 と同じ。"
+  correlated_with: [Q01, Q13, Q14, Q04]
+  economic_rationale: >-
+    ポートフォリオ全体の分散度。Q01（最大）が個別の重複を見るのに対し、
+    Q02（平均）は全体の凝集度を見る。**実効銘柄数（Q14）と併せて、
+    「20銘柄持っているが実質5銘柄」という状態を検出する。**
+  evidence_tier: T2
+  references: ["構造的判断。LAW-06"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Q03:
+  formula: "SUM( セクター別ウェイト^2 )"
+  inputs: [SELF_positions, sector_classification]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  missing_bias: "業種分類の欠損で計算不能。"
+  correlated_with: [Q01, Q02, Q11, Q14, V13]
+  economic_rationale: >-
+    セクター集中度。**追加後の HHI を計算して閾値超過なら減点する**という
+    後段補正に使う。ただし 263AT は小型株中心なので、
+    **そもそもセクターが偏りやすい**（小型株が多い業種と少ない業種がある）。
+    厳しく管理しすぎるとユニバースを失う。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Q04:
+  formula: "d(sigma_p) / d(w_i)"
+  inputs: [PRICE, SELF_positions, I03]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "ポートフォリオのボラがゼロなら欠損。"
+  missing_bias: "共分散行列の推定に依存。保有銘柄数が少ないと不安定。"
+  correlated_with: [Q01, Q02, Q05, Q12, I03, I16]
+  economic_rationale: >-
+    **単独リスクではなくポートフォリオへの寄与で判断する。**
+    高ボラでも既存保有と負相関なら、全体のリスクは下がる。
+    §1.6 の Kelly サイジングは単独の sigma を使うが、
+    **本来は限界リスク寄与で調整すべき**（未実装。次の改訂候補）。
+  evidence_tier: T2
+  references: ["構造的判断。LAW-06 / §1.6"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Q05:
+  formula: "d(E[U_p]) / d(w_i)"
+  inputs: [mu_hat, Q04, lambda]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  missing_bias: "期待リターン推定（§1.4）に依存。**b_h が有意でなければこの値も無意味。**"
+  correlated_with: [Q04, Q12, R11, S12]
+  economic_rationale: >-
+    **Q04 との比が実質的な採用基準。** 期待効用の増加をリスクの増加で割った値が
+    高い順に組み入れる。**§1.4 の較正（スコア → 期待リターン）ができていないと
+    計算できない**ので、Phase 3 までは使えない。
+  evidence_tier: T3
+  references: ["構造的判断。§1.4 / §1.6"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Q06:
+  formula: "LLM による既存保有とのテーマ類似度 0-1"
+  inputs: [LLM, SELF_positions]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（スコア）"
+  missing_bias: "LLM 依存。過去に遡れない（§6.4）。"
+  correlated_with: [Q01, Q02, Q13, Q16, R22, T21]
+  economic_rationale: >-
+    **相関では見えない「同じ賭け」を検出する。**
+    半導体 × AI × 電力インフラは、過去の相関が低くても同じシナリオに依存している。
+    **LLM を使うと「今の物語」に引っ張られて集中しやすい**（§8-5）ので、
+    LLM 自身にその重複を検出させるという構造にしている。
+  evidence_tier: T3
+  references: ["構造的判断。LLM 由来のため前向き記録が必要"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Q07:
+  formula: "SUM( w_i × P08_i )"
+  inputs: [P08, SELF_positions]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  nonlinear: "abs_dev(x_star=0)"
+  missing_bias: "P08（銘柄別為替感応度）の推定に依存。"
+  correlated_with: [P07, P08, P21, Q15, S18, V07]
+  economic_rationale: >-
+    ∩型（ゼロが最適とは限らないが、意図しない大きな露出は避ける）。
+    **日米両方に投資するので二重に効く** — 米国株を持つこと自体がドル露出であり、
+    さらに日本の輸出企業もドル感応度を持つ。**気づかないうちに為替に大きく賭けている**
+    という状態が起きやすい。Q08（投信部分）まで含めて見ないと全体が分からない。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Q08:
+  formula: "保有投信の組入上位銘柄と個別株保有の重複ウェイト"
+  inputs: [SELF_fund_holdings, SELF_positions]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  missing_bias: >-
+    **投信の組入銘柄は月次開示で、しかも上位10銘柄程度しか出ない。**
+    インデックス投信なら構成銘柄が分かるが、アクティブ投信は不透明。
+    **全体像は原理的に把握できない。**
+  correlated_with: [Q01, Q06, Q07, Q15, Q11]
+  economic_rationale: >-
+    **全体ポートフォリオの90%が投信である以上、これを見ないのは片手落ち。**
+    §1.8 のバーベル構造（90%投信 + 10%個別株）が成立する前提は、
+    両者が独立であること。個別株が投信と同じ銘柄なら、
+    **バーベルではなく単なる集中になっている。**
+    ただし上記の通り把握には限界があるので、**セクター・地域レベルで近似する**のが現実的。
+  evidence_tier: T3
+  references: ["構造的判断。catalog §1.8 のバーベル前提"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Q09:
+  formula: "業種内での S_buy の順位"
+  inputs: [S_buy, sector_classification]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "業種内の銘柄数が5未満なら欠損。"
+  missing_bias: "業種分類の欠損。T21（LLM による真の競合特定）で母集団を置き換える案がある。"
+  correlated_with: [A25, A41, R22, T21, Q10]
+  economic_rationale: >-
+    **「この業種に賭けるなら、この銘柄が最善か」。**
+    業種の追い風で全銘柄が上がっている局面では、
+    銘柄選択の巧拙が見えなくなる。業種内順位で見れば、
+    **業種要因を除いた選択能力が分かる。** A41（同業最安値スプレッド）と対。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Q10:
+  formula: "r_i(6ヶ月) - median( r_同業(6ヶ月) )"
+  inputs: [PRICE, sector_classification]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "業種内の銘柄数が3未満なら欠損。"
+  missing_bias: "業種分類の欠損。"
+  correlated_with: [G11, G27, Q09, L01, L09]
+  economic_rationale: >-
+    **一社だけ下がっているなら個社要因。** 業種全体が下がっているなら
+    マクロかセクター要因で、意味が全く違う。
+    **LLM で理由を調べるトリガーにする**という使い方が本質で、
+    スコアへの直接寄与より、調査リソースの配分に使う（LAW-14 情報の価値）。
+  evidence_tier: T2
+  references: ["https://www.openassetpricing.com/", "OSAP IndMom / IndRetBig との関連"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Q11:
+  formula: "ポートフォリオのファクター露出（バリュー/クオリティ/サイズ/モメンタム）"
+  inputs: [SELF_positions, factor_loadings]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  nonlinear: "abs_dev(x_star=target_exposure)"
+  missing_bias: "ファクター・ローディングの推定に Ken French データが要る（無料で取得可能）。"
+  correlated_with: [Q03, Q07, Q08, Q13, P17, P23]
+  economic_rationale: >-
+    ∩型。**意図しないファクター賭けの検出。**
+    銘柄単位で選ぶと必ずどこかに偏る。バリュー重視で選んだつもりが
+    小型株ばかりになっている、といった事態を検出する。
+    P23（ファクター混雑度）と組み合わせると、**混雑したファクターに
+    知らないうちに全張りしている**という最悪の状態を防げる。
+  evidence_tier: T2
+  references: ["https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Q12:
+  formula: "delta( mu_p / sigma_p ) 追加前後"
+  inputs: [Q04, Q05, mu_hat]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "sigma_p がゼロなら欠損。"
+  missing_bias: "期待リターン推定に依存。"
+  correlated_with: [Q04, Q05, Q13, R10, R11]
+  economic_rationale: >-
+    Q04（限界リスク）と Q05（限界期待値）の統合。
+    **採用可否の最終判断はこれで行う。** 単独のスコアが高くても、
+    ポートフォリオのシャープを下げるなら入れない。
+    OQ-24 の実測（合成シャープ 0.6〜1.0）を踏まえると、
+    **1銘柄の追加でシャープが下がるなら、それは組み入れる価値がない。**
+  evidence_tier: T3
+  references: ["構造的判断。research/findings §7"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Q13:
+  formula: "市場下落上位5%の日に限定した銘柄間相関"
+  inputs: [PRICE, market_return, SELF_positions]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "下落上位5%の日が20未満なら欠損。"
+  missing_bias: "危機を含む長期の履歴が要る。**上場5年未満では危機を経験していない可能性がある。**"
+  correlated_with: [Q01, Q02, I10, I16, I18, I28]
+  economic_rationale: >-
+    **平時の相関は危機時に役に立たない。** 危機では相関が1に近づき、
+    分散効果が消える。Q01/Q02 で分散できたと思っていても、
+    **本当に必要なときに機能しない**という致命的な誤算が起きる。
+    I18（危機時パフォーマンス）と併せて、**ストレス下での実際の分散度**を測る。
+  evidence_tier: T2
+  references: ["構造的判断。危機時の相関上昇は広く観測される"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Q14:
+  formula: "1 / SUM(w_i^2)"
+  inputs: [SELF_positions]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "ポジションが無ければ欠損。"
+  nonlinear: "abs_dev(x_star=N_target)"
+  missing_bias: "na"
+  correlated_with: [Q02, Q03, Q13, R10]
+  economic_rationale: >-
+    ∩型。**見かけの銘柄数ではなく実質的な分散度。**
+    20銘柄でも1銘柄が50%なら実効銘柄数は約4。
+    §1.8.3 で N_target を実測IC から導くと決めたので、
+    **その目標値との乖離**を測るのがこの変数の役割。
+    Bessembinder（4%の銘柄が全リターンを生む）を踏まえると、
+    実効銘柄数が小さすぎると右裾を掴む確率が下がる。
+  evidence_tier: T2
+  references: ["https://www.zeninvestor.org/wp-content/uploads/2025/11/Do-stocks-outperform-T-bills.pdf", "catalog §1.8.3"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Q15:
+  formula: "国別・通貨別のウェイト分布"
+  inputs: [SELF_positions, J19]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  nonlinear: "abs_dev(x_star=target_allocation)"
+  missing_bias: "na"
+  correlated_with: [Q07, Q08, P07, P21, P22, S18]
+  economic_rationale: >-
+    ∩型。Q07（為替感応度の合計）が統計的な露出を測るのに対し、
+    Q15 は名目的な配分を測る。**日米の配分比率は P22（相対バリュエーション）で
+    動的に決めるべきだが、それはマクロ予測になるので §1.9 の
+    「マクロで銘柄を選ばない」（LAW-78）と衝突する。**
+    暫定的には固定比率（例: 50/50）にして、Q15 で乖離を監視するのが安全。
+  evidence_tier: T3
+  references: ["構造的判断。catalog LAW-78"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Q16:
+  formula: "保有銘柄間の顧客・仕入先の重複度（LLM 判定）"
+  inputs: [LLM, N21, L06, L07, SELF_positions]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（スコア）"
+  missing_bias: "LLM 依存。顧客・仕入先の開示が薄い日本では推定精度が落ちる。"
+  correlated_with: [Q01, Q06, Q13, L06, L07, N21]
+  economic_rationale: >-
+    **Q06（テーマ）でも相関でも見えない連鎖リスク。**
+    同じ最終顧客に依存する2社は、テーマも業種も違って見えても
+    同じ需要ショックで同時に沈む。L06/L07（サプライチェーン・モメンタム）が
+    リターン予測に使う関係を、**リスク管理側から使う。**
+  evidence_tier: T3
+  references: ["https://www.openassetpricing.com/", "OSAP iomom_cust / iomom_supp と同根"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Q17:
+  formula: "現金 / 個別株予算"
+  inputs: [SELF_cash, PORTFOLIO_JPY]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "予算>0。"
+  nonlinear: "abs_dev(x_star=target_cash)"
+  missing_bias: "na"
+  correlated_with: [P16, P10, Q14, R10, S05]
+  economic_rationale: >-
+    ∩型。**下落時の買い増し余地を確保する。**
+    P16（市場ドローダウン）と連動させ、市場が下がったときに
+    使える現金を持っておく。ただし**現金を持つこと自体は期待リターンを下げる**ので、
+    タイミングを計ろうとすると LAW-78 に反する。
+    **NISA 枠の年間上限（S05、240万円）があるので、
+    そもそも一度に全額投入できない**という制度的な制約が、
+    結果的にドルコスト平均法的な効果を生む点は指摘しておく価値がある。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Q18:
+  formula: "NISA 保有銘柄の期待リターン順位 vs 全保有の期待リターン順位"
+  inputs: [S04, S05, mu_hat, SELF_positions]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  missing_bias: "期待リターン推定に依存。日本固有。"
+  correlated_with: [S04, S05, S06, S14, S10, S16]
+  economic_rationale: >-
+    **期待値が高い順に NISA を埋める**という原則の、ポートフォリオ全体での測定。
+    ただし S06 で述べた通り単純な期待値順ではなく、
+    **(a) NISA は損切りが救済されないので分散の小さい銘柄が向く、
+    (b) 高配当米国株は外国税額控除が使えず不利（S10）**という
+    2つの修正が要る。**税制の最適化は 263AT で最も日本固有かつ
+    確実にリターンを改善できる領域**で、しかも予測不要なので確度が高い。
+  evidence_tier: T3
+  references: ["https://faq.sbisec.co.jp/answer/5ee86c0b144d40001145db08/", "構造的判断"]
+  markets: [JP]
+  review: {status: verified}
+
+# --- Y ESG・非財務リスク -------------------------------------------------------
+
+Y01:
+  formula: "主要評価機関の ESG スコア"
+  inputs: [ESG_rating]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（スコア）"
+  missing_bias: >-
+    **カバレッジが大型株に強く偏る。** 日本の小型株はほぼ未評価。
+    さらに**評価機関間の相関が低い**（同じ企業に真逆の評価が付く）ので、
+    どの機関のスコアを使うかで結果が変わる。
+  correlated_with: [Y02, Y03, Y12, W07, M27]
+  economic_rationale: >-
+    **単独のアルファ源としては証拠が弱い。** 評価機関間の不一致が大きいこと自体が、
+    「ESG」という概念が測定可能な単一の量ではないことを示唆する。
+    263AT では**需給要因（Y12 指数採用）とテールリスク（Y06/Y10）としてのみ扱い、
+    水準はほぼ使わない。** ★1 の事前スケール 0.15 で強く縮小される。
+  evidence_tier: T3
+  references: ["構造的判断。ESG スコアの機関間不一致は広く報告されている"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Y02:
+  formula: "Y01 の前年比変化"
+  inputs: [Y01]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "前年のスコアが無ければ欠損。"
+  missing_bias: "Y01 を継承。評価方法の変更でスコアが動くと誤検出する。"
+  correlated_with: [Y01, Y04, Y12]
+  economic_rationale: >-
+    **水準よりモメンタムの方がまだ証拠がある。** 理由は需給
+    — ESG 資金が改善企業に流入するため。因果ではなくフローの話。
+    ただし評価機関が算定方法を変えただけでもスコアが動くので、
+    **変化の原因を確認しないと誤検出する。**
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Y03:
+  formula: "(Scope1 + Scope2 排出量) / REV"
+  inputs: [emissions, REV]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **算定基準（GHG プロトコル）は共通だが、集計範囲が企業判断。**
+    Scope2 のマーケット基準とロケーション基準で数値が変わる。
+  zero_denominator_policy: "REV>0。排出量の開示が無ければ欠損。"
+  missing_bias: "**開示企業に偏る。** 日本は東証プライムで実質義務化されているが、スタンダード・グロースは任意。"
+  correlated_with: [Y04, Y05, Y10, V07, P30]
+  economic_rationale: >-
+    **炭素税・排出量取引が導入されれば直接コストになる。**
+    5年ホライズンでは制度変更（P30）の確率が無視できないので、
+    アルファではなく**将来コストの現在価値**として扱う。
+    排出量原単位が業種中央値の数倍なら、制度変更時の打撃が大きい。
+  evidence_tier: T3
+  references: ["GHG プロトコル", "https://www.jpx.co.jp/english/equities/follow-up/02.html"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Y04:
+  formula: "排出削減目標に対する実績の進捗率"
+  inputs: [Y03, emission_targets, LLM]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "目標が無ければ欠損。"
+  missing_bias: "目標を掲げる企業に偏る。**目標を掲げない企業を評価できない。**"
+  correlated_with: [Y03, Y02, N18, T11]
+  economic_rationale: >-
+    **目標だけの企業と実行企業の区別。** N18（中計の達成率）と
+    T11（経営陣の約束履行率）の環境版で、**同じ「約束を守るか」という
+    企業文化の指標**として見る方が、環境そのものより情報量が多いかもしれない。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Y05:
+  formula: "1 if 化石燃料・武器・たばこ・ギャンブル等に該当 else 0"
+  inputs: [LLM, sector_classification, REV_breakdown]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: "該当業種の判定に売上構成が要る。副業として該当事業を持つ企業を取りこぼす。"
+  correlated_with: [Y01, Y12, O13, K26]
+  economic_rationale: >-
+    **符号が相殺する厄介な変数。** 機関のダイベストメントで売り圧力を受ける（負）が、
+    **その結果として割安になる**（正）。OSAP `sinAlgo` t=2.0 は正の符号
+    — つまり**避けられる銘柄の方が儲かる**という結果。
+    これは O カテゴリ（ネグレクト）と同じ構造で、
+    **「機関が持てない」ことが個人の機会になる**典型例。
+    ただし本人の価値観で除外したい場合は、これをゲートにする選択もありうる。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP sinAlgo t=2.0"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Y06:
+  formula: "過去5年の重大な不祥事の件数"
+  inputs: [NEWS, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（カウント）"
+  missing_bias: >-
+    **報道依存なので小型株で見逃す**（N36/N37/W14 と同型）。
+    O カテゴリと逆方向で、**ネグレクト銘柄で悪材料を見逃す**という
+    リスク管理上まずい偏りが、Y カテゴリにも共通して現れる。
+  correlated_with: [Y07, Y09, W14, N36, N37, E12, E08]
+  economic_rationale: >-
+    **再発率が高い。組織文化の指標として実用的。**
+    1件目を「不運」と見るか「兆候」と見るかで判断が変わるが、
+    実務的には兆候と見るべき。E08/E12（会計上の問題）、W14（労務）、
+    N36/N37（製品・情報）と合わせて、**組織の統制の弱さを横断的に測る。**
+  evidence_tier: T3
+  references: ["構造的判断。不祥事の再発率に関する体系的な実証は未確認"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Y07:
+  formula: "訴訟・行政処分の件数と規模 / MCAP"
+  inputs: [LLM, EDINET, SEC_legal, MCAP]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "N20 と同じ日米の開示基準差（米国の方が広い）。"
+  zero_denominator_policy: "MCAP>0。"
+  missing_bias: "N20 と同じ。米国はクラスアクションが多く制度差が数値差になる。"
+  correlated_with: [N20, Y06, Y10, D21, E12]
+  economic_rationale: >-
+    N20（現在係争中）が現在を見るのに対し、Y07 は履歴を見る。
+    **訴訟の多い企業は訴訟を招く事業慣行を持っている**可能性が高く、
+    Y06（不祥事）と同じ「再発する」性質を持つ。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Y08:
+  formula: "強制労働懸念地域への調達・生産依存度"
+  inputs: [LLM, V08, supply_chain]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（スコア）"
+  missing_bias: "**サプライチェーンの2次以降が見えない。** 直接取引先しか分からず、過小評価に偏る。"
+  correlated_with: [V08, T19, Y10, N38, P30]
+  economic_rationale: >-
+    **米国 UFLPA 等で輸入差止のリスク。** 実際に発動されると
+    売上が即座に止まるので、テールリスクとして無視できない。
+    V08（中国エクスポージャー）と重なるが、
+    **こちらは規制リスクという具体的な発現経路を持つ。**
+  evidence_tier: T3
+  references: ["米国: Uyghur Forced Labor Prevention Act (UFLPA)", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Y09:
+  formula: "個人データ取扱量とプライバシー規制への露出度"
+  inputs: [LLM, V07, business_model]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（スコア）"
+  missing_bias: "LLM 推定。ネット企業に偏る。"
+  correlated_with: [Y07, N37, T20, V07]
+  economic_rationale: >-
+    **GDPR の制裁金は全世界売上の最大4%**という規模なので、
+    利益ではなく売上に対して科される点が特異。
+    N37（情報漏洩）が事故を見るのに対し、Y09 は規制への構造的な露出を見る。
+  evidence_tier: T3
+  references: ["EU GDPR Art.83", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Y10:
+  formula: "環境関連の引当金 + 推定潜在債務 / EQ"
+  inputs: [environmental_provisions, LLM, EQ]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **引当計上の基準が国で違う。** 米国 ASC 410（資産除去債務）は範囲が広く、
+    日本は限定的。**日本企業の方が簿外に残りやすい。**
+  zero_denominator_policy: "EQ>0。債務超過なら D02 で既に除外。"
+  missing_bias: "潜在債務の推定は LLM 頼み。化学・重工業以外ではほぼゼロ。"
+  correlated_with: [Y03, Y07, D21, D20, E11]
+  economic_rationale: >-
+    **簿外の巨額債務になりうる。** 土壌汚染・アスベスト・原状回復義務は、
+    発覚した時点で自己資本を大きく毀損する。
+    D21（保証債務）と同じく**貸借対照表に載っていないリスク**で、
+    バリュー指標（A03 PBR）を見ているだけでは絶対に気づけない。
+  evidence_tier: T3
+  references: ["米国: ASC 410（資産除去債務）", "日本: 資産除去債務に関する会計基準"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Y11:
+  formula: "主要拠点の水害・地震ハザードマップ上のリスク評価"
+  inputs: [LLM, facility_locations, hazard_maps]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（スコア）"
+  missing_bias: >-
+    **拠点の所在地は有報の「主要な設備の状況」から取れるが、粒度が粗い**
+    （市区町村レベル）。サプライヤーの拠点は分からない。
+  correlated_with: [N38, V07, V08, Y10, I18]
+  economic_rationale: >-
+    **日本は地震・水害リスクが構造的に高い。** 5年ホライズンでは
+    大規模災害の発生確率が無視できない。ただし**定量化が極めて難しく、
+    しかも保険でカバーされる部分がある**ので、実効的なリスクは推定値より小さい。
+    ★1 で強く縮小されるのが妥当。
+  evidence_tier: T3
+  references: ["構造的判断。定量化手法が確立していない"]
+  markets: [JP, US]
+  review: {status: verified}
+
+Y12:
+  formula: "主要 ESG 指数への採用・除外イベント"
+  inputs: [index_membership]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（分類）"
+  missing_bias: "指数の構成銘柄リストが必要。日本は GPIF 採用指数が公表されている。"
+  correlated_with: [K12, K13, K26, O13, Y01, Y02]
+  economic_rationale: >-
+    **純粋な需給イベントとして扱う**（K13 の指数採用と同種）。
+    日本は GPIF が ESG 指数に巨額を配分しているので、
+    **採用・除外の需給インパクトが他国より大きい。**
+    Y01（スコア水準）にアルファが無くても、
+    **指数採用というイベントには需給効果がある**という切り分けが重要。
+  evidence_tier: T3
+  references: ["https://www.openassetpricing.com/", "K13（指数イベント）と同種の需給効果"]
+  markets: [JP, US]
+  review: {status: verified}

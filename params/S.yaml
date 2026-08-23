@@ -12,8 +12,11 @@
   category_name: 税・コスト
   subsection: null
   definition: 手数料 + スプレッド(J04) + マーケットインパクト
-  formula: null
-  inputs: null
+  formula: 手数料 + スプレッド(J04) + マーケットインパクト(S02)
+  inputs:
+  - J04
+  - S02
+  - broker_fee
   sign: negative
   buy_class: main
   sell_class: main
@@ -26,7 +29,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -37,13 +40,21 @@
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: J04（実効スプレッド）の推定に依存。小型株ほど推定誤差が大きい。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - J03
+  - J04
+  - S02
+  - S12
+  - S13
+  - J02
+  economic_rationale: '**バックテストに必ず入れる。** 小型株ではスプレッドが手数料の数倍になる。 OQ-24 の実測で、月0.25%のコストを引くと9方式中8つが死んだ。 **コストの見積もりが甘いと、存在しないエッジを信じることになる。**'
+  references:
+  - https://www.hec.ca/finance/Fichier/McLean.pdf
+  - research/findings_2026-08-23.md §7 の実測
   notes: バックテストに必ず入れる。小型株ではスプレッドが手数料の数倍になる
   notes_extra: null
   provenance:
@@ -57,21 +68,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S02
   name_ja: マーケットインパクト推定
@@ -79,8 +93,11 @@
   category_name: 税・コスト
   subsection: null
   definition: k × sqrt( 建玉 / 日次売買代金 ) × sigma
-  formula: null
-  inputs: null
+  formula: k * sqrt( 建玉額 / 日次売買代金 ) * sigma
+  inputs:
+  - J01
+  - I01
+  - target_position
   sign: negative
   buy_class: main
   sell_class: main
@@ -93,7 +110,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -102,15 +119,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: J01 がゼロなら無限大（J10 で既に除外）。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**係数 k は実測でしか決まらない。** 文献値（0.5〜1.0）を暫定で使うが、 日本の小型株での妥当性は未検証。**実運用の約定データが貯まるまで不確実。**'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - J01
+  - J02
+  - J03
+  - J13
+  - S01
+  - S12
+  economic_rationale: '**平方根則。入れないと小型株戦略は必ず過大評価される。** 建玉が日商の10%なら sqrt(0.1)≈0.32 にボラを掛けた分だけ不利な価格で約定する。 **J02（流動化日数）のゲートと合わせて、サイズの上限を決める2本柱。**'
+  references:
+  - 構造的判断。平方根則は実務標準だが係数は市場・銘柄依存
   notes: 平方根則。入れないと小型株戦略は必ず過大評価される
   notes_extra: null
   provenance:
@@ -124,21 +148,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S03
   name_ja: 想定譲渡益税
@@ -146,8 +173,10 @@
   category_name: 税・コスト
   subsection: null
   definition: 含み益 × 0.20315（特定口座）
-  formula: null
-  inputs: null
+  formula: 含み益 × 0.20315（特定口座の場合）
+  inputs:
+  - R01
+  - S04
   sign: negative
   buy_class: none
   sell_class: main
@@ -160,10 +189,9 @@
   - CALC
   evidence_stars: null
   prior_scale: null
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: POINT
   consolidation: na
@@ -171,13 +199,20 @@
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: NISA 口座では常にゼロ（S04 で分岐）。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - R01
+  - S04
+  - S07
+  - S08
+  - S09
+  - R11
+  economic_rationale: '**売却で確定する税。売りスコアの抑制項。** 含み益のある銘柄を売ると即座に20.315%が消えるので、 **乗り換え（R11）はスコア差がこれを上回らないと正当化できない。** 長期保有の税繰延効果はここから来る。'
+  references:
+  - 所得税法・租税特別措置法（上場株式等の譲渡所得 20.315%）
   notes: 売却時に確定。売りスコアの抑制項
   notes_extra: null
   provenance:
@@ -191,21 +226,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S04
   name_ja: 口座種別
@@ -213,8 +251,9 @@
   category_name: 税・コスト
   subsection: null
   definition: NISA成長投資枠 / 特定口座 / 一般口座
-  formula: null
-  inputs: null
+  formula: 口座種別（NISA成長投資枠 / 特定口座 / 一般口座）
+  inputs:
+  - SELF_account_type
   sign: context
   buy_class: main
   sell_class: main
@@ -227,24 +266,33 @@
   - SELF
   evidence_stars: null
   prior_scale: null
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: na（分類）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 日本固有。米国は課税口座 / IRA / 401k が対応するが制度が違う。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - S03
+  - S05
+  - S06
+  - S07
+  - S08
+  - S14
+  - S15
+  - S16
+  economic_rationale: '**NISA 内銘柄は「利確に税がかからない」が「損切りが救済されない」。** 損益通算も繰越控除もできないので、**同じ含み損でも NISA の方が実質コストが高い。** したがって**売り閾値を口座別に変える必要がある** — これは 263AT の 売り設計に直接効く、日本固有の重要な分岐。'
+  references:
+  - https://faq.sbisec.co.jp/answer/5ee86c0b144d40001145db08/
+  - 租税特別措置法 第37条の14（NISA）
   notes: NISA内銘柄は「利確に税がかからない」が「損切りが救済されない」。売り閾値を口座別に変える
   notes_extra: null
   provenance:
@@ -258,21 +306,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S05
   name_ja: NISA成長投資枠の残枠
@@ -280,8 +331,9 @@
   category_name: 税・コスト
   subsection: null
   definition: 年間240万 - 当年使用額 / 生涯1200万 - 累計
-  formula: null
-  inputs: null
+  formula: 年間240万円 - 当年使用額、および 生涯1200万円 - 累計取得額
+  inputs:
+  - SELF_nisa_usage
   sign: positive
   buy_class: main
   sell_class: none
@@ -294,24 +346,29 @@
   - SELF
   evidence_stars: null
   prior_scale: null
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 日本固有。年ごとにリセットされ、売却分は翌年復活する（S15）。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - S04
+  - S06
+  - S14
+  - S15
+  - Q18
+  economic_rationale: '**300万円規模なら成長投資枠（生涯1200万円）でほぼ全額カバーできる。** 枠は年240万円までなので、**5年かけて埋める**のが基本設計。 枠の使い方自体が最適化問題で、**期待リターンが最も高い銘柄から埋める**べき（S06）。'
+  references:
+  - 租税特別措置法 第37条の14（NISA成長投資枠）
   notes: 枠は年ごとにリセットされ、売却分は翌年復活する。枠の使い方自体が最適化問題
   notes_extra: null
   provenance:
@@ -325,21 +382,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S06
   name_ja: NISA枠の機会費用
@@ -347,8 +407,11 @@
   category_name: 税・コスト
   subsection: null
   definition: その枠を別銘柄に使った場合の期待節税額
-  formula: null
-  inputs: null
+  formula: その枠を次善の候補に使った場合の期待節税額との差
+  inputs:
+  - S05
+  - mu_hat
+  - S03
   sign: negative
   buy_class: main
   sell_class: useful
@@ -361,24 +424,28 @@
   - CALC
   evidence_stars: null
   prior_scale: null
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 枠が残っていなければ計算不要。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 期待リターン推定（§1.4）に依存。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - S05
+  - S14
+  - Q18
+  - R11
+  economic_rationale: '**期待リターンが最も高い銘柄を NISA に入れるべき。** 非課税枠の価値は「その銘柄が生む利益 × 20.315%」なので、 低期待値の銘柄で枠を埋めるのは機会損失。 **ただし NISA は損切りが救済されないので、期待値が高くても 分散が大きい銘柄は特定口座の方が良い場合がある** — 単純な期待値順ではない。'
+  references:
+  - 構造的判断
   notes: 期待リターンが最も高い銘柄をNISAに入れるべき。低期待値の銘柄でNISA枠を埋めない
   notes_extra: null
   provenance:
@@ -392,21 +459,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S07
   name_ja: 特定口座の年間損益
@@ -414,8 +484,9 @@
   category_name: 税・コスト
   subsection: null
   definition: 当年の実現損益累計
-  formula: null
-  inputs: null
+  formula: 当年の特定口座における実現損益の累計
+  inputs:
+  - SELF_realized_pnl
   sign: context
   buy_class: none
   sell_class: main
@@ -428,10 +499,9 @@
   - SELF
   evidence_stars: null
   prior_scale: null
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: POINT
   consolidation: na
@@ -439,13 +509,18 @@
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 複数の証券会社にまたがる場合は合算が要る。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - S03
+  - S08
+  - S09
+  - S17
+  economic_rationale: 年末の損益通算最適化（S08）の前提。 実現益が出ている年は損出しの価値が高く、実現損しかない年は価値が無い。 **年末に向けて売り判定が変わる**という、他に例のない時期依存性を生む。
+  references:
+  - 所得税法（申告分離課税・損益通算）
   notes: 年末に向けた損益通算の最適化（S08）に使う
   notes_extra: null
   provenance:
@@ -459,21 +534,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S08
   name_ja: 損出しの価値
@@ -481,8 +559,11 @@
   category_name: 税・コスト
   subsection: null
   definition: 実現可能な損失 × 0.20315 × 1[当年に相殺可能な益がある]
-  formula: null
-  inputs: null
+  formula: 実現可能な含み損 × 0.20315 × 1[当年に相殺可能な実現益がある]
+  inputs:
+  - R01
+  - S07
+  - S04
   sign: positive
   buy_class: none
   sell_class: main
@@ -495,10 +576,9 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
-  - US
   industries: null
   period_convention: POINT
   consolidation: na
@@ -506,13 +586,21 @@
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**NISA では常にゼロ**（損益通算できない）。特定口座のみ。'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - S03
+  - S04
+  - S07
+  - S09
+  - R01
+  - H11
+  economic_rationale: '**年末の損出しクロス取引。** 含み損を実現して実現益と相殺し、 同じ銘柄を買い戻せば、ポジションを維持したまま税を減らせる。 ただし**往復コスト（S01）がかかる**ので、節税額がそれを上回る場合のみ。 そして**この行動が市場全体で起きるので H11（損出し一巡後の反発）が生まれる** — 自分の税務行動と市場アノマリーが同じ現象の裏表になっている珍しい例。'
+  references:
+  - 所得税法（損益通算）
+  - H11 と同根の現象
   notes: 年末の損出しクロス。特定口座のみ。NISAでは無価値
   notes_extra: null
   provenance:
@@ -526,21 +614,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S09
   name_ja: 繰越控除の残余
@@ -548,8 +639,9 @@
   category_name: 税・コスト
   subsection: null
   definition: 過去3年の繰越損失額
-  formula: null
-  inputs: null
+  formula: 過去3年の繰越損失残高
+  inputs:
+  - SELF_loss_carryforward
   sign: context
   buy_class: none
   sell_class: useful
@@ -562,10 +654,9 @@
   - SELF
   evidence_stars: null
   prior_scale: null
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: POINT
   consolidation: na
@@ -573,13 +664,18 @@
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 確定申告をしていないと繰越できない。**運用に依存する。**
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - S03
+  - S07
+  - S08
+  - S17
+  economic_rationale: 繰越損失があるなら、**その範囲までの利確は実質非課税。** S03（譲渡益税）の抑制効果が消えるので、 **繰越がある年は乗り換え（R11）の閾値を下げてよい。** 3年で失効するので、期限が近い年は積極的に使う。
+  references:
+  - 租税特別措置法 第37条の12の2（譲渡損失の繰越控除）
   notes: 繰越があるなら利確の実質税率が下がる
   notes_extra: null
   provenance:
@@ -593,21 +689,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S10
   name_ja: 米国株の税コスト
@@ -615,8 +714,11 @@
   category_name: 税・コスト
   subsection: null
   definition: 配当源泉10% + 国内20.315%、外国税額控除の見込み
-  formula: null
-  inputs: null
+  formula: 米国配当の源泉10% + 国内20.315%、外国税額控除の見込み額を控除
+  inputs:
+  - A11
+  - S04
+  - foreign_tax_credit
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -629,9 +731,8 @@
   - CALC
   evidence_stars: null
   prior_scale: null
-  evidence_tier: null
+  evidence_tier: T3
   markets:
-  - JP
   - US
   industries: null
   period_convention: POINT
@@ -640,13 +741,20 @@
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 米国株のみ。日本株では常にゼロ。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - A10
+  - A11
+  - S04
+  - S16
+  - R13
+  economic_rationale: '**高配当米国株 × NISA は最悪の組み合わせ。** NISA では外国税額控除が使えないので、米国の源泉10%が取り返せない。 つまり**同じ配当利回りでも、NISA に入れた米国株は日本株より実質利回りが低い。** S04/S06（口座の使い分け）の判断に直接効く。'
+  references:
+  - 日米租税条約 第10条
+  - 所得税法 第95条（外国税額控除）
   notes: 米国株の配当は二重課税。高配当米国株はNISAと相性が悪い（NISAでは外国税額控除が使えない）
   notes_extra: null
   provenance:
@@ -660,21 +768,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S11
   name_ja: 為替コスト
@@ -682,8 +793,10 @@
   category_name: 税・コスト
   subsection: null
   definition: 円ドル往復スプレッド + 為替手数料
-  formula: null
-  inputs: null
+  formula: 円ドル往復のスプレッド + 為替手数料
+  inputs:
+  - fx_spread
+  - broker_fx_fee
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -696,9 +809,8 @@
   - CALC
   evidence_stars: null
   prior_scale: null
-  evidence_tier: null
+  evidence_tier: T3
   markets:
-  - JP
   - US
   industries: null
   period_convention: POINT
@@ -707,13 +819,19 @@
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 米国株のみ。証券会社によって大きく違う。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - S01
+  - S12
+  - S13
+  - S18
+  - P07
+  economic_rationale: '**米国株の実質的な参入障壁。** 片道25銭なら往復0.5%で、 それだけで OQ-24 の年率アルファ（2〜3%）の2割が消える。 ただし**長期保有なら薄まる**（S13）ので、6M〜5Y の設計とは相性が良い。 短期売買を米国株で行うのは、この一点だけで不利。'
+  references:
+  - 構造的判断。証券会社の手数料体系に依存
   notes: 米国株の実質的な参入障壁。長期保有なら薄まる
   notes_extra: null
   provenance:
@@ -727,21 +845,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S12
   name_ja: 実効往復コスト率
@@ -749,8 +870,10 @@
   category_name: 税・コスト
   subsection: null
   definition: (手数料 + スプレッド + インパクト) / 建玉額
-  formula: null
-  inputs: null
+  formula: S01 / 建玉額
+  inputs:
+  - S01
+  - target_position
   sign: negative
   buy_class: main
   sell_class: main
@@ -763,7 +886,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -772,15 +895,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 建玉額>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: S01 の推定に依存。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - S01
+  - S02
+  - S13
+  - J02
+  - J04
+  economic_rationale: '**期待リターンから直接引く形にするための率表示。** §1.4 の μ(i,h) から S12 を引いて初めて、正味の期待値になる。 **これを引く前の数字で判断するのが、バックテストが実運用と乖離する最大の原因。**'
+  references:
+  - research/findings_2026-08-23.md §7 の実測
+  - https://www.hec.ca/finance/Fichier/McLean.pdf
   notes: S01 の率表示。期待リターンから直接引く
   notes_extra: null
   provenance:
@@ -794,21 +924,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S13
   name_ja: 保有期間で割った年率コスト
@@ -816,8 +949,10 @@
   category_name: 税・コスト
   subsection: null
   definition: 往復コスト率 / h*（年）
-  formula: null
-  inputs: null
+  formula: S12 / h*(年)
+  inputs:
+  - S12
+  - h_star
   sign: negative
   buy_class: main
   sell_class: main
@@ -830,7 +965,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -839,15 +974,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: h* がゼロなら無限大。建玉しない。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: h* の推定に依存。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - S12
+  - R03
+  - N45
+  - Z11
+  economic_rationale: '**保有期間が長いほど有利であることの直接表現。** 往復1%のコストも、5年持てば年0.2%。1年で回せば年1%。 **OQ-24 の実測が示した通り、この差が生死を分ける** （月0.03〜0.10%では7/9が生存、月0.25%では1/9）。 §1.5 の h* 選択の目的関数に入る項でもあり、 **「なぜ長期保有なのか」の定量的な答え。**'
+  references:
+  - research/findings_2026-08-23.md §7
+  - catalog LAW-11 / §1.5
   notes: 保有期間が長いほど有利であることの直接表現。h* 選択（§1.5）の入力になる
   notes_extra: null
   provenance:
@@ -861,21 +1002,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S14
   name_ja: NISA枠の使用効率
@@ -883,8 +1027,11 @@
   category_name: 税・コスト
   subsection: null
   definition: NISA保有銘柄の期待リターン合計 / 全候補上位N の合計
-  formula: null
-  inputs: null
+  formula: NISA保有銘柄の期待リターン合計 / 全候補上位N の期待リターン合計
+  inputs:
+  - S05
+  - mu_hat
+  - SELF_positions
   sign: positive
   buy_class: main
   sell_class: useful
@@ -897,24 +1044,27 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 分母がゼロなら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 期待リターン推定に依存。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - S05
+  - S06
+  - Q18
+  economic_rationale: S06（枠の機会費用）の測定版。**枠を最適に使えているかを事後的に採点する。** 1に近いほど良い。低い場合は、期待値の低い銘柄で枠を埋めてしまっている。 ただし**枠は一度使うと売却翌年まで戻らない**（S15）ので、 事後的に最適化できない不可逆な選択である点が重要。
+  references:
+  - 構造的判断
   notes: S06 の測定版
   notes_extra: null
   provenance:
@@ -928,21 +1078,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S15
   name_ja: NISA枠の翌年復活額
@@ -950,8 +1103,9 @@
   category_name: 税・コスト
   subsection: null
   definition: 当年売却した NISA 銘柄の簿価合計
-  formula: null
-  inputs: null
+  formula: 当年に売却した NISA 銘柄の取得価額合計
+  inputs:
+  - SELF_nisa_sales
   sign: positive
   buy_class: none
   sell_class: useful
@@ -964,10 +1118,9 @@
   - SELF
   evidence_stars: null
   prior_scale: null
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: POINT
   consolidation: na
@@ -975,13 +1128,18 @@
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 日本固有。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - S04
+  - S05
+  - S14
+  - S06
+  economic_rationale: '**NISA 枠は売却した翌年に復活する**（簿価ベース）。 つまり**年末に売れば翌年すぐ使えるが、年初に売ると1年近く枠が寝る。** 売却タイミングの最適化に効く、日本固有の制度的な非対称。 S08（年末の損出し）とは逆方向の年末効果を生む。'
+  references:
+  - 租税特別措置法（NISA の非課税保有限度額の再利用）
   notes: 翌年の枠計画。売却タイミングの最適化に効く
   notes_extra: null
   provenance:
@@ -995,21 +1153,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S16
   name_ja: 配当課税の実効負担
@@ -1017,8 +1178,11 @@
   category_name: 税・コスト
   subsection: null
   definition: 日本株20.315% / 米国株の二重課税と外国税額控除の見込み
-  formula: null
-  inputs: null
+  formula: 配当 × 実効税率（日本株20.315% / 米国株は S10）
+  inputs:
+  - A11
+  - S04
+  - S10
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -1031,24 +1195,31 @@
   - CALC
   evidence_stars: null
   prior_scale: null
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: POINT
+  period_convention: TTM
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 無配企業ではゼロ。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - A10
+  - A11
+  - R13
+  - S04
+  - S10
+  economic_rationale: '**配当は受け取るたびに課税されるので、税繰延ができない。** 同じトータルリターンなら、**キャピタルゲインの方が税効率が良い** （売るまで課税されない）。したがって A10/A11（配当・総還元利回り）を 加点する際は、税引後で評価しないと過大評価になる。 **NISA ではこの差が消える**ので、S04 との交互作用が本質。'
+  references:
+  - 所得税法（配当所得）
+  - 日米租税条約
   notes: 高配当米国株 × NISA は最悪の組み合わせ（NISAでは外国税額控除が使えない）
   notes_extra: null
   provenance:
@@ -1062,21 +1233,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S17
   name_ja: 特定口座の源泉徴収区分
@@ -1084,8 +1258,9 @@
   category_name: 税・コスト
   subsection: null
   definition: あり / なし
-  formula: null
-  inputs: null
+  formula: 特定口座の源泉徴収の有無
+  inputs:
+  - SELF_account_type
   sign: context
   buy_class: none
   sell_class: useful
@@ -1098,24 +1273,28 @@
   - SELF
   evidence_stars: null
   prior_scale: null
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: na（分類）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 日本固有。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - S04
+  - S07
+  - S09
+  economic_rationale: 源泉徴収ありなら確定申告不要だが、**繰越控除（S09）を使うには申告が必要。** また申告すると合計所得金額が増え、**国民健康保険料や配偶者控除に波及する** ことがある。**税率だけでなく社会保険料まで含めた実効負担で判断すべき**という、 見落としやすい論点。
+  references:
+  - 所得税法（特定口座源泉徴収選択）
+  - 国民健康保険法
   notes: 確定申告の要否と、国民健康保険料への波及
   notes_extra: null
   provenance:
@@ -1129,21 +1308,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S18
   name_ja: 為替の実現損益
@@ -1151,8 +1333,11 @@
   category_name: 税・コスト
   subsection: null
   definition: 米国株の円換算損益のうち為替要因
-  formula: null
-  inputs: null
+  formula: 米国株の円換算損益 - ドル建て損益の円換算
+  inputs:
+  - PRICE
+  - fx_rate
+  - SELF_cost
   sign: context
   buy_class: none
   sell_class: useful
@@ -1165,24 +1350,29 @@
   - CALC
   evidence_stars: null
   prior_scale: null
-  evidence_tier: null
+  evidence_tier: T3
   markets:
-  - JP
   - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（差分）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 米国株のみ。取得時の為替レートを記録していないと計算できない。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P07
+  - P08
+  - S11
+  - Q07
+  - Q15
+  economic_rationale: '**株価が下がっても円安で益が出ることがある。** そして **日本の税制では円換算後の損益に課税される**ので、 ドル建てで損していても課税されることがある。 S03（譲渡益税）の計算に必須で、Q07（為替エクスポージャー）の 実現側でもある。'
+  references:
+  - 所得税法（外貨建取引の換算）
   notes: 株価が下がっても円安で益が出ることがある。税計算に必須
   notes_extra: null
   provenance:
@@ -1196,21 +1386,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: S19
   name_ja: 貸株サービスの収益
@@ -1218,8 +1411,9 @@
   category_name: 税・コスト
   subsection: null
   definition: 貸株金利収入 / 保有額
-  formula: null
-  inputs: null
+  formula: 貸株金利収入 / 保有評価額
+  inputs:
+  - SELF_lending_income
   sign: positive
   buy_class: aux
   sell_class: aux
@@ -1232,7 +1426,7 @@
   - SELF
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1241,15 +1435,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 保有評価額>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 貸株サービスを利用している場合のみ。NISA では利用できない証券会社が多い。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K21
+  - K38
+  - K19
+  - S16
+  - S04
+  economic_rationale: '**長期保有の副収入。** 空売り需要の強い銘柄（K19/K38）ほど金利が高い。 ただし**配当が「配当金相当額」になり、配当控除が使えず雑所得扱いになる**ので、 税制上は不利になることがある。**高配当株では貸株しない方が有利。** さらに貸株中は株主優待（F12）も受けられない。'
+  references:
+  - 構造的判断。証券会社の貸株サービス規約と税務上の取扱い
   notes: 長期保有の副収入。ただし配当が「配当金相当額」となり課税上不利になる点に注意
   notes_extra: null
   provenance:
@@ -1263,19 +1463,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1

@@ -12,8 +12,10 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: 現値 / 平均取得単価 - 1
-  formula: null
-  inputs: null
+  formula: PRICE / avg_cost - 1
+  inputs:
+  - PRICE
+  - SELF_avg_cost
   sign: context
   buy_class: none
   sell_class: main
@@ -26,7 +28,7 @@
   - SELF
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -35,15 +37,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 取得単価>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 保有銘柄のみ。日本は総平均法なので取得単価は一意。米国はロット指定が可能（R12）。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - R05
+  - R09
+  - R13
+  - S03
+  - S08
+  economic_rationale: '**これを単独で売り理由にしてはいけない（処分効果 LAW-94）。** Barber-Odean が示した通り、個人は勝ちを早く売り負けを持ち続ける。 含み損益は**税（S03）とテーゼ健在度（R07）との交互作用でのみ**使う。 §2 の設計で「売りスコアの主項は水準ではなく劣化量」としたのは、この罠を避けるため。'
+  references:
+  - https://faculty.haas.berkeley.edu/odean/papers%20current%20versions/individual_investor_performance_final.pdf
+  - Odean (1998) 処分効果
   notes: これを単独で売り理由にしてはいけない（処分効果）。R05・R06 との交互作用でのみ使う
   notes_extra: null
   provenance:
@@ -57,21 +66,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R02
   name_ja: 保有日数
@@ -79,8 +91,9 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: 建玉からの経過営業日
-  formula: null
-  inputs: null
+  formula: 現在日 - 建玉日（営業日）
+  inputs:
+  - SELF_entry_date
   sign: context
   buy_class: none
   sell_class: useful
@@ -93,7 +106,7 @@
   - SELF
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -102,15 +115,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（日数）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '保有銘柄のみ。複数回買い増した場合の起点をどこにするかを決める必要がある（暫定: 初回建玉日）。'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - R03
+  - R04
+  - R19
+  - S13
+  - N45
+  economic_rationale: 短期売買を抑制する項。**日本の税制では保有期間による優遇が無い**ので、 米国の長短キャピタルゲイン区分のような直接的な理由は存在しない。 それでも保有日数を持つのは、S13（保有期間で割った年率コスト）と R03（想定保有期間の消化率）の入力になるため。
+  references:
+  - 構造的判断
   notes: 短期の売買を抑制する項として。日本の税制上、期間による優遇はない
   notes_extra: null
   provenance:
@@ -124,21 +143,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R03
   name_ja: 想定保有期間の消化率
@@ -146,8 +168,10 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: 保有日数 / h*(i, t_entry)
-  formula: null
-  inputs: null
+  formula: R02 / h*(建玉時)
+  inputs:
+  - R02
+  - h_star_entry
   sign: positive
   buy_class: none
   sell_class: main
@@ -160,7 +184,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -169,15 +193,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: h* がゼロなら建玉していないはず。欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: h* を記録していないポジションでは計算できない。**建玉時に必ず記録する運用が前提。**
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - R02
+  - R04
+  - R18
+  - R19
+  - N45
+  economic_rationale: '**§1.5（保有期間の最適化）の核心。** 1 を超えても h* が再び伸びていれば売らない。 「予定より長く持っている」こと自体は売り理由にならず、 **h* が縮んでいる（R04）ことが売り理由になる。**'
+  references:
+  - 構造的判断。catalog §1.5 の設計
   notes: §1.5 の核心。1を超えても h* が再び伸びていれば売らない
   notes_extra: null
   provenance:
@@ -191,21 +221,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R04
   name_ja: 残存 h* の変化
@@ -213,8 +246,9 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: h*(i,t) - h*(i,t-1)
-  formula: null
-  inputs: null
+  formula: h*(t) - h*(t-1)
+  inputs:
+  - h_star
   sign: negative
   buy_class: none
   sell_class: main
@@ -227,7 +261,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -236,15 +270,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（差分）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: h* の再計算を毎回行っていないと欠損。**運用の規律に依存する。**
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - R03
+  - R05
+  - R06
+  - R18
+  - R19
+  economic_rationale: '**縮み続けているなら物語が終わりつつある。** h* は期待効用が最大になる期間なので、 それが縮むということは「この先の期待リターンが減った」ことを意味する。 R05（スコア劣化）が原因を測るのに対し、R04 は結果を測る。'
+  references:
+  - 構造的判断。catalog §1.5
   notes: 縮み続けているなら物語が終わりつつある
   notes_extra: null
   provenance:
@@ -258,21 +298,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R05
   name_ja: 買いスコアの劣化量
@@ -280,8 +323,9 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: S_buy(i, t_entry) - S_buy(i, t)
-  formula: null
-  inputs: null
+  formula: S_buy(建玉時) - S_buy(t)
+  inputs:
+  - S_buy
   sign: positive
   buy_class: none
   sell_class: main
@@ -294,7 +338,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -303,15 +347,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（差分）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 建玉時のスコアを記録していないと計算できない。**監査ログの必須項目。**
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - R06
+  - R17
+  - R07
+  - R11
+  - R16
+  economic_rationale: '**売りスコアの主項。水準ではなく劣化量を使う。** 水準で売ると「買った時から常に上位10%だった超優良株」を長く持てず、 長期複利が成立しない（§2）。**263AT の売り設計で最も重要な一点。**'
+  references:
+  - 構造的判断。catalog §2 の設計
   notes: 売りスコアの主項。水準ではなく変化を使う理由は §2 参照
   notes_extra: null
   provenance:
@@ -325,21 +375,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R06
   name_ja: 買いスコアの劣化速度
@@ -347,8 +400,9 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: d/dt S_buy（3ヶ月移動）
-  formula: null
-  inputs: null
+  formula: slope( S_buy, 過去3ヶ月 )
+  inputs:
+  - S_buy
   sign: positive
   buy_class: none
   sell_class: main
@@ -361,7 +415,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -370,15 +424,19 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 3ヶ月分のスコア履歴が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: R05 と同じ。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - R04
+  - R05
+  - R17
+  economic_rationale: '**急激な劣化は緩やかな劣化より危険。** 同じ劣化量でも、 3ヶ月で落ちたのか3年かけて落ちたのかで意味が違う。 急落は新情報の到着を示唆するので、テーゼ検証（R07）を起動するトリガーにする。'
+  references:
+  - 構造的判断
   notes: 急激な劣化は緩やかな劣化より危険
   notes_extra: null
   provenance:
@@ -392,21 +450,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R07
   name_ja: テーゼ健在度
@@ -414,8 +475,11 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: LLMによる 0-1 判定（T25 と同一）
-  formula: null
-  inputs: null
+  formula: T25（テーゼ健在度）と同一。LLM が 0-1 で判定
+  inputs:
+  - T23
+  - T25
+  - LLM
   sign: negative
   buy_class: none
   sell_class: main
@@ -428,7 +492,7 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -437,15 +501,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（スコア）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**T23（テーゼ）を建玉時に記録していないと判定不能。** しかも LLM 依存なので過去に遡れない（§6.4）。**forward_log で記録し始めた対象。**'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - T23
+  - T24
+  - T25
+  - R05
+  - R16
+  - R18
+  economic_rationale: '**これが 0 に落ちたら、含み損益に関係なく売る。最も重要な売り条件。** R01（含み損益）を単独で使わないための代替であり、 「なぜ買ったか」を記録していないと「なぜ売るか」も判断できない、という 運用規律の中核。T24（反証条件）を建玉時に定めておくことで、 後知恵での言い訳を防ぐ。'
+  references:
+  - 構造的判断。catalog §2 / §6.6。LLM 由来のため前向き記録が必要
   notes: これが 0 に落ちたら、含み損益に関係なく売る。最も重要な売り条件
   notes_extra: null
   provenance:
@@ -459,21 +530,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R08
   name_ja: 目標株価到達度
@@ -481,8 +555,10 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: 現値 / 買付時の想定目標価格
-  formula: null
-  inputs: null
+  formula: PRICE / 建玉時の想定目標価格
+  inputs:
+  - PRICE
+  - SELF_target_price
   sign: positive
   buy_class: none
   sell_class: main
@@ -495,7 +571,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -504,15 +580,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 目標価格>0。設定していなければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 目標価格を設定する運用をしていないと欠損。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - A26
+  - A27
+  - A28
+  - R05
+  - R11
+  economic_rationale: '**到達しても即売りではない。** 目標株価自体が更新されうる（企業が成長すれば 内在価値も上がる）。到達は「再評価のトリガー」であって「売却の指示」ではない。 ここを機械的に売ると、**利を伸ばせず勝ちを小さくする**（LAW-71 の逆）。'
+  references:
+  - 構造的判断
   notes: 到達しても即売りではない。目標株価自体が更新されうることに注意
   notes_extra: null
   provenance:
@@ -526,21 +608,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R09
   name_ja: 高値からの下落率（トレーリング）
@@ -548,8 +633,10 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: 現値 / max(保有中の高値) - 1
-  formula: null
-  inputs: null
+  formula: PRICE / max(PRICE, 保有期間中) - 1
+  inputs:
+  - PRICE
+  - SELF_entry_date
   sign: negative
   buy_class: none
   sell_class: useful
@@ -562,7 +649,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -571,15 +658,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 保有期間の最高値>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 保有銘柄のみ。日中高値を使うか終値を使うかで値が変わる（終値に統一）。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - R01
+  - R17
+  - I11
+  - I12
+  - G09
+  economic_rationale: トレーリングストップの入力。**ただし mean reversion 型の銘柄では逆効果** （H01 長期リバーサルを狙う銘柄で高値から落ちたら売るのは矛盾）。 **銘柄タイプで切り替える必要がある。** §1.6 で rho が高いほどストップを 広げるとしたのは、この矛盾を緩和するため。
+  references:
+  - https://arxiv.org/pdf/1701.03960
+  - https://www.quant-investing.com/blog/stop-loss-strategies-complete-guide
   notes: トレーリングストップの入力。mean reversion 型の銘柄では逆効果なので銘柄タイプで切り替える
   notes_extra: null
   provenance:
@@ -593,21 +687,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R10
   name_ja: ポジションサイズ乖離
@@ -615,8 +712,10 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: w_actual(i) - w_target(i)
-  formula: null
-  inputs: null
+  formula: w_actual(i) - w_target(i)
+  inputs:
+  - SELF_positions
+  - w_target
   sign: positive
   buy_class: none
   sell_class: main
@@ -629,7 +728,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -638,15 +737,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（差分）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 目標ウェイトを計算していないと欠損。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Q04
+  - Q05
+  - Q12
+  - Q14
+  - R11
+  economic_rationale: '**「利を伸ばす」と「リスク管理」の折衷点。** 上がって膨らんだポジションを 全部売るのではなく、超過分だけ利確する。 §1.8 の非対称ペイオフ（勝ちを伸ばす）と §1.6 の w_max（1銘柄上限）が 衝突する箇所であり、**どちらを優先するかは rho で決める。**'
+  references:
+  - 構造的判断。catalog §1.6 / §1.8
   notes: 上がって膨らんだ分の一部利確。これが「利を伸ばす」と「リスク管理」の折衷点
   notes_extra: null
   provenance:
@@ -660,21 +765,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R11
   name_ja: 機会費用
@@ -682,8 +790,10 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: max_j S_buy(j,t) - S_buy(i,t)（j は未保有）
-  formula: null
-  inputs: null
+  formula: max_j( S_buy(j) ) - S_buy(i)、j は未保有かつ Gate=1 の銘柄
+  inputs:
+  - S_buy
+  - SELF_positions
   sign: positive
   buy_class: none
   sell_class: main
@@ -696,7 +806,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -705,15 +815,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（差分）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 全ユニバースのスコアが要る。Z10 が低い時期は比較対象が減る。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - R05
+  - R22
+  - A41
+  - Q09
+  - S12
+  - S13
+  economic_rationale: '**買いスコアには存在しない比較項（§2 の非対称性7）。** 売りは「この銘柄が悪い」だけでなく「もっと良い銘柄がある」でも起きる。 ただし**乗り換えには往復コストと税（S03/S12）がかかる**ので、 スコア差がそれを上回らなければ動かない。**この閾値が回転率を決める**ので、 OQ-24 の実測（月0.25%のコストで壊滅）を踏まえて保守的に設定する。'
+  references:
+  - 構造的判断。catalog §2 / research/findings §7
   notes: 乗り換え判断。取引コスト・税を差し引いてなお有利かで判定
   notes_extra: null
   provenance:
@@ -727,21 +844,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R12
   name_ja: ロット別損益
@@ -749,8 +869,9 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: 複数回買った場合の各ロットの取得単価と損益
-  formula: null
-  inputs: null
+  formula: 各ロットの取得単価と含み損益（米国のみ）
+  inputs:
+  - SELF_lots
   sign: context
   buy_class: none
   sell_class: useful
@@ -763,24 +884,30 @@
   - SELF
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
-  - JP
   - US
   industries: null
   period_convention: POINT
   consolidation: na
-  accounting_standard_note: na
+  accounting_standard_note: '**日本は総平均法が強制されるのでロット選択の余地が無い。** 米国は specific identification が使えるので、税務上有利なロットを選べる。 **制度差がそのまま使える/使えないを分ける。**'
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 日本では常に欠損（制度上存在しない）。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - R01
+  - R13
+  - S03
+  - S08
+  - S09
+  economic_rationale: 米国では**同じ銘柄でも売るロットを選ぶことで税負担が変わる。** 損失の出ているロットを先に売れば S08（損出し）になり、 利益の出ているロットを残せば課税を繰り延べられる。 日本ではこの最適化ができないので、**S04（NISA/特定口座の使い分け）が代替手段になる。**
+  references:
+  - '米国: IRS Publication 550（specific identification）'
+  - '日本: 所得税法施行令 第118条（総平均法）'
   notes: 日本は総平均法なのでロット選択の余地がない。米国株では特定ロット指定が可能
   notes_extra: null
   provenance:
@@ -794,21 +921,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R13
   name_ja: 保有中の累計配当
@@ -816,8 +946,10 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: 受取配当の累計 / 取得額
-  formula: null
-  inputs: null
+  formula: 受取配当の累計 / 取得額
+  inputs:
+  - SELF_dividends
+  - SELF_cost
   sign: positive
   buy_class: none
   sell_class: aux
@@ -830,7 +962,7 @@
   - SELF
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -839,15 +971,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 取得額>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 保有銘柄のみ。税引前で持つか税引後で持つかを決める（税引後に統一。S16 参照）。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - R01
+  - A10
+  - A11
+  - S16
+  - S03
+  economic_rationale: '**実質的な取得単価の低下。** R01（含み損益）だけを見ると、 高配当株のトータルリターンを過小評価する。 5年保有で配当利回り4%なら20%が戻っている計算で、これは無視できない。 **売り判定はトータルリターンで行うべき**なので、R01 + R13 を合成した 指標を持つべき（未定義。次の改訂候補）。'
+  references:
+  - 構造的判断
   notes: 実質的な取得単価の低下。トータルリターンでの判定に必要
   notes_extra: null
   provenance:
@@ -861,21 +999,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R14
   name_ja: 買い増し可否フラグ
@@ -883,8 +1024,11 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: 1[テーゼ健在] × 1[S_buy 上昇中] × 1[w < w_max]
-  formula: null
-  inputs: null
+  formula: 1[R07 テーゼ健在] × 1[R06 スコア上昇中] × 1[w < w_max]
+  inputs:
+  - R07
+  - R06
+  - R10
   sign: positive
   buy_class: none
   sell_class: none
@@ -897,7 +1041,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -906,15 +1050,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール積）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: R07（LLM 依存）の欠損を継承。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - R06
+  - R07
+  - R10
+  - R20
+  - R05
+  economic_rationale: '**LAW-75（ナンピンは破滅の道）を構造で強制する。** 株価が下がったことだけを理由にした買い増しを禁止し、 **テーゼが健在で、かつスコアが上昇している場合にのみ**許可する。 「安くなったから買い増す」は、間違ったテーゼへの投入額を増やす行為であり、 §1.8 の非対称ペイオフ（損は切る、勝ちを伸ばす）と正反対。'
+  references:
+  - 構造的判断。catalog LAW-75
   notes: LAW-75。株価下落だけを理由にした買い増しを構造的に禁止する
   notes_extra: null
   provenance:
@@ -928,21 +1078,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R15
   name_ja: 保有中の再評価回数
@@ -950,8 +1103,9 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: このポジションを何回評価したか
-  formula: null
-  inputs: null
+  formula: このポジションを評価した回数
+  inputs:
+  - SELF_evaluation_log
   sign: context
   buy_class: none
   sell_class: aux
@@ -964,7 +1118,7 @@
   - SELF
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -973,15 +1127,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（カウント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 評価ログを残していないと計算できない。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - R02
+  - R23
+  - R21
+  economic_rationale: '**評価頻度そのものが設計変数。** §2 の非対称性5 の通り、 「売るか」は保有中毎日問われ続けるので、毎日評価するとノイズで売ってしまう。 LAW-90（売買しすぎ）の構造的な原因がここにある。 **記録することで「見すぎていないか」を自己監視する。**'
+  references:
+  - https://faculty.haas.berkeley.edu/odean/papers%20current%20versions/individual_investor_performance_final.pdf
+  - LAW-90 売買しすぎ
   notes: 評価頻度そのものを設計変数にする（頻繁に見ると売りたくなる）。ログとして必須
   notes_extra: null
   provenance:
@@ -995,21 +1154,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R16
   name_ja: エントリー時の想定と実績の乖離
@@ -1017,8 +1179,11 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: 想定した業績 vs 実際の業績
-  formula: null
-  inputs: null
+  formula: 建玉時に想定した業績 vs 実際の業績の乖離率
+  inputs:
+  - T23
+  - SELF_entry_assumptions
+  - actual_results
   sign: negative
   buy_class: none
   sell_class: main
@@ -1032,24 +1197,30 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: 比較対象の業績指標を建玉時に明示していないと計算できない。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 想定値がゼロなら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: T23（テーゼ）に定量的な想定を書いていないと欠損。**運用規律に依存。**
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - R05
+  - R07
+  - T23
+  - T24
+  - N18
+  economic_rationale: '**T23 のテーゼを定量的に検証する。** T25（LLM によるテーゼ健在度）が 定性判断なのに対し、R16 は数字で検証する。両者が食い違ったら **数字を信じる**（catalog §8-5 の「物語への過剰適合」対策）。'
+  references:
+  - 構造的判断
   notes: T23 のテーゼを定量的に検証する
   notes_extra: null
   provenance:
@@ -1063,21 +1234,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R17
   name_ja: 保有中の最高スコアからの低下
@@ -1085,8 +1259,9 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: max(S_buy, 保有期間中) - S_buy(t)
-  formula: null
-  inputs: null
+  formula: max(S_buy, 保有期間中) - S_buy(t)
+  inputs:
+  - S_buy
   sign: positive
   buy_class: none
   sell_class: main
@@ -1099,7 +1274,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1108,15 +1283,19 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（差分）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: R05 と同じ。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - R05
+  - R06
+  - R09
+  economic_rationale: '**R05（エントリー比）とは別。買った後に一度良くなってから悪化した場合を捉える。** エントリー時のスコアが低くても、その後改善してから劣化したなら、 R05 では検出できない。R09（保有中高値からの下落）の スコア版で、価格ではなくファンダメンタルで見る。'
+  references:
+  - 構造的判断
   notes: R05（エントリー比）とは別。買った後に良くなってから悪化した場合を捉える
   notes_extra: null
   provenance:
@@ -1130,21 +1309,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R18
   name_ja: 想定カタリストの発生
@@ -1152,8 +1334,11 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: エントリー時に想定したカタリストが起きたか
-  formula: null
-  inputs: null
+  formula: 1 if 建玉時に想定したカタリストが発生した else 0
+  inputs:
+  - T23
+  - N45
+  - LLM
   sign: positive
   buy_class: none
   sell_class: main
@@ -1166,7 +1351,7 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1175,15 +1360,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: T23 に想定カタリストを書いていないと判定不能。LLM 依存で過去に遡れない。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N45
+  - R03
+  - R19
+  - T23
+  - T30
+  economic_rationale: '**起きたなら利確を検討、起きないなら R19 で期限管理。** LAW-73（噂で買って事実で売る）の実装で、T30（織り込み度）と組み合わせて 「もう織り込まれたか」を判定する。カタリスト投資の出口設計そのもの。'
+  references:
+  - 構造的判断。catalog LAW-73
   notes: N45 と対。起きたなら利確検討、起きないなら R19 で期限管理
   notes_extra: null
   provenance:
@@ -1197,21 +1388,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R19
   name_ja: 想定カタリストの期限超過
@@ -1219,8 +1413,10 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: 想定時期を過ぎても起きていない日数
-  formula: null
-  inputs: null
+  formula: 現在日 - 建玉時に想定したカタリスト発生予定日（正なら超過）
+  inputs:
+  - N45
+  - SELF_entry_date
   sign: positive
   buy_class: none
   sell_class: main
@@ -1233,7 +1429,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1242,15 +1438,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（日数）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: N45（LLM の期間推定）に依存。**その推定が較正されていない**（T44 待ち）。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N45
+  - R03
+  - R04
+  - R11
+  - R18
+  economic_rationale: '**「いつまでも起きないカタリスト」が最も資本効率を毀損する。** 含み損も含み益も出ないまま資金が拘束され、その間の機会費用（R11）が積み上がる。 バリュートラップの本質は「安いまま」であって「下がる」ことではない。 **時間切れという明示的な売り理由を持つことで、塩漬けを構造的に防ぐ。**'
+  references:
+  - 構造的判断
   notes: 「いつまでも起きないカタリスト」が最も資本効率を毀損する。機会費用の主要因
   notes_extra: null
   provenance:
@@ -1264,21 +1466,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R20
   name_ja: 買い増し時の取得単価変化
@@ -1286,8 +1491,11 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: ナンピンした場合の平均取得単価の変化
-  formula: null
-  inputs: null
+  formula: 買い増した場合の新しい平均取得単価 / 現在の平均取得単価 - 1
+  inputs:
+  - R01
+  - SELF_avg_cost
+  - PRICE
   sign: context
   buy_class: none
   sell_class: none
@@ -1300,24 +1508,28 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: POINT
   consolidation: na
-  accounting_standard_note: na
+  accounting_standard_note: 日本は総平均法なので計算が一意。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 取得単価>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 保有銘柄のみ。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - R01
+  - R14
+  - R10
+  economic_rationale: '**単独で買い増し理由にしてはいけない。** 「取得単価が下がる」ことに 経済的な意味は無い（サンクコストの錯覚）。R14（買い増し可否）の 判断材料として持つだけで、**スコアには一切寄与させない**（buy/sell とも ✕）。 この変数を置いている理由は、**置かないと人が頭の中で計算してしまうから。**'
+  references:
+  - 構造的判断。LAW-75 の補助
   notes: R14 の判断材料。単独で買い増し理由にしてはいけない
   notes_extra: null
   provenance:
@@ -1331,21 +1543,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R21
   name_ja: 実現ボラ vs 想定ボラ
@@ -1353,8 +1568,10 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: 保有中に経験したボラ / エントリー時の想定
-  formula: null
-  inputs: null
+  formula: 保有期間中の実現ボラティリティ / 建玉時の想定ボラティリティ
+  inputs:
+  - PRICE
+  - I03
   sign: context
   buy_class: none
   sell_class: useful
@@ -1367,7 +1584,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1376,15 +1593,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 想定ボラがゼロなら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 建玉時の想定ボラを記録していないと計算できない。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - I01
+  - I03
+  - I23
+  - R15
+  economic_rationale: '**サイジング前提の事後検証。** Kelly の分母（I03）が実際より小さければ、 ポジションを過大に取っていたことになる。1.5 を超える状態が続くなら ボラ予測モデルが壊れているので、**サイジング全体を見直す必要がある。** 個別銘柄の売り判定というより、システムの健全性の指標。'
+  references:
+  - 構造的判断。catalog §1.6
   notes: サイジング前提の事後検証
   notes_extra: null
   provenance:
@@ -1398,21 +1620,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R22
   name_ja: 同一テーマ内での相対劣後
@@ -1420,8 +1645,11 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: 同テーマ保有銘柄内での買いスコア順位
-  formula: null
-  inputs: null
+  formula: 同一テーマ内の保有銘柄における S_buy の順位
+  inputs:
+  - S_buy
+  - Q06
+  - SELF_positions
   sign: positive
   buy_class: none
   sell_class: main
@@ -1434,7 +1662,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1443,15 +1671,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 同テーマの保有が2未満なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: Q06（LLM によるテーマ判定）に依存。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Q06
+  - Q01
+  - R11
+  - A41
+  economic_rationale: '**R11（全体の機会費用）のテーマ内版。** 同じテーマに複数持っているなら、 最も劣る1本を売って他に寄せる方が効率的。テーマ分散を保ちながら 銘柄選択を改善できるので、**Q06（テーマ重複）の是正と同時に達成できる。**'
+  references:
+  - 構造的判断
   notes: R11 のテーマ内版。乗り換え判断
   notes_extra: null
   provenance:
@@ -1465,21 +1698,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: R23
   name_ja: テーゼ記録の陳腐化
@@ -1487,8 +1723,10 @@
   category_name: 保有状態依存（売り専用）
   subsection: null
   definition: テーゼの最終更新からの経過日数
-  formula: null
-  inputs: null
+  formula: 現在日 - テーゼ記録の最終更新日
+  inputs:
+  - T23
+  - SELF_thesis_log
   sign: positive
   buy_class: none
   sell_class: useful
@@ -1501,7 +1739,7 @@
   - SELF
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1510,15 +1748,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（日数）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: テーゼを記録・更新する運用をしていないと意味を持たない。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - R07
+  - R15
+  - R16
+  - T23
+  - T25
+  economic_rationale: '**運用規律の指標。** 古い記録のまま判断していないかを監視する。 テーゼが1年更新されていないなら、それは「変わっていない」のではなく 「見ていない」可能性が高い。**プロセスの品質をパラメータとして持つ**という点で Z カテゴリに近い性格。'
+  references:
+  - 構造的判断
   notes: 運用規律の指標。古い記録のまま判断していないか
   notes_extra: null
   provenance:
@@ -1532,19 +1776,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1

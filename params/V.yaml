@@ -12,8 +12,9 @@
   category_name: セグメント・事業構成
   subsection: null
   definition: 開示セグメントの数
-  formula: null
-  inputs: null
+  formula: 開示セグメントの数
+  inputs:
+  - segment_disclosure
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -26,24 +27,31 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**マネジメント・アプローチ（IFRS8 / ASC280）なので、企業が経営管理上どう区分しているかで決まる。** 同業でも粒度が全く違う。セグメント変更は頻繁で、前年比が壊れる（V06 で検出）。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（カウント）。単一セグメント企業は1。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: セグメント開示が免除される小規模企業で欠損。
   normalization: rank_sector
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - V02
+  - V03
+  - V06
+  - A36
+  - L08
+  economic_rationale: ∩型。1つだと事業リスクが集中し（I25）、多すぎるとコングロマリット・ディスカウントが生じる。 **A36（SOTP）と L08（コングロマリット・リターン）の適用可否を決める前提条件**でもある。
+  references:
+  - IFRS 8 / ASC 280（セグメント情報）
+  - 構造的判断
   notes: 多すぎるとコングロマリット・ディスカウント
   notes_extra: null
   provenance:
@@ -57,24 +65,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    zero_denominator_policy: default
+    nonlinear: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: V02
   name_ja: 最大セグメントの構成比
@@ -82,8 +91,10 @@
   category_name: セグメント・事業構成
   subsection: null
   definition: 最大セグメント売上 / 総売上
-  formula: null
-  inputs: null
+  formula: 最大セグメントの売上 / 総売上
+  inputs:
+  - segment_revenue
+  - REV
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -96,24 +107,30 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: V01 を継承。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: REV>0。単一セグメントなら1.0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: V01 と同じ。
   normalization: rank_sector
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - V01
+  - V03
+  - I25
+  - T18
+  - N41
+  economic_rationale: ∩型。集中は分かりやすさと経営資源の集中という利点があるが、 **一本足リスク**（I25）でもある。1.0（単一事業）と 0.3（4事業均等）のどちらが良いかは 業種と成長段階で違うので、業種内中央値を暫定 x* とする。
+  references:
+  - 構造的判断
   notes: 集中は分かりやすいが一本足リスク（I25）
   notes_extra: null
   provenance:
@@ -127,24 +144,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
+    nonlinear: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: V03
   name_ja: セグメント別ROICの分散
@@ -152,8 +170,10 @@
   category_name: セグメント・事業構成
   subsection: null
   definition: 最高 ROIC セグメントと最低の差
-  formula: null
-  inputs: null
+  formula: max(セグメント別ROIC) - min(セグメント別ROIC)
+  inputs:
+  - segment_profit
+  - segment_assets
   sign: positive
   buy_class: main
   sell_class: useful
@@ -166,24 +186,31 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: '**セグメント資産を開示しない企業がある**（IFRS8 では経営者に報告されている場合のみ義務）。 その場合セグメント別 ROIC が計算できず、利益率で代替するしかない。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: セグメント資産がゼロ・未開示なら欠損。セグメントが2未満なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: セグメント資産の開示企業に偏る。日本の中小型では開示が薄い。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B38
+  - V04
+  - V05
+  - V09
+  - V10
+  - A36
+  economic_rationale: '**再編余地の大きさ。** 差が大きいほど、低収益事業を切り離したときの 全社 ROIC の改善幅が大きい。A36（SOTP）で価値を測り、V03 で改善余地を測る。 M10（アクティビスト標的スコア）の構成要素にすべき候補。'
+  references:
+  - 構造的判断。SOTP 分析の実務手法
   notes: 再編余地の大きさ。B38 と同一概念
   notes_extra: null
   provenance:
@@ -197,22 +224,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: V04
   name_ja: 価値破壊セグメントの構成比
@@ -220,8 +249,12 @@
   category_name: セグメント・事業構成
   subsection: null
   definition: ROIC < WACC のセグメントの売上 / 総売上
-  formula: null
-  inputs: null
+  formula: SUM(ROIC < WACC のセグメントの売上) / REV
+  inputs:
+  - V03
+  - B04
+  - segment_revenue
+  - REV
   sign: negative
   buy_class: main
   sell_class: main
@@ -234,24 +267,33 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: V03 と B04 を継承。WACC は全社共通を使うか事業別に推定するかで結果が変わる。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: REV>0。セグメント別 ROIC が計算できなければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: V03 と同じ。WACC の事業別推定は実務上ほぼ不可能なので全社共通で代用する。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - V03
+  - V05
+  - V10
+  - B04
+  - A36
+  - M10
+  - N15
+  economic_rationale: '**切り離せば価値が上がる部分の大きさ。** アクティビストが最初に指摘する箇所で、 東証の資本コスト要請（LAW-47）が名指ししている領域でもある。 N15（事業売却・スピンオフ）の事前予測になる。 **日本の多角化企業で最も実際的な改善余地がある変数。**'
+  references:
+  - https://www.jpx.co.jp/english/equities/follow-up/02.html
+  - 構造的判断。この形での断面実証は未確認
   notes: 切り離せば価値が上がる部分。アクティビストの標的になる（M10）
   notes_extra: null
   provenance:
@@ -265,22 +307,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: V05
   name_ja: 高収益セグメントの成長率
@@ -288,8 +332,10 @@
   category_name: セグメント・事業構成
   subsection: null
   definition: 最高 ROIC セグメントの売上成長
-  formula: null
-  inputs: null
+  formula: 最高ROICセグメントの売上成長率
+  inputs:
+  - V03
+  - segment_revenue
   sign: positive
   buy_class: main
   sell_class: main
@@ -302,24 +348,31 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: V03 を継承。セグメント変更があると追跡できない。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 前期の当該セグメント売上がゼロなら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: V03 と同じ。セグメント再編で「最高ROICセグメント」が入れ替わると系列が壊れる。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - V03
+  - V04
+  - V06
+  - C01
+  - B44
+  - B18
+  economic_rationale: '**ミックス改善による全社利益率の自動改善。** 最も見落とされる成長源で、 全社の売上成長率（C01）が横ばいでも、高収益事業の構成比が上がれば利益は伸びる。 B18（粗利率トレンド）や B44（総資産回転率の変化）に現れる改善の、 **原因側を特定する変数。**'
+  references:
+  - 構造的判断。ミックス改善は実務的に重要だが断面実証は未確認
   notes: ミックス改善による全社利益率の自動改善。最も見落とされる成長源
   notes_extra: null
   provenance:
@@ -333,22 +386,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: V06
   name_ja: セグメント構成の変化速度
@@ -356,8 +411,9 @@
   category_name: セグメント・事業構成
   subsection: null
   definition: 構成比の YoY 変化の絶対値合計
-  formula: null
-  inputs: null
+  formula: SUM|セグメント売上構成比(t) - 構成比(t-1)|
+  inputs:
+  - segment_revenue
   sign: context
   buy_class: useful
   sell_class: useful
@@ -370,24 +426,32 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: '**セグメント区分そのものが変更されると、構成比の比較が無意味になる。** 区分変更を検出して欠損にする必要があるが、機械的な検出は難しい（セグメント名の変更で近似）。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（差分の和）。前期のセグメント構成が取れなければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: セグメント変更を検出できないと、変更年に巨大な値が出る。誤検出が上位に来る。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - V01
+  - V03
+  - V05
+  - V12
+  - C10
+  - C28
+  - N15
+  economic_rationale: 事業ポートフォリオの変化の速さ。大きな変化は M&A（C10/C28）か 事業売却（N15）を伴うので、**イベントの検出器としても機能する。** ただし符号は文脈依存で、良い再編と迷走の区別がつかない。
+  references:
+  - 構造的判断
   notes: 事業ポートフォリオの変化の速さ
   notes_extra: null
   provenance:
@@ -401,22 +465,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: V07
   name_ja: 地域別売上構成
@@ -424,8 +490,9 @@
   category_name: セグメント・事業構成
   subsection: null
   definition: 国内 / 北米 / 欧州 / 中国 / その他
-  formula: null
-  inputs: null
+  formula: 地域別売上構成比（国内 / 北米 / 欧州 / 中国 / その他）
+  inputs:
+  - geographic_revenue
   sign: context
   buy_class: useful
   sell_class: useful
@@ -438,24 +505,32 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**地域区分の粒度が企業ごとに違う。**「アジア」に中国を含める企業と分ける企業があり、 V08（中国エクスポージャー）の精度に直結する。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: REV>0。地域別開示が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 国内専業企業は開示しないので、海外展開企業に偏る。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - V08
+  - C23
+  - P07
+  - P08
+  - U26
+  - Y08
+  economic_rationale: 成長余地（海外市場の大きさ）と地政学リスクの両面。P08（為替感応度）の ファンダメンタル側の説明変数でもあり、**統計推定の P08 と突合して整合性を確認できる。**
+  references:
+  - IFRS 8 / ASC 280（地域別情報）
+  - 構造的判断
   notes: 成長余地と地政学リスクの両面
   notes_extra: null
   provenance:
@@ -469,22 +544,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: V08
   name_ja: 中国エクスポージャー
@@ -492,8 +569,11 @@
   category_name: セグメント・事業構成
   subsection: null
   definition: 中国売上比率 + 中国生産比率
-  formula: null
-  inputs: null
+  formula: 中国向け売上比率 + 中国生産比率
+  inputs:
+  - V07
+  - LLM
+  - facility_locations
   sign: negative
   buy_class: useful
   sell_class: main
@@ -507,24 +587,30 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: V07 の区分粒度の問題を継承。生産比率は開示義務が無く LLM 推定。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: REV>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**生産拠点の中国依存は開示されないことが多い。** サプライヤー経由の間接依存は さらに見えない。**過小評価に強く偏る**ので、リスク管理上は保守的に扱うべき。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - V07
+  - Y08
+  - T19
+  - N38
+  - P09
+  economic_rationale: '**2026年時点で最大の地政学リスク要因。** 5年ホライズンでは 台湾情勢・輸出規制・サプライチェーン再編のいずれかが顕在化する確率が無視できない。 Y08（人権リスク）と T19（サプライチェーンリスク）と重なるが、 **単一国への集中という定量化しやすい形で持つ価値がある。**'
+  references:
+  - 構造的判断。地政学リスクの定量化は困難で、実証は存在しない
   notes: 2026年時点で最大の地政学リスク要因。5年ホライズンでは必須
   notes_extra: null
   provenance:
@@ -538,22 +624,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: V09
   name_ja: セグメント別資産効率
@@ -561,8 +649,10 @@
   category_name: セグメント・事業構成
   subsection: null
   definition: セグメント資産 / セグメント売上
-  formula: null
-  inputs: null
+  formula: セグメント資産 / セグメント売上
+  inputs:
+  - segment_assets
+  - segment_revenue
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -575,24 +665,30 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: V03 と同じくセグメント資産の開示が要る。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: セグメント売上がゼロなら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: V03 と同じ。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - V03
+  - V04
+  - B11
+  - B44
+  - C36
+  economic_rationale: '**どこに資本が寝ているか。** 全社の総資産回転率（B11）を事業別に分解した形。 V04（価値破壊セグメント）が利益側から見るのに対し、V09 は資産側から見る。 資産効率の悪いセグメントは、切り離しても全社 ROIC が上がる候補になる。'
+  references:
+  - 構造的判断
   notes: どこに資本が寝ているか
   notes_extra: null
   provenance:
@@ -606,22 +702,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: V10
   name_ja: 本社費配賦後のセグメント利益
@@ -629,8 +727,11 @@
   category_name: セグメント・事業構成
   subsection: null
   definition: 全社費用を配賦した後の各セグメント利益
-  formula: null
-  inputs: null
+  formula: セグメント利益 - 全社費用を売上比で配賦した額
+  inputs:
+  - segment_profit
+  - corporate_expenses
+  - segment_revenue
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -643,24 +744,29 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: '**全社費用（本社費・調整額）の配賦方法は開示されない。** 売上比で按分するのは こちらの仮定であり、実際の因果とは違う可能性がある。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 配賦基準の売上がゼロなら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 全社費用を独立開示しない企業で計算不能。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - V03
+  - V04
+  - V05
+  - V09
+  economic_rationale: '**「本社費控除前は黒字」の罠を避ける。** セグメント利益は全社費用を 配賦する前の数字なので、全部を足しても営業利益にならない。 配賦後で見ないと、**実際には赤字のセグメントを黒字と誤認する。** V04（価値破壊セグメント）の判定精度を上げるための前処理。'
+  references:
+  - 構造的判断
   notes: 「本社費控除前は黒字」の罠を避ける
   notes_extra: null
   provenance:
@@ -674,22 +780,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: V11
   name_ja: 持分法投資の利益貢献
@@ -697,8 +805,10 @@
   category_name: セグメント・事業構成
   subsection: null
   definition: 持分法投資損益 / 経常利益
-  formula: null
-  inputs: null
+  formula: 持分法投資損益 / 経常利益
+  inputs:
+  - equity_method_income
+  - ordinary_income
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -711,24 +821,30 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: TTM
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**日本基準の「経常利益」に相当する概念が IFRS/US GAAP に無い。** IFRS では持分法損益が営業利益の上か下かも企業判断。分母を税引前利益に統一する。'
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 経常利益がゼロ・負なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 持分法適用会社を持たない企業ではゼロ。多い業種（商社・自動車）に偏る。
   normalization: rank_sector
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - V01
+  - B03
+  - A06
+  - C40
+  - E25
+  economic_rationale: ∩型。持分法投資は**連結の外にある利益**なので、比率が高いと 連結財務諸表から実態が見えなくなる。**日本の商社・自動車で特に重要**で、 利益の大半が持分法という企業もある。ROIC（B03）の分母に持分法投資が入るが 分子の NOPAT に持分法損益が入るかは定義次第で、**B03 の定義揺れの主要因の一つ。**
+  references:
+  - 構造的判断
   notes: 高いと連結の実態が見えにくい。日本の商社・自動車で重要
   notes_extra: null
   provenance:
@@ -742,24 +858,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
+    nonlinear: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: V12
   name_ja: 非継続事業の存在
@@ -767,8 +884,9 @@
   category_name: セグメント・事業構成
   subsection: null
   definition: 売却予定・廃止予定事業の有無
-  formula: null
-  inputs: null
+  formula: 1 if 非継続事業（売却予定・廃止予定）の開示あり else 0
+  inputs:
+  - discontinued_operations
   sign: context
   buy_class: useful
   sell_class: useful
@@ -782,24 +900,31 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: TTM
+  period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: null
+  accounting_standard_note: '**IFRS5 / ASC205-20 で非継続事業は損益計算書上で区分表示される。** 日本基準には同等の区分が無く、特別損益に混じる。**日米で見え方が違う。**'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 日本基準企業では検出しにくい。IFRS 適用企業に偏る。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - V06
+  - N15
+  - E06
+  - C10
+  - Z06
+  economic_rationale: '**時系列比較を壊す。** 非継続事業がある年は、売上も利益も継続事業ベースに 組み替えられるので、前年と比較できない。Z06（決算期変更）と同種の 「データが壊れる」フラグとして機能する。 同時に N15（事業売却）の先行指標でもあり、V04 の是正が始まった証拠にもなる。'
+  references:
+  - IFRS 5 / ASC 205-20（非継続事業）
+  - 構造的判断
   notes: 一時的に業績が歪む。時系列比較を壊す（Z06 と同種の注意）
   notes_extra: null
   provenance:
@@ -813,22 +938,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: V13
   name_ja: 業種集中度（売上ベース）
@@ -836,8 +963,10 @@
   category_name: セグメント・事業構成
   subsection: null
   definition: 所属業種の売上 HHI
-  formula: null
-  inputs: null
+  formula: 所属業種内の売上シェアの Herfindahl 指数
+  inputs:
+  - REV
+  - sector_classification
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -856,21 +985,25 @@
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: 上場企業のみで計算するので、非上場の競合が多い業種では過大になる。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 業種内の銘柄数が3未満なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**非上場企業と海外企業が母集団から抜ける。** 日本の内需業種では上場企業だけで 計算しても実態に近いが、グローバル競争のある業種（半導体・自動車）では無意味になる。'
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - V14
+  - V15
+  - B07
+  - T37
+  - T38
+  economic_rationale: OSAP `Herf` t=2.1。**集中した業種は競争が緩く、利益が守られる。** T37（5フォース評価）の「既存競合」を定量化した形で、 LLM の定性判断（T14 堀）と突合できる客観指標。 ただし t=2.1 と弱く、業種分類と母集団の定義に強く依存する。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP Herf — Hou and Robinson 2006, JF（OSAP再現 t=2.1, 月次0.26%, 品質=1_good, 予測力=1_clear）
+  - OSAP Herf t=2.1
   notes: OSAP Herf t=2.1。集中した業種＝競争が緩い＝利益が守られる。T37（5フォース）の定量版
   notes_extra: null
   provenance:
@@ -884,23 +1017,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: V14
   name_ja: 業種集中度（資産ベース）
@@ -908,80 +1042,10 @@
   category_name: セグメント・事業構成
   subsection: null
   definition: 所属業種の資産 HHI
-  formula: null
-  inputs: null
-  sign: positive
-  buy_class: useful
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 1Y-5Y
-    min_m: 12
-    max_m: 60
-  data_sources:
-  - CALC
-  evidence_stars: 2
-  prior_scale: 0.45
-  evidence_tier: T2
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_sector
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP HerfAsset — Hou and Robinson 2006, JF（OSAP再現 t=2.1, 月次0.2%, 品質=1_good, 予測力=2_likely）
-  notes: OSAP HerfAsset t=2.1
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    zero_denominator_policy: default
-    evidence_tier: override
-    references: override
-  review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
-  version: 1
-- id: V15
-  name_ja: 業種集中度（純資産ベース）
-  category: V
-  category_name: セグメント・事業構成
-  subsection: null
-  definition: 所属業種の自己資本 HHI
-  formula: null
-  inputs: null
+  formula: 所属業種内の総資産シェアの Herfindahl 指数
+  inputs:
+  - TA
+  - sector_classification
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1000,21 +1064,98 @@
   - US
   industries: null
   period_convention: TTM
-  consolidation: na
-  accounting_standard_note: null
+  consolidation: consolidated
+  accounting_standard_note: V13 と同じ。
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: V13 と同じ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: V13 と同じ。
   normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - V13
+  - V15
+  economic_rationale: OSAP `HerfAsset` t=2.1。V13 の資産版。**資本集約的な業種では 資産シェアの方が参入障壁を反映する。** V13/V14/V15 は同じ概念の3通りの測り方で 相関が極めて高いはずなので、Z12 でまとまる可能性が高い。
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP HerfBE — Hou and Robinson 2006, JF（OSAP再現 t=2.5, 月次0.24%, 品質=1_good, 予測力=1_clear）
+  - OSAP HerfAsset t=2.1
+  notes: OSAP HerfAsset t=2.1
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    zero_denominator_policy: override
+    evidence_tier: override
+    references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: V15
+  name_ja: 業種集中度（純資産ベース）
+  category: V
+  category_name: セグメント・事業構成
+  subsection: null
+  definition: 所属業種の自己資本 HHI
+  formula: 所属業種内の自己資本シェアの Herfindahl 指数
+  inputs:
+  - EQ
+  - sector_classification
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-5Y
+    min_m: 12
+    max_m: 60
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: V13 と同じ。債務超過企業を含めると歪む。
+  pit_lag_days: 0
+  zero_denominator_policy: V13 と同じ。EQ<0 の企業は母集団から除く。
+  missing_policy: flag
+  missing_bias: V13 と同じ。
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - V13
+  - V14
+  economic_rationale: OSAP `HerfBE` t=2.5。3つの Herfindahl の中では最も強い。 自己資本シェアは**過去の利益蓄積の集中**を反映するので、 売上シェア（V13）より持続的な優位を捉えている可能性がある。
+  references:
+  - https://www.openassetpricing.com/
+  - OSAP HerfBE t=2.5
   notes: OSAP HerfBE t=2.5
   notes_extra: null
   provenance:
@@ -1028,21 +1169,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    zero_denominator_policy: default
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    accounting_standard_note: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q01
-    - q04
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1

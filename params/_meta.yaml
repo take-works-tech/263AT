@@ -9,18 +9,18 @@ generated_from:
 generated_by: tools/build_registry.py
 generated_on: '2026-08-23'
 total_parameters: 770
-verified: 152
-draft: 618
+verified: 277
+draft: 493
 open_questions_by_id:
-  q01: 208
-  q04: 208
-  q05: 227
-  q06: 618
-  q09: 618
-  q10: 618
-  q12: 562
-  q11: 487
-  q08: 50
+  q01: 193
+  q04: 193
+  q05: 195
+  q06: 493
+  q09: 493
+  q10: 493
+  q12: 437
+  q11: 374
+  q08: 39
 categories:
 - letter: A
   name_ja: バリュエーション

@@ -12,8 +12,9 @@
   category_name: ESG・非財務リスク
   subsection: null
   definition: 主要評価機関のスコア
-  formula: null
-  inputs: null
+  formula: 主要評価機関の ESG スコア
+  inputs:
+  - ESG_rating
   sign: context
   buy_class: aux
   sell_class: aux
@@ -26,24 +27,30 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: FY
-  consolidation: na
+  consolidation: consolidated
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（スコア）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**カバレッジが大型株に強く偏る。** 日本の小型株はほぼ未評価。 さらに**評価機関間の相関が低い**（同じ企業に真逆の評価が付く）ので、 どの機関のスコアを使うかで結果が変わる。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Y02
+  - Y03
+  - Y12
+  - W07
+  - M27
+  economic_rationale: '**単独のアルファ源としては証拠が弱い。** 評価機関間の不一致が大きいこと自体が、 「ESG」という概念が測定可能な単一の量ではないことを示唆する。 263AT では**需給要因（Y12 指数採用）とテールリスク（Y06/Y10）としてのみ扱い、 水準はほぼ使わない。** ★1 の事前スケール 0.15 で強く縮小される。'
+  references:
+  - 構造的判断。ESG スコアの機関間不一致は広く報告されている
   notes: 機関間の相関が低い。水準はほぼ使えないと考えるべき
   notes_extra: null
   provenance:
@@ -57,21 +64,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Y02
   name_ja: ESGスコアの変化
@@ -79,8 +89,9 @@
   category_name: ESG・非財務リスク
   subsection: null
   definition: YoY
-  formula: null
-  inputs: null
+  formula: Y01 の前年比変化
+  inputs:
+  - Y01
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -93,24 +104,28 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: FY
-  consolidation: na
+  consolidation: consolidated
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 前年のスコアが無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: Y01 を継承。評価方法の変更でスコアが動くと誤検出する。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Y01
+  - Y04
+  - Y12
+  economic_rationale: '**水準よりモメンタムの方がまだ証拠がある。** 理由は需給 — ESG 資金が改善企業に流入するため。因果ではなくフローの話。 ただし評価機関が算定方法を変えただけでもスコアが動くので、 **変化の原因を確認しないと誤検出する。**'
+  references:
+  - 構造的判断
   notes: 水準よりモメンタムの方がまだ証拠がある（需給要因として）
   notes_extra: null
   provenance:
@@ -124,21 +139,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Y03
   name_ja: CO2排出量 / 売上
@@ -146,8 +164,10 @@
   category_name: ESG・非財務リスク
   subsection: null
   definition: Scope 1+2
-  formula: null
-  inputs: null
+  formula: (Scope1 + Scope2 排出量) / REV
+  inputs:
+  - emissions
+  - REV
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -161,24 +181,31 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: na
+  accounting_standard_note: '**算定基準（GHG プロトコル）は共通だが、集計範囲が企業判断。** Scope2 のマーケット基準とロケーション基準で数値が変わる。'
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: REV>0。排出量の開示が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**開示企業に偏る。** 日本は東証プライムで実質義務化されているが、スタンダード・グロースは任意。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Y04
+  - Y05
+  - Y10
+  - V07
+  - P30
+  economic_rationale: '**炭素税・排出量取引が導入されれば直接コストになる。** 5年ホライズンでは制度変更（P30）の確率が無視できないので、 アルファではなく**将来コストの現在価値**として扱う。 排出量原単位が業種中央値の数倍なら、制度変更時の打撃が大きい。'
+  references:
+  - GHG プロトコル
+  - https://www.jpx.co.jp/english/equities/follow-up/02.html
   notes: 炭素税・排出量取引が導入されれば直接コストになる。5年ホライズンでは実質的
   notes_extra: null
   provenance:
@@ -192,21 +219,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Y04
   name_ja: 排出削減目標の達成度
@@ -214,8 +244,11 @@
   category_name: ESG・非財務リスク
   subsection: null
   definition: 目標に対する実績の進捗
-  formula: null
-  inputs: null
+  formula: 排出削減目標に対する実績の進捗率
+  inputs:
+  - Y03
+  - emission_targets
+  - LLM
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -228,24 +261,29 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: FY
-  consolidation: na
+  consolidation: consolidated
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 目標が無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 目標を掲げる企業に偏る。**目標を掲げない企業を評価できない。**
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Y03
+  - Y02
+  - N18
+  - T11
+  economic_rationale: '**目標だけの企業と実行企業の区別。** N18（中計の達成率）と T11（経営陣の約束履行率）の環境版で、**同じ「約束を守るか」という 企業文化の指標**として見る方が、環境そのものより情報量が多いかもしれない。'
+  references:
+  - 構造的判断
   notes: 目標だけの企業と実行企業の区別
   notes_extra: null
   provenance:
@@ -259,21 +297,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Y05
   name_ja: ダイベストメント対象リスク
@@ -281,8 +322,11 @@
   category_name: ESG・非財務リスク
   subsection: null
   definition: 化石燃料・武器・たばこ等への該当
-  formula: null
-  inputs: null
+  formula: 1 if 化石燃料・武器・たばこ・ギャンブル等に該当 else 0
+  inputs:
+  - LLM
+  - sector_classification
+  - REV_breakdown
   sign: context
   buy_class: useful
   sell_class: useful
@@ -295,27 +339,30 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: T2
+  evidence_tier: T1
   markets:
   - JP
   - US
   industries: null
   period_convention: FY
-  consolidation: na
+  consolidation: consolidated
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 該当業種の判定に売上構成が要る。副業として該当事業を持つ企業を取りこぼす。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - Y01
+  - Y12
+  - O13
+  - K26
+  economic_rationale: '**符号が相殺する厄介な変数。** 機関のダイベストメントで売り圧力を受ける（負）が、 **その結果として割安になる**（正）。OSAP `sinAlgo` t=2.0 は正の符号 — つまり**避けられる銘柄の方が儲かる**という結果。 これは O カテゴリ（ネグレクト）と同じ構造で、 **「機関が持てない」ことが個人の機会になる**典型例。 ただし本人の価値観で除外したい場合は、これをゲートにする選択もありうる。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP sinAlgo — Hong and Kacperczyk 2009, JFE（OSAP再現 t=2.0, 月次0.3%, 品質=2_fair, 予測力=2_likely）
+  - OSAP sinAlgo t=2.0
   notes: 機関の売り圧力だが、その分割安になる。O カテゴリと符号が相殺する点に注意
   notes_extra: null
   provenance:
@@ -329,22 +376,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Y06
   name_ja: 不祥事の履歴
@@ -352,8 +401,10 @@
   category_name: ESG・非財務リスク
   subsection: null
   definition: 過去5年の重大な不祥事の件数
-  formula: null
-  inputs: null
+  formula: 過去5年の重大な不祥事の件数
+  inputs:
+  - NEWS
+  - LLM
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -367,24 +418,32 @@
   - NEWS
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: FY
+  period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（カウント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**報道依存なので小型株で見逃す**（N36/N37/W14 と同型）。 O カテゴリと逆方向で、**ネグレクト銘柄で悪材料を見逃す**という リスク管理上まずい偏りが、Y カテゴリにも共通して現れる。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Y07
+  - Y09
+  - W14
+  - N36
+  - N37
+  - E12
+  - E08
+  economic_rationale: '**再発率が高い。組織文化の指標として実用的。** 1件目を「不運」と見るか「兆候」と見るかで判断が変わるが、 実務的には兆候と見るべき。E08/E12（会計上の問題）、W14（労務）、 N36/N37（製品・情報）と合わせて、**組織の統制の弱さを横断的に測る。**'
+  references:
+  - 構造的判断。不祥事の再発率に関する体系的な実証は未確認
   notes: 再発率が高い。組織文化の指標として実用的
   notes_extra: null
   provenance:
@@ -398,21 +457,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Y07
   name_ja: 訴訟・行政処分の履歴
@@ -420,8 +482,12 @@
   category_name: ESG・非財務リスク
   subsection: null
   definition: 件数と規模 / 時価総額
-  formula: null
-  inputs: null
+  formula: 訴訟・行政処分の件数と規模 / MCAP
+  inputs:
+  - LLM
+  - EDINET
+  - SEC_legal
+  - MCAP
   sign: negative
   buy_class: useful
   sell_class: main
@@ -435,24 +501,30 @@
   - EDI
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: na
+  accounting_standard_note: N20 と同じ日米の開示基準差（米国の方が広い）。
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: MCAP>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: N20 と同じ。米国はクラスアクションが多く制度差が数値差になる。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N20
+  - Y06
+  - Y10
+  - D21
+  - E12
+  economic_rationale: N20（現在係争中）が現在を見るのに対し、Y07 は履歴を見る。 **訴訟の多い企業は訴訟を招く事業慣行を持っている**可能性が高く、 Y06（不祥事）と同じ「再発する」性質を持つ。
+  references:
+  - 構造的判断
   notes: N20 の履歴版
   notes_extra: null
   provenance:
@@ -466,21 +538,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Y08
   name_ja: サプライチェーンの人権リスク
@@ -488,8 +563,11 @@
   category_name: ESG・非財務リスク
   subsection: null
   definition: 強制労働懸念地域への依存
-  formula: null
-  inputs: null
+  formula: 強制労働懸念地域への調達・生産依存度
+  inputs:
+  - LLM
+  - V08
+  - supply_chain
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -502,24 +580,31 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: FY
-  consolidation: na
+  consolidation: consolidated
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（スコア）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**サプライチェーンの2次以降が見えない。** 直接取引先しか分からず、過小評価に偏る。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - V08
+  - T19
+  - Y10
+  - N38
+  - P30
+  economic_rationale: '**米国 UFLPA 等で輸入差止のリスク。** 実際に発動されると 売上が即座に止まるので、テールリスクとして無視できない。 V08（中国エクスポージャー）と重なるが、 **こちらは規制リスクという具体的な発現経路を持つ。**'
+  references:
+  - '米国: Uyghur Forced Labor Prevention Act (UFLPA)'
+  - 構造的判断
   notes: 米国 UFLPA 等で輸入差止のリスク。V08 と連動
   notes_extra: null
   provenance:
@@ -533,21 +618,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Y09
   name_ja: データプライバシー・規制リスク
@@ -555,8 +643,11 @@
   category_name: ESG・非財務リスク
   subsection: null
   definition: GDPR・個人情報保護法への露出
-  formula: null
-  inputs: null
+  formula: 個人データ取扱量とプライバシー規制への露出度
+  inputs:
+  - LLM
+  - V07
+  - business_model
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -569,24 +660,30 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: FY
-  consolidation: na
+  consolidation: consolidated
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（スコア）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: LLM 推定。ネット企業に偏る。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Y07
+  - N37
+  - T20
+  - V07
+  economic_rationale: '**GDPR の制裁金は全世界売上の最大4%**という規模なので、 利益ではなく売上に対して科される点が特異。 N37（情報漏洩）が事故を見るのに対し、Y09 は規制への構造的な露出を見る。'
+  references:
+  - EU GDPR Art.83
+  - 構造的判断
   notes: ネット企業。制裁金は売上比で科される
   notes_extra: null
   provenance:
@@ -600,21 +697,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Y10
   name_ja: 環境負債・土壌汚染
@@ -622,8 +722,11 @@
   category_name: ESG・非財務リスク
   subsection: null
   definition: 引当額と潜在債務
-  formula: null
-  inputs: null
+  formula: 環境関連の引当金 + 推定潜在債務 / EQ
+  inputs:
+  - environmental_provisions
+  - LLM
+  - EQ
   sign: negative
   buy_class: useful
   sell_class: main
@@ -637,24 +740,31 @@
   - EDI
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: FY
   consolidation: consolidated
-  accounting_standard_note: na
+  accounting_standard_note: '**引当計上の基準が国で違う。** 米国 ASC 410（資産除去債務）は範囲が広く、 日本は限定的。**日本企業の方が簿外に残りやすい。**'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: EQ>0。債務超過なら D02 で既に除外。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 潜在債務の推定は LLM 頼み。化学・重工業以外ではほぼゼロ。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Y03
+  - Y07
+  - D21
+  - D20
+  - E11
+  economic_rationale: '**簿外の巨額債務になりうる。** 土壌汚染・アスベスト・原状回復義務は、 発覚した時点で自己資本を大きく毀損する。 D21（保証債務）と同じく**貸借対照表に載っていないリスク**で、 バリュー指標（A03 PBR）を見ているだけでは絶対に気づけない。'
+  references:
+  - '米国: ASC 410（資産除去債務）'
+  - '日本: 資産除去債務に関する会計基準'
   notes: 化学・重工業。簿外の巨額債務になりうる
   notes_extra: null
   provenance:
@@ -668,21 +778,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Y11
   name_ja: 気候・地震の物理リスク
@@ -690,8 +803,11 @@
   category_name: ESG・非財務リスク
   subsection: null
   definition: 主要拠点の水害・地震リスク
-  formula: null
-  inputs: null
+  formula: 主要拠点の水害・地震ハザードマップ上のリスク評価
+  inputs:
+  - LLM
+  - facility_locations
+  - hazard_maps
   sign: negative
   buy_class: aux
   sell_class: useful
@@ -704,24 +820,30 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: FY
-  consolidation: na
+  consolidation: consolidated
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（スコア）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**拠点の所在地は有報の「主要な設備の状況」から取れるが、粒度が粗い** （市区町村レベル）。サプライヤーの拠点は分からない。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N38
+  - V07
+  - V08
+  - Y10
+  - I18
+  economic_rationale: '**日本は地震・水害リスクが構造的に高い。** 5年ホライズンでは 大規模災害の発生確率が無視できない。ただし**定量化が極めて難しく、 しかも保険でカバーされる部分がある**ので、実効的なリスクは推定値より小さい。 ★1 で強く縮小されるのが妥当。'
+  references:
+  - 構造的判断。定量化手法が確立していない
   notes: 日本は特に重要だが定量化が難しい。N38 と対
   notes_extra: null
   provenance:
@@ -735,21 +857,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Y12
   name_ja: ESG指数への採用 / 除外
@@ -757,8 +882,9 @@
   category_name: ESG・非財務リスク
   subsection: null
   definition: GPIF採用指数等の構成銘柄変更
-  formula: null
-  inputs: null
+  formula: 主要 ESG 指数への採用・除外イベント
+  inputs:
+  - index_membership
   sign: context
   buy_class: useful
   sell_class: useful
@@ -771,24 +897,32 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
-  period_convention: FY
+  period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（分類）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 指数の構成銘柄リストが必要。日本は GPIF 採用指数が公表されている。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K12
+  - K13
+  - K26
+  - O13
+  - Y01
+  - Y02
+  economic_rationale: '**純粋な需給イベントとして扱う**（K13 の指数採用と同種）。 日本は GPIF が ESG 指数に巨額を配分しているので、 **採用・除外の需給インパクトが他国より大きい。** Y01（スコア水準）にアルファが無くても、 **指数採用というイベントには需給効果がある**という切り分けが重要。'
+  references:
+  - https://www.openassetpricing.com/
+  - K13（指数イベント）と同種の需給効果
   notes: 純粋な需給イベントとして扱う（K13 と同種）。日本は GPIF の影響が大きい
   notes_extra: null
   provenance:
@@ -802,19 +936,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1

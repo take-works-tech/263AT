@@ -12,8 +12,9 @@
   category_name: メタ・データ品質
   subsection: null
   definition: その銘柄で欠損しているパラメータの割合
-  formula: null
-  inputs: null
+  formula: その銘柄で欠損しているパラメータ数 / 計算対象パラメータ数
+  inputs:
+  - all_parameters
   sign: negative
   buy_class: main
   sell_class: useful
@@ -26,7 +27,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -35,15 +36,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 対象パラメータ数は常に正。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**これ自体が欠損の測定なので、メタな循環がある。** 「欠損率が高い」ことと「そもそも計算対象にしていない」ことを区別する必要がある （U カテゴリは非該当業種で必ず欠損するので分母から除く）。'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Z02
+  - Z03
+  - Z10
+  - J05
+  - O01
+  - O10
+  economic_rationale: '**欠損が多い銘柄はスコアそのものが信用できない。** サイジングの信頼度に直結する。 そして 263AT にとって重要なのは、**欠損が小型株に偏る**こと（Z03）。 O カテゴリで加点した銘柄が Z01 で減点されるという構造的な緊張があり、 **「誰も見ていない」と「データが無い」を分けられるかがこのシステムの成否を左右する。**'
+  references:
+  - 構造的判断。データ品質のメタ指標であり実証の対象ではない
   notes: 欠損が多い銘柄はスコアが信用できない。サイズを落とすか除外する
   notes_extra: null
   provenance:
@@ -57,21 +65,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Z02
   name_ja: データ欠損率（パラメータ別）
@@ -79,8 +90,9 @@
   category_name: メタ・データ品質
   subsection: null
   definition: そのパラメータが計算できる銘柄の割合
-  formula: null
-  inputs: null
+  formula: そのパラメータが計算できた銘柄数 / ユニバース銘柄数
+  inputs:
+  - all_parameters
   sign: positive
   buy_class: na
   sell_class: na
@@ -93,7 +105,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -102,15 +114,19 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: ユニバース銘柄数は常に正。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: na（これ自体が偏りの測定）
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Z01
+  - Z03
+  - Z10
+  economic_rationale: '**カバレッジが低いパラメータは断面正規化の母集団が歪む。** 30%の銘柄でしか計算できない変数をランク化すると、その30%の中での 順位になってしまい、残り70%と比較できない。 **spec §4 の「最小母集団 N<30 ならランク化しない」の判定に使う。**'
+  references:
+  - 構造的判断
   notes: 低いパラメータは断面正規化の母集団が歪む
   notes_extra: null
   provenance:
@@ -124,21 +140,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Z03
   name_ja: 欠損の業種・サイズ偏り
@@ -146,8 +165,10 @@
   category_name: メタ・データ品質
   subsection: null
   definition: 欠損フラグと時価総額の相関
-  formula: null
-  inputs: null
+  formula: corr( 欠損フラグ, log(MCAP) ) を各パラメータについて計算
+  inputs:
+  - Z01
+  - J05
   sign: negative
   buy_class: na
   sell_class: na
@@ -160,7 +181,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -169,15 +190,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 欠損がゼロまたは全件欠損なら相関が定義できない。欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: na
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Z01
+  - Z02
+  - J05
+  - O01
+  - O10
+  economic_rationale: '**263AT で最も重要なメタ指標。** 欠損が小型株に偏っていると、 欠損を中立（z=0）にしてもユニバースが暗黙に大型株へ寄る。 レビューで実際に見つかった偏り: F02（上場5年未満で欠損）、B13/B28（5年履歴）、 O01（無カバー62%）、C11-C15（開示企業のみ）、W06/W08（人的資本開示企業のみ）。 **これらはすべて「小型株ほど欠損する」方向で、狙っているユニバースを削る。**'
+  references:
+  - 構造的判断。docs/02_definition_spec.md §4 の欠損方針の根拠
   notes: これを見ないとユニバースが暗黙に大型株へ偏る（§1.9.5）
   notes_extra: null
   provenance:
@@ -191,21 +218,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Z04
   name_ja: データの鮮度
@@ -213,8 +243,9 @@
   category_name: メタ・データ品質
   subsection: null
   definition: 各パラメータの最終更新からの日数
-  formula: null
-  inputs: null
+  formula: 各パラメータの available_at から評価時点までの日数
+  inputs:
+  - available_at
   sign: negative
   buy_class: main
   sell_class: main
@@ -227,7 +258,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -236,15 +267,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（日数）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**available_at が記録されていないデータは鮮度を測れない。** 測れないものを「新しい」と扱うのが最も危険なので、 available_at が無いソースは最大値（無限に古い）として扱う。'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Z05
+  - Z14
+  - D26
+  - K23
+  - N04
+  economic_rationale: '**決算は最大3ヶ月古い。13F は45日遅れ。日本のインサイダー報告は45日超**（OQ-29）。 同じスコアでも、構成する情報の鮮度がバラバラだと解釈が変わる。 サーキットブレーカー B5（docs/04_security.md §3.2）の入力でもあり、 **古いデータで発注しようとしたら止める**という安全装置に直結する。'
+  references:
+  - 構造的判断。docs/02_definition_spec.md §1.2 の開示ラグ表
   notes: 決算は最大3ヶ月古い。古いデータで判断していないかの監視
   notes_extra: null
   provenance:
@@ -258,21 +295,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Z05
   name_ja: データソース間の不一致
@@ -280,8 +320,9 @@
   category_name: メタ・データ品質
   subsection: null
   definition: 同一項目の複数ソース間の乖離
-  formula: null
-  inputs: null
+  formula: 同一項目の複数ソース間の相対差 |a-b| / max(|a|,|b|)
+  inputs:
+  - multi_source_data
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -294,24 +335,29 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: POINT
   consolidation: na
-  accounting_standard_note: na
+  accounting_standard_note: '**ソースによって会計基準の扱いが違う**ことが不一致の主因になりうる。 「どちらかが間違っている」のではなく「定義が違う」場合を区別する必要がある。'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 両方ゼロなら一致とみなす。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 複数ソースを持つ項目でのみ計算できる。単一ソースの項目は検証不能。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Z04
+  - Z06
+  - Z07
+  - Z14
+  economic_rationale: '**不一致はどちらかが壊れている証拠。** ゲートの根拠になる（docs/04_security.md §3.2 B7）。 263AT では米国で SEC EDGAR（自前）と OSAP（CRSP由来）の2系統を持てるので、 **突合できる稀な状況にある。** ただし日本は J-Quants 単独になる見込みで、 **日本側では Z05 が機能しない**という非対称がある。'
+  references:
+  - 構造的判断
   notes: 不一致はどちらかが間違っている。Gate の根拠になる
   notes_extra: null
   provenance:
@@ -325,21 +371,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Z06
   name_ja: 決算期変更フラグ
@@ -347,8 +396,9 @@
   category_name: メタ・データ品質
   subsection: null
   definition: 過去5年に決算期変更があったか
-  formula: null
-  inputs: null
+  formula: 1 if 過去5年に決算期変更があった else 0
+  inputs:
+  - fiscal_year_end_history
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -361,24 +411,30 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: POINT
-  consolidation: consolidated
+  consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 決算期の履歴が必要。DERA の sub.txt に fye があるので米国は取得可能。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Z05
+  - Z07
+  - N27
+  - V12
+  - C02
+  economic_rationale: '**時系列比較を壊す。バグの温床。** 変更期は月数が12でないので、 成長率が +50% などの異常値になる。**ウィンザライズで静かに消えるので気づけない** のが最悪で、だからフラグで明示的に検出する。 レビューで判明した通り、C02/C06/B13/B28/E04/B17 など**多期間を跨ぐ変数はすべて壊れる。**'
+  references:
+  - 構造的判断。docs/02_definition_spec.md §1.4
   notes: 時系列比較を壊す。バグの温床（N27）
   notes_extra: null
   provenance:
@@ -392,21 +448,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Z07
   name_ja: 会計基準変更フラグ
@@ -414,8 +473,9 @@
   category_name: メタ・データ品質
   subsection: null
   definition: 日本基準 ↔ IFRS の変更
-  formula: null
-  inputs: null
+  formula: 1 if 過去5年に会計基準変更（日本基準↔IFRS、IFRS16適用等）があった else 0
+  inputs:
+  - accounting_standard_history
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -428,24 +488,32 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
   industries: null
   period_convention: POINT
-  consolidation: consolidated
-  accounting_standard_note: na
+  consolidation: na
+  accounting_standard_note: '**この変数自体が会計基準差の管理装置。**'
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（ブール値）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**IFRS16 は2019年前後に全企業が一斉に適用したので、その年は全銘柄でフラグが立つ。** 全件欠損にするとその年のデータが丸ごと失われる。 **影響を受ける変数（D01/D19/B03/C35/A16 等）だけを欠損にする**という 選択的な適用が必要。'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Z05
+  - Z06
+  - D01
+  - D19
+  - B03
+  - C35
+  - A16
+  economic_rationale: '**のれん償却・リース・収益認識の3つが主な断層。** レビューで繰り返し出てきた通り、C35（総資産成長）は IFRS16 適用年に 架空の資産急増を記録し、D01（Net Debt/EBITDA）は不連続に悪化する。 **これを検出せずに検証すると、2019年前後の全企業が誤判定される。**'
+  references:
+  - 構造的判断。docs/02_definition_spec.md §2.1
   notes: 同上。のれん償却の有無で利益が不連続に変わる
   notes_extra: null
   provenance:
@@ -459,21 +527,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Z08
   name_ja: 使える履歴の年数
@@ -481,8 +552,10 @@
   category_name: メタ・データ品質
   subsection: null
   definition: 上場からの経過期間とデータ取得可能期間
-  formula: null
-  inputs: null
+  formula: min(上場からの経過年数, データが実際に取得できている年数)
+  inputs:
+  - listing_date
+  - data_history
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -495,7 +568,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -504,15 +577,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（年数）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 米国の XBRL は2009年開始なので、それ以前の上場企業でも履歴は最大17年（DF 実測）。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N24
+  - O24
+  - Z01
+  - Z10
+  - B13
+  - F02
+  economic_rationale: '**N24（上場後経過年数）と概念が違う。** N24 は IPO 後の劣後（LAW-48）という リターン予測の話だが、Z08 は「多期間パラメータが計算できるか」というデータの話。 F02（5年株式発行率）、B13/B28（5年 ROIC）、A22/A23（5年バリュエーション）は すべて Z08 >= 5 が前提。**Z08 が短い銘柄では使えるパラメータが構造的に減る**ので、 Z01（欠損率）と強く相関する。'
+  references:
+  - 構造的判断
   notes: 短いと多くのパラメータが計算できない（N24 と別概念）
   notes_extra: null
   provenance:
@@ -526,21 +606,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Z09
   name_ja: 異常値フラグ
@@ -548,8 +631,9 @@
   category_name: メタ・データ品質
   subsection: null
   definition: ウィンザライズで切られた回数
-  formula: null
-  inputs: null
+  formula: そのパラメータでウィンザライズの上下限に張り付いた回数
+  inputs:
+  - all_parameters
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -562,7 +646,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -571,15 +655,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（カウント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: ランク化を標準にしているので、生値を使う変数でのみ発生する。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Z05
+  - Z06
+  - Z07
+  - Z14
+  economic_rationale: '**頻繁に切られる銘柄はデータか実態が異常。** Z06/Z07 の検出漏れを 事後的に拾う網でもある。ただし**ランク化を標準にしている以上、 ウィンザライズ自体が原則不要**（spec §4）なので、この変数の出番は限定的。 生値を使う場面（Kelly の分母のボラなど）でのみ意味を持つ。'
+  references:
+  - 構造的判断
   notes: 頻繁に切られる銘柄はデータか実態が異常
   notes_extra: null
   provenance:
@@ -593,21 +682,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Z10
   name_ja: 断面カバレッジ
@@ -615,8 +707,9 @@
   category_name: メタ・データ品質
   subsection: null
   definition: その時点で計算できたパラメータ数
-  formula: null
-  inputs: null
+  formula: その時点で計算できたパラメータ数
+  inputs:
+  - all_parameters
   sign: positive
   buy_class: main
   sell_class: useful
@@ -629,7 +722,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -638,15 +731,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（カウント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: Z01 の裏返しなので同じ性質。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Z01
+  - Z02
+  - Z08
+  - J05
+  economic_rationale: Z01（欠損率）の絶対数版。**スコアの信頼度に直結し、 サイジング（§1.6）の乗数として使う。** 100個で計算したスコアと 300個で計算したスコアを同じ確信度で扱ってはいけない。 §1.4 の期待リターン較正でも、Z10 が低い銘柄は b_h の推定誤差が大きくなる。
+  references:
+  - 構造的判断
   notes: スコアの信頼度に直結。Z01 の裏返し
   notes_extra: null
   provenance:
@@ -660,21 +758,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Z11
   name_ja: パラメータの時系列安定性
@@ -682,8 +783,9 @@
   category_name: メタ・データ品質
   subsection: null
   definition: 各パラメータの自己相関
-  formula: null
-  inputs: null
+  formula: 各パラメータの1期ラグ自己相関
+  inputs:
+  - all_parameters
   sign: context
   buy_class: na
   sell_class: na
@@ -696,7 +798,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -705,15 +807,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 時系列が20観測未満なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: na
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Z12
+  - Z13
+  - S12
+  - S13
+  economic_rationale: '**不安定なパラメータは回転率を上げ、コストを増やす（LAW-11）。** OQ-24 の実測で、月0.25%のコストで9方式中8つが死んだ。 自己相関が低い変数を重視すると、意図せず高回転の戦略になる。 **6M〜5Y の保有期間を守るには、自己相関の高い変数に重みを寄せる必要がある** — これは予測力とは別の軸での選好であり、§1.9 の縮小に加えるべき制約。'
+  references:
+  - 構造的判断。research/findings_2026-08-23.md §7 の実測が根拠
   notes: 不安定なパラメータは回転率を上げる＝コストを増やす（LAW-11）
   notes_extra: null
   provenance:
@@ -727,21 +834,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Z12
   name_ja: パラメータ間の相関構造
@@ -749,8 +859,9 @@
   category_name: メタ・データ品質
   subsection: null
   definition: 相関行列の固有値・主成分
-  formula: null
-  inputs: null
+  formula: パラメータ間相関行列の固有値と主成分
+  inputs:
+  - all_parameters
   sign: none
   buy_class: na
   sell_class: na
@@ -763,7 +874,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -772,15 +883,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 共分散行列が特異なら固有値がゼロになる。正則化して扱う。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**欠損パターンが相関構造を歪める。** 一緒に欠損する変数どうしは 見かけの相関が高くなる。ペアワイズ削除か多重代入かで結果が変わる。'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Z01
+  - Z03
+  - Z11
+  - Z13
+  economic_rationale: '**§1.9.3 の主成分縮小（KNS 流）の直接の入力。** 770 パラメータは 770 次元ではなく、実質的に数十次元しかないはず。 レビューで判明した重複候補: L03/L04/L05、V13/V14/V15、O20-O23、A25/A32、 A28/A34。**Z12 を実測すれば、これらが本当に1本にまとまるかが分かる。** そして q09（相関）の実測値を全 770 件に供給する唯一の手段でもある。'
+  references:
+  - https://www.nber.org/system/files/working_papers/w24070/w24070.pdf
+  - KNS の主成分縮小の入力
   notes: §1.9.3 の主成分縮小の直接の入力
   notes_extra: null
   provenance:
@@ -794,21 +911,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Z13
   name_ja: ファクター予測力の時系列
@@ -816,8 +936,10 @@
   category_name: メタ・データ品質
   subsection: null
   definition: ローリング IC の推移
-  formula: null
-  inputs: null
+  formula: 各パラメータのローリング情報係数（IC）の時系列
+  inputs:
+  - all_parameters
+  - forward_returns
   sign: context
   buy_class: na
   sell_class: na
@@ -830,7 +952,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -839,15 +961,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 断面の観測数が30未満の期間は欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: リターンデータが要る。DF-01 が解決するまで計算できない。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Z11
+  - Z12
+  - P23
+  - P24
+  economic_rationale: ファクターの減衰（LAW-100、実測57%）と混雑（P23）の検出。 **ただし §1.9.4 の通り、これを見て採用を決めてはいけない。** 見て決めた瞬間に選択バイアスが入る。**診断としてのみ使い、 重み付けは事前分布と縮小で行う**というのが 263AT の方針。 この境界を曖昧にすると、多重検定の対策が全部無効になる。
+  references:
+  - https://www.hec.ca/finance/Fichier/McLean.pdf
+  - 構造的判断＋§1.9.4 の方針
   notes: 減衰・混雑の検出（P23 と対）。ただしこれを見て採用を決めてはいけない（§1.9.4）
   notes_extra: null
   provenance:
@@ -861,21 +989,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Z14
   name_ja: PIT違反の自動検出

@@ -12,8 +12,10 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: max_j corr( r_i, r_j )（日次252日）
-  formula: null
-  inputs: null
+  formula: max_j corr( r_i, r_j )、j は保有銘柄、日次252日
+  inputs:
+  - PRICE
+  - SELF_positions
   sign: negative
   buy_class: main
   sell_class: useful
@@ -26,7 +28,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -35,15 +37,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 共通観測が60日未満なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 上場1年未満で欠損。売買停止日が多い銘柄で推定が歪む。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Q02
+  - Q06
+  - Q13
+  - Q16
+  - Q03
+  economic_rationale: '**0.7超なら実質同じ銘柄。** §1.6 で集中設計（rho 高）を採るほど、 残す銘柄間の相関管理が重要になる。ただし**平時の相関は危機時に役に立たない** （Q13）ので、これだけで分散できたと考えてはいけない。'
+  references:
+  - 構造的判断。分散の数学 LAW-06
   notes: 0.7超なら実質同じ銘柄。集中設計（rho高）ほど厳しく管理する
   notes_extra: null
   provenance:
@@ -57,21 +65,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Q02
   name_ja: 既存保有との平均相関
@@ -79,8 +90,10 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: mean_j corr( r_i, r_j )
-  formula: null
-  inputs: null
+  formula: mean_j corr( r_i, r_j )
+  inputs:
+  - PRICE
+  - SELF_positions
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -93,7 +106,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -102,15 +115,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: Q01 と同じ。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: Q01 と同じ。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Q01
+  - Q13
+  - Q14
+  - Q04
+  economic_rationale: ポートフォリオ全体の分散度。Q01（最大）が個別の重複を見るのに対し、 Q02（平均）は全体の凝集度を見る。**実効銘柄数（Q14）と併せて、 「20銘柄持っているが実質5銘柄」という状態を検出する。**
+  references:
+  - 構造的判断。LAW-06
   notes: ポートフォリオ全体の分散度
   notes_extra: null
   provenance:
@@ -124,21 +142,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Q03
   name_ja: セクター集中度 (HHI)
@@ -146,8 +167,10 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: SUM (w_sector)^2
-  formula: null
-  inputs: null
+  formula: SUM( セクター別ウェイト^2 )
+  inputs:
+  - SELF_positions
+  - sector_classification
   sign: negative
   buy_class: useful
   sell_class: main
@@ -160,7 +183,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -171,13 +194,19 @@
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 業種分類の欠損で計算不能。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Q01
+  - Q02
+  - Q11
+  - Q14
+  - V13
+  economic_rationale: セクター集中度。**追加後の HHI を計算して閾値超過なら減点する**という 後段補正に使う。ただし 263AT は小型株中心なので、 **そもそもセクターが偏りやすい**（小型株が多い業種と少ない業種がある）。 厳しく管理しすぎるとユニバースを失う。
+  references:
+  - 構造的判断
   notes: 追加後のHHIを計算して閾値超過なら減点
   notes_extra: null
   provenance:
@@ -191,21 +220,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Q04
   name_ja: 限界リスク寄与
@@ -213,8 +245,11 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: delta_sigma_p / delta_w_i
-  formula: null
-  inputs: null
+  formula: d(sigma_p) / d(w_i)
+  inputs:
+  - PRICE
+  - SELF_positions
+  - I03
   sign: negative
   buy_class: main
   sell_class: main
@@ -227,7 +262,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -236,15 +271,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: ポートフォリオのボラがゼロなら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 共分散行列の推定に依存。保有銘柄数が少ないと不安定。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Q01
+  - Q02
+  - Q05
+  - Q12
+  - I03
+  - I16
+  economic_rationale: '**単独リスクではなくポートフォリオへの寄与で判断する。** 高ボラでも既存保有と負相関なら、全体のリスクは下がる。 §1.6 の Kelly サイジングは単独の sigma を使うが、 **本来は限界リスク寄与で調整すべき**（未実装。次の改訂候補）。'
+  references:
+  - 構造的判断。LAW-06 / §1.6
   notes: 単独リスクではなくポートフォリオへの寄与で判断する
   notes_extra: null
   provenance:
@@ -258,21 +300,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Q05
   name_ja: 限界期待値寄与
@@ -280,8 +325,11 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: delta_E[U_p] / delta_w_i
-  formula: null
-  inputs: null
+  formula: d(E[U_p]) / d(w_i)
+  inputs:
+  - mu_hat
+  - Q04
+  - lambda
   sign: positive
   buy_class: main
   sell_class: main
@@ -294,7 +342,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -303,15 +351,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 期待リターン推定（§1.4）に依存。**b_h が有意でなければこの値も無意味。**
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Q04
+  - Q12
+  - R11
+  - S12
+  economic_rationale: '**Q04 との比が実質的な採用基準。** 期待効用の増加をリスクの増加で割った値が 高い順に組み入れる。**§1.4 の較正（スコア → 期待リターン）ができていないと 計算できない**ので、Phase 3 までは使えない。'
+  references:
+  - 構造的判断。§1.4 / §1.6
   notes: Q04 との比が実質的な採用基準になる
   notes_extra: null
   provenance:
@@ -325,21 +378,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Q06
   name_ja: テーマ重複度
@@ -347,8 +403,10 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: LLMによる既存保有とのテーマ類似度 0-1
-  formula: null
-  inputs: null
+  formula: LLM による既存保有とのテーマ類似度 0-1
+  inputs:
+  - LLM
+  - SELF_positions
   sign: negative
   buy_class: main
   sell_class: useful
@@ -361,7 +419,7 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -370,15 +428,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（スコア）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: LLM 依存。過去に遡れない（§6.4）。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Q01
+  - Q02
+  - Q13
+  - Q16
+  - R22
+  - T21
+  economic_rationale: '**相関では見えない「同じ賭け」を検出する。** 半導体 × AI × 電力インフラは、過去の相関が低くても同じシナリオに依存している。 **LLM を使うと「今の物語」に引っ張られて集中しやすい**（§8-5）ので、 LLM 自身にその重複を検出させるという構造にしている。'
+  references:
+  - 構造的判断。LLM 由来のため前向き記録が必要
   notes: 相関では見えない「同じ賭け」を検出する。半導体×AI×電力 のような連鎖
   notes_extra: null
   provenance:
@@ -392,21 +457,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Q07
   name_ja: 為替エクスポージャー合計
@@ -414,8 +482,10 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: SUM w_i × P08_i
-  formula: null
-  inputs: null
+  formula: SUM( w_i × P08_i )
+  inputs:
+  - P08
+  - SELF_positions
   sign: cap
   buy_class: useful
   sell_class: main
@@ -428,7 +498,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -439,13 +509,20 @@
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: P08（銘柄別為替感応度）の推定に依存。
   normalization: none
-  nonlinear: abs_dev(x_star=sector_median)
+  nonlinear: abs_dev(x_star=0)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P07
+  - P08
+  - P21
+  - Q15
+  - S18
+  - V07
+  economic_rationale: ∩型（ゼロが最適とは限らないが、意図しない大きな露出は避ける）。 **日米両方に投資するので二重に効く** — 米国株を持つこと自体がドル露出であり、 さらに日本の輸出企業もドル感応度を持つ。**気づかないうちに為替に大きく賭けている** という状態が起きやすい。Q08（投信部分）まで含めて見ないと全体が分からない。
+  references:
+  - 構造的判断
   notes: 日米両建てなので必須。投信側90%のエクスポージャーも合算して見るべき
   notes_extra: null
   provenance:
@@ -459,23 +536,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Q08
   name_ja: 投信部分との重複
@@ -483,8 +562,10 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: 保有投信の組入上位銘柄との重複
-  formula: null
-  inputs: null
+  formula: 保有投信の組入上位銘柄と個別株保有の重複ウェイト
+  inputs:
+  - SELF_fund_holdings
+  - SELF_positions
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -498,7 +579,7 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -509,13 +590,19 @@
   pit_lag_days: 3
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**投信の組入銘柄は月次開示で、しかも上位10銘柄程度しか出ない。** インデックス投信なら構成銘柄が分かるが、アクティブ投信は不透明。 **全体像は原理的に把握できない。**'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Q01
+  - Q06
+  - Q07
+  - Q15
+  - Q11
+  economic_rationale: '**全体ポートフォリオの90%が投信である以上、これを見ないのは片手落ち。** §1.8 のバーベル構造（90%投信 + 10%個別株）が成立する前提は、 両者が独立であること。個別株が投信と同じ銘柄なら、 **バーベルではなく単なる集中になっている。** ただし上記の通り把握には限界があるので、**セクター・地域レベルで近似する**のが現実的。'
+  references:
+  - 構造的判断。catalog §1.8 のバーベル前提
   notes: 全体ポートフォリオの90%が投信である以上、これを見ないのは片手落ち
   notes_extra: null
   provenance:
@@ -529,21 +616,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Q09
   name_ja: 業種内相対順位
@@ -551,8 +641,10 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: 同業種内で自分の買いスコアが何位か
-  formula: null
-  inputs: null
+  formula: 業種内での S_buy の順位
+  inputs:
+  - S_buy
+  - sector_classification
   sign: positive
   buy_class: main
   sell_class: main
@@ -565,7 +657,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -574,15 +666,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 業種内の銘柄数が5未満なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 業種分類の欠損。T21（LLM による真の競合特定）で母集団を置き換える案がある。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - A25
+  - A41
+  - R22
+  - T21
+  - Q10
+  economic_rationale: '**「この業種に賭けるなら、この銘柄が最善か」。** 業種の追い風で全銘柄が上がっている局面では、 銘柄選択の巧拙が見えなくなる。業種内順位で見れば、 **業種要因を除いた選択能力が分かる。** A41（同業最安値スプレッド）と対。'
+  references:
+  - 構造的判断
   notes: 「この業種に賭けるなら、この銘柄が最善か」の検証
   notes_extra: null
   provenance:
@@ -596,21 +694,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Q10
   name_ja: 同業他社の相対パフォーマンス
@@ -618,8 +719,10 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: r_i - r_同業中央値（過去6ヶ月）
-  formula: null
-  inputs: null
+  formula: r_i(6ヶ月) - median( r_同業(6ヶ月) )
+  inputs:
+  - PRICE
+  - sector_classification
   sign: context
   buy_class: useful
   sell_class: main
@@ -632,7 +735,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -641,15 +744,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 業種内の銘柄数が3未満なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 業種分類の欠損。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G11
+  - G27
+  - Q09
+  - L01
+  - L09
+  economic_rationale: '**一社だけ下がっているなら個社要因。** 業種全体が下がっているなら マクロかセクター要因で、意味が全く違う。 **LLM で理由を調べるトリガーにする**という使い方が本質で、 スコアへの直接寄与より、調査リソースの配分に使う（LAW-14 情報の価値）。'
+  references:
+  - https://www.openassetpricing.com/
+  - OSAP IndMom / IndRetBig との関連
   notes: 一社だけ下がっているなら個社要因。LLMで理由を調べるトリガーにする
   notes_extra: null
   provenance:
@@ -663,21 +773,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Q11
   name_ja: ファクター露出の合計
@@ -685,8 +798,10 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: ポートフォリオのバリュー / クオリティ / サイズ等の合成露出
-  formula: null
-  inputs: null
+  formula: ポートフォリオのファクター露出（バリュー/クオリティ/サイズ/モメンタム）
+  inputs:
+  - SELF_positions
+  - factor_loadings
   sign: cap
   buy_class: main
   sell_class: main
@@ -699,7 +814,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -708,15 +823,23 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: ファクター・ローディングの推定に Ken French データが要る（無料で取得可能）。
   normalization: none
-  nonlinear: abs_dev(x_star=sector_median)
+  nonlinear: abs_dev(x_star=target_exposure)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Q03
+  - Q07
+  - Q08
+  - Q13
+  - P17
+  - P23
+  economic_rationale: ∩型。**意図しないファクター賭けの検出。** 銘柄単位で選ぶと必ずどこかに偏る。バリュー重視で選んだつもりが 小型株ばかりになっている、といった事態を検出する。 P23（ファクター混雑度）と組み合わせると、**混雑したファクターに 知らないうちに全張りしている**という最悪の状態を防げる。
+  references:
+  - https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/
+  - 構造的判断
   notes: 意図しないファクター賭けの検出。銘柄単位で選ぶと必ず偏る
   notes_extra: null
   provenance:
@@ -730,23 +853,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
+    nonlinear: override
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Q12
   name_ja: 追加後の期待シャープ変化
@@ -754,8 +879,11 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: delta( mu_p / sigma_p )
-  formula: null
-  inputs: null
+  formula: delta( mu_p / sigma_p ) 追加前後
+  inputs:
+  - Q04
+  - Q05
+  - mu_hat
   sign: positive
   buy_class: main
   sell_class: main
@@ -768,7 +896,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -777,15 +905,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: sigma_p がゼロなら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 期待リターン推定に依存。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Q04
+  - Q05
+  - Q13
+  - R10
+  - R11
+  economic_rationale: Q04（限界リスク）と Q05（限界期待値）の統合。 **採用可否の最終判断はこれで行う。** 単独のスコアが高くても、 ポートフォリオのシャープを下げるなら入れない。 OQ-24 の実測（合成シャープ 0.6〜1.0）を踏まえると、 **1銘柄の追加でシャープが下がるなら、それは組み入れる価値がない。**
+  references:
+  - 構造的判断。research/findings §7
   notes: Q04/Q05 の統合指標。採用可否の最終判断
   notes_extra: null
   provenance:
@@ -799,21 +933,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Q13
   name_ja: 尾部相関
@@ -821,8 +958,11 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: 市場下落上位5%の日における銘柄間相関
-  formula: null
-  inputs: null
+  formula: 市場下落上位5%の日に限定した銘柄間相関
+  inputs:
+  - PRICE
+  - market_return
+  - SELF_positions
   sign: negative
   buy_class: main
   sell_class: useful
@@ -835,7 +975,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -844,15 +984,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 下落上位5%の日が20未満なら欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 危機を含む長期の履歴が要る。**上場5年未満では危機を経験していない可能性がある。**
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Q01
+  - Q02
+  - I10
+  - I16
+  - I18
+  - I28
+  economic_rationale: '**平時の相関は危機時に役に立たない。** 危機では相関が1に近づき、 分散効果が消える。Q01/Q02 で分散できたと思っていても、 **本当に必要なときに機能しない**という致命的な誤算が起きる。 I18（危機時パフォーマンス）と併せて、**ストレス下での実際の分散度**を測る。'
+  references:
+  - 構造的判断。危機時の相関上昇は広く観測される
   notes: 平時の相関は危機時に役に立たない。分散効果の実効性を測る
   notes_extra: null
   provenance:
@@ -866,21 +1013,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Q14
   name_ja: 実効銘柄数
@@ -888,8 +1038,9 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: 1 / SUM(w_i^2)
-  formula: null
-  inputs: null
+  formula: 1 / SUM(w_i^2)
+  inputs:
+  - SELF_positions
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -902,7 +1053,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -911,15 +1062,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: ポジションが無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: na
   normalization: none
-  nonlinear: abs_dev(x_star=sector_median)
+  nonlinear: abs_dev(x_star=N_target)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Q02
+  - Q03
+  - Q13
+  - R10
+  economic_rationale: ∩型。**見かけの銘柄数ではなく実質的な分散度。** 20銘柄でも1銘柄が50%なら実効銘柄数は約4。 §1.8.3 で N_target を実測IC から導くと決めたので、 **その目標値との乖離**を測るのがこの変数の役割。 Bessembinder（4%の銘柄が全リターンを生む）を踏まえると、 実効銘柄数が小さすぎると右裾を掴む確率が下がる。
+  references:
+  - https://www.zeninvestor.org/wp-content/uploads/2025/11/Do-stocks-outperform-T-bills.pdf
+  - catalog §1.8.3
   notes: 見かけの銘柄数ではなく実質的な分散度
   notes_extra: null
   provenance:
@@ -933,23 +1090,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
+    nonlinear: override
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Q15
   name_ja: 国別・通貨別エクスポージャー
@@ -957,8 +1116,10 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: 日米の配分と各国内の集中度
-  formula: null
-  inputs: null
+  formula: 国別・通貨別のウェイト分布
+  inputs:
+  - SELF_positions
+  - J19
   sign: cap
   buy_class: useful
   sell_class: main
@@ -971,7 +1132,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -982,13 +1143,20 @@
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: na
   normalization: none
-  nonlinear: abs_dev(x_star=sector_median)
+  nonlinear: abs_dev(x_star=target_allocation)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Q07
+  - Q08
+  - P07
+  - P21
+  - P22
+  - S18
+  economic_rationale: '∩型。Q07（為替感応度の合計）が統計的な露出を測るのに対し、 Q15 は名目的な配分を測る。**日米の配分比率は P22（相対バリュエーション）で 動的に決めるべきだが、それはマクロ予測になるので §1.9 の 「マクロで銘柄を選ばない」（LAW-78）と衝突する。** 暫定的には固定比率（例: 50/50）にして、Q15 で乖離を監視するのが安全。'
+  references:
+  - 構造的判断。catalog LAW-78
   notes: Q07 の拡張
   notes_extra: null
   provenance:
@@ -1002,23 +1170,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Q16
   name_ja: サプライチェーンの重複
@@ -1026,8 +1196,13 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: 保有銘柄間の顧客・仕入先の重なり
-  formula: null
-  inputs: null
+  formula: 保有銘柄間の顧客・仕入先の重複度（LLM 判定）
+  inputs:
+  - LLM
+  - N21
+  - L06
+  - L07
+  - SELF_positions
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -1040,7 +1215,7 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1049,15 +1224,23 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（スコア）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: LLM 依存。顧客・仕入先の開示が薄い日本では推定精度が落ちる。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - Q01
+  - Q06
+  - Q13
+  - L06
+  - L07
+  - N21
+  economic_rationale: '**Q06（テーマ）でも相関でも見えない連鎖リスク。** 同じ最終顧客に依存する2社は、テーマも業種も違って見えても 同じ需要ショックで同時に沈む。L06/L07（サプライチェーン・モメンタム）が リターン予測に使う関係を、**リスク管理側から使う。**'
+  references:
+  - https://www.openassetpricing.com/
+  - OSAP iomom_cust / iomom_supp と同根
   notes: Q06（テーマ）でも相関でも見えない連鎖リスク
   notes_extra: null
   provenance:
@@ -1071,21 +1254,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Q17
   name_ja: ドライパウダー比率
@@ -1093,8 +1279,10 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: 現金 / 個別株予算
-  formula: null
-  inputs: null
+  formula: 現金 / 個別株予算
+  inputs:
+  - SELF_cash
+  - PORTFOLIO_JPY
   sign: cap
   buy_class: main
   sell_class: main
@@ -1107,7 +1295,7 @@
   - SELF
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1116,15 +1304,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 予算>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: na
   normalization: none
-  nonlinear: abs_dev(x_star=sector_median)
+  nonlinear: abs_dev(x_star=target_cash)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P16
+  - P10
+  - Q14
+  - R10
+  - S05
+  economic_rationale: ∩型。**下落時の買い増し余地を確保する。** P16（市場ドローダウン）と連動させ、市場が下がったときに 使える現金を持っておく。ただし**現金を持つこと自体は期待リターンを下げる**ので、 タイミングを計ろうとすると LAW-78 に反する。 **NISA 枠の年間上限（S05、240万円）があるので、 そもそも一度に全額投入できない**という制度的な制約が、 結果的にドルコスト平均法的な効果を生む点は指摘しておく価値がある。
+  references:
+  - 構造的判断
   notes: P16（市場ドローダウン）と連動させ、下落時の買い増し余地を確保する
   notes_extra: null
   provenance:
@@ -1138,23 +1332,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
+    nonlinear: override
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: Q18
   name_ja: NISA枠と特定口座の配分最適性
@@ -1162,8 +1358,12 @@
   category_name: セクター・相関・ポートフォリオ文脈
   subsection: null
   definition: 銘柄ごとの口座割当が期待値順になっているか
-  formula: null
-  inputs: null
+  formula: NISA 保有銘柄の期待リターン順位 vs 全保有の期待リターン順位
+  inputs:
+  - S04
+  - S05
+  - mu_hat
+  - SELF_positions
   sign: positive
   buy_class: main
   sell_class: useful
@@ -1176,10 +1376,9 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: POINT
   consolidation: na
@@ -1187,13 +1386,21 @@
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 期待リターン推定に依存。日本固有。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - S04
+  - S05
+  - S06
+  - S14
+  - S10
+  - S16
+  economic_rationale: '**期待値が高い順に NISA を埋める**という原則の、ポートフォリオ全体での測定。 ただし S06 で述べた通り単純な期待値順ではなく、 **(a) NISA は損切りが救済されないので分散の小さい銘柄が向く、 (b) 高配当米国株は外国税額控除が使えず不利（S10）**という 2つの修正が要る。**税制の最適化は 263AT で最も日本固有かつ 確実にリターンを改善できる領域**で、しかも予測不要なので確度が高い。'
+  references:
+  - https://faq.sbisec.co.jp/answer/5ee86c0b144d40001145db08/
+  - 構造的判断
   notes: S04-S06 のポートフォリオ版。期待値が高い順に NISA を埋める
   notes_extra: null
   provenance:
@@ -1207,19 +1414,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
