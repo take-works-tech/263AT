@@ -12,8 +12,9 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: sd(日次対数r, 60日) * sqrt(252)
-  formula: null
-  inputs: null
+  formula: sd(daily ln r, 60d) * sqrt(252)
+  inputs:
+  - PRICE_adj
   sign: negative
   buy_class: aux
   sell_class: aux
@@ -26,7 +27,7 @@
   - PX
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: T1
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -35,18 +36,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: '60営業日が要る。売買停止日は欠損として除外（ゼロを入れない: spec §3）。'
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**売買停止日を0リターンで埋めると過小評価される。** J10（出来高ゼロ日）で除外される銘柄と重なる。'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - I02
+  - I03
+  - I04
+  - I31
+  - I24
+  - J01
+  economic_rationale: '**主用途はサイジングの分母（Kelly）。断面の選択材料としては I31 を使う。** normalization を none にしたのは、 **「低ボラだから買う」（I31）と「低ボラだから多く持つ」（I01）を 二重計上しないため。** 60日は反応が速いがノイズも多い。I02（252日）と両方持つ。'
   references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP RealizedVol — Ang et al. 2006, JF（OSAP再現 t=2.9, 月次0.97%, 品質=1_good, 予測力=1_clear）
+  - 構造的判断。サイジング用途に限定
   notes: 主用途はサイジングの分母。選択の減点材料としては弱い
   notes_extra: サイジングの分母専用。断面ランクしない（catalog §4-I の中心思想）。
   provenance:
@@ -60,23 +65,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: override
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
     notes_extra: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: I02
   name_ja: ヒストリカルボラ(252日)
@@ -84,8 +91,9 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: 同上、252日
-  formula: null
-  inputs: null
+  formula: sd(daily ln r, 252d) * sqrt(252)
+  inputs:
+  - PRICE_adj
   sign: negative
   buy_class: aux
   sell_class: aux
@@ -98,7 +106,7 @@
   - PX
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -107,15 +115,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 252営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: I01 と同じ。**上場後1年未満で欠損**（N24 と重複）。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - I01
+  - I03
+  - I11
+  - I16
+  economic_rationale: '**長期保有の想定リスク推定に使う。263AT の保有期間（6ヶ月-5年）には I01（60日）より I02 の方が近い。** ただし**ボラティリティ自体が時変なので、 252日の平均は直近のレジームを反映しない。** → I03（予測ボラ）が本来はこの役割を担うべき。'
+  references:
+  - 構造的判断。サイジング用途に限定
   notes: 長期保有の想定リスク推定に使う
   notes_extra: サイジングの分母専用。断面ランクしない。
   provenance:
@@ -129,22 +142,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: override
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     notes_extra: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: I03
   name_ja: 予測ボラティリティ
@@ -152,8 +168,10 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: EWMA / GARCH(1,1) / インプライドの合成
-  formula: null
-  inputs: null
+  formula: EWMA / GARCH(1,1) / インプライドの合成予測ボラ
+  inputs:
+  - PRICE_adj
+  - option_iv
   sign: negative
   buy_class: none
   sell_class: none
@@ -166,7 +184,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -175,15 +193,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 推定に十分な履歴が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**インプライドは米国の流動的な銘柄でしか取れない**ので、 合成の重みが銘柄で変わる。**263AT の中核ユニバースでは 実質 EWMA/GARCH のみ**になる。'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - I01
+  - I02
+  - I14
+  - I15
+  - I23
+  economic_rationale: '**Kelly の分母。選択には使わない。** ボラティリティはクラスタリングするので、 **直近のボラは将来のボラを予測する**（GARCH の存在意義）。 リターンの予測より遥かに確度が高い。 → **サイジングの精度はリターン予測の精度より高くできる**という 非対称が、リスク管理を重視する根拠。 I23（予測の当てはまり）でこの前提自体を監視する。'
+  references:
+  - Bollerslev (1986) GARCH
+  - 構造的判断
   notes: Kellyの分母。選択には使わない
   notes_extra: Kelly の分母。選択には一切使わない。
   provenance:
@@ -197,22 +222,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: override
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
     notes_extra: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: I04
   name_ja: 特異ボラティリティ (IVOL)
@@ -220,8 +248,10 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: 3ファクター回帰の残差 sd（60日）
-  formula: null
-  inputs: null
+  formula: sd( residual of FF3 regression, 60d ) * sqrt(252)
+  inputs:
+  - PRICE_adj
+  - factor_returns
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -243,19 +273,23 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 60営業日とファクター系列が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本のファクター系列（Ken French の Japan）は大型株偏重**なので、小型株の残差が過大に出る。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - I01
+  - I06
+  - I07
+  - I29
+  - I31
+  - O07
+  economic_rationale: '**LAW-35。Ang-Hodrick-Xing-Zhang (JF 2006) の IVOL パズル。 特異ボラが高い銘柄は将来リターンが低い** — 分散可能なリスクに プレミアムが付かないどころか負のプレミアムが付く。 **ただし I06（MAX）を入れると符号が反転するという報告がある** （Bali-Cakici-Whitelaw JFE 2011） — IVOL 効果の正体は宝くじ選好かもしれない。 → **両方入れて交互作用を検証する以外に決着の付けようがない。** §1.9 の方針が最も直接的に正当化される例。'
   references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP IdioVol3F — Ang et al. 2006, JF（OSAP再現 t=3.1, 月次1.06%, 品質=1_good, 予測力=1_clear）
-  - OSAP IdioVolAHT — Ali, Hwang, and Trombley 2003, JFE（OSAP再現 t=2.7, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - Ang-Hodrick-Xing-Zhang (JF 2006) The Cross-Section of Volatility and Expected Returns
+  - Bali-Cakici-Whitelaw (JFE 2011) Maxing Out
   notes: LAW-35。MAX（I06）を入れると符号が反転する報告あり。両方入れて交互作用を検証する
   notes_extra: null
   provenance:
@@ -269,22 +303,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: I05
   name_ja: 市場ベータ
@@ -292,8 +328,10 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: cov(r_i, r_m)/var(r_m)（252日、Vasicek収縮）
-  formula: null
-  inputs: null
+  formula: cov(r_i, r_m)/var(r_m), 252d, Vasicek 収縮
+  inputs:
+  - PRICE_adj
+  - index
   sign: negative
   buy_class: aux
   sell_class: aux
@@ -306,7 +344,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: T2
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -315,18 +353,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 252営業日が要る。**日米で使う市場指数が違う**ので rank_market が妥当。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: N24 と重複。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - I26
+  - I10
+  - I19
+  - I30
+  - G28
+  economic_rationale: '**BAB（Betting Against Beta, LAW-36）。生ベータは推定誤差が大きいので 収縮推定を必ず入れる。** Vasicek 収縮は個別推定値を横断的な平均へ引っ張るもので、 **§1.9 の縮小と同じ思想をベータ推定に適用したもの。** → **I26（Frazzini-Pedersen ベータ、t=7.1）の方が正式な推定法**なので、 I05 は簡易版。両方持つが重みは I26 を優先する。'
   references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP Beta — Fama and MacBeth 1973, JPE（OSAP再現 t=2.6, 月次nan%, 品質=1_good, 予測力=2_likely）
+  - Frazzini-Pedersen (JFE 2014) Betting Against Beta
+  - Vasicek (JF 1973)
   notes: BAB。生ベータは推定誤差が大きいので収縮推定を必ず入れる
   notes_extra: null
   provenance:
@@ -340,22 +382,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: I06
   name_ja: MAX効果
@@ -440,8 +484,9 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: 直近21日の日次リターン上位5日の平均
-  formula: null
-  inputs: null
+  formula: mean( top 5 daily returns in past 21d )
+  inputs:
+  - PRICE_adj
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -454,7 +499,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -463,15 +508,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 21営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: I06 と同じ。低流動性銘柄では飛び値が入りやすい。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - I06
+  - I04
+  - I08
+  - I29
+  - O06
+  economic_rationale: '**I06（MAX 単日）のノイズを減らした版。** 宝くじ選好（Bali-Cakici-Whitelaw JFE 2011）。 **「直近に大きく上がった日があった銘柄」を個人が追いかけて 買い上げるので割高になる。** → **263AT の狙い（機関が見ていない静かな銘柄）と 真逆の性質を減点する**ので、戦略と整合する。 G12（Frog-in-the-pan）が「静かに上がった銘柄が良い」と言うのと同じ軸。'
+  references:
+  - Bali-Cakici-Whitelaw (JFE 2011) Maxing Out
+  - https://www.openassetpricing.com/
   notes: I06 のノイズを減らした版
   notes_extra: null
   provenance:
@@ -485,21 +537,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: I08
   name_ja: 特異歪度
@@ -507,8 +562,10 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: 残差リターンの歪度（252日）
-  formula: null
-  inputs: null
+  formula: skewness( residual returns, 252d )
+  inputs:
+  - PRICE_adj
+  - factor_returns
   sign: negative
   buy_class: useful
   sell_class: aux
@@ -530,19 +587,23 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 252営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: N24 と重複。**外れ値1つで歪度が大きく動く**ので、低流動性銘柄で不安定。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - I06
+  - I07
+  - I20
+  - I29
+  - I27
+  - Q05
+  economic_rationale: '**正の歪度は将来リターンと負相関。直感の逆なので必ず符号を確認する。** Boyer-Mitton-Vorkink (RFS 2010) の期待歪度。 **宝くじ型の銘柄は買われすぎて期待リターンが低い。** **263AT の設計（1/10 が全部を賄う＝正の歪度を求める）と 正面から衝突するように見えるが、矛盾ではない。** 求めるべきは「歪度が正」ではなく **「期待値が正でかつ歪度が正」**であり、 **I08 で減点しつつ A/B/C で加点された銘柄が本命。** → **I08 を単独で使ってはいけない。必ず交互作用で使う。**'
   references:
+  - Boyer-Mitton-Vorkink (RFS 2010) Expected Idiosyncratic Skewness
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP ReturnSkew — Bali, Engle and Murray 2015, Book（OSAP再現 t=4.0, 月次0.47%, 品質=1_good, 予測力=1_clear）
-  - OSAP ReturnSkew3F — Bali, Engle and Murray 2015, Book（OSAP再現 t=4.3, 月次0.45%, 品質=1_good, 予測力=1_clear）
   notes: 正の歪度は将来リターンと負相関。直感の逆なので必ず符号を確認
   notes_extra: null
   provenance:
@@ -556,22 +617,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: I09
   name_ja: 尖度
@@ -579,8 +642,10 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: 残差リターンの尖度
-  formula: null
-  inputs: null
+  formula: kurtosis( residual returns, 252d )
+  inputs:
+  - PRICE_adj
+  - factor_returns
   sign: negative
   buy_class: aux
   sell_class: aux
@@ -593,7 +658,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -602,15 +667,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 252営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: I08 と同じ。外れ値に極めて敏感。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - I08
+  - I16
+  - I17
+  - I21
+  - D08
+  economic_rationale: '**テールの厚み。破綻リスクの代理。** 尖度が高い銘柄は「普段は動かないが、 たまに極端に動く」ので、**ボラティリティだけでは リスクを測れない。** → I16（CVaR）や I17（過去最悪日次）と同じものを モーメントで測る。**実証は無いので★1** だが、 **サイジングの安全側の調整には使える。**'
+  references:
+  - 構造的判断。実証は無い
   notes: テールの厚み。破綻リスクの代理
   notes_extra: null
   provenance:
@@ -624,21 +695,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: I10
   name_ja: ダウンサイドベータ
@@ -646,8 +720,10 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: 市場下落日のみで推定したベータ
-  formula: null
-  inputs: null
+  formula: beta estimated on days where r_m < 0
+  inputs:
+  - PRICE_adj
+  - index
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -660,7 +736,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -669,15 +745,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 市場下落日が60日以上必要。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**強気相場が続くと下落日が足りず全銘柄で欠損する。最も必要な局面で作れない**（G28 と同じ）。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - G28
+  - I05
+  - I18
+  - I27
+  - I28
+  - Q04
+  economic_rationale: '**分散効果の実効性を測る。Q カテゴリと連携。** Ang-Chen-Xing (RFS 2006)。 **平時のベータが低くても、下落時のベータが高ければ 分散になっていない。** 相関は危機時に上がるので、 **通常の相関行列で組んだポートフォリオは、 必要なときに機能しない。** → **I10 は Q04（ポートフォリオのテールリスク）の入力**であり、 銘柄選択より配分の材料として重要。'
+  references:
+  - Ang-Chen-Xing (RFS 2006) Downside Risk
   notes: 分散効果の実効性を測る。Q カテゴリと連携
   notes_extra: null
   provenance:
@@ -691,21 +774,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: I11
   name_ja: 最大ドローダウン(3年)
@@ -713,8 +799,9 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: min( P_t/cummax(P) - 1 )
-  formula: null
-  inputs: null
+  formula: min( P_t / cummax(P) - 1 ) over 3 years
+  inputs:
+  - PRICE_adj
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -727,7 +814,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -736,15 +823,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 3年の履歴が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**3年の履歴が要るので若い企業で欠損。** G26/F23 と同じ方向の偏り。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - I17
+  - I16
+  - I18
+  - G08
+  - G07
+  - N23
+  economic_rationale: '**過去に何が起きたかの記録。その原因が解消したかは LLM で判定する。** ドローダウン自体は過去の事実であって将来の予測ではない。 **重要なのは「なぜ下がったか」と「それは終わったか」**で、 そこは T25（テーゼ健在度）や T08（リスク記載の変化）が担う。 → **I11 は定量値としてより、LLM への問いを起動する トリガーとしての価値が大きい。**'
+  references:
+  - 構造的判断
   notes: 過去に何が起きたかの記録。その原因が解消したかはLLMで判定
   notes_extra: null
   provenance:
@@ -758,21 +852,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: I12
   name_ja: ATR比率
@@ -780,8 +877,9 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: ATR(14) / P_t
-  formula: null
-  inputs: null
+  formula: ATR(14) / P_t
+  inputs:
+  - PRICE_adj
   sign: negative
   buy_class: aux
   sell_class: useful
@@ -794,7 +892,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -803,15 +901,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: P>0。14営業日が要る。
   missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
+  missing_bias: '**日本は値幅制限があるので ATR が人為的に抑えられる**（G17 と同じ）。'
+  normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - I01
+  - I12
+  - J11
+  - J18
+  - G17
+  economic_rationale: '**ストップ幅の設定に使う（§1.6）。断面の選択材料ではない** ので normalization: none。 **一律の%ストップは、低ボラ株では狭すぎ高ボラ株では広すぎる。** ATR で正規化すると、**どの銘柄でも「同じ確率で引っかかる」 ストップになる。** ただし**263AT は 6ヶ月-5年 保有なので、 そもそもストップを使うべきかは別の論点**（S カテゴリ）。'
+  references:
+  - 構造的判断。§1.6 のリスク調整
   notes: ストップ幅の設定に使う（§1.6）
   notes_extra: null
   provenance:
@@ -825,21 +929,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: I13
   name_ja: ボラのボラ
@@ -847,8 +954,9 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: sd( 20日ボラの時系列, 過去1年 )
-  formula: null
-  inputs: null
+  formula: sd( 20-day rolling volatility, past 1 year )
+  inputs:
+  - PRICE_adj
   sign: negative
   buy_class: aux
   sell_class: useful
@@ -861,7 +969,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -870,15 +978,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 252営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: N24 と重複。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - I01
+  - I19
+  - I23
+  - I21
+  - P18
+  economic_rationale: '**レジーム不安定性。** ボラティリティ自体が安定しない銘柄は、 **サイジングの前提（I03 の予測ボラ）が崩れやすい。** → **I13 が高い銘柄は I03 の信頼度を下げ、 保守的にサイジングする**という使い方をする。 I23（予測の当てはまり）と同じ役割で、 **Z カテゴリ（メタ）に近い性格を持つ。**'
+  references:
+  - 構造的判断
   notes: レジーム不安定性
   notes_extra: null
   provenance:
@@ -892,21 +1006,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: I14
   name_ja: インプライドボラ / IVランク
@@ -914,8 +1031,9 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: オプション市場から（米国主体）
-  formula: null
-  inputs: null
+  formula: implied volatility とその1年パーセンタイル（IVランク）
+  inputs:
+  - option_iv
   sign: cap
   buy_class: aux
   sell_class: useful
@@ -928,24 +1046,29 @@
   - OPT
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
-  - JP
   - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: オプションが無ければ欠損。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本の小型株にはオプションがない。米国側のみ。** OQ-33 の通り、**263AT の中核ユニバースとオプションが存在する銘柄は ほとんど重ならない。**'
   normalization: rank_all
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - I15
+  - I03
+  - K53
+  - K55
+  - K57
+  economic_rationale: ∩型。**高い IV は市場がイベントを警戒している証拠だが、 同時に「保険が高い」ので買い手には不利。** **I15（IV-HV スプレッド）の方が使いやすい** — 水準ではなく実現ボラとの差を見るので、 銘柄固有のボラ水準の影響を除ける。
+  references:
+  - 構造的判断。OQ-33 の制約下にある
   notes: 日本の小型株にはオプションがない。米国側のみ
   notes_extra: null
   provenance:
@@ -959,23 +1082,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: I15
   name_ja: IV - HV スプレッド
@@ -983,8 +1108,10 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: IV - ヒストリカルボラ
-  formula: null
-  inputs: null
+  formula: IV - historical volatility
+  inputs:
+  - option_iv
+  - PRICE_adj
   sign: negative
   buy_class: aux
   sell_class: useful
@@ -998,24 +1125,29 @@
   - OPT
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
-  - JP
   - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 両方が必要。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: I14 と同じ。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - I14
+  - K55
+  - I03
+  - N08
+  - K53
+  economic_rationale: '**K55（実現ボラ - IV）と符号が逆の同一量。** 2つの ID で持っているのは、**片方が K（需給）、 片方が I（リスク）として別の文脈で使われるから**だが、 **Z12 で完全な負の相関が出るはず。** → **統合候補として最も明確**（K55 の説明と対応）。 決算前の期待の大きさを測れるので、 **N08（PEAD）の前に「どれだけ驚きが期待されているか」が分かる。**'
+  references:
+  - 構造的判断。K55 と同一量（符号逆）
   notes: 高いほど市場がイベントを警戒。決算前の期待の大きさを測れる
   notes_extra: null
   provenance:
@@ -1029,21 +1161,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: I16
   name_ja: CVaR（期待ショートフォール）
@@ -1051,8 +1186,9 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: 下位5%リターンの平均
-  formula: null
-  inputs: null
+  formula: mean( worst 5% of daily returns )
+  inputs:
+  - PRICE_adj
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -1061,750 +1197,6 @@
     label: all
     min_m: 0
     max_m: null
-  data_sources:
-  - CALC
-  evidence_stars: 2
-  prior_scale: 0.45
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: VaR より裾を捉える。Q04 の入力
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: I17
-  name_ja: 過去最悪日次リターン
-  category: I
-  category_name: ボラティリティ・リスク
-  subsection: null
-  definition: min(r_d, 過去3年)
-  formula: null
-  inputs: null
-  sign: negative
-  buy_class: useful
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 1Y-3Y
-    min_m: 12
-    max_m: 36
-  data_sources:
-  - PX
-  evidence_stars: 1
-  prior_scale: 0.15
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: テールの実測。その原因が解消したかは LLM で判定する
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: I18
-  name_ja: 危機時パフォーマンス
-  category: I
-  category_name: ボラティリティ・リスク
-  subsection: null
-  definition: リーマン / コロナ / 2022金利上昇 局面の相対リターン
-  formula: null
-  inputs: null
-  sign: positive
-  buy_class: useful
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 3Y-5Y
-    min_m: 36
-    max_m: 60
-  data_sources:
-  - CALC
-  evidence_stars: 2
-  prior_scale: 0.45
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: null
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: ストレステスト。長期保有では避けて通れない
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-  review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: I19
-  name_ja: ベータの不安定性
-  category: I
-  category_name: ボラティリティ・リスク
-  subsection: null
-  definition: sd( ローリング60日ベータ, 過去2年 )
-  formula: null
-  inputs: null
-  sign: negative
-  buy_class: aux
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 1Y-3Y
-    min_m: 12
-    max_m: 36
-  data_sources:
-  - CALC
-  evidence_stars: 1
-  prior_scale: 0.15
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: 相関が安定しない銘柄は分散効果が読めない
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: I20
-  name_ja: 上方 / 下方ボラの非対称
-  category: I
-  category_name: ボラティリティ・リスク
-  subsection: null
-  definition: sd(正のリターン) / sd(負のリターン)
-  formula: null
-  inputs: null
-  sign: positive
-  buy_class: useful
-  sell_class: aux
-  gate_policy: null
-  horizon:
-    label: 6M-2Y
-    min_m: 6
-    max_m: 24
-  data_sources:
-  - CALC
-  evidence_stars: 1
-  prior_scale: 0.15
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: null
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: 「良い非対称性」の数少ない直接指標。I08（歪度）と符号が逆に見える点に注意し、必ず両方入れて検証する
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-  review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: I21
-  name_ja: ジャンプ頻度
-  category: I
-  category_name: ボラティリティ・リスク
-  subsection: null
-  definition: 日次リターンが ±3sigma を超えた回数
-  formula: null
-  inputs: null
-  sign: negative
-  buy_class: useful
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 1Y-3Y
-    min_m: 12
-    max_m: 36
-  data_sources:
-  - CALC
-  evidence_stars: 1
-  prior_scale: 0.15
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: 情報の反映が離散的＝流動性が薄い
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: I22
-  name_ja: 決算日のボラティリティ
-  category: I
-  category_name: ボラティリティ・リスク
-  subsection: null
-  definition: 決算発表日の平均絶対リターン
-  formula: null
-  inputs: null
-  sign: cap
-  buy_class: useful
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 1Y-3Y
-    min_m: 12
-    max_m: 36
-  data_sources:
-  - CALC
-  evidence_stars: 1
-  prior_scale: 0.15
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: abs_dev(x_star=sector_median)
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: 大きいほどサプライズが多い＝予測が難しい
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-  review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: I23
-  name_ja: ボラ予測の当てはまり
-  category: I
-  category_name: ボラティリティ・リスク
-  subsection: null
-  definition: GARCH の予測誤差
-  formula: null
-  inputs: null
-  sign: negative
-  buy_class: aux
-  sell_class: aux
-  gate_policy: null
-  horizon:
-    label: all
-    min_m: 0
-    max_m: null
-  data_sources:
-  - CALC
-  evidence_stars: 1
-  prior_scale: 0.15
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: サイジングの信頼度に反映させる
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: I24
-  name_ja: 流動性調整後リスク
-  category: I
-  category_name: ボラティリティ・リスク
-  subsection: null
-  definition: sigma × sqrt(1 + 流動化日数)
-  formula: null
-  inputs: null
-  sign: negative
-  buy_class: main
-  sell_class: main
-  gate_policy: null
-  horizon:
-    label: all
-    min_m: 0
-    max_m: null
-  data_sources:
-  - CALC
-  evidence_stars: 1
-  prior_scale: 0.15
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: 小型株の真のリスク。J02 を sigma に織り込む
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: I25
-  name_ja: 単一要因への依存度
-  category: I
-  category_name: ボラティリティ・リスク
-  subsection: null
-  definition: 最大の売上・利益ドライバーへの感応度
-  formula: null
-  inputs: null
-  sign: negative
-  buy_class: useful
-  sell_class: main
-  gate_policy: null
-  horizon:
-    label: 1Y-3Y
-    min_m: 12
-    max_m: 36
-  data_sources:
-  - LLM
-  - CALC
-  evidence_stars: 1
-  prior_scale: 0.15
-  evidence_tier: null
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
-  notes: 一本足打法のリスク。N21/T18/V02 の定量版
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
-  version: 1
-- id: I26
-  name_ja: Frazzini-Pedersen ベータ
-  category: I
-  category_name: ボラティリティ・リスク
-  subsection: null
-  definition: 日次リターンの相関とボラを分けて推定した収縮ベータ
-  formula: null
-  inputs: null
-  sign: negative
-  buy_class: main
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 6M-2Y
-    min_m: 6
-    max_m: 24
-  data_sources:
-  - CALC
-  evidence_stars: 2
-  prior_scale: 0.45
-  evidence_tier: T3
-  markets:
-  - JP
-  - US
-  industries: null
-  period_convention: POINT
-  consolidation: na
-  accounting_standard_note: na
-  pit_lag_days: 0
-  zero_denominator_policy: na
-  missing_policy: flag
-  missing_bias: null
-  normalization: rank_all
-  nonlinear: null
-  winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP BetaFP — Frazzini and Pedersen 2014, JFE（OSAP再現 t=7.1, 月次0.7%, 品質=3_distant, 予測力=2_likely）
-  notes: OSAP BetaFP t=7.1。BAB（LAW-36）の正式な推定法。I05 の素のベータより遥かに強い
-  notes_extra: null
-  provenance:
-    name_ja: catalog
-    definition: catalog
-    sign: catalog
-    buy_class: catalog
-    sell_class: catalog
-    horizon: catalog
-    data_sources: catalog
-    evidence_stars: catalog
-    notes: catalog
-    prior_scale: default
-    consolidation: default
-    missing_policy: default
-    normalization: default
-    period_convention: default
-    pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
-    evidence_tier: override
-    references: override
-  review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
-  version: 1
-- id: I27
-  name_ja: 共歪度
-  category: I
-  category_name: ボラティリティ・リスク
-  subsection: null
-  definition: 市場リターンの2乗に対する感応度
-  formula: null
-  inputs: null
-  sign: negative
-  buy_class: useful
-  sell_class: useful
-  gate_policy: null
-  horizon:
-    label: 1Y-3Y
-    min_m: 12
-    max_m: 36
   data_sources:
   - CALC
   evidence_stars: 2
@@ -1818,19 +1210,24 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 252営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: N24 と重複。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - I09
+  - I17
+  - I11
+  - I28
+  - Q04
+  - I01
+  economic_rationale: '**VaR より裾を捉える。Q04 の入力。** VaR は「5%の確率で −X% 以上下がる」としか言わないが、 CVaR は**その 5% の中の平均**を見るので、 **どれだけひどいことになるかを測れる。** **263AT は 90% を投資信託に置いているので、 個別株の10%が全損しても生活は壊れない** — これが CVaR を許容できる根拠であり、 **§1.8 のサイジングの前提そのもの。**'
   references:
-  - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP Coskewness — Harvey and Siddique 2000, JF（OSAP再現 t=2.0, 月次0.3%, 品質=1_good, 予測力=2_likely）
-  notes: OSAP Coskewness t=2.0 / CoskewACX t=2.8。市場が大きく動くときに一緒に壊れるか
+  - Rockafellar-Uryasev (2000) Conditional Value-at-Risk
+  - 構造的判断
+  notes: VaR より裾を捉える。Q04 の入力
   notes_extra: null
   provenance:
     name_ja: catalog
@@ -1843,31 +1240,821 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
     evidence_tier: override
     references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
-- id: I28
-  name_ja: テールリスク・ベータ
+- id: I17
+  name_ja: 過去最悪日次リターン
   category: I
   category_name: ボラティリティ・リスク
   subsection: null
-  definition: 市場のテールリスク指標への感応度
-  formula: null
-  inputs: null
+  definition: min(r_d, 過去3年)
+  formula: min( daily r, past 3 years )
+  inputs:
+  - PRICE_adj
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - PX
+  evidence_stars: 1
+  prior_scale: 0.15
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: 3年の履歴が要る。
+  missing_policy: flag
+  missing_bias: I11 と同じ。**しかも日本は値幅制限で単日の最悪値が切り詰められる**（複数日に分散する）。
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - I11
+  - I16
+  - I09
+  - I21
+  - G17
+  economic_rationale: '**テールの実測。その原因が解消したかは LLM で判定する。** I11（最大DD）が累積、I17 が単日。 **単日で −30% になる銘柄は、 上場廃止・不正会計・大型減損のいずれかが起きている。** → **I17 が極端な銘柄は、E カテゴリ（会計品質）と D カテゴリ（財務健全性）を重点的に見る**という 調査の起動条件になる。'
+  references:
+  - 構造的判断
+  notes: テールの実測。その原因が解消したかは LLM で判定する
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: I18
+  name_ja: 危機時パフォーマンス
+  category: I
+  category_name: ボラティリティ・リスク
+  subsection: null
+  definition: リーマン / コロナ / 2022金利上昇 局面の相対リターン
+  formula: リーマン / コロナ / 2022金利上昇 各局面の市場相対リターン
+  inputs:
+  - PRICE_adj
+  - index
+  - crisis_periods
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 3Y-5Y
+    min_m: 36
+    max_m: 60
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: 該当局面に上場していなければ欠損。
+  missing_policy: flag
+  missing_bias: '**リーマン（2008）まで遡ると上場していない企業が大量に出る。 しかも「3つの危機を生き延びた」こと自体が生存者バイアス**（§8-2）。 → **I18 が計算できる時点で、その銘柄は生き残っている。** これは避けようがない構造的な偏り。'
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - I10
+  - G28
+  - T40
+  - D03
+  - U42
+  - P15
+  economic_rationale: '**ストレステスト。長期保有では避けて通れない。** 3つの危機は性質が違う（信用危機 / パンデミック / 金利上昇）ので、 **どれに強くどれに弱いかで、次に何が起きたときに どうなるかが推定できる。** → **T40（景気耐性の定性評価）と突合し、 矛盾したら要調査**というのが T カテゴリ共通の使い方。 上の missing_bias の通り**生存者バイアスが構造的に入る**ので、 値が良いことを額面通りに受け取ってはいけない。'
+  references:
+  - 構造的判断。生存者バイアスが不可避
+  notes: ストレステスト。長期保有では避けて通れない
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: I19
+  name_ja: ベータの不安定性
+  category: I
+  category_name: ボラティリティ・リスク
+  subsection: null
+  definition: sd( ローリング60日ベータ, 過去2年 )
+  formula: sd( rolling 60-day beta, past 2 years )
+  inputs:
+  - PRICE_adj
+  - index
+  sign: negative
+  buy_class: aux
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 1
+  prior_scale: 0.15
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: 2年の履歴が要る。
+  missing_policy: flag
+  missing_bias: N24 と重複。
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - I05
+  - I13
+  - I26
+  - I10
+  - Q04
+  economic_rationale: '**相関が安定しない銘柄は分散効果が読めない。** I13（ボラのボラ）のベータ版。 **Q カテゴリ（ポートフォリオ）が想定する分散は、 ベータと相関が安定していることを前提にしている。** → **I19 が高い銘柄を多く持つと、 ポートフォリオのリスク推定そのものが信用できなくなる。** 銘柄選択より配分の制約として使う。'
+  references:
+  - 構造的判断
+  notes: 相関が安定しない銘柄は分散効果が読めない
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: I20
+  name_ja: 上方 / 下方ボラの非対称
+  category: I
+  category_name: ボラティリティ・リスク
+  subsection: null
+  definition: sd(正のリターン) / sd(負のリターン)
+  formula: sd( positive returns ) / sd( negative returns )
+  inputs:
+  - PRICE_adj
+  sign: positive
+  buy_class: useful
+  sell_class: aux
+  gate_policy: null
+  horizon:
+    label: 6M-2Y
+    min_m: 6
+    max_m: 24
+  data_sources:
+  - CALC
+  evidence_stars: 1
+  prior_scale: 0.15
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: 下落日が60日以上必要。
+  missing_policy: flag
+  missing_bias: I10 と同じ。強気相場では下落日が不足する。
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - I08
+  - I29
+  - I10
+  - G28
+  - Q05
+  economic_rationale: '**「良い非対称性」の数少ない直接指標。** 上には大きく、下には小さく動く銘柄は、 **263AT の設計（1/10 が全部を賄う）が求める性質そのもの。** **I08（歪度 −）と符号が逆に見える点が最大の論点。** → 上の (4) で整理した通り、 **I08 は「宝くじ選好で買われすぎた銘柄」を減点し、 I20 は「実際に非対称なリターン分布を持つ銘柄」を加点する。** 測っているものが違うので矛盾しないが、 **相関は高いはずなので、Z12 で両者の関係を必ず確認する。** 実証が無いので★1 だが、**設計思想との整合性は最も高い。**'
+  references:
+  - 構造的判断。§1.8（Bessembinder サイジング）との整合
+  notes: 「良い非対称性」の数少ない直接指標。I08（歪度）と符号が逆に見える点に注意し、必ず両方入れて検証する
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: I21
+  name_ja: ジャンプ頻度
+  category: I
+  category_name: ボラティリティ・リスク
+  subsection: null
+  definition: 日次リターンが ±3sigma を超えた回数
+  formula: count( abs(r_d) > 3 * sd(r) ) over 252d
+  inputs:
+  - PRICE_adj
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 1
+  prior_scale: 0.15
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: 252営業日が要る。
+  missing_policy: flag
+  missing_bias: '**日本は値幅制限でジャンプが複数日に分割されるので、日米で頻度が構造的に違う。**'
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - G17
+  - I09
+  - I17
+  - J09
+  - J10
+  - O01
+  economic_rationale: '**情報の反映が離散的＝流動性が薄い。** 連続的に価格が動かず、たまに飛ぶ銘柄は、 **板が薄く、少数の注文で価格が決まっている。** → **J カテゴリ（流動性）の性格を強く持つ**ので、 I というより J に近い。 **263AT の狙う小型株では構造的に高くなる**ので、 **減点すると戦略と衝突する。** → **選択の減点ではなくサイジングの調整に使うべき。**'
+  references:
+  - 構造的判断
+  notes: 情報の反映が離散的＝流動性が薄い
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: I22
+  name_ja: 決算日のボラティリティ
+  category: I
+  category_name: ボラティリティ・リスク
+  subsection: null
+  definition: 決算発表日の平均絶対リターン
+  formula: mean( abs(r) on earnings announcement days )
+  inputs:
+  - PRICE_adj
+  - earnings_date
+  sign: cap
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 1
+  prior_scale: 0.15
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: 決算日が4回以上必要。
+  missing_policy: flag
+  missing_bias: '**決算発表日の正確な特定が要る。日本は引け後発表が多く、翌営業日に反映される**（spec §1.5）。'
+  normalization: rank_all
+  nonlinear: abs_dev(x_star=sector_median)
+  winsorize: null
+  correlated_with:
+  - I15
+  - N08
+  - E14
+  - G37
+  - T03
+  economic_rationale: ∩型。**大きいほどサプライズが多い＝予測が難しい。** ただし**小さすぎるのも問題で、 決算に反応しない銘柄は誰も見ていない** — それは O カテゴリ（ネグレクト）としては好材料。 → **∩型にしたが、263AT では低い側を減点すべきでない 可能性がある。** 業種中央値を x* に置くのは暫定。 **N08（PEAD）が効く前提は「決算に反応する」ことなので、 I22 が極端に低い銘柄では N08 が機能しない。**
+  references:
+  - 構造的判断
+  notes: 大きいほどサプライズが多い＝予測が難しい
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: I23
+  name_ja: ボラ予測の当てはまり
+  category: I
+  category_name: ボラティリティ・リスク
+  subsection: null
+  definition: GARCH の予測誤差
+  formula: GARCH 予測ボラと実現ボラの予測誤差
+  inputs:
+  - I03
+  - PRICE_adj
+  sign: negative
+  buy_class: aux
+  sell_class: aux
+  gate_policy: null
+  horizon:
+    label: all
+    min_m: 0
+    max_m: null
+  data_sources:
+  - CALC
+  evidence_stars: 1
+  prior_scale: 0.15
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: 予測と実現の両方が要る。
+  missing_policy: flag
+  missing_bias: I03 を継承。
+  normalization: none
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - I03
+  - I13
+  - I19
+  - Z10
+  - Z11
+  economic_rationale: '**サイジングの信頼度に反映させる。** I03 の説明で述べた「サイジングの精度はリターン予測より高い」 という前提を、**実測で監視する。** → **Z カテゴリ（メタ）と同じ役割**で、 断面ランクを取らない（normalization: none）。 **予測が外れている銘柄では Kelly の分母が信用できないので、 保守的に持つ。**'
+  references:
+  - 構造的判断。Z カテゴリと同じ役割
+  notes: サイジングの信頼度に反映させる
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: override
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: I24
+  name_ja: 流動性調整後リスク
+  category: I
+  category_name: ボラティリティ・リスク
+  subsection: null
+  definition: sigma × sqrt(1 + 流動化日数)
+  formula: sigma * sqrt( 1 + 流動化に要する日数 )
+  inputs:
+  - I01
+  - J02
+  sign: negative
+  buy_class: main
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: all
+    min_m: 0
+    max_m: null
+  data_sources:
+  - CALC
+  evidence_stars: 1
+  prior_scale: 0.15
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: J02（参加率上限）から流動化日数を算出。
+  missing_policy: flag
+  missing_bias: J01/J02 を継承。
+  normalization: none
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - I01
+  - J01
+  - J02
+  - J10
+  - Q04
+  economic_rationale: '**小型株の真のリスク。J02 を sigma に織り込む。** 「3日かけないと売れない」銘柄は、 **その3日分の価格変動リスクを負っている。** 通常のボラティリティはこれを無視する。 → **263AT の狙う小型株では I24 と I01 の差が大きく、 I01 だけでサイジングすると過大に持つ。** **J01（600万円の流動性下限）を設けた根拠と直結する。**'
+  references:
+  - 構造的判断。§1.6 / J01 の根拠と直結
+  notes: 小型株の真のリスク。J02 を sigma に織り込む
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: override
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: I25
+  name_ja: 単一要因への依存度
+  category: I
+  category_name: ボラティリティ・リスク
+  subsection: null
+  definition: 最大の売上・利益ドライバーへの感応度
+  formula: 最大の売上・利益ドライバーへの感応度（LLM 特定 + 回帰）
+  inputs:
+  - LLM
+  - REV
+  - driver_series
+  sign: negative
+  buy_class: useful
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - LLM
+  - CALC
+  evidence_stars: 1
+  prior_scale: 0.15
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: ドライバーが特定できなければ欠損。
+  missing_policy: flag
+  missing_bias: '**LLM がドライバーを誤特定すると、感応度は正しく推定されても意味がない。**'
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - T18
+  - U36
+  - V02
+  - N21
+  - T19
+  - U39
+  economic_rationale: '**一本足打法のリスク。N21/T18/V02 の定量版。** 単一顧客（T18）、単一製品（U36）、単一商品価格（U39）、 単一事業（V02）— **形は違うが「一つが崩れたら終わる」という 同じ構造。** I25 はそれを統一的に測る試み。 **263AT の狙う小型株ほど集中度が高い**ので、 **戦略と構造的に結びついたリスク。** → サイジング（Q）で必ず反映させる。'
+  references:
+  - 構造的判断。T18/U36/V02/U39 の統合
+  notes: 一本足打法のリスク。N21/T18/V02 の定量版
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: I26
+  name_ja: Frazzini-Pedersen ベータ
+  category: I
+  category_name: ボラティリティ・リスク
+  subsection: null
+  definition: 日次リターンの相関とボラを分けて推定した収縮ベータ
+  formula: Frazzini-Pedersen beta = corr(r_i, r_m) * sd(r_i)/sd(r_m), 収縮あり
+  inputs:
+  - PRICE_adj
+  - index
+  sign: negative
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 6M-2Y
+    min_m: 6
+    max_m: 24
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: 相関に5年、ボラに1年の履歴を使うのが原論文の定義。
+  missing_policy: flag
+  missing_bias: '**相関の推定に5年を使うので、若い銘柄で欠損する。** I05 より欠損が多い。'
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - I05
+  - I10
+  - I19
+  - I30
+  - G16
+  economic_rationale: '**OSAP BetaFP t=7.1。BAB（LAW-36）の正式な推定法。** 相関とボラを別々の窓で推定するのが要点 — **相関は安定していて長い窓が使え、 ボラは時変なので短い窓が要る。** 生ベータ（I05）は両方を同じ窓で推定するので、 **ボラの変動が相関の推定を汚染する。** → **I26 が I05 より遥かに良い理由はここにあり、 t=7.1 という差になって現れる。** **レバレッジ制約のある投資家が高ベータ株を買い上げる**という 機構は、**信用取引を使える個人には利用可能。**'
+  references:
+  - https://www.openassetpricing.com/
+  - Frazzini-Pedersen (JFE 2014) Betting Against Beta
+  - OSAP BetaFP t=7.1
+  notes: OSAP BetaFP t=7.1。BAB（LAW-36）の正式な推定法。I05 の素のベータより遥かに強い
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    evidence_tier: override
+    references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: I27
+  name_ja: 共歪度
+  category: I
+  category_name: ボラティリティ・リスク
+  subsection: null
+  definition: 市場リターンの2乗に対する感応度
+  formula: beta( r_i ~ r_m^2 )
+  inputs:
+  - PRICE_adj
+  - index
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -1889,18 +2076,102 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 252営業日が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: N24 と重複。**推定が不安定**（2乗項の回帰は外れ値に弱い）。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - I08
+  - I10
+  - I28
+  - I29
+  - Q04
+  economic_rationale: '**市場が大きく動くときに一緒に大きく動く度合い。** Harvey-Siddique (JF 2000) の共歪度。 **投資家は「市場が崩れるときに一緒に崩れる」資産を嫌う**ので、 そういう資産にはプレミアムが要る — はずだが、 **OSAP の t は 2.0 / 2.8 と弱い。** → **理論的には最も正当な部類なのに実証が弱い**という、 §0 の T1-T4 の枠組みでは扱いにくい例。 ★2 だが実質的な重みは低くなる。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP BetaTailRisk — Kelly and Jiang 2014, RFS（OSAP再現 t=2.5, 月次0.33%, 品質=1_good, 予測力=1_clear）
+  - Harvey-Siddique (JF 2000) Conditional Skewness in Asset Pricing Tests
+  - OSAP Coskewness t=2.0
+  notes: OSAP Coskewness t=2.0 / CoskewACX t=2.8。市場が大きく動くときに一緒に壊れるか
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: override
+    missing_policy: default
+    normalization: default
+    period_convention: override
+    pit_lag_days: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    evidence_tier: override
+    references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
+  review:
+    status: verified
+    pending: []
+  version: 1
+- id: I28
+  name_ja: テールリスク・ベータ
+  category: I
+  category_name: ボラティリティ・リスク
+  subsection: null
+  definition: 市場のテールリスク指標への感応度
+  formula: beta( r_i ~ market tail risk index )
+  inputs:
+  - PRICE_adj
+  - tail_risk_index
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: テールリスク指標の系列が要る。
+  missing_policy: flag
+  missing_bias: '**Kelly-Jiang のテールリスク指標は日本について整備されていない。米国のみ実装可能。**'
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with:
+  - I16
+  - I10
+  - I27
+  - I30
+  - P10
+  economic_rationale: '**I16（CVaR）の断面版。** 自分のテールでなく **市場のテールに対する感応度**を測る。 Kelly-Jiang (RFS 2014)。 **危機時に一斉に落ちる銘柄群を識別できる**ので、 **Q カテゴリの分散が効かなくなる条件を事前に把握できる。** OSAP BetaTailRisk t=2.5。'
+  references:
+  - https://www.openassetpricing.com/
+  - Kelly-Jiang (RFS 2014) Tail Risk and Asset Prices
+  - OSAP BetaTailRisk t=2.5
   notes: OSAP BetaTailRisk t=2.5。I16（CVaR）の断面版
   notes_extra: null
   provenance:
@@ -1914,22 +2185,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: I29
   name_ja: 3ファクター残差歪度
@@ -1937,8 +2210,10 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: FF3 回帰残差の歪度
-  formula: null
-  inputs: null
+  formula: skewness( FF3 residuals )
+  inputs:
+  - PRICE_adj
+  - factor_returns
   sign: negative
   buy_class: main
   sell_class: useful
@@ -1960,18 +2235,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 252営業日とファクター系列が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: I04 と同じ。日本のファクター系列の質に依存。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - I08
+  - I07
+  - I06
+  - I20
+  - I04
+  economic_rationale: '**I08 より高い t（4.3 / 4.0）。** ファクター調整した残差で測る方が予測力が高い — **市場全体やサイズ・バリューに起因する歪度ではなく、 銘柄固有の歪度が効く**ということ。 G10（残差モメンタム）が素のモメンタムより良いのと同じ構造で、 **「ファクターを除いた残りが本体」というパターンが I にも G にも現れる。**'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP ReturnSkew3F — Bali, Engle and Murray 2015, Book（OSAP再現 t=4.3, 月次0.45%, 品質=1_good, 予測力=1_clear）
+  - OSAP ReturnSkew3F t=4.3
   notes: OSAP ReturnSkew3F t=4.3 / ReturnSkew t=4.0。I08 より高い t。§1.8 の宝くじ回避の主力
   notes_extra: null
   provenance:
@@ -1985,22 +2264,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: I30
   name_ja: VIX 感応度
@@ -2008,8 +2289,10 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: beta( r_i ~ delta_VIX )
-  formula: null
-  inputs: null
+  formula: beta( r_i ~ delta VIX )
+  inputs:
+  - PRICE_adj
+  - VIX
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -2031,18 +2314,23 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 252営業日と VIX 系列が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本は日経VI を使う。VIX と日経VI は別物なので、日米統合ランクは取らない**（rank_market が妥当）。'
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - P10
+  - I05
+  - I26
+  - I28
+  - K53
+  economic_rationale: '**P10（VIX 水準）の銘柄別版。** VIX が上がったときに一緒に落ちる銘柄は、 **ボラティリティリスクに対して脆弱。** Ang-Hodrick-Xing-Zhang (JF 2006) の aggregate volatility risk。 **I04（IVOL パズル）と同じ論文から出た概念**で、 **両者を併せて見るのが原論文の趣旨。** OSAP betaVIX t=3.9。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP betaVIX — Ang et al. 2006, JF（OSAP再現 t=3.9, 月次1.04%, 品質=1_good, 予測力=1_clear）
+  - Ang-Hodrick-Xing-Zhang (JF 2006)
+  - OSAP betaVIX t=3.9
   notes: OSAP betaVIX t=3.9。P10 の銘柄別版
   notes_extra: null
   provenance:
@@ -2056,22 +2344,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: I31
   name_ja: 実現ボラティリティ（総合）
@@ -2079,8 +2369,9 @@
   category_name: ボラティリティ・リスク
   subsection: null
   definition: 日次リターンの標準偏差（ファクター調整なし）
-  formula: null
-  inputs: null
+  formula: sd( daily returns ), ファクター調整なし
+  inputs:
+  - PRICE_adj
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -2102,18 +2393,23 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 推定窓の営業日数が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: I01 と同じ。
   normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
+  correlated_with:
+  - I01
+  - I02
+  - I04
+  - I24
+  - I26
+  economic_rationale: '**I01/I02 は「サイジング専用」としたが、断面でも効く。** OSAP RealizedVol t=2.9。 低ボラアノマリー（Baker-Bradley-Wurgler FAJ 2011）。 → **同じ量を I01（サイジング, normalization: none）と I31（選択, rank_all）で二重に持つのは意図的。** **役割が違うので二重計上にならない** — I01 は Kelly の分母、I31 はスコアの加減点。 **これを混ぜないために ID を分けた**というのが I カテゴリ設計の要点。'
   references:
   - https://www.openassetpricing.com/
-  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
-  - OSAP RealizedVol — Ang et al. 2006, JF（OSAP再現 t=2.9, 月次0.97%, 品質=1_good, 予測力=1_clear）
+  - Baker-Bradley-Wurgler (FAJ 2011) Benchmarks as Limits to Arbitrage
+  - OSAP RealizedVol t=2.9
   notes: OSAP RealizedVol t=2.9。I01/I02 は「サイジング専用」としたが、断面でも予測力がある
   notes_extra: null
   provenance:
@@ -2127,20 +2423,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
     normalization: default
-    period_convention: default
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
     evidence_tier: override
     references: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q12
+    status: verified
+    pending: []
   version: 1

@@ -11472,3 +11472,1490 @@ T45:
   references: ["構造的判断。catalog §6.5（ルックアヘッド検出）"]
   markets: [JP, US]
   review: {status: verified}
+
+# =============================================================================
+# I（リスク・ボラティリティ）31件
+#
+# I カテゴリを貫く4つの事実:
+#
+#  (1) **「リスクが低い銘柄ほどリターンが高い」という、
+#      教科書と正反対の実証が I の大半を占める。**
+#      低ボラ（I01/I31）、低ベータ（I05/I26）、低 IVOL（I04）、
+#      低歪度（I08/I29）— どれも符号が負。
+#      **CAPM が予測する正の関係は、断面では観測されない。**
+#      Frazzini-Pedersen (JFE 2014) はレバレッジ制約で説明する:
+#      レバレッジをかけられない投資家が高ベータ株を買うので割高になる。
+#      **→ 個人はレバレッジ制約が緩い（信用取引が使える）ので、
+#         この歪みを利用できる側にいる。** 263AT の優位性の一つ。
+#
+#  (2) **サイジング用と選択用を厳密に分ける。**
+#      I01/I02/I03 は Kelly の分母であって断面ランクの材料ではない。
+#      → **normalization: none**。ここを混ぜると、
+#      「低ボラだから買う」と「低ボラだから多く持つ」が二重計上される。
+#
+#  (3) **符号が直感と逆なものが多く、しかも互いに逆を向く。**
+#      I08（歪度 −）と I20（上方/下方ボラ比 +）は一見矛盾する。
+#      I04（IVOL）は I06（MAX）を入れると符号が反転するという報告がある。
+#      → **どれも「両方入れて交互作用を検証する」以外に解がない。**
+#         §1.9（選択せず縮小する）が最も正当化されるカテゴリ。
+#
+#  (4) **263AT の設計（1/10 が全部を賄う）は、
+#      正の歪度を求める設計である。** ところが I08/I29 の実証は
+#      「正の歪度の銘柄は平均リターンが低い」と言う。
+#      **これは矛盾ではない** — 宝くじ型銘柄は期待値が負でも
+#      分散が大きい。求めるべきは「歪度」ではなく
+#      「期待値が正でかつ歪度が正」であり、
+#      **I08 で減点しつつ A/B/C で加点された銘柄が本命。**
+#      → **I08 を単独で使わず、必ずバリュー・質と交互作用させる。**
+# =============================================================================
+
+I01:
+  formula: "sd(daily ln r, 60d) * sqrt(252)"
+  inputs: [PRICE_adj]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "60営業日が要る。売買停止日は欠損として除外（ゼロを入れない: spec §3）。"
+  missing_bias: "**売買停止日を0リターンで埋めると過小評価される。** J10（出来高ゼロ日）で除外される銘柄と重なる。"
+  correlated_with: [I02, I03, I04, I31, I24, J01]
+  economic_rationale: >-
+    **主用途はサイジングの分母（Kelly）。断面の選択材料としては I31 を使う。**
+    normalization を none にしたのは、
+    **「低ボラだから買う」（I31）と「低ボラだから多く持つ」（I01）を
+    二重計上しないため。**
+    60日は反応が速いがノイズも多い。I02（252日）と両方持つ。
+  evidence_tier: T3
+  references: ["構造的判断。サイジング用途に限定"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I02:
+  formula: "sd(daily ln r, 252d) * sqrt(252)"
+  inputs: [PRICE_adj]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "252営業日が要る。"
+  missing_bias: "I01 と同じ。**上場後1年未満で欠損**（N24 と重複）。"
+  correlated_with: [I01, I03, I11, I16]
+  economic_rationale: >-
+    **長期保有の想定リスク推定に使う。263AT の保有期間（6ヶ月-5年）には
+    I01（60日）より I02 の方が近い。**
+    ただし**ボラティリティ自体が時変なので、
+    252日の平均は直近のレジームを反映しない。**
+    → I03（予測ボラ）が本来はこの役割を担うべき。
+  evidence_tier: T3
+  references: ["構造的判断。サイジング用途に限定"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I03:
+  formula: "EWMA / GARCH(1,1) / インプライドの合成予測ボラ"
+  inputs: [PRICE_adj, option_iv]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "推定に十分な履歴が要る。"
+  missing_bias: >-
+    **インプライドは米国の流動的な銘柄でしか取れない**ので、
+    合成の重みが銘柄で変わる。**263AT の中核ユニバースでは
+    実質 EWMA/GARCH のみ**になる。
+  correlated_with: [I01, I02, I14, I15, I23]
+  economic_rationale: >-
+    **Kelly の分母。選択には使わない。**
+    ボラティリティはクラスタリングするので、
+    **直近のボラは将来のボラを予測する**（GARCH の存在意義）。
+    リターンの予測より遥かに確度が高い。
+    → **サイジングの精度はリターン予測の精度より高くできる**という
+    非対称が、リスク管理を重視する根拠。
+    I23（予測の当てはまり）でこの前提自体を監視する。
+  evidence_tier: T2
+  references: ["Bollerslev (1986) GARCH", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I04:
+  formula: "sd( residual of FF3 regression, 60d ) * sqrt(252)"
+  inputs: [PRICE_adj, factor_returns]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "60営業日とファクター系列が要る。"
+  missing_bias: "**日本のファクター系列（Ken French の Japan）は大型株偏重**なので、小型株の残差が過大に出る。"
+  correlated_with: [I01, I06, I07, I29, I31, O07]
+  economic_rationale: >-
+    **LAW-35。Ang-Hodrick-Xing-Zhang (JF 2006) の IVOL パズル。
+    特異ボラが高い銘柄は将来リターンが低い** — 分散可能なリスクに
+    プレミアムが付かないどころか負のプレミアムが付く。
+    **ただし I06（MAX）を入れると符号が反転するという報告がある**
+    （Bali-Cakici-Whitelaw JFE 2011）
+    — IVOL 効果の正体は宝くじ選好かもしれない。
+    → **両方入れて交互作用を検証する以外に決着の付けようがない。**
+    §1.9 の方針が最も直接的に正当化される例。
+  evidence_tier: T1
+  references: ["Ang-Hodrick-Xing-Zhang (JF 2006) The Cross-Section of Volatility and Expected Returns", "Bali-Cakici-Whitelaw (JFE 2011) Maxing Out"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I05:
+  formula: "cov(r_i, r_m)/var(r_m), 252d, Vasicek 収縮"
+  inputs: [PRICE_adj, index]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "252営業日が要る。**日米で使う市場指数が違う**ので rank_market が妥当。"
+  missing_bias: "N24 と重複。"
+  correlated_with: [I26, I10, I19, I30, G28]
+  economic_rationale: >-
+    **BAB（Betting Against Beta, LAW-36）。生ベータは推定誤差が大きいので
+    収縮推定を必ず入れる。**
+    Vasicek 収縮は個別推定値を横断的な平均へ引っ張るもので、
+    **§1.9 の縮小と同じ思想をベータ推定に適用したもの。**
+    → **I26（Frazzini-Pedersen ベータ、t=7.1）の方が正式な推定法**なので、
+    I05 は簡易版。両方持つが重みは I26 を優先する。
+  evidence_tier: T1
+  references: ["Frazzini-Pedersen (JFE 2014) Betting Against Beta", "Vasicek (JF 1973)"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I07:
+  formula: "mean( top 5 daily returns in past 21d )"
+  inputs: [PRICE_adj]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "21営業日が要る。"
+  missing_bias: "I06 と同じ。低流動性銘柄では飛び値が入りやすい。"
+  correlated_with: [I06, I04, I08, I29, O06]
+  economic_rationale: >-
+    **I06（MAX 単日）のノイズを減らした版。**
+    宝くじ選好（Bali-Cakici-Whitelaw JFE 2011）。
+    **「直近に大きく上がった日があった銘柄」を個人が追いかけて
+    買い上げるので割高になる。**
+    → **263AT の狙い（機関が見ていない静かな銘柄）と
+    真逆の性質を減点する**ので、戦略と整合する。
+    G12（Frog-in-the-pan）が「静かに上がった銘柄が良い」と言うのと同じ軸。
+  evidence_tier: T1
+  references: ["Bali-Cakici-Whitelaw (JFE 2011) Maxing Out", "https://www.openassetpricing.com/"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I08:
+  formula: "skewness( residual returns, 252d )"
+  inputs: [PRICE_adj, factor_returns]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "252営業日が要る。"
+  missing_bias: "N24 と重複。**外れ値1つで歪度が大きく動く**ので、低流動性銘柄で不安定。"
+  correlated_with: [I06, I07, I20, I29, I27, Q05]
+  economic_rationale: >-
+    **正の歪度は将来リターンと負相関。直感の逆なので必ず符号を確認する。**
+    Boyer-Mitton-Vorkink (RFS 2010) の期待歪度。
+    **宝くじ型の銘柄は買われすぎて期待リターンが低い。**
+    **263AT の設計（1/10 が全部を賄う＝正の歪度を求める）と
+    正面から衝突するように見えるが、矛盾ではない。**
+    求めるべきは「歪度が正」ではなく
+    **「期待値が正でかつ歪度が正」**であり、
+    **I08 で減点しつつ A/B/C で加点された銘柄が本命。**
+    → **I08 を単独で使ってはいけない。必ず交互作用で使う。**
+  evidence_tier: T1
+  references: ["Boyer-Mitton-Vorkink (RFS 2010) Expected Idiosyncratic Skewness", "https://www.openassetpricing.com/"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I09:
+  formula: "kurtosis( residual returns, 252d )"
+  inputs: [PRICE_adj, factor_returns]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "252営業日が要る。"
+  missing_bias: "I08 と同じ。外れ値に極めて敏感。"
+  correlated_with: [I08, I16, I17, I21, D08]
+  economic_rationale: >-
+    **テールの厚み。破綻リスクの代理。**
+    尖度が高い銘柄は「普段は動かないが、
+    たまに極端に動く」ので、**ボラティリティだけでは
+    リスクを測れない。**
+    → I16（CVaR）や I17（過去最悪日次）と同じものを
+    モーメントで測る。**実証は無いので★1** だが、
+    **サイジングの安全側の調整には使える。**
+  evidence_tier: T3
+  references: ["構造的判断。実証は無い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I10:
+  formula: "beta estimated on days where r_m < 0"
+  inputs: [PRICE_adj, index]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "市場下落日が60日以上必要。"
+  missing_bias: "**強気相場が続くと下落日が足りず全銘柄で欠損する。最も必要な局面で作れない**（G28 と同じ）。"
+  correlated_with: [G28, I05, I18, I27, I28, Q04]
+  economic_rationale: >-
+    **分散効果の実効性を測る。Q カテゴリと連携。**
+    Ang-Chen-Xing (RFS 2006)。
+    **平時のベータが低くても、下落時のベータが高ければ
+    分散になっていない。** 相関は危機時に上がるので、
+    **通常の相関行列で組んだポートフォリオは、
+    必要なときに機能しない。**
+    → **I10 は Q04（ポートフォリオのテールリスク）の入力**であり、
+    銘柄選択より配分の材料として重要。
+  evidence_tier: T2
+  references: ["Ang-Chen-Xing (RFS 2006) Downside Risk"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I11:
+  formula: "min( P_t / cummax(P) - 1 ) over 3 years"
+  inputs: [PRICE_adj]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "3年の履歴が要る。"
+  missing_bias: "**3年の履歴が要るので若い企業で欠損。** G26/F23 と同じ方向の偏り。"
+  correlated_with: [I17, I16, I18, G08, G07, N23]
+  economic_rationale: >-
+    **過去に何が起きたかの記録。その原因が解消したかは LLM で判定する。**
+    ドローダウン自体は過去の事実であって将来の予測ではない。
+    **重要なのは「なぜ下がったか」と「それは終わったか」**で、
+    そこは T25（テーゼ健在度）や T08（リスク記載の変化）が担う。
+    → **I11 は定量値としてより、LLM への問いを起動する
+    トリガーとしての価値が大きい。**
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I12:
+  formula: "ATR(14) / P_t"
+  inputs: [PRICE_adj]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "P>0。14営業日が要る。"
+  missing_bias: "**日本は値幅制限があるので ATR が人為的に抑えられる**（G17 と同じ）。"
+  correlated_with: [I01, I12, J11, J18, G17]
+  economic_rationale: >-
+    **ストップ幅の設定に使う（§1.6）。断面の選択材料ではない**
+    ので normalization: none。
+    **一律の%ストップは、低ボラ株では狭すぎ高ボラ株では広すぎる。**
+    ATR で正規化すると、**どの銘柄でも「同じ確率で引っかかる」
+    ストップになる。**
+    ただし**263AT は 6ヶ月-5年 保有なので、
+    そもそもストップを使うべきかは別の論点**（S カテゴリ）。
+  evidence_tier: T3
+  references: ["構造的判断。§1.6 のリスク調整"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I13:
+  formula: "sd( 20-day rolling volatility, past 1 year )"
+  inputs: [PRICE_adj]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "252営業日が要る。"
+  missing_bias: "N24 と重複。"
+  correlated_with: [I01, I19, I23, I21, P18]
+  economic_rationale: >-
+    **レジーム不安定性。** ボラティリティ自体が安定しない銘柄は、
+    **サイジングの前提（I03 の予測ボラ）が崩れやすい。**
+    → **I13 が高い銘柄は I03 の信頼度を下げ、
+    保守的にサイジングする**という使い方をする。
+    I23（予測の当てはまり）と同じ役割で、
+    **Z カテゴリ（メタ）に近い性格を持つ。**
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I14:
+  formula: "implied volatility とその1年パーセンタイル（IVランク）"
+  inputs: [option_iv]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "オプションが無ければ欠損。"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: >-
+    **日本の小型株にはオプションがない。米国側のみ。**
+    OQ-33 の通り、**263AT の中核ユニバースとオプションが存在する銘柄は
+    ほとんど重ならない。**
+  correlated_with: [I15, I03, K53, K55, K57]
+  economic_rationale: >-
+    ∩型。**高い IV は市場がイベントを警戒している証拠だが、
+    同時に「保険が高い」ので買い手には不利。**
+    **I15（IV-HV スプレッド）の方が使いやすい**
+    — 水準ではなく実現ボラとの差を見るので、
+    銘柄固有のボラ水準の影響を除ける。
+  evidence_tier: T3
+  references: ["構造的判断。OQ-33 の制約下にある"]
+  markets: [US]
+  review: {status: verified}
+
+I15:
+  formula: "IV - historical volatility"
+  inputs: [option_iv, PRICE_adj]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "両方が必要。"
+  missing_bias: "I14 と同じ。"
+  correlated_with: [I14, K55, I03, N08, K53]
+  economic_rationale: >-
+    **K55（実現ボラ - IV）と符号が逆の同一量。**
+    2つの ID で持っているのは、**片方が K（需給）、
+    片方が I（リスク）として別の文脈で使われるから**だが、
+    **Z12 で完全な負の相関が出るはず。**
+    → **統合候補として最も明確**（K55 の説明と対応）。
+    決算前の期待の大きさを測れるので、
+    **N08（PEAD）の前に「どれだけ驚きが期待されているか」が分かる。**
+  evidence_tier: T2
+  references: ["構造的判断。K55 と同一量（符号逆）"]
+  markets: [US]
+  review: {status: verified}
+
+I16:
+  formula: "mean( worst 5% of daily returns )"
+  inputs: [PRICE_adj]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "252営業日が要る。"
+  missing_bias: "N24 と重複。"
+  correlated_with: [I09, I17, I11, I28, Q04, I01]
+  economic_rationale: >-
+    **VaR より裾を捉える。Q04 の入力。**
+    VaR は「5%の確率で −X% 以上下がる」としか言わないが、
+    CVaR は**その 5% の中の平均**を見るので、
+    **どれだけひどいことになるかを測れる。**
+    **263AT は 90% を投資信託に置いているので、
+    個別株の10%が全損しても生活は壊れない**
+    — これが CVaR を許容できる根拠であり、
+    **§1.8 のサイジングの前提そのもの。**
+  evidence_tier: T2
+  references: ["Rockafellar-Uryasev (2000) Conditional Value-at-Risk", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I17:
+  formula: "min( daily r, past 3 years )"
+  inputs: [PRICE_adj]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "3年の履歴が要る。"
+  missing_bias: "I11 と同じ。**しかも日本は値幅制限で単日の最悪値が切り詰められる**（複数日に分散する）。"
+  correlated_with: [I11, I16, I09, I21, G17]
+  economic_rationale: >-
+    **テールの実測。その原因が解消したかは LLM で判定する。**
+    I11（最大DD）が累積、I17 が単日。
+    **単日で −30% になる銘柄は、
+    上場廃止・不正会計・大型減損のいずれかが起きている。**
+    → **I17 が極端な銘柄は、E カテゴリ（会計品質）と
+    D カテゴリ（財務健全性）を重点的に見る**という
+    調査の起動条件になる。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I18:
+  formula: "リーマン / コロナ / 2022金利上昇 各局面の市場相対リターン"
+  inputs: [PRICE_adj, index, crisis_periods]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "該当局面に上場していなければ欠損。"
+  missing_bias: >-
+    **リーマン（2008）まで遡ると上場していない企業が大量に出る。
+    しかも「3つの危機を生き延びた」こと自体が生存者バイアス**（§8-2）。
+    → **I18 が計算できる時点で、その銘柄は生き残っている。**
+    これは避けようがない構造的な偏り。
+  correlated_with: [I10, G28, T40, D03, U42, P15]
+  economic_rationale: >-
+    **ストレステスト。長期保有では避けて通れない。**
+    3つの危機は性質が違う（信用危機 / パンデミック / 金利上昇）ので、
+    **どれに強くどれに弱いかで、次に何が起きたときに
+    どうなるかが推定できる。**
+    → **T40（景気耐性の定性評価）と突合し、
+    矛盾したら要調査**というのが T カテゴリ共通の使い方。
+    上の missing_bias の通り**生存者バイアスが構造的に入る**ので、
+    値が良いことを額面通りに受け取ってはいけない。
+  evidence_tier: T2
+  references: ["構造的判断。生存者バイアスが不可避"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I19:
+  formula: "sd( rolling 60-day beta, past 2 years )"
+  inputs: [PRICE_adj, index]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "2年の履歴が要る。"
+  missing_bias: "N24 と重複。"
+  correlated_with: [I05, I13, I26, I10, Q04]
+  economic_rationale: >-
+    **相関が安定しない銘柄は分散効果が読めない。**
+    I13（ボラのボラ）のベータ版。
+    **Q カテゴリ（ポートフォリオ）が想定する分散は、
+    ベータと相関が安定していることを前提にしている。**
+    → **I19 が高い銘柄を多く持つと、
+    ポートフォリオのリスク推定そのものが信用できなくなる。**
+    銘柄選択より配分の制約として使う。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I20:
+  formula: "sd( positive returns ) / sd( negative returns )"
+  inputs: [PRICE_adj]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "下落日が60日以上必要。"
+  missing_bias: "I10 と同じ。強気相場では下落日が不足する。"
+  correlated_with: [I08, I29, I10, G28, Q05]
+  economic_rationale: >-
+    **「良い非対称性」の数少ない直接指標。**
+    上には大きく、下には小さく動く銘柄は、
+    **263AT の設計（1/10 が全部を賄う）が求める性質そのもの。**
+    **I08（歪度 −）と符号が逆に見える点が最大の論点。**
+    → 上の (4) で整理した通り、
+    **I08 は「宝くじ選好で買われすぎた銘柄」を減点し、
+    I20 は「実際に非対称なリターン分布を持つ銘柄」を加点する。**
+    測っているものが違うので矛盾しないが、
+    **相関は高いはずなので、Z12 で両者の関係を必ず確認する。**
+    実証が無いので★1 だが、**設計思想との整合性は最も高い。**
+  evidence_tier: T3
+  references: ["構造的判断。§1.8（Bessembinder サイジング）との整合"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I21:
+  formula: "count( abs(r_d) > 3 * sd(r) ) over 252d"
+  inputs: [PRICE_adj]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "252営業日が要る。"
+  missing_bias: "**日本は値幅制限でジャンプが複数日に分割されるので、日米で頻度が構造的に違う。**"
+  correlated_with: [G17, I09, I17, J09, J10, O01]
+  economic_rationale: >-
+    **情報の反映が離散的＝流動性が薄い。**
+    連続的に価格が動かず、たまに飛ぶ銘柄は、
+    **板が薄く、少数の注文で価格が決まっている。**
+    → **J カテゴリ（流動性）の性格を強く持つ**ので、
+    I というより J に近い。
+    **263AT の狙う小型株では構造的に高くなる**ので、
+    **減点すると戦略と衝突する。**
+    → **選択の減点ではなくサイジングの調整に使うべき。**
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I22:
+  formula: "mean( abs(r) on earnings announcement days )"
+  inputs: [PRICE_adj, earnings_date]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "決算日が4回以上必要。"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: "**決算発表日の正確な特定が要る。日本は引け後発表が多く、翌営業日に反映される**（spec §1.5）。"
+  correlated_with: [I15, N08, E14, G37, T03]
+  economic_rationale: >-
+    ∩型。**大きいほどサプライズが多い＝予測が難しい。**
+    ただし**小さすぎるのも問題で、
+    決算に反応しない銘柄は誰も見ていない**
+    — それは O カテゴリ（ネグレクト）としては好材料。
+    → **∩型にしたが、263AT では低い側を減点すべきでない
+    可能性がある。** 業種中央値を x* に置くのは暫定。
+    **N08（PEAD）が効く前提は「決算に反応する」ことなので、
+    I22 が極端に低い銘柄では N08 が機能しない。**
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I23:
+  formula: "GARCH 予測ボラと実現ボラの予測誤差"
+  inputs: [I03, PRICE_adj]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "予測と実現の両方が要る。"
+  missing_bias: "I03 を継承。"
+  correlated_with: [I03, I13, I19, Z10, Z11]
+  economic_rationale: >-
+    **サイジングの信頼度に反映させる。**
+    I03 の説明で述べた「サイジングの精度はリターン予測より高い」
+    という前提を、**実測で監視する。**
+    → **Z カテゴリ（メタ）と同じ役割**で、
+    断面ランクを取らない（normalization: none）。
+    **予測が外れている銘柄では Kelly の分母が信用できないので、
+    保守的に持つ。**
+  evidence_tier: T3
+  references: ["構造的判断。Z カテゴリと同じ役割"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I24:
+  formula: "sigma * sqrt( 1 + 流動化に要する日数 )"
+  inputs: [I01, J02]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "J02（参加率上限）から流動化日数を算出。"
+  missing_bias: "J01/J02 を継承。"
+  correlated_with: [I01, J01, J02, J10, Q04]
+  economic_rationale: >-
+    **小型株の真のリスク。J02 を sigma に織り込む。**
+    「3日かけないと売れない」銘柄は、
+    **その3日分の価格変動リスクを負っている。**
+    通常のボラティリティはこれを無視する。
+    → **263AT の狙う小型株では I24 と I01 の差が大きく、
+    I01 だけでサイジングすると過大に持つ。**
+    **J01（600万円の流動性下限）を設けた根拠と直結する。**
+  evidence_tier: T3
+  references: ["構造的判断。§1.6 / J01 の根拠と直結"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I25:
+  formula: "最大の売上・利益ドライバーへの感応度（LLM 特定 + 回帰）"
+  inputs: [LLM, REV, driver_series]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "ドライバーが特定できなければ欠損。"
+  missing_bias: "**LLM がドライバーを誤特定すると、感応度は正しく推定されても意味がない。**"
+  correlated_with: [T18, U36, V02, N21, T19, U39]
+  economic_rationale: >-
+    **一本足打法のリスク。N21/T18/V02 の定量版。**
+    単一顧客（T18）、単一製品（U36）、単一商品価格（U39）、
+    単一事業（V02）— **形は違うが「一つが崩れたら終わる」という
+    同じ構造。** I25 はそれを統一的に測る試み。
+    **263AT の狙う小型株ほど集中度が高い**ので、
+    **戦略と構造的に結びついたリスク。**
+    → サイジング（Q）で必ず反映させる。
+  evidence_tier: T3
+  references: ["構造的判断。T18/U36/V02/U39 の統合"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I26:
+  formula: "Frazzini-Pedersen beta = corr(r_i, r_m) * sd(r_i)/sd(r_m), 収縮あり"
+  inputs: [PRICE_adj, index]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "相関に5年、ボラに1年の履歴を使うのが原論文の定義。"
+  missing_bias: "**相関の推定に5年を使うので、若い銘柄で欠損する。** I05 より欠損が多い。"
+  correlated_with: [I05, I10, I19, I30, G16]
+  economic_rationale: >-
+    **OSAP BetaFP t=7.1。BAB（LAW-36）の正式な推定法。**
+    相関とボラを別々の窓で推定するのが要点
+    — **相関は安定していて長い窓が使え、
+    ボラは時変なので短い窓が要る。**
+    生ベータ（I05）は両方を同じ窓で推定するので、
+    **ボラの変動が相関の推定を汚染する。**
+    → **I26 が I05 より遥かに良い理由はここにあり、
+    t=7.1 という差になって現れる。**
+    **レバレッジ制約のある投資家が高ベータ株を買い上げる**という
+    機構は、**信用取引を使える個人には利用可能。**
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "Frazzini-Pedersen (JFE 2014) Betting Against Beta", "OSAP BetaFP t=7.1"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I27:
+  formula: "beta( r_i ~ r_m^2 )"
+  inputs: [PRICE_adj, index]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "252営業日が要る。"
+  missing_bias: "N24 と重複。**推定が不安定**（2乗項の回帰は外れ値に弱い）。"
+  correlated_with: [I08, I10, I28, I29, Q04]
+  economic_rationale: >-
+    **市場が大きく動くときに一緒に大きく動く度合い。**
+    Harvey-Siddique (JF 2000) の共歪度。
+    **投資家は「市場が崩れるときに一緒に崩れる」資産を嫌う**ので、
+    そういう資産にはプレミアムが要る — はずだが、
+    **OSAP の t は 2.0 / 2.8 と弱い。**
+    → **理論的には最も正当な部類なのに実証が弱い**という、
+    §0 の T1-T4 の枠組みでは扱いにくい例。
+    ★2 だが実質的な重みは低くなる。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "Harvey-Siddique (JF 2000) Conditional Skewness in Asset Pricing Tests", "OSAP Coskewness t=2.0"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I28:
+  formula: "beta( r_i ~ market tail risk index )"
+  inputs: [PRICE_adj, tail_risk_index]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "テールリスク指標の系列が要る。"
+  missing_bias: "**Kelly-Jiang のテールリスク指標は日本について整備されていない。米国のみ実装可能。**"
+  correlated_with: [I16, I10, I27, I30, P10]
+  economic_rationale: >-
+    **I16（CVaR）の断面版。** 自分のテールでなく
+    **市場のテールに対する感応度**を測る。
+    Kelly-Jiang (RFS 2014)。
+    **危機時に一斉に落ちる銘柄群を識別できる**ので、
+    **Q カテゴリの分散が効かなくなる条件を事前に把握できる。**
+    OSAP BetaTailRisk t=2.5。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "Kelly-Jiang (RFS 2014) Tail Risk and Asset Prices", "OSAP BetaTailRisk t=2.5"]
+  markets: [US]
+  review: {status: verified}
+
+I29:
+  formula: "skewness( FF3 residuals )"
+  inputs: [PRICE_adj, factor_returns]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "252営業日とファクター系列が要る。"
+  missing_bias: "I04 と同じ。日本のファクター系列の質に依存。"
+  correlated_with: [I08, I07, I06, I20, I04]
+  economic_rationale: >-
+    **I08 より高い t（4.3 / 4.0）。**
+    ファクター調整した残差で測る方が予測力が高い
+    — **市場全体やサイズ・バリューに起因する歪度ではなく、
+    銘柄固有の歪度が効く**ということ。
+    G10（残差モメンタム）が素のモメンタムより良いのと同じ構造で、
+    **「ファクターを除いた残りが本体」というパターンが
+    I にも G にも現れる。**
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP ReturnSkew3F t=4.3"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I30:
+  formula: "beta( r_i ~ delta VIX )"
+  inputs: [PRICE_adj, VIX]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "252営業日と VIX 系列が要る。"
+  missing_bias: "**日本は日経VI を使う。VIX と日経VI は別物なので、日米統合ランクは取らない**（rank_market が妥当）。"
+  correlated_with: [P10, I05, I26, I28, K53]
+  economic_rationale: >-
+    **P10（VIX 水準）の銘柄別版。**
+    VIX が上がったときに一緒に落ちる銘柄は、
+    **ボラティリティリスクに対して脆弱。**
+    Ang-Hodrick-Xing-Zhang (JF 2006) の
+    aggregate volatility risk。
+    **I04（IVOL パズル）と同じ論文から出た概念**で、
+    **両者を併せて見るのが原論文の趣旨。**
+    OSAP betaVIX t=3.9。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "Ang-Hodrick-Xing-Zhang (JF 2006)", "OSAP betaVIX t=3.9"]
+  markets: [JP, US]
+  review: {status: verified}
+
+I31:
+  formula: "sd( daily returns ), ファクター調整なし"
+  inputs: [PRICE_adj]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "推定窓の営業日数が要る。"
+  missing_bias: "I01 と同じ。"
+  correlated_with: [I01, I02, I04, I24, I26]
+  economic_rationale: >-
+    **I01/I02 は「サイジング専用」としたが、断面でも効く。**
+    OSAP RealizedVol t=2.9。
+    低ボラアノマリー（Baker-Bradley-Wurgler FAJ 2011）。
+    → **同じ量を I01（サイジング, normalization: none）と
+    I31（選択, rank_all）で二重に持つのは意図的。**
+    **役割が違うので二重計上にならない**
+    — I01 は Kelly の分母、I31 はスコアの加減点。
+    **これを混ぜないために ID を分けた**というのが
+    I カテゴリ設計の要点。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "Baker-Bradley-Wurgler (FAJ 2011) Benchmarks as Limits to Arbitrage", "OSAP RealizedVol t=2.9"]
+  markets: [JP, US]
+  review: {status: verified}
+
+# =============================================================================
+# P（マクロ・市場環境）30件
+#
+# P カテゴリを貫く4つの事実:
+#
+#  (1) **P の大半は銘柄横断の量ではない。** 金利も VIX も景気指数も、
+#      全銘柄で同じ値を取る。**断面ランクを取ると全員が同順位になり無意味。**
+#      → 既定 normalization: none。**P はスコアの加減点ではなく、
+#        サイジングの乗数と、他パラメータの重み W_c の条件変数として使う。**
+#      例外は P08/P09/P19/P20 — これらは**銘柄ごとの感応度**なので断面量。
+#
+#  (2) **マクロ予測は当たらない。** 金利も景気も為替も、
+#      専門家の予測精度は実質ゼロに近い。
+#      → **263AT は P を「予測する」のではなく
+#        「今どの状態にあるか」を測るためだけに使う。**
+#      P18（レジーム判定）を複雑にしないと決めたのはこのため。
+#
+#  (3) **日米両建てなので、マクロが二重に効く。**
+#      P07（USD/JPY）は日本株の業績と、米国株の円換算リターンの
+#      両方に効く。**同じ円安が、日本の輸出株にはプラス、
+#      米国株の円建て評価にもプラス**なので、
+#      **知らないうちに為替に大きく賭けている状態になりやすい。**
+#      → P08（銘柄別感応度）でポートフォリオ全体の
+#        為替エクスポージャーを必ず管理する。
+#
+#  (4) **P13/P14/P22 のような市場水準の指標は、
+#      5年ホライズンでのみ意味を持つ。** 1年では予測力がほぼない。
+#      → **263AT の保有期間（最大5年）はぎりぎり使える範囲**だが、
+#        タイミングを取ろうとすると失敗する。配分の傾きにとどめる。
+# =============================================================================
+
+P01:
+  formula: "10年国債利回り（日本 / 米国）"
+  inputs: [MACRO_10y]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na（水準）"
+  missing_bias: "**公表データなので欠損しない。**"
+  correlated_with: [P02, P03, P04, P05, P21, A12, U11]
+  economic_rationale: >-
+    **バリュエーションの割引率。グロース株ほど感応度が高い**
+    （キャッシュフローが遠い将来にあるのでデュレーションが長い）。
+    → **金利上昇局面ではバリューがグロースに勝つ**という
+    2022年に起きたことの機構。
+    **A12（益回りスプレッド）と U11（キャップレートスプレッド）の
+    直接の入力**でもある。
+    **日本の金利正常化（P05）は、U01（銀行）にプラス、
+    U11（不動産）にマイナスと業種で正反対に効く。**
+  evidence_tier: T2
+  references: ["構造的判断。割引現在価値の定義から"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P02:
+  formula: "delta( 10年金利 ), 3ヶ月"
+  inputs: [MACRO_10y]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na（差分）"
+  missing_bias: "欠損しない。"
+  correlated_with: [P01, P03, P05, P17, P23]
+  economic_rationale: >-
+    **水準より変化が効く。バリュー / グロースの相対を動かす。**
+    水準（P01）は既に価格に入っているが、
+    **変化は新しい情報。**
+    → **P17（ファクターモメンタム）の主要な説明変数**で、
+    「なぜ今バリューが効いているか」の大部分が
+    P02 で説明できる局面がある。
+    **A（水準）と C（変化）を分ける原則が、
+    マクロでも同じく成り立つ。**
+  evidence_tier: T2
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P03:
+  formula: "10年金利 - 2年金利"
+  inputs: [MACRO_10y, MACRO_2y]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na（差分）"
+  missing_bias: "欠損しない。"
+  correlated_with: [P01, P02, P11, P15, U01]
+  economic_rationale: >-
+    **逆イールドは景気後退の先行指標**（Estrella-Mishkin RES 1998）だが、
+    **ラグが長く不安定**（12-18ヶ月、しかも幅が大きい）。
+    **日本では日銀のYCCで長期間人為的に歪められていたので、
+    日本のイールドカーブは景気の情報を持たない期間が長い。**
+    → **P03 は米国でのみ意味を持つと考えるのが安全。**
+    U01（銀行の NIM）には直接効く。
+  evidence_tier: T2
+  references: ["Estrella-Mishkin (RES 1998) Predicting U.S. Recessions", "構造的判断"]
+  markets: [US]
+  review: {status: verified}
+
+P04:
+  formula: "名目金利 - 期待インフレ率"
+  inputs: [MACRO_10y, breakeven_inflation]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "期待インフレの系列が要る。"
+  missing_bias: "**日本の物価連動債は流動性が低く、ブレークイーブンの信頼度が米国より低い。**"
+  correlated_with: [P01, P05, P20, P09, U11]
+  economic_rationale: >-
+    **金・資源・ディフェンシブとの関係。**
+    実質金利が低い（マイナス）局面では、
+    現金を持つコストが高いので実物資産に資金が向かう。
+    **名目金利（P01）だけを見ると、
+    インフレ局面での金利上昇を「引き締め」と誤読する**
+    — 実質では緩和のままということがある。
+    → **P01 と P04 を両方持つ理由はここ。**
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P05:
+  formula: "政策金利と日銀声明のトーン（LLM 判定）"
+  inputs: [MACRO_policy, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na"
+  missing_bias: "**声明のトーン判定は LLM 依存。日銀の言い回しは極めて微妙で、誤読しやすい。**"
+  correlated_with: [P01, P02, P04, P21, U01, U11, K14]
+  economic_rationale: >-
+    **日本の金利正常化は現在進行中の構造変化。**
+    数十年続いたゼロ金利が終わることで、
+    **銀行（U01 の NIM 改善）、不動産（U11 のキャップレート悪化）、
+    高債務企業（D01 の負担増）の相対が大きく動く。**
+    → **263AT が日本株を扱う以上、P05 は最も重要なマクロ変数。**
+    しかも**過去データに同じ局面が存在しない**ので、
+    バックテストで学習できない。
+    **K14（日銀 ETF の処分）も同じ流れにある。**
+  evidence_tier: T3
+  references: ["構造的判断。過去に類例のない局面"]
+  markets: [JP]
+  review: {status: verified}
+
+P06:
+  formula: "FF金利と FOMC 声明のトーン（LLM 判定）"
+  inputs: [MACRO_policy, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na"
+  missing_bias: "P05 と同じ。**ただし FOMC はドットプロットという数値の指針があるので、日銀より読みやすい。**"
+  correlated_with: [P01, P02, P05, P21, P10]
+  economic_rationale: >-
+    **米国株側の主要ドライバー。**
+    ただし**FRB の方針は市場に広く分析されており、
+    263AT が追加の洞察を持てる領域ではない。**
+    → **P06 を予測に使うのではなく、
+    「今どの局面か」の記録として使う。**
+    上の (2) の方針そのもの。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [US]
+  review: {status: verified}
+
+P07:
+  formula: "USD/JPY の水準と変化"
+  inputs: [MACRO_fx]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na"
+  missing_bias: "欠損しない。"
+  correlated_with: [P08, P21, U26, V07, S18, C23]
+  economic_rationale: >-
+    **日米両方に投資するので二重に効く。**
+    円安は (a) 日本の輸出企業の業績にプラス、
+    (b) 米国株の円換算リターンにプラス。
+    → **同じ方向に二重に賭けている状態になりやすい。**
+    **知らないうちに為替が最大のリスク要因になる**という
+    263AT に固有の構造的な問題。
+    → **P08（銘柄別感応度）で
+    ポートフォリオ全体のエクスポージャーを必ず測る。**
+    S18（損益の株価要因・為替要因への分解）が事後の確認。
+  evidence_tier: T2
+  references: ["構造的判断。日米両建てに固有の問題"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P08:
+  formula: "beta( r_i ~ delta USDJPY ), 252d"
+  inputs: [PRICE_adj, MACRO_fx]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: rank_market
+  zero_denominator_policy: "252営業日が要る。"
+  missing_bias: >-
+    **日本株と米国株で「USD/JPY への感応度」の意味が全く違う。**
+    日本株は業績経路、米国株は換算経路。
+    → **rank_market（市場内ランク）にする。統合ランクは無意味。**
+  correlated_with: [P07, U26, V07, C23, S18, P20]
+  economic_rationale: >-
+    **輸出企業と内需企業の判別。ポートフォリオ全体の
+    為替エクスポージャー管理に必須。**
+    **U26（会社開示の為替感応度）が企業の自己申告なのに対し、
+    P08 は株価から統計的に推定する。**
+    → **両者が食い違う銘柄は、
+    株価が為替以外の要因で動いている**ことを示すので、
+    **その乖離自体が情報になる**（U26 の説明と対応）。
+    P カテゴリで数少ない断面量。
+  evidence_tier: T2
+  references: ["構造的判断。U26 との突合が要点"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P09:
+  formula: "beta( r_i ~ 原油 / 銅 / 穀物 )"
+  inputs: [PRICE_adj, commodity_index]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: rank_all
+  zero_denominator_policy: "252営業日が要る。"
+  missing_bias: "**主要商品の選択が要る。複数商品に跨る企業では単純化される。**"
+  correlated_with: [U24, U39, U41, P04, P20, U25]
+  economic_rationale: >-
+    **資源・素材・運輸。商品価格は国際市場で決まるので、
+    日米で同じ指標を使える**（→ rank_all）。
+    **U24（粗利率の原材料感応度）が損益で測るのに対し、
+    P09 は株価で測る。**
+    → **投入側（コスト増でマイナス）と
+    産出側（売価上昇でプラス）で符号が逆**なので、
+    **context としたのは正しい。**
+    符号を固定すると、資源企業と素材加工企業が打ち消し合う。
+  evidence_tier: T3
+  references: ["構造的判断。U24 との対応"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P10:
+  formula: "VIX / 日経VI の水準とパーセンタイル"
+  inputs: [MACRO_vix]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  nonlinear: "abs_dev(x_star=sector_median)"
+  zero_denominator_policy: "na"
+  missing_bias: "欠損しない。**日本の日経VI は米国 VIX より歴史が短い。**"
+  correlated_with: [I30, I14, P16, P12, P18, G30]
+  economic_rationale: >-
+    ∩型。**高 VIX は長期投資家にとって買い場。ただしサイジングは慎重に。**
+    高ボラ局面では期待リターンが高いが、
+    **同時に Kelly の分母（I03）が大きくなるので
+    ポジションは小さくすべき**という、
+    **符号が逆向きの2つの効果が同時に働く。**
+    → **P10 はスコアに加点するのではなく、
+    「買い増しの余地を作る」（P16）方向で使う。**
+    G30（モメンタムクラッシュ）の検出とも連動する。
+  evidence_tier: T2
+  references: ["構造的判断。§1.8 のサイジングとの関係"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P11:
+  formula: "ハイイールド債利回り - 国債利回り"
+  inputs: [MACRO_credit]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na（差分）"
+  missing_bias: "**日本のハイイールド市場は極小なので、実質的に米国の指標。** 日本株にも使うが外挿になる。"
+  correlated_with: [P03, P15, U02, D08, D25, I28]
+  economic_rationale: >-
+    **株より早く壊れる。小型株・高債務企業の先行指標として優秀。**
+    債券投資家は元本の毀損だけを見るので、
+    **株式投資家より早く悲観に転じる。**
+    → **P11 の拡大は、D カテゴリ（財務健全性）が
+    ゲートで効き始めるべき局面を教える。**
+    **U02（銀行の与信費用）と同じ機構をマクロで見たもの。**
+    P カテゴリで最も実務的に有用な早期警戒指標。
+  evidence_tier: T2
+  references: ["Gilchrist-Zakrajsek (AER 2012) Credit Spreads and Business Cycle Fluctuations"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P12:
+  formula: "騰落レシオ / 新高値-新安値 / 上昇銘柄比率"
+  inputs: [market_breadth]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  nonlinear: "abs_dev(x_star=sector_median)"
+  zero_denominator_policy: "na"
+  missing_bias: "**市場全体の集計。ユニバースの定義で値が変わる。**"
+  correlated_with: [P10, P16, P18, G19, G07]
+  economic_rationale: >-
+    ∩型。**極端値が逆指標。**
+    ブレッドスが極端に狭い（一部の大型株だけが上げている）局面は、
+    **指数が上がっていても内部は弱い。**
+    → **263AT は小型株中心なので、
+    指数の動きよりブレッドスの方が
+    自分のポートフォリオの環境を正しく表す。**
+    実証は弱いので★1。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P13:
+  formula: "TOPIX / S&P500 の予想PER、CAPE"
+  inputs: [index_valuation]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "指数の予想 EPS>0。"
+  missing_bias: "**CAPE は10年の実質利益平均が要る。日本の長期系列は米国より整備が弱い。**"
+  correlated_with: [P14, P22, P24, A22, P23]
+  economic_rationale: >-
+    **5年ホライズンなら意味を持つ。1年では予測力がほぼない**
+    （Campbell-Shiller の CAPE は10年先のリターンを説明するが
+    1年先は説明しない）。
+    → **263AT の保有期間（最大5年）はぎりぎり使える範囲。**
+    ただし**タイミングを取ろうとすると失敗する**
+    — 割高でも数年上がり続けることがある。
+    **配分の傾き（日米比率、現金比率）にとどめる。**
+  evidence_tier: T2
+  references: ["Campbell-Shiller (1988) Stock Prices, Earnings, and Expected Dividends"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P14:
+  formula: "株式時価総額 / GDP"
+  inputs: [MACRO_gdp, index_mcap]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "GDP>0。"
+  missing_bias: >-
+    **国際比較には向かない。** 上場企業の GDP に占める割合が
+    国で違う（米国は高く、ドイツは低い）。
+    **自国内の時系列比較としてのみ意味を持つ。**
+  correlated_with: [P13, P22, P27, P28]
+  economic_rationale: >-
+    **長期のみ。** P13 と実質的に同じことを別の分母で測る。
+    **GDP は改定されるので PIT が問題になる**
+    （spec §1 の as-of ルールが GDP にも要る）。
+    → **P13 があれば P14 は冗長**な可能性が高く、
+    Z12 で確認する。★1 のまま強く縮小される。
+  evidence_tier: T3
+  references: ["構造的判断。P13 と冗長な可能性"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P15:
+  formula: "CLI / 景気動向指数 / PMI"
+  inputs: [MACRO_leading]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na"
+  missing_bias: "**景気指数は改定される。spec §1 の as-of ルールを適用しないと、改定後の値でバックテストすることになる。**"
+  correlated_with: [P03, P11, P19, U22, U25, U41]
+  economic_rationale: >-
+    **循環株のサイジング調整。**
+    PMI が50を割る局面では、
+    **U22（BBレシオ）や U41（運賃指数）と同じ方向を向く。**
+    → **業種レベルの感応度（P19）と掛け合わせて、
+    循環株の重みを動的に変える**のが本来の使い方。
+    **上の (2) の通り予測には使わない**
+    — 景気指数自体が遅行することも多い。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P16:
+  formula: "指数 / cummax(指数) - 1"
+  inputs: [index]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na"
+  missing_bias: "欠損しない。"
+  correlated_with: [P10, P12, G30, G16, Q03]
+  economic_rationale: >-
+    **下落時は買い増し余地を作る設計にする（ドライパウダー管理）。**
+    符号が + なのは「ドローダウンが深いほど将来リターンが高い」
+    という意味だが、**実際の使い方は資金配分。**
+    → **263AT は 90% を投資信託に置いているので、
+    個別株の枠に追加投入する余力が構造的に存在する。**
+    **市場が20%下げたときに買い増せるかどうかが、
+    長期リターンの大きな部分を決める。**
+    G30（モメンタムクラッシュ）とは
+    **同じ局面を逆の目的で見ている**
+    — G30 は「モメンタムを止めろ」、P16 は「買い増せ」。
+  evidence_tier: T3
+  references: ["構造的判断。§1.8 のサイジング設計"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P17:
+  formula: "バリュー / グロース / クオリティ のファクターリターンのモメンタム"
+  inputs: [factor_returns]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "ファクター系列が要る。"
+  missing_bias: "**日本のファクター系列の質が米国より低い**（I04/G10 と同じ問題）。"
+  correlated_with: [P02, P23, P24, P18, G01]
+  economic_rationale: >-
+    **ファクター配分 W_c を動的にする根拠。ただし過剰適合しやすい。**
+    Ehsani-Linnainmaa (JF 2022) はファクターモメンタムが
+    個別株モメンタムの大部分を説明すると報告している。
+    → **G01（個別株モメンタム）と P17 が同じものを
+    別の階層で見ている可能性がある。**
+    **W_c を動かすのは §1.9 の縮小の枠組みの外側にある操作**なので、
+    **やりすぎると縮小の効果を打ち消す。**
+    → **P17 は監視するが、W_c を動かす幅は厳しく制限する。**
+  evidence_tier: T2
+  references: ["Ehsani-Linnainmaa (JF 2022) Factor Momentum and the Momentum Factor"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P18:
+  formula: "HMM / ルールベースで リスクオン / オフ / 移行 を分類"
+  inputs: [P10, P11, P16, factor_returns]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na（分類）"
+  missing_bias: >-
+    **分類器自体が過剰適合の温床。**
+    HMM の状態数を増やせば過去には必ずよく当てはまるが、
+    **将来の状態が過去の状態と同じ性質を持つ保証はない。**
+  correlated_with: [P10, P11, P16, P17, G30, Q03]
+  economic_rationale: >-
+    **サイジング全体の乗数。分類器自体が過剰適合の温床なので
+    シンプルに保つ。**
+    → **263AT の方針: 状態は3つまで。
+    入力は P10（VIX）、P11（クレジット）、P16（DD）の3つまで。**
+    複雑にした瞬間に、**バックテストでは完璧に見えて
+    実運用で機能しないものになる。**
+    **§1.9 が「選択せず縮小する」と決めたのと同じ精神で、
+    レジーム判定も「凝らない」ことが正しさに直結する。**
+  evidence_tier: T3
+  references: ["構造的判断。過剰適合の回避を最優先"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P19:
+  formula: "beta( 業種指数リターン ~ delta 景気先行指数 )"
+  inputs: [sector_index, MACRO_leading]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: rank_sector
+  zero_denominator_policy: "業種指数と景気指数の系列が要る。"
+  missing_bias: "**業種指数の定義が日米で違う**（東証33業種 vs GICS）。SP-03 の課題を継承。"
+  correlated_with: [P15, P09, U39, U41, U45, I05]
+  economic_rationale: >-
+    **循環株の識別。サイジング調整に使う。**
+    業種レベルの量なので**銘柄には業種経由で割り当てる。**
+    → **U カテゴリ（業種固有）が業種内の差を測るのに対し、
+    P19 は業種間の差を測る。**
+    **同じ業種でも U42（長期契約比率）が高い企業は
+    景気感応度が低い**ので、
+    **P19 を銘柄にそのまま適用すると粗すぎる。**
+    → I05（個別ベータ）との併用が要る。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P20:
+  formula: "beta( r_i ~ delta CPI )"
+  inputs: [PRICE_adj, MACRO_cpi]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: rank_market
+  zero_denominator_policy: "CPI の系列と252営業日が要る。"
+  missing_bias: >-
+    **CPI は月次なので、日次リターンとの回帰はサンプルが少ない。
+    5年で60点しかない。** 推定誤差が大きい。
+    **日米で CPI の構成が違う**ので rank_market。
+  correlated_with: [B36, U24, P04, P09, P08]
+  economic_rationale: >-
+    **B36（価格転嫁力）の市場側からの検証。**
+    価格転嫁できる企業は、インフレ局面で株価が持ちこたえる。
+    → **B36（損益から推定）と P20（株価から推定）が
+    一致するかを見る**のが要点で、
+    **U24（粗利率の原材料感応度）を含めて
+    3つの独立な経路で同じ性質を測っている。**
+    3つが一致すれば信頼できる。
+    上の missing_bias の通り**推定精度が低い**ので、
+    単独では使わない。
+  evidence_tier: T3
+  references: ["構造的判断。B36/U24 との三点測量"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P21:
+  formula: "米10年金利 - 日10年金利"
+  inputs: [MACRO_10y]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na（差分）"
+  missing_bias: "欠損しない。"
+  correlated_with: [P01, P05, P06, P07, P08]
+  economic_rationale: >-
+    **為替の主要ドライバー。日米両建てなので直接効く。**
+    金利差が拡大すれば円安になりやすい
+    （キャリートレードの誘因）。
+    → **P07（為替水準）の先行指標であり、
+    P05（日銀）と P06（FRB）の差分表現。**
+    **日本の金利正常化が進めば金利差は縮小し、
+    円高方向に働く**ので、
+    **P05 の効果が P21 経由で P07/P08 に伝播する**という
+    連鎖を意識する必要がある。
+  evidence_tier: T2
+  references: ["構造的判断。金利平価の基本"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P22:
+  formula: "TOPIX 予想PER / S&P500 予想PER"
+  inputs: [index_valuation]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "両指数の予想 EPS>0。"
+  missing_bias: "**指数の構成業種が違うので、PER の差の一部は業種構成の差。** 純粋な割安度ではない。"
+  correlated_with: [P13, P14, P21, S18]
+  economic_rationale: >-
+    **日米の配分比率の調整に使う（銘柄選択には使わない）。**
+    上の missing_bias の通り、
+    **日本の PER が低いのは業種構成（金融・素材が多い）の
+    影響が大きく、単純に割安とは言えない。**
+    → **業種構成を調整した比較でないと誤読する。**
+    それでも**5年スケールでの資金配分の傾きには使える。**
+    ★1 で強く縮小されるのが妥当。
+  evidence_tier: T3
+  references: ["構造的判断。業種構成の調整が必要"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P23:
+  formula: "ファクター内のバリュエーション・スプレッドの水準"
+  inputs: [factor_valuation]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "ファクターのロング・ショート両側のバリュエーションが要る。"
+  missing_bias: "**日本のファクター構築の質に依存**（I04/G10/P17 と同じ）。"
+  correlated_with: [P17, P24, P13, A22, C36]
+  economic_rationale: >-
+    **混雑したファクターは巻き戻す。**
+    2020年のバリュー（スプレッドが史上最大まで開いた）と
+    2009年のモメンタム（クラッシュ）が実例。
+    Asness et al. の value spread の議論。
+    → **P17（ファクターモメンタム）と符号が逆**で、
+    **P17 は「効いているものを追う」、
+    P23 は「効きすぎたものを避ける」。**
+    **両方持つと打ち消し合うので、
+    時間軸で使い分ける**（P17 は3M-1Y、P23 は1Y-3Y）。
+    A22（自己バリュエーション位置）をファクターに適用した形。
+  evidence_tier: T2
+  references: ["Asness-Friedman-Krail-Liew (JPM 2000) Style Timing: Value versus Growth"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P24:
+  formula: "各ファクターの現在のドローダウン深度"
+  inputs: [factor_returns]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "ファクター系列が要る。"
+  missing_bias: "P17/P23 と同じ。"
+  correlated_with: [P23, P17, P16, P13]
+  economic_rationale: >-
+    **ファクターも平均回帰するが、回復に何年もかかる。**
+    バリューは2018-2020年に3年連続で負けた。
+    → **「安いから買う」を機械的にやると、
+    3年間負け続ける可能性がある。**
+    **263AT の保有期間（最大5年）はこれに耐えられるが、
+    その間に運用をやめてしまう心理的リスクの方が大きい。**
+    → **P24 は「今どれだけ我慢しているか」を
+    記録して可視化する**ことに価値がある。
+    P16（市場のDD）のファクター版。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P25:
+  formula: "二市場信用買残の水準と変化"
+  inputs: [margin_market_total]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na"
+  missing_bias: "**日本のみ。米国のマージン残高は FINRA が集計するが定義が違う。**"
+  correlated_with: [K01, K04, K10, P12, P26]
+  economic_rationale: >-
+    **日本の個人の過熱度。**
+    K01（個別銘柄の信用買残）を市場全体で見たもの。
+    **個人の買い越しが極端になった局面は天井に近い**
+    という経験則があるが、実証は弱い。
+    → **263AT の狙う小型株は個人の売買比率が高い**ので、
+    **市場全体の指標より、
+    小型株に絞った信用残の方が適切**な可能性がある。
+    ★1 のまま。
+  evidence_tier: T3
+  references: ["構造的判断"]
+  markets: [JP]
+  review: {status: verified}
+
+P26:
+  formula: "現物・先物の裁定買い残高"
+  inputs: [arbitrage_balance]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na"
+  missing_bias: "**日本のみ。**"
+  correlated_with: [P25, K46, K26, P12]
+  economic_rationale: >-
+    **短期需給。長期戦略では優先度低。**
+    裁定残高の解消は SQ 前後の数日で起きるので、
+    **263AT の保有期間（6ヶ月-5年）とは3桁違う時間軸。**
+    → **執行タイミングにすら使いにくい。**
+    **P カテゴリで最も優先度が低い項目**と明記しておく。
+    削除しないのは §1.9 の方針だが、
+    実質的な重みはほぼゼロになるはず。
+  evidence_tier: T3
+  references: ["構造的判断。時間軸が合わない"]
+  markets: [JP]
+  review: {status: verified}
+
+P27:
+  formula: "直近12ヶ月の新規上場件数"
+  inputs: [ipo_count]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na（カウント）"
+  missing_bias: "**手で集める必要がある。日米で集計基準を揃える必要がある。**"
+  correlated_with: [P28, P13, P14, N24, F26]
+  economic_rationale: >-
+    **IPO ラッシュは市場の天井のサイン（株式の供給過多）。**
+    Ritter の IPO 市場のタイミング研究。
+    **企業は自社株が割高なときに上場する**ので、
+    **IPO が多い＝市場全体が割高**という推論が成り立つ。
+    → **F26（純外部資金調達）を市場レベルで見たもの**で、
+    **個別銘柄で t=5.7 の効果が、
+    市場全体でも同じ機構で働く**という一貫性がある。
+    P28 と合わせて「株式の供給」を測る。
+  evidence_tier: T3
+  references: ["Ritter (1991) The Long-Run Performance of Initial Public Offerings", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P28:
+  formula: "市場全体の増資・売出し総額"
+  inputs: [equity_offering_total]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na（金額）"
+  missing_bias: "P27 と同じ。手集計。"
+  correlated_with: [P27, F01, F02, F26, P13]
+  economic_rationale: >-
+    P27 と同じ機構。**F01/F02（個別の株式発行）を
+    市場全体で集計したもの。**
+    Baker-Wurgler (JF 2000) の equity share in new issues は
+    市場リターンを予測すると報告されている。
+    → **P27/P28 を両方持つのは、
+    IPO（新規）と増資（既存）で
+    タイミングの意味が違うから。**
+    増資は既存株主の希薄化を伴うので、
+    **経営陣の割高判断がより直接的に表れる。**
+  evidence_tier: T2
+  references: ["Baker-Wurgler (JF 2000) The Equity Share in New Issues and Aggregate Stock Returns"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P29:
+  formula: "市場全体の M&A 件数と平均プレミアム"
+  inputs: [ma_activity]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na"
+  missing_bias: "**手集計。日本の非公開案件は捕捉できない。**"
+  correlated_with: [N13, N14, M10, K18, K48, P01]
+  economic_rationale: >-
+    **活発なら N13/N14 の実現確率が上がる。**
+    M&A は金利が低く、企業の手元資金が厚いときに増える。
+    → **263AT の日本での優位性の一角
+    （親子上場解消 K18、アクティビスト M08/K48）は
+    M&A 市場の活況に依存する。**
+    **P29 が低迷している局面では、
+    それらのカタリスト系パラメータの期待値を下げるべき。**
+    **DF-01 の制約（買収廃止銘柄が無料データから消える）で
+    検証できない領域と直結している**ので、
+    OQ-30 と併せて扱う。
+  evidence_tier: T3
+  references: ["構造的判断。OQ-30 と関連"]
+  markets: [JP, US]
+  review: {status: verified}
+
+P30:
+  formula: "税制・制度の変更（NISA / 法人税 / 金融所得課税）"
+  inputs: [LLM, MACRO_policy]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na（イベント）"
+  missing_bias: "**制度変更は稀事象。過去データから学習できない。**"
+  correlated_with: [S16, S17, U38, U45, T20, N19]
+  economic_rationale: >-
+    **S カテゴリの前提が変わる。制度変更の監視は必須。**
+    NISA 成長投資枠（年240万 / 生涯1200万、
+    **損益通算・繰越控除ができない**）という制約は、
+    **263AT のサイジングと売買判断に直接効く。**
+    → **損失を出しても他の利益と相殺できないので、
+    NISA 枠では「負ける可能性の高い銘柄」を
+    置くべきでない**という非対称が生まれる。
+    **金融所得課税の強化が議論されている**ので、
+    S16（税引後リターン）の前提は変わりうる。
+    **U38（薬価改定）や U45（規制産業）でも
+    制度が利益を直接決める。**
+  evidence_tier: T3
+  references: ["構造的判断。NISA 制度、金融所得課税の動向"]
+  markets: [JP]
+  review: {status: verified}

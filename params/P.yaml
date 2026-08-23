@@ -12,8 +12,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 10年国債利回り
-  formula: null
-  inputs: null
+  formula: 10年国債利回り（日本 / 米国）
+  inputs:
+  - MACRO_10y
   sign: negative
   buy_class: aux
   sell_class: aux
@@ -26,7 +27,7 @@
   - MACRO
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -35,15 +36,23 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: na
+  zero_denominator_policy: na（水準）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**公表データなので欠損しない。**'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P02
+  - P03
+  - P04
+  - P05
+  - P21
+  - A12
+  - U11
+  economic_rationale: '**バリュエーションの割引率。グロース株ほど感応度が高い** （キャッシュフローが遠い将来にあるのでデュレーションが長い）。 → **金利上昇局面ではバリューがグロースに勝つ**という 2022年に起きたことの機構。 **A12（益回りスプレッド）と U11（キャップレートスプレッド）の 直接の入力**でもある。 **日本の金利正常化（P05）は、U01（銀行）にプラス、 U11（不動産）にマイナスと業種で正反対に効く。**'
+  references:
+  - 構造的判断。割引現在価値の定義から
   notes: バリュエーションの割引率。グロース株ほど感応度が高い
   notes_extra: null
   provenance:
@@ -57,21 +66,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P02
   name_ja: 長期金利の変化
@@ -79,8 +91,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: delta_10年金利（3ヶ月）
-  formula: null
-  inputs: null
+  formula: delta( 10年金利 ), 3ヶ月
+  inputs:
+  - MACRO_10y
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -93,7 +106,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -102,15 +115,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（差分）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 欠損しない。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P01
+  - P03
+  - P05
+  - P17
+  - P23
+  economic_rationale: '**水準より変化が効く。バリュー / グロースの相対を動かす。** 水準（P01）は既に価格に入っているが、 **変化は新しい情報。** → **P17（ファクターモメンタム）の主要な説明変数**で、 「なぜ今バリューが効いているか」の大部分が P02 で説明できる局面がある。 **A（水準）と C（変化）を分ける原則が、 マクロでも同じく成り立つ。**'
+  references:
+  - 構造的判断
   notes: 水準より変化が効く。バリュー/グロースの相対を動かす
   notes_extra: null
   provenance:
@@ -124,21 +143,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P03
   name_ja: イールドカーブの傾き
@@ -146,8 +168,10 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 10年 - 2年
-  formula: null
-  inputs: null
+  formula: 10年金利 - 2年金利
+  inputs:
+  - MACRO_10y
+  - MACRO_2y
   sign: positive
   buy_class: aux
   sell_class: aux
@@ -160,24 +184,30 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
-  - JP
   - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: na（差分）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 欠損しない。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P01
+  - P02
+  - P11
+  - P15
+  - U01
+  economic_rationale: '**逆イールドは景気後退の先行指標**（Estrella-Mishkin RES 1998）だが、 **ラグが長く不安定**（12-18ヶ月、しかも幅が大きい）。 **日本では日銀のYCCで長期間人為的に歪められていたので、 日本のイールドカーブは景気の情報を持たない期間が長い。** → **P03 は米国でのみ意味を持つと考えるのが安全。** U01（銀行の NIM）には直接効く。'
+  references:
+  - Estrella-Mishkin (RES 1998) Predicting U.S. Recessions
+  - 構造的判断
   notes: 逆イールドは景気後退の先行指標（ただしラグが長く不安定）
   notes_extra: null
   provenance:
@@ -191,21 +221,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P04
   name_ja: 実質金利
@@ -213,8 +246,10 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 名目金利 - 期待インフレ
-  formula: null
-  inputs: null
+  formula: 名目金利 - 期待インフレ率
+  inputs:
+  - MACRO_10y
+  - breakeven_inflation
   sign: negative
   buy_class: aux
   sell_class: aux
@@ -227,7 +262,7 @@
   - MACRO
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -236,15 +271,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: na
+  zero_denominator_policy: 期待インフレの系列が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本の物価連動債は流動性が低く、ブレークイーブンの信頼度が米国より低い。**'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P01
+  - P05
+  - P20
+  - P09
+  - U11
+  economic_rationale: '**金・資源・ディフェンシブとの関係。** 実質金利が低い（マイナス）局面では、 現金を持つコストが高いので実物資産に資金が向かう。 **名目金利（P01）だけを見ると、 インフレ局面での金利上昇を「引き締め」と誤読する** — 実質では緩和のままということがある。 → **P01 と P04 を両方持つ理由はここ。**'
+  references:
+  - 構造的判断
   notes: 金・資源・ディフェンシブとの関係
   notes_extra: null
   provenance:
@@ -258,21 +299,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P05
   name_ja: 日銀政策金利・スタンス
@@ -280,8 +324,10 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 政策金利と声明のトーン（LLM）
-  formula: null
-  inputs: null
+  formula: 政策金利と日銀声明のトーン（LLM 判定）
+  inputs:
+  - MACRO_policy
+  - LLM
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -295,10 +341,9 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: POINT
   consolidation: na
@@ -306,13 +351,21 @@
   pit_lag_days: 1
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**声明のトーン判定は LLM 依存。日銀の言い回しは極めて微妙で、誤読しやすい。**'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P01
+  - P02
+  - P04
+  - P21
+  - U01
+  - U11
+  - K14
+  economic_rationale: '**日本の金利正常化は現在進行中の構造変化。** 数十年続いたゼロ金利が終わることで、 **銀行（U01 の NIM 改善）、不動産（U11 のキャップレート悪化）、 高債務企業（D01 の負担増）の相対が大きく動く。** → **263AT が日本株を扱う以上、P05 は最も重要なマクロ変数。** しかも**過去データに同じ局面が存在しない**ので、 バックテストで学習できない。 **K14（日銀 ETF の処分）も同じ流れにある。**'
+  references:
+  - 構造的判断。過去に類例のない局面
   notes: 日本の金利正常化は現在進行中の構造変化。銀行・不動産・高債務企業の相対が動く
   notes_extra: null
   provenance:
@@ -326,21 +379,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P06
   name_ja: FRB 政策スタンス
@@ -348,8 +404,10 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: FF金利、FOMC声明のトーン
-  formula: null
-  inputs: null
+  formula: FF金利と FOMC 声明のトーン（LLM 判定）
+  inputs:
+  - MACRO_policy
+  - LLM
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -363,9 +421,8 @@
   - LLM
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
-  - JP
   - US
   industries: null
   period_convention: POINT
@@ -374,13 +431,19 @@
   pit_lag_days: 1
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: P05 と同じ。**ただし FOMC はドットプロットという数値の指針があるので、日銀より読みやすい。**
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P01
+  - P02
+  - P05
+  - P21
+  - P10
+  economic_rationale: '**米国株側の主要ドライバー。** ただし**FRB の方針は市場に広く分析されており、 263AT が追加の洞察を持てる領域ではない。** → **P06 を予測に使うのではなく、 「今どの局面か」の記録として使う。** 上の (2) の方針そのもの。'
+  references:
+  - 構造的判断
   notes: 米国株側の主要ドライバー
   notes_extra: null
   provenance:
@@ -394,21 +457,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P07
   name_ja: USD/JPY 水準と変化
@@ -416,8 +482,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 為替レート
-  formula: null
-  inputs: null
+  formula: USD/JPY の水準と変化
+  inputs:
+  - MACRO_fx
   sign: context
   buy_class: useful
   sell_class: useful
@@ -430,7 +497,7 @@
   - MACRO
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -441,13 +508,20 @@
   pit_lag_days: 1
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 欠損しない。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P08
+  - P21
+  - U26
+  - V07
+  - S18
+  - C23
+  economic_rationale: '**日米両方に投資するので二重に効く。** 円安は (a) 日本の輸出企業の業績にプラス、 (b) 米国株の円換算リターンにプラス。 → **同じ方向に二重に賭けている状態になりやすい。** **知らないうちに為替が最大のリスク要因になる**という 263AT に固有の構造的な問題。 → **P08（銘柄別感応度）で ポートフォリオ全体のエクスポージャーを必ず測る。** S18（損益の株価要因・為替要因への分解）が事後の確認。'
+  references:
+  - 構造的判断。日米両建てに固有の問題
   notes: 日米両方に投資するので二重に効く。銘柄ごとの為替感応度（P08）と併せて
   notes_extra: null
   provenance:
@@ -461,21 +535,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P08
   name_ja: 銘柄の為替感応度
@@ -483,8 +560,10 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: beta( r_i ~ delta_USDJPY )（252日）
-  formula: null
-  inputs: null
+  formula: beta( r_i ~ delta USDJPY ), 252d
+  inputs:
+  - PRICE_adj
+  - MACRO_fx
   sign: context
   buy_class: useful
   sell_class: useful
@@ -497,7 +576,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -506,15 +585,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 252営業日が要る。
   missing_policy: flag
-  missing_bias: null
-  normalization: none
+  missing_bias: '**日本株と米国株で「USD/JPY への感応度」の意味が全く違う。** 日本株は業績経路、米国株は換算経路。 → **rank_market（市場内ランク）にする。統合ランクは無意味。**'
+  normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P07
+  - U26
+  - V07
+  - C23
+  - S18
+  - P20
+  economic_rationale: '**輸出企業と内需企業の判別。ポートフォリオ全体の 為替エクスポージャー管理に必須。** **U26（会社開示の為替感応度）が企業の自己申告なのに対し、 P08 は株価から統計的に推定する。** → **両者が食い違う銘柄は、 株価が為替以外の要因で動いている**ことを示すので、 **その乖離自体が情報になる**（U26 の説明と対応）。 P カテゴリで数少ない断面量。'
+  references:
+  - 構造的判断。U26 との突合が要点
   notes: 輸出企業と内需企業の判別。ポートフォリオ全体の為替エクスポージャー管理に必須
   notes_extra: null
   provenance:
@@ -528,21 +614,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P09
   name_ja: 商品価格感応度
@@ -550,8 +639,10 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 原油・銅・穀物への beta
-  formula: null
-  inputs: null
+  formula: beta( r_i ~ 原油 / 銅 / 穀物 )
+  inputs:
+  - PRICE_adj
+  - commodity_index
   sign: context
   buy_class: aux
   sell_class: useful
@@ -564,7 +655,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -573,15 +664,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 252営業日が要る。
   missing_policy: flag
-  missing_bias: null
-  normalization: none
+  missing_bias: '**主要商品の選択が要る。複数商品に跨る企業では単純化される。**'
+  normalization: rank_all
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - U24
+  - U39
+  - U41
+  - P04
+  - P20
+  - U25
+  economic_rationale: '**資源・素材・運輸。商品価格は国際市場で決まるので、 日米で同じ指標を使える**（→ rank_all）。 **U24（粗利率の原材料感応度）が損益で測るのに対し、 P09 は株価で測る。** → **投入側（コスト増でマイナス）と 産出側（売価上昇でプラス）で符号が逆**なので、 **context としたのは正しい。** 符号を固定すると、資源企業と素材加工企業が打ち消し合う。'
+  references:
+  - 構造的判断。U24 との対応
   notes: 資源・素材・運輸
   notes_extra: null
   provenance:
@@ -595,21 +693,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P10
   name_ja: VIX / 日経VI
@@ -617,8 +718,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 恐怖指数の水準とパーセンタイル
-  formula: null
-  inputs: null
+  formula: VIX / 日経VI の水準とパーセンタイル
+  inputs:
+  - MACRO_vix
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -631,7 +733,7 @@
   - MACRO
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -642,13 +744,20 @@
   pit_lag_days: 1
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 欠損しない。**日本の日経VI は米国 VIX より歴史が短い。**
   normalization: none
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - I30
+  - I14
+  - P16
+  - P12
+  - P18
+  - G30
+  economic_rationale: ∩型。**高 VIX は長期投資家にとって買い場。ただしサイジングは慎重に。** 高ボラ局面では期待リターンが高いが、 **同時に Kelly の分母（I03）が大きくなるので ポジションは小さくすべき**という、 **符号が逆向きの2つの効果が同時に働く。** → **P10 はスコアに加点するのではなく、 「買い増しの余地を作る」（P16）方向で使う。** G30（モメンタムクラッシュ）の検出とも連動する。
+  references:
+  - 構造的判断。§1.8 のサイジングとの関係
   notes: 高VIXは長期投資家にとって買い場。ただしサイジングは慎重に
   notes_extra: null
   provenance:
@@ -662,23 +771,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P11
   name_ja: クレジットスプレッド
@@ -686,8 +797,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: ハイイールド - 国債
-  formula: null
-  inputs: null
+  formula: ハイイールド債利回り - 国債利回り
+  inputs:
+  - MACRO_credit
   sign: negative
   buy_class: useful
   sell_class: main
@@ -700,7 +812,7 @@
   - MACRO
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -709,15 +821,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: na
+  zero_denominator_policy: na（差分）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本のハイイールド市場は極小なので、実質的に米国の指標。** 日本株にも使うが外挿になる。'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P03
+  - P15
+  - U02
+  - D08
+  - D25
+  - I28
+  economic_rationale: '**株より早く壊れる。小型株・高債務企業の先行指標として優秀。** 債券投資家は元本の毀損だけを見るので、 **株式投資家より早く悲観に転じる。** → **P11 の拡大は、D カテゴリ（財務健全性）が ゲートで効き始めるべき局面を教える。** **U02（銀行の与信費用）と同じ機構をマクロで見たもの。** P カテゴリで最も実務的に有用な早期警戒指標。'
+  references:
+  - Gilchrist-Zakrajsek (AER 2012) Credit Spreads and Business Cycle Fluctuations
   notes: 株より早く壊れる。小型株・高債務企業の先行指標として優秀
   notes_extra: null
   provenance:
@@ -731,21 +850,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P12
   name_ja: 市場ブレッドス
@@ -753,8 +875,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 騰落レシオ、新高値-新安値、上昇銘柄比率
-  formula: null
-  inputs: null
+  formula: 騰落レシオ / 新高値-新安値 / 上昇銘柄比率
+  inputs:
+  - market_breadth
   sign: cap
   buy_class: useful
   sell_class: useful
@@ -767,7 +890,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -778,13 +901,19 @@
   pit_lag_days: 0
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**市場全体の集計。ユニバースの定義で値が変わる。**'
   normalization: none
   nonlinear: abs_dev(x_star=sector_median)
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P10
+  - P16
+  - P18
+  - G19
+  - G07
+  economic_rationale: ∩型。**極端値が逆指標。** ブレッドスが極端に狭い（一部の大型株だけが上げている）局面は、 **指数が上がっていても内部は弱い。** → **263AT は小型株中心なので、 指数の動きよりブレッドスの方が 自分のポートフォリオの環境を正しく表す。** 実証は弱いので★1。
+  references:
+  - 構造的判断
   notes: 極端値が逆指標
   notes_extra: null
   provenance:
@@ -798,23 +927,25 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    nonlinear: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    nonlinear: override
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q08
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P13
   name_ja: 市場全体のバリュエーション
@@ -822,8 +953,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: TOPIX / S&P500 の予想PER、CAPE
-  formula: null
-  inputs: null
+  formula: TOPIX / S&P500 の予想PER、CAPE
+  inputs:
+  - index_valuation
   sign: negative
   buy_class: aux
   sell_class: useful
@@ -836,7 +968,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -845,15 +977,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 指数の予想 EPS>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**CAPE は10年の実質利益平均が要る。日本の長期系列は米国より整備が弱い。**'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P14
+  - P22
+  - P24
+  - A22
+  - P23
+  economic_rationale: '**5年ホライズンなら意味を持つ。1年では予測力がほぼない** （Campbell-Shiller の CAPE は10年先のリターンを説明するが 1年先は説明しない）。 → **263AT の保有期間（最大5年）はぎりぎり使える範囲。** ただし**タイミングを取ろうとすると失敗する** — 割高でも数年上がり続けることがある。 **配分の傾き（日米比率、現金比率）にとどめる。**'
+  references:
+  - Campbell-Shiller (1988) Stock Prices, Earnings, and Expected Dividends
   notes: 5年ホライズンなら意味を持つ。1年では予測力がほぼない
   notes_extra: null
   provenance:
@@ -867,21 +1005,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P14
   name_ja: バフェット指数
@@ -889,8 +1030,10 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 株式時価総額 / GDP
-  formula: null
-  inputs: null
+  formula: 株式時価総額 / GDP
+  inputs:
+  - MACRO_gdp
+  - index_mcap
   sign: negative
   buy_class: aux
   sell_class: aux
@@ -903,7 +1046,7 @@
   - MACRO
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -912,15 +1055,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: null
+  zero_denominator_policy: GDP>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**国際比較には向かない。** 上場企業の GDP に占める割合が 国で違う（米国は高く、ドイツは低い）。 **自国内の時系列比較としてのみ意味を持つ。**'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P13
+  - P22
+  - P27
+  - P28
+  economic_rationale: '**長期のみ。** P13 と実質的に同じことを別の分母で測る。 **GDP は改定されるので PIT が問題になる** （spec §1 の as-of ルールが GDP にも要る）。 → **P13 があれば P14 は冗長**な可能性が高く、 Z12 で確認する。★1 のまま強く縮小される。'
+  references:
+  - 構造的判断。P13 と冗長な可能性
   notes: 長期のみ。国際比較には向かない
   notes_extra: null
   provenance:
@@ -934,21 +1082,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P15
   name_ja: 景気先行指数
@@ -956,8 +1107,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: CLI、景気動向指数、PMI
-  formula: null
-  inputs: null
+  formula: CLI / 景気動向指数 / PMI
+  inputs:
+  - MACRO_leading
   sign: positive
   buy_class: aux
   sell_class: useful
@@ -970,7 +1122,7 @@
   - MACRO
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -981,13 +1133,20 @@
   pit_lag_days: 1
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**景気指数は改定される。spec §1 の as-of ルールを適用しないと、改定後の値でバックテストすることになる。**'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P03
+  - P11
+  - P19
+  - U22
+  - U25
+  - U41
+  economic_rationale: '**循環株のサイジング調整。** PMI が50を割る局面では、 **U22（BBレシオ）や U41（運賃指数）と同じ方向を向く。** → **業種レベルの感応度（P19）と掛け合わせて、 循環株の重みを動的に変える**のが本来の使い方。 **上の (2) の通り予測には使わない** — 景気指数自体が遅行することも多い。'
+  references:
+  - 構造的判断
   notes: 循環株のサイジング調整
   notes_extra: null
   provenance:
@@ -1001,21 +1160,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P16
   name_ja: 市場ドローダウン状態
@@ -1023,8 +1185,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 指数 / cummax(指数) - 1
-  formula: null
-  inputs: null
+  formula: 指数 / cummax(指数) - 1
+  inputs:
+  - index
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1037,7 +1200,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1046,15 +1209,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 欠損しない。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P10
+  - P12
+  - G30
+  - G16
+  - Q03
+  economic_rationale: '**下落時は買い増し余地を作る設計にする（ドライパウダー管理）。** 符号が + なのは「ドローダウンが深いほど将来リターンが高い」 という意味だが、**実際の使い方は資金配分。** → **263AT は 90% を投資信託に置いているので、 個別株の枠に追加投入する余力が構造的に存在する。** **市場が20%下げたときに買い増せるかどうかが、 長期リターンの大きな部分を決める。** G30（モメンタムクラッシュ）とは **同じ局面を逆の目的で見ている** — G30 は「モメンタムを止めろ」、P16 は「買い増せ」。'
+  references:
+  - 構造的判断。§1.8 のサイジング設計
   notes: 下落時は買い増し余地を作る設計にする（ドライパウダー管理）
   notes_extra: null
   provenance:
@@ -1068,21 +1237,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P17
   name_ja: ファクターモメンタム
@@ -1090,8 +1262,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: バリュー / グロース / クオリティ のどれが効いている局面か
-  formula: null
-  inputs: null
+  formula: バリュー / グロース / クオリティ のファクターリターンのモメンタム
+  inputs:
+  - factor_returns
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1104,7 +1277,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -1113,15 +1286,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: ファクター系列が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本のファクター系列の質が米国より低い**（I04/G10 と同じ問題）。'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P02
+  - P23
+  - P24
+  - P18
+  - G01
+  economic_rationale: '**ファクター配分 W_c を動的にする根拠。ただし過剰適合しやすい。** Ehsani-Linnainmaa (JF 2022) はファクターモメンタムが 個別株モメンタムの大部分を説明すると報告している。 → **G01（個別株モメンタム）と P17 が同じものを 別の階層で見ている可能性がある。** **W_c を動かすのは §1.9 の縮小の枠組みの外側にある操作**なので、 **やりすぎると縮小の効果を打ち消す。** → **P17 は監視するが、W_c を動かす幅は厳しく制限する。**'
+  references:
+  - Ehsani-Linnainmaa (JF 2022) Factor Momentum and the Momentum Factor
   notes: ファクター配分 W_c を動的にする根拠。ただし過剰適合しやすい
   notes_extra: null
   provenance:
@@ -1135,21 +1314,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P18
   name_ja: レジーム判定
@@ -1157,8 +1339,12 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: HMM / ルールベースで リスクオン・オフ・移行 を分類
-  formula: null
-  inputs: null
+  formula: HMM / ルールベースで リスクオン / オフ / 移行 を分類
+  inputs:
+  - P10
+  - P11
+  - P16
+  - factor_returns
   sign: context
   buy_class: useful
   sell_class: useful
@@ -1171,7 +1357,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1180,15 +1366,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: na（分類）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**分類器自体が過剰適合の温床。** HMM の状態数を増やせば過去には必ずよく当てはまるが、 **将来の状態が過去の状態と同じ性質を持つ保証はない。**'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P10
+  - P11
+  - P16
+  - P17
+  - G30
+  - Q03
+  economic_rationale: '**サイジング全体の乗数。分類器自体が過剰適合の温床なので シンプルに保つ。** → **263AT の方針: 状態は3つまで。 入力は P10（VIX）、P11（クレジット）、P16（DD）の3つまで。** 複雑にした瞬間に、**バックテストでは完璧に見えて 実運用で機能しないものになる。** **§1.9 が「選択せず縮小する」と決めたのと同じ精神で、 レジーム判定も「凝らない」ことが正しさに直結する。**'
+  references:
+  - 構造的判断。過剰適合の回避を最優先
   notes: サイジング全体の乗数。分類器自体が過剰適合の温床なのでシンプルに保つ
   notes_extra: null
   provenance:
@@ -1202,21 +1395,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P19
   name_ja: 業種の景気感応度
@@ -1224,8 +1420,10 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 業種指数の景気先行指数への beta
-  formula: null
-  inputs: null
+  formula: beta( 業種指数リターン ~ delta 景気先行指数 )
+  inputs:
+  - sector_index
+  - MACRO_leading
   sign: context
   buy_class: useful
   sell_class: useful
@@ -1238,7 +1436,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1247,15 +1445,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: 業種指数と景気指数の系列が要る。
   missing_policy: flag
-  missing_bias: null
-  normalization: none
+  missing_bias: '**業種指数の定義が日米で違う**（東証33業種 vs GICS）。SP-03 の課題を継承。'
+  normalization: rank_sector
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P15
+  - P09
+  - U39
+  - U41
+  - U45
+  - I05
+  economic_rationale: '**循環株の識別。サイジング調整に使う。** 業種レベルの量なので**銘柄には業種経由で割り当てる。** → **U カテゴリ（業種固有）が業種内の差を測るのに対し、 P19 は業種間の差を測る。** **同じ業種でも U42（長期契約比率）が高い企業は 景気感応度が低い**ので、 **P19 を銘柄にそのまま適用すると粗すぎる。** → I05（個別ベータ）との併用が要る。'
+  references:
+  - 構造的判断
   notes: 循環株の識別。サイジング調整に使う
   notes_extra: null
   provenance:
@@ -1269,21 +1474,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P20
   name_ja: インフレ感応度
@@ -1291,8 +1499,10 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: beta( r_i ~ delta_CPI )
-  formula: null
-  inputs: null
+  formula: beta( r_i ~ delta CPI )
+  inputs:
+  - PRICE_adj
+  - MACRO_cpi
   sign: context
   buy_class: useful
   sell_class: useful
@@ -1305,7 +1515,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1314,15 +1524,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: CPI の系列と252営業日が要る。
   missing_policy: flag
-  missing_bias: null
-  normalization: none
+  missing_bias: '**CPI は月次なので、日次リターンとの回帰はサンプルが少ない。 5年で60点しかない。** 推定誤差が大きい。 **日米で CPI の構成が違う**ので rank_market。'
+  normalization: rank_market
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - B36
+  - U24
+  - P04
+  - P09
+  - P08
+  economic_rationale: '**B36（価格転嫁力）の市場側からの検証。** 価格転嫁できる企業は、インフレ局面で株価が持ちこたえる。 → **B36（損益から推定）と P20（株価から推定）が 一致するかを見る**のが要点で、 **U24（粗利率の原材料感応度）を含めて 3つの独立な経路で同じ性質を測っている。** 3つが一致すれば信頼できる。 上の missing_bias の通り**推定精度が低い**ので、 単独では使わない。'
+  references:
+  - 構造的判断。B36/U24 との三点測量
   notes: B36（価格転嫁力）の市場側からの検証
   notes_extra: null
   provenance:
@@ -1336,21 +1552,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P21
   name_ja: 日米金利差
@@ -1358,8 +1577,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 米10年 - 日10年
-  formula: null
-  inputs: null
+  formula: 米10年金利 - 日10年金利
+  inputs:
+  - MACRO_10y
   sign: context
   buy_class: useful
   sell_class: useful
@@ -1372,7 +1592,7 @@
   - MACRO
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -1381,15 +1601,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: na
+  zero_denominator_policy: na（差分）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: 欠損しない。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P01
+  - P05
+  - P06
+  - P07
+  - P08
+  economic_rationale: '**為替の主要ドライバー。日米両建てなので直接効く。** 金利差が拡大すれば円安になりやすい （キャリートレードの誘因）。 → **P07（為替水準）の先行指標であり、 P05（日銀）と P06（FRB）の差分表現。** **日本の金利正常化が進めば金利差は縮小し、 円高方向に働く**ので、 **P05 の効果が P21 経由で P07/P08 に伝播する**という 連鎖を意識する必要がある。'
+  references:
+  - 構造的判断。金利平価の基本
   notes: 為替の主要ドライバー。日米両建てなので直接効く
   notes_extra: null
   provenance:
@@ -1403,21 +1629,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P22
   name_ja: 日米相対バリュエーション
@@ -1425,8 +1654,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: TOPIX予想PER / S&P500予想PER
-  formula: null
-  inputs: null
+  formula: TOPIX 予想PER / S&P500 予想PER
+  inputs:
+  - index_valuation
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -1439,7 +1669,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1448,15 +1678,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: null
+  zero_denominator_policy: 両指数の予想 EPS>0。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**指数の構成業種が違うので、PER の差の一部は業種構成の差。** 純粋な割安度ではない。'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P13
+  - P14
+  - P21
+  - S18
+  economic_rationale: '**日米の配分比率の調整に使う（銘柄選択には使わない）。** 上の missing_bias の通り、 **日本の PER が低いのは業種構成（金融・素材が多い）の 影響が大きく、単純に割安とは言えない。** → **業種構成を調整した比較でないと誤読する。** それでも**5年スケールでの資金配分の傾きには使える。** ★1 で強く縮小されるのが妥当。'
+  references:
+  - 構造的判断。業種構成の調整が必要
   notes: 日米の配分比率の調整に使う（銘柄選択には使わない）
   notes_extra: null
   provenance:
@@ -1470,21 +1705,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
+    accounting_standard_note: override
+    formula: override
+    inputs: override
+    zero_denominator_policy: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q05
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P23
   name_ja: ファクター混雑度
@@ -1492,8 +1730,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: ファクター内のバリュエーション・スプレッドの水準
-  formula: null
-  inputs: null
+  formula: ファクター内のバリュエーション・スプレッドの水準
+  inputs:
+  - factor_valuation
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -1506,7 +1745,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -1515,15 +1754,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: ファクターのロング・ショート両側のバリュエーションが要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本のファクター構築の質に依存**（I04/G10/P17 と同じ）。'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P17
+  - P24
+  - P13
+  - A22
+  - C36
+  economic_rationale: '**混雑したファクターは巻き戻す。** 2020年のバリュー（スプレッドが史上最大まで開いた）と 2009年のモメンタム（クラッシュ）が実例。 Asness et al. の value spread の議論。 → **P17（ファクターモメンタム）と符号が逆**で、 **P17 は「効いているものを追う」、 P23 は「効きすぎたものを避ける」。** **両方持つと打ち消し合うので、 時間軸で使い分ける**（P17 は3M-1Y、P23 は1Y-3Y）。 A22（自己バリュエーション位置）をファクターに適用した形。'
+  references:
+  - 'Asness-Friedman-Krail-Liew (JPM 2000) Style Timing: Value versus Growth'
   notes: 混雑したファクターは巻き戻す（2020年のバリュー、2009年のモメンタム）
   notes_extra: null
   provenance:
@@ -1537,21 +1782,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P24
   name_ja: ファクターのドローダウン
@@ -1559,8 +1807,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 各ファクターの現在のドローダウン深度
-  formula: null
-  inputs: null
+  formula: 各ファクターの現在のドローダウン深度
+  inputs:
+  - factor_returns
   sign: positive
   buy_class: useful
   sell_class: useful
@@ -1573,7 +1822,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1582,15 +1831,20 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 0
-  zero_denominator_policy: na
+  zero_denominator_policy: ファクター系列が要る。
   missing_policy: flag
-  missing_bias: null
+  missing_bias: P17/P23 と同じ。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P23
+  - P17
+  - P16
+  - P13
+  economic_rationale: '**ファクターも平均回帰するが、回復に何年もかかる。** バリューは2018-2020年に3年連続で負けた。 → **「安いから買う」を機械的にやると、 3年間負け続ける可能性がある。** **263AT の保有期間（最大5年）はこれに耐えられるが、 その間に運用をやめてしまう心理的リスクの方が大きい。** → **P24 は「今どれだけ我慢しているか」を 記録して可視化する**ことに価値がある。 P16（市場のDD）のファクター版。'
+  references:
+  - 構造的判断
   notes: ファクターも平均回帰するが、回復に何年もかかる
   notes_extra: null
   provenance:
@@ -1604,21 +1858,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P25
   name_ja: 市場全体の信用買残
@@ -1626,8 +1883,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 二市場信用買残の水準と変化
-  formula: null
-  inputs: null
+  formula: 二市場信用買残の水準と変化
+  inputs:
+  - margin_market_total
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -1640,10 +1898,9 @@
   - JQ
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: POINT
   consolidation: na
@@ -1651,13 +1908,19 @@
   pit_lag_days: 1
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本のみ。米国のマージン残高は FINRA が集計するが定義が違う。**'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - K01
+  - K04
+  - K10
+  - P12
+  - P26
+  economic_rationale: '**日本の個人の過熱度。** K01（個別銘柄の信用買残）を市場全体で見たもの。 **個人の買い越しが極端になった局面は天井に近い** という経験則があるが、実証は弱い。 → **263AT の狙う小型株は個人の売買比率が高い**ので、 **市場全体の指標より、 小型株に絞った信用残の方が適切**な可能性がある。 ★1 のまま。'
+  references:
+  - 構造的判断
   notes: 日本の個人の過熱度
   notes_extra: null
   provenance:
@@ -1671,21 +1934,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P26
   name_ja: 裁定買い残
@@ -1693,8 +1959,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 現物・先物の裁定残高
-  formula: null
-  inputs: null
+  formula: 現物・先物の裁定買い残高
+  inputs:
+  - arbitrage_balance
   sign: negative
   buy_class: aux
   sell_class: aux
@@ -1707,10 +1974,9 @@
   - JQ
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: POINT
   consolidation: na
@@ -1718,13 +1984,18 @@
   pit_lag_days: 1
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**日本のみ。**'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P25
+  - K46
+  - K26
+  - P12
+  economic_rationale: '**短期需給。長期戦略では優先度低。** 裁定残高の解消は SQ 前後の数日で起きるので、 **263AT の保有期間（6ヶ月-5年）とは3桁違う時間軸。** → **執行タイミングにすら使いにくい。** **P カテゴリで最も優先度が低い項目**と明記しておく。 削除しないのは §1.9 の方針だが、 実質的な重みはほぼゼロになるはず。'
+  references:
+  - 構造的判断。時間軸が合わない
   notes: 短期需給。長期戦略では優先度低
   notes_extra: null
   provenance:
@@ -1738,21 +2009,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P27
   name_ja: IPO件数
@@ -1760,8 +2034,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 直近12ヶ月の新規上場件数
-  formula: null
-  inputs: null
+  formula: 直近12ヶ月の新規上場件数
+  inputs:
+  - ipo_count
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -1774,7 +2049,7 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1783,15 +2058,22 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（カウント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**手で集める必要がある。日米で集計基準を揃える必要がある。**'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P28
+  - P13
+  - P14
+  - N24
+  - F26
+  economic_rationale: '**IPO ラッシュは市場の天井のサイン（株式の供給過多）。** Ritter の IPO 市場のタイミング研究。 **企業は自社株が割高なときに上場する**ので、 **IPO が多い＝市場全体が割高**という推論が成り立つ。 → **F26（純外部資金調達）を市場レベルで見たもの**で、 **個別銘柄で t=5.7 の効果が、 市場全体でも同じ機構で働く**という一貫性がある。 P28 と合わせて「株式の供給」を測る。'
+  references:
+  - Ritter (1991) The Long-Run Performance of Initial Public Offerings
+  - 構造的判断
   notes: IPOラッシュは市場の天井のサイン（株式の供給過多）
   notes_extra: null
   provenance:
@@ -1805,21 +2087,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P28
   name_ja: エクイティファイナンス総額
@@ -1827,8 +2112,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 市場全体の増資・売出し総額
-  formula: null
-  inputs: null
+  formula: 市場全体の増資・売出し総額
+  inputs:
+  - equity_offering_total
   sign: negative
   buy_class: useful
   sell_class: useful
@@ -1841,7 +2127,7 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -1850,15 +2136,21 @@
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 3
-  zero_denominator_policy: na
+  zero_denominator_policy: na（金額）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: P27 と同じ。手集計。
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - P27
+  - F01
+  - F02
+  - F26
+  - P13
+  economic_rationale: P27 と同じ機構。**F01/F02（個別の株式発行）を 市場全体で集計したもの。** Baker-Wurgler (JF 2000) の equity share in new issues は 市場リターンを予測すると報告されている。 → **P27/P28 を両方持つのは、 IPO（新規）と増資（既存）で タイミングの意味が違うから。** 増資は既存株主の希薄化を伴うので、 **経営陣の割高判断がより直接的に表れる。**
+  references:
+  - Baker-Wurgler (JF 2000) The Equity Share in New Issues and Aggregate Stock Returns
   notes: P27 と合わせて「株式の供給」を測る
   notes_extra: null
   provenance:
@@ -1872,21 +2164,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P29
   name_ja: M&A活動水準
@@ -1894,8 +2189,9 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: 市場全体の M&A 件数とプレミアム
-  formula: null
-  inputs: null
+  formula: 市場全体の M&A 件数と平均プレミアム
+  inputs:
+  - ma_activity
   sign: positive
   buy_class: useful
   sell_class: aux
@@ -1908,7 +2204,7 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1919,13 +2215,20 @@
   pit_lag_days: 3
   zero_denominator_policy: na
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**手集計。日本の非公開案件は捕捉できない。**'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - N13
+  - N14
+  - M10
+  - K18
+  - K48
+  - P01
+  economic_rationale: '**活発なら N13/N14 の実現確率が上がる。** M&A は金利が低く、企業の手元資金が厚いときに増える。 → **263AT の日本での優位性の一角 （親子上場解消 K18、アクティビスト M08/K48）は M&A 市場の活況に依存する。** **P29 が低迷している局面では、 それらのカタリスト系パラメータの期待値を下げるべき。** **DF-01 の制約（買収廃止銘柄が無料データから消える）で 検証できない領域と直結している**ので、 OQ-30 と併せて扱う。'
+  references:
+  - 構造的判断。OQ-30 と関連
   notes: 活発なら N13/N14 の実現確率が上がる
   notes_extra: null
   provenance:
@@ -1939,21 +2242,24 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
 - id: P30
   name_ja: 税制・制度の変更
@@ -1961,8 +2267,10 @@
   category_name: マクロ・レジーム
   subsection: null
   definition: NISA拡充、法人税、金融所得課税
-  formula: null
-  inputs: null
+  formula: 税制・制度の変更（NISA / 法人税 / 金融所得課税）
+  inputs:
+  - LLM
+  - MACRO_policy
   sign: context
   buy_class: useful
   sell_class: useful
@@ -1976,24 +2284,30 @@
   - MACRO
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
-  - US
   industries: null
   period_convention: POINT
   consolidation: na
   accounting_standard_note: na
   pit_lag_days: 1
-  zero_denominator_policy: na
+  zero_denominator_policy: na（イベント）
   missing_policy: flag
-  missing_bias: null
+  missing_bias: '**制度変更は稀事象。過去データから学習できない。**'
   normalization: none
   nonlinear: null
   winsorize: null
-  correlated_with: null
-  economic_rationale: null
-  references: []
+  correlated_with:
+  - S16
+  - S17
+  - U38
+  - U45
+  - T20
+  - N19
+  economic_rationale: '**S カテゴリの前提が変わる。制度変更の監視は必須。** NISA 成長投資枠（年240万 / 生涯1200万、 **損益通算・繰越控除ができない**）という制約は、 **263AT のサイジングと売買判断に直接効く。** → **損失を出しても他の利益と相殺できないので、 NISA 枠では「負ける可能性の高い銘柄」を 置くべきでない**という非対称が生まれる。 **金融所得課税の強化が議論されている**ので、 S16（税引後リターン）の前提は変わりうる。 **U38（薬価改定）や U45（規制産業）でも 制度が利益を直接決める。**'
+  references:
+  - 構造的判断。NISA 制度、金融所得課税の動向
   notes: S カテゴリの前提が変わる。制度変更の監視は必須
   notes_extra: null
   provenance:
@@ -2007,19 +2321,22 @@
     evidence_stars: catalog
     notes: catalog
     prior_scale: default
-    consolidation: default
+    consolidation: override
     missing_policy: default
-    normalization: default
-    period_convention: default
+    normalization: override
+    period_convention: override
     pit_lag_days: default
-    accounting_standard_note: default
-    zero_denominator_policy: default
+    accounting_standard_note: override
+    zero_denominator_policy: override
+    formula: override
+    inputs: override
+    missing_bias: override
+    correlated_with: override
+    economic_rationale: override
+    evidence_tier: override
+    references: override
+    markets: override
   review:
-    status: draft
-    pending:
-    - q06
-    - q09
-    - q10
-    - q11
-    - q12
+    status: verified
+    pending: []
   version: 1
