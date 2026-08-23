@@ -224,8 +224,11 @@ def normalize(values: Sequence[float | None],
 # ---------------------------------------------------------------- self-test
 def _test() -> int:
     fails = []
+    ran = []
 
     def check(name, cond):
+
+        ran.append(name)
         if not cond:
             fails.append(name)
         print("  %-58s %s" % (name, "OK" if cond else "**FAIL**"))
@@ -290,8 +293,13 @@ def _test() -> int:
     check("市場を指定しなければ1グループ", r6.n_groups == 1)
 
     print("-" * 72)
-    total = 21
-    print("%d/%d 通過" % (total - len(fails), total))
+    declared = 21
+    if len(ran) != declared:
+        fails.append("**検査の本数が宣言と違う（宣言 %d / 実際 %d）**"
+                     % (declared, len(ran)))
+        print("  **検査の本数が宣言と違う: 宣言 %d / 実際 %d**"
+              % (declared, len(ran)))
+    print("%d/%d 通過" % (len(ran) - len(fails), len(ran)))
     return 1 if fails else 0
 
 

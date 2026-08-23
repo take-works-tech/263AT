@@ -329,8 +329,11 @@ def compute(a: FA.AsOf, cik: int, t: str, mcap: float | None = None,
 # ---------------------------------------------------------------- self-test
 def _test() -> int:
     fails = []
+    ran = []
 
     def check(nm, cond):
+
+        ran.append(nm)
         if not cond:
             fails.append(nm)
         print("  %-64s %s" % (nm, "OK" if cond else "**FAIL**"))
@@ -450,8 +453,13 @@ def _test() -> int:
           v7["A03"].value is not None and v7["E29"].value is None)
 
     print("-" * 78)
-    total = 27
-    print("%d/%d 通過" % (total - len(fails), total))
+    declared = 27
+    if len(ran) != declared:
+        fails.append("**検査の本数が宣言と違う（宣言 %d / 実際 %d）**"
+                     % (declared, len(ran)))
+        print("  **検査の本数が宣言と違う: 宣言 %d / 実際 %d**"
+              % (declared, len(ran)))
+    print("%d/%d 通過" % (len(ran) - len(fails), len(ran)))
     return 1 if fails else 0
 
 

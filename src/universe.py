@@ -51,6 +51,7 @@ class Exclusion(enum.Enum):
     SUPERVISED = "整理・監理銘柄（N23）"
     GOING_CONCERN = "継続企業の前提に関する注記（D13）"
     AUDIT_OPINION = "監査意見が無限定適正でない（E22）"
+    LOW_PRICE = "株価が低すぎる（板の刻みに対して比が大きく、往復コストが実現不能）"
     MISSING_DATA = "判定に必要なデータが欠損"
 
 
@@ -65,6 +66,28 @@ class Thresholds:
     min_adv_jpy: float = 6_000_000.0        # J01: 600万円
     max_zero_volume_days: int = 0           # J10
     min_mcap_jpy: float = 3_000_000_000.0   # 30億円
+
+    # **最低株価。市場ごとに現地通貨で持つ。**
+    #
+    # 円換算した単一の閾値では機能しない。日本の 200円 の銘柄は普通だが、
+    # 米国の $1.3（同額）は仕手株の領域である。**同じ金額でも意味が違う。**
+    #
+    # なぜ要るか（2026-08-23、実データで踏んだ）:
+    #   2020-10-31 の断面で AITX の90日リターンが **+10,729%** だった。
+    #   データの誤りではない。$0.0007 -> $0.08 の実際の値動きである。
+    #   しかし**この利益は取れない。** 板の刻み $0.0001 に対して
+    #   株価が $0.0007 なので、**買って売るだけで 14% 以上が消える。**
+    #   ADV のゲートは通ってしまう（株数が膨大なので売買代金は立つ）。
+    #
+    #   結果として下位分位の平均が +250% に化け、
+    #   **上位-下位の差が -206.9% という、長期保有ではあり得ない値**が出た。
+    #   下位10%の 16 回だけで合計 -618.7%（全体は +232.0%）。
+    #   **測定の2割が、取れない利益で決まっていた。**
+    #
+    # 本来は「板の刻み ÷ 株価」で測るのが筋である（往復コストそのもの）。
+    # 刻みの規則を市場ごとに持っていないので、**株価を代理に使う。** OQ に残す。
+    min_price_local: dict = dataclasses.field(
+        default_factory=lambda: {"US": 1.0, "JP": 100.0})
 
     # **上場期間のゲートを明示的に無効化できるようにする。**
     #
@@ -96,6 +119,10 @@ class Thresholds:
             max_zero_volume_days=cls.max_zero_volume_days,
             min_mcap_jpy=cls.min_mcap_jpy / rho,
             require_age=cls.require_age,
+            # **最低株価は rho で動かさない。**
+            # 低位株を買うかどうかは「リスク許容度」の問題ではない。
+            # 板の刻みに対して株価が低いと、**利益そのものが実現しない。**
+            # 攻めても取れないものは、攻めても取れない。
         )
 
 
@@ -112,6 +139,8 @@ class Candidate:
     supervised: bool                 # 整理・監理
     going_concern_note: bool         # 継続企業の前提に関する注記
     audit_clean: bool | None         # 無限定適正なら True。None は未取得
+    price_local: float | None = None   # **現地通貨の株価**（円換算しない）
+    market: str = "US"
 
 
 def judge(c: Candidate, th: Thresholds) -> list[Exclusion]:
@@ -141,6 +170,13 @@ def judge(c: Candidate, th: Thresholds) -> list[Exclusion]:
         out.append(Exclusion.MISSING_DATA)
     elif c.mcap_jpy < th.min_mcap_jpy:
         out.append(Exclusion.TOO_SMALL)
+    # **最低株価。** 円換算せず、市場ごとの現地通貨で比べる
+    lim = th.min_price_local.get(c.market)
+    if lim is not None:
+        if c.price_local is None:
+            out.append(Exclusion.MISSING_DATA)
+        elif c.price_local < lim:
+            out.append(Exclusion.LOW_PRICE)
     if c.supervised:
         out.append(Exclusion.SUPERVISED)
     if c.going_concern_note:
@@ -193,15 +229,19 @@ def report(candidates: list[Candidate], rho: float = 1.0) -> str:
 def _ok(t="OK", **kw) -> Candidate:
     base = dict(ticker=t, listed=True, months_listed=24.0, adv_jpy=50_000_000.0,
                 zero_volume_days=0, mcap_jpy=50_000_000_000.0, supervised=False,
-                going_concern_note=False, audit_clean=True)
+                going_concern_note=False, audit_clean=True,
+                price_local=20.0, market="US")
     base.update(kw)
     return Candidate(**base)
 
 
 def _test() -> int:
     fails = []
+    ran = []
 
     def check(name, cond):
+
+        ran.append(name)
         if not cond:
             fails.append(name)
         print("  %-56s %s" % (name, "OK" if cond else "**FAIL**"))
@@ -225,6 +265,29 @@ def _test() -> int:
           Exclusion.SUPERVISED in judge(_ok(supervised=True), th))
     check("継続企業の前提の注記があれば落ちる（D13）",
           Exclusion.GOING_CONCERN in judge(_ok(going_concern_note=True), th))
+
+    # --- 最低株価（2026-08-23 に実データで踏んだ） -------------------------
+    check("**米国のサブペニー株を落とす**",
+          Exclusion.LOW_PRICE in judge(
+              _ok(price_local=0.0007, market="US"), th))
+    check("米国の $1 以上は通す",
+          Exclusion.LOW_PRICE not in judge(
+              _ok(price_local=1.5, market="US"), th))
+    check("**日本の 200円 は通す（同額の $1.3 とは意味が違う）**",
+          Exclusion.LOW_PRICE not in judge(
+              _ok(price_local=200.0, market="JP"), th))
+    check("**日本でも 50円 は落とす**",
+          Exclusion.LOW_PRICE in judge(
+              _ok(price_local=50.0, market="JP"), th))
+    check("**株価が未取得なら通さない（欠損を「高い」に丸めない）**",
+          Exclusion.MISSING_DATA in judge(
+              _ok(price_local=None, market="US"), th))
+    check("**rho を上げても最低株価は下がらない**",
+          Thresholds.for_rho(3.0).min_price_local["US"]
+          == Thresholds.for_rho(0.5).min_price_local["US"])
+    check("流動性の下限は rho で下がる",
+          Thresholds.for_rho(3.0).min_adv_jpy
+          < Thresholds.for_rho(0.5).min_adv_jpy)
     check("監査意見が不適正なら落ちる（E22）",
           Exclusion.AUDIT_OPINION in judge(_ok(audit_clean=False), th))
     check("**監査意見が未取得（None）を『適正』に丸めない**",
@@ -267,8 +330,13 @@ def _test() -> int:
     check("report が読める形を出す", "UNIVERSE(t)" in report([_ok("A")]))
 
     print("-" * 70)
-    total = 24
-    print("%d/%d 通過" % (total - len(fails), total))
+    declared = 31
+    if len(ran) != declared:
+        fails.append("**検査の本数が宣言と違う（宣言 %d / 実際 %d）**"
+                     % (declared, len(ran)))
+        print("  **検査の本数が宣言と違う: 宣言 %d / 実際 %d**"
+              % (declared, len(ran)))
+    print("%d/%d 通過" % (len(ran) - len(fails), len(ran)))
     return 1 if fails else 0
 
 

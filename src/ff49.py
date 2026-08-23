@@ -186,8 +186,11 @@ def name(abbrev: str | None) -> str | None:
 # ---------------------------------------------------------------- self-test
 def _test() -> int:
     fails = []
+    ran = []
 
     def check(nm, cond):
+
+        ran.append(nm)
         if not cond:
             fails.append(nm)
         print("  %-58s %s" % (nm, "OK" if cond else "**FAIL**"))
@@ -240,8 +243,13 @@ def _test() -> int:
     check("SIC レンジが業種間で重ならない（重なり %d 件）" % overlaps, overlaps == 0)
 
     print("-" * 72)
-    total = 23
-    print("%d/%d 通過" % (total - len(fails), total))
+    declared = 22
+    if len(ran) != declared:
+        fails.append("**検査の本数が宣言と違う（宣言 %d / 実際 %d）**"
+                     % (declared, len(ran)))
+        print("  **検査の本数が宣言と違う: 宣言 %d / 実際 %d**"
+              % (declared, len(ran)))
+    print("%d/%d 通過" % (len(ran) - len(fails), len(ran)))
     return 1 if fails else 0
 
 

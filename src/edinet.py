@@ -187,8 +187,11 @@ def business_days_back(n: int, today: str | None = None) -> list[str]:
 # ---------------------------------------------------------------- self-test
 def _test() -> int:
     fails = []
+    ran = []
 
     def check(nm, cond):
+
+        ran.append(nm)
         if not cond:
             fails.append(nm)
         print("  %-66s %s" % (nm, "OK" if cond else "**FAIL**"))
@@ -239,8 +242,13 @@ def _test() -> int:
         check("（キーがあるのでこの検査は省略）", True)
 
     print("-" * 80)
-    total = 13
-    print("%d/%d 通過" % (total - len(fails), total))
+    declared = 13
+    if len(ran) != declared:
+        fails.append("**検査の本数が宣言と違う（宣言 %d / 実際 %d）**"
+                     % (declared, len(ran)))
+        print("  **検査の本数が宣言と違う: 宣言 %d / 実際 %d**"
+              % (declared, len(ran)))
+    print("%d/%d 通過" % (len(ran) - len(fails), len(ran)))
     return 1 if fails else 0
 
 

@@ -254,8 +254,11 @@ def _c(t, sec, score, vol=0.30, adv=1e9) -> Candidate:
 
 def _test() -> int:
     fails = []
+    ran = []
 
     def check(nm, cond):
+
+        ran.append(nm)
         if not cond:
             fails.append(nm)
         print("  %-64s %s" % (nm, "OK" if cond else "**FAIL**"))
@@ -372,8 +375,13 @@ def _test() -> int:
           all(c.score > 0 for c in select_top(huge + [_c("X", "S", -1.0)], 999)))
 
     print("-" * 78)
-    total = 31
-    print("%d/%d 通過" % (total - len(fails), total))
+    declared = 33
+    if len(ran) != declared:
+        fails.append("**検査の本数が宣言と違う（宣言 %d / 実際 %d）**"
+                     % (declared, len(ran)))
+        print("  **検査の本数が宣言と違う: 宣言 %d / 実際 %d**"
+              % (declared, len(ran)))
+    print("%d/%d 通過" % (len(ran) - len(fails), len(ran)))
     return 1 if fails else 0
 
 

@@ -188,8 +188,11 @@ def status(path: pathlib.Path | None = None) -> str:
 def _test() -> int:
     import tempfile
     fails = []
+    ran = []
 
     def check(nm, cond):
+
+        ran.append(nm)
         if not cond:
             fails.append(nm)
         print("  %-64s %s" % (nm, "OK" if cond else "**FAIL**"))
@@ -290,8 +293,13 @@ def _test() -> int:
         check("その場合 status は未作成と言う", "未作成" in status(p2))
 
     print("-" * 80)
-    total = 33
-    print("%d/%d 通過" % (total - len(fails), total))
+    declared = 34
+    if len(ran) != declared:
+        fails.append("**検査の本数が宣言と違う（宣言 %d / 実際 %d）**"
+                     % (declared, len(ran)))
+        print("  **検査の本数が宣言と違う: 宣言 %d / 実際 %d**"
+              % (declared, len(ran)))
+    print("%d/%d 通過" % (len(ran) - len(fails), len(ran)))
     return 1 if fails else 0
 
 

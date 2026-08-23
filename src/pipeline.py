@@ -117,6 +117,8 @@ def build(t: str, candidates: list[dict], asof: FA.AsOf,
             mcap_jpy=c.get("mcap_jpy"), supervised=c.get("supervised", False),
             going_concern_note=c.get("going_concern_note", False),
             audit_clean=c.get("audit_clean"),
+            # **最低株価のゲート。** 現地通貨なので円換算しない
+            price_local=c.get("price_local"), market=c.get("market", "US"),
         )
         ex = UV.judge(cand, th)
 
@@ -186,8 +188,11 @@ def summary(rows: list[Row]) -> str:
 # ---------------------------------------------------------------- self-test
 def _test() -> int:
     fails = []
+    ran = []
 
     def check(nm, cond):
+
+        ran.append(nm)
         if not cond:
             fails.append(nm)
         print("  %-64s %s" % (nm, "OK" if cond else "**FAIL**"))
@@ -211,7 +216,7 @@ def _test() -> int:
     def cand(i, **kw):
         base = dict(ticker="T%02d" % i, cik=1000 + i, market="US", sic=3674,
                     months_listed=120.0, adv_jpy=5e7, zero_volume_days=0,
-                    mcap_jpy=5e10, audit_clean=True)
+                    mcap_jpy=5e10, audit_clean=True, price_local=20.0)
         base.update(kw)
         return base
 
@@ -272,8 +277,13 @@ def _test() -> int:
     check("要約が出る", "ユニバース内" in s and "除外理由" in s)
 
     print("-" * 78)
-    total = 19
-    print("%d/%d 通過" % (total - len(fails), total))
+    declared = 19
+    if len(ran) != declared:
+        fails.append("**検査の本数が宣言と違う（宣言 %d / 実際 %d）**"
+                     % (declared, len(ran)))
+        print("  **検査の本数が宣言と違う: 宣言 %d / 実際 %d**"
+              % (declared, len(ran)))
+    print("%d/%d 通過" % (len(ran) - len(fails), len(ran)))
     return 1 if fails else 0
 
 

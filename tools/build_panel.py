@@ -147,7 +147,10 @@ def build_one(t: str, series, by_ticker, sic_asof, asof, bars_by_ticker,
             ticker=tk, listed=True, months_listed=None,
             adv_jpy=(snap["adv20"] or 0) * FX,
             zero_volume_days=snap["zero_vol_60"], mcap_jpy=mcap,
-            supervised=False, going_concern_note=False, audit_clean=True)
+            supervised=False, going_concern_note=False, audit_clean=True,
+            # **最低株価のゲート。** 現地通貨（米国株なのでドル）で渡す。
+            # 円換算すると、日本の 200円 と米国の $1.3 が同じ扱いになる。
+            price_local=snap["close"], market="US")
         if UV.judge(cand, th):
             continue
         v = PU.compute(asof, cik, t, mcap)

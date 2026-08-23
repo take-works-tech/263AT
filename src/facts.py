@@ -211,8 +211,11 @@ def _f(cik, code, ddate, qtrs, value, filed) -> Fact:
 
 def _test() -> int:
     fails = []
+    ran = []
 
     def check(nm, cond):
+
+        ran.append(nm)
         if not cond:
             fails.append(nm)
         print("  %-60s %s" % (nm, "OK" if cond else "**FAIL**"))
@@ -299,8 +302,13 @@ def _test() -> int:
             check("pandas が無い", False)
 
     print("-" * 74)
-    total = 19
-    print("%d/%d 通過" % (total - len(fails), total))
+    declared = 19
+    if len(ran) != declared:
+        fails.append("**検査の本数が宣言と違う（宣言 %d / 実際 %d）**"
+                     % (declared, len(ran)))
+        print("  **検査の本数が宣言と違う: 宣言 %d / 実際 %d**"
+              % (declared, len(ran)))
+    print("%d/%d 通過" % (len(ran) - len(fails), len(ran)))
     return 1 if fails else 0
 
 
