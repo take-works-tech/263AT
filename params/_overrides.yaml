@@ -17118,3 +17118,1099 @@ H18:
   references: ["https://www.openassetpricing.com/", "OSAP MRreversal", "OQ-31 と同じ論点"]
   markets: [JP, US]
   review: {status: verified}
+
+# =============================================================================
+# M（株主構成・ガバナンス）未検証 16件
+#
+# M カテゴリを貫く3つの事実:
+#
+#  (1) **形式指標と実質指標を混ぜてはいけない。**
+#      M12（社外取締役比率）/ M27（多様性）は形式基準なので、
+#      **東証やコードが求めれば全社が満たしてしまい、断面の差が消える。**
+#      → **形式が普及するほど情報量が減る**という、
+#        他カテゴリに無い時間的な劣化がある。
+#      **M19（報酬の KPI）/ M26（社外取締役の質）のような
+#      実質指標の方が長く生き残る。**
+#
+#  (2) **M の大半は有報でのみ開示され、年1回・3ヶ月遅れ。**
+#      → **鮮度が最悪。** ただしガバナンスは年単位でしか変わらないので、
+#        鮮度の低さが致命的にならない数少ない領域。
+#
+#  (3) **東証の資本コスト要請（F13/LAW-47）が M を動かしている。**
+#      M13（買収防衛策）/ M16（還元方針）/ M23（持ち合い）は
+#      **いずれも今まさに変化の途上**で、
+#      **過去データの分布が将来の分布と違う。**
+# =============================================================================
+
+M07:
+  formula: "従業員持株会保有株数 / SHARES"
+  inputs: [esop_holdings, SHARES]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "SHARES>0。制度が無ければゼロ。"
+  missing_bias: "**有報の大株主一覧に載る規模でないと捕捉できない。** 小規模な持株会は見えない。"
+  correlated_with: [M29, K36, K35, W05, W06]
+  economic_rationale: >-
+    **弱いが安定株主。日本で取りやすい。**
+    従業員が自社株を買うのは**内部者の弱いシグナル**だが、
+    **持株会は毎月定額の自動買付**なので、
+    **判断ではなく制度で買っている**部分が大半。
+    → **M29（拠出額の変化）の方が判断を反映する**が、
+    そちらも開示が粗い。
+    **K36（安定株主比率）の一部を構成する**ので、
+    **浮動株の少なさ（J06/J07）にも寄与する。**
+  evidence_tier: T3
+  references: ["構造的判断。シグナルとしては弱い"]
+  markets: [JP]
+  review: {status: verified}
+
+M11:
+  formula: "変更報告書での保有比率の増加幅"
+  inputs: [large_shareholding_report]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: "**大量保有報告書の提出が無ければ欠損。**"
+  missing_bias: >-
+    **5%超の保有者のみ。義務発生日から5営業日以内の提出**（spec §1.2）。
+    → **そのラグの間に価格が動く。**
+  correlated_with: [M08, M09, K48, K23, N43, K18]
+  economic_rationale: >-
+    **継続的な買い集め。義務発生日から公表日にかけて
+    累積超過リターンが増加する。**
+    → **spec §1.2 で記録した「約1週間のラグ」が
+    M11 が効く窓そのもの。**
+    **米国の K48（13D/13G）と対応する日本版**だが、
+    **米国は目的別（13D = 経営関与、13G = 純投資）に
+    区分があるのに対し、日本は保有目的の記載が自由文**なので、
+    **LLM で目的を分類する必要がある。**
+    → **T12（開示文書の要点抽出）の重要な適用先。**
+    K48 が t を持つ実証（Brav et al. JF 2008）に対し、
+    **日本版の実証は無いので★2 に留める。**
+  evidence_tier: T2
+  references: ["金融商品取引法 大量保有報告制度", "Brav-Jiang-Partnoy-Thomas (JF 2008) が米国版の実証"]
+  markets: [JP]
+  review: {status: verified}
+
+M12:
+  formula: "社外取締役数 / 取締役総数"
+  inputs: [board_composition]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "取締役総数>0。"
+  missing_bias: >-
+    **コーポレートガバナンス・コードで比率が事実上義務化されたので、
+    プライムでは全社が満たし断面の差が消えつつある。**
+    → 上の (1) の劣化そのもの。
+  correlated_with: [M26, M27, M13, M23, F13, W13]
+  economic_rationale: >-
+    **弱い。形式基準なので実質を伴わないことが多い。**
+    → **社外取締役が3分の1いても、
+    全員が取引先や元役員なら独立性が無い。**
+    **M26（兼任社数・専門性・在任年数）が実質を測る。**
+    上の missing_bias の通り、**制度が普及するほど
+    M12 の情報量は減る**ので、
+    **263AT の主戦場（スタンダード市場）では
+    まだ差が残っているが、数年で消える。**
+    → **形式指標には賞味期限がある**という
+    M カテゴリ固有の性質。
+  evidence_tier: T3
+  references: ["東京証券取引所 コーポレートガバナンス・コード", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+M13:
+  formula: "買収防衛策の導入・継続の有無"
+  inputs: [tdnet_disclosure]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "na（フラグ）"
+  missing_bias: "**日本の導入企業は減少傾向。** 過去データの分布と将来の分布が違う（上の (3)）。"
+  correlated_with: [K18, M08, M23, K36, N13, F13]
+  economic_rationale: >-
+    **少数株主軽視のサイン。TOB 期待を消す。**
+    → **263AT の日本での優位性の一角
+    （親子上場解消 K18、アクティビスト M08、TOB N13/N14）を
+    構造的に無効化する。**
+    **A15（NCAV）/ A19（不動産含み益）のような
+    隠れ資産型の銘柄に防衛策があれば、
+    その資産は永遠に顕在化しない可能性がある。**
+    → **M13 は「カタリストが起きない」ことの直接的な証拠**で、
+    **隠れ資産型パラメータの減衰係数として使うべき。**
+    **DF-01 の制約（TOB 銘柄が無料データから消える）と
+    併せて、OQ-30 の文脈で扱う。**
+  evidence_tier: T3
+  references: ["構造的判断。隠れ資産型パラメータの減衰係数"]
+  markets: [JP]
+  review: {status: verified}
+
+M14:
+  formula: "現CEO の就任からの年数"
+  inputs: [ceo_tenure, LLM]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "na（年数）"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: "**就任日の特定が LLM 依存。会長職への移行など実質的な支配の継続を捉えられない。**"
+  correlated_with: [M21, M15, M22, T22, T41, E15]
+  economic_rationale: >-
+    ∩型。**短すぎ = 未知数、長すぎ = 停滞。交代直後は変化の期待。**
+    **M21（社長交代）が起きた直後は
+    E15（会計方針の変更 = big bath）の可能性が高く、
+    その場合は翌年以降の利益が良く見える**ので
+    むしろ買い場になりうる（E15 の説明と対応）。
+    → **M14 が小さい（交代直後）ことは、
+    E15/T35（話者単位の言語変化が無効になる）と
+    連動した一つの局面を表す。**
+    **T41（資本配分の質）は10年の履歴を要するので、
+    新任CEO では評価できない**という
+    構造的な穴がここにある。
+  evidence_tier: T3
+  references: ["構造的判断。M21/E15 との連動"]
+  markets: [JP, US]
+  review: {status: verified}
+
+M15:
+  formula: "創業者が経営しているか（フラグ）"
+  inputs: [LLM]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "na（フラグ）"
+  missing_bias: "**LLM の知識に依存。無名企業では判定精度が落ちる**（OQ-34 の知名度バイアス）。"
+  correlated_with: [M01, M22, M14, T22, T41, K35]
+  economic_rationale: >-
+    **長期志向・大胆な資本配分と相関するという報告がある。**
+    創業者は**自社株を大量に持つ（M01）ので利害が一致し、
+    かつ任期を気にしないので長期投資ができる。**
+    → **263AT の保有期間（最大5年）と
+    経営者の時間軸が一致することに意味がある。**
+    **M22（創業家の世代）が細分化版**で、
+    **2代目・3代目では創業者の利点が薄れる。**
+    上の missing_bias が OQ-34 の実例で、
+    **無名企業ほど LLM が創業者を知らない。**
+  evidence_tier: T3
+  references: ["構造的判断。OQ-34 の知名度バイアスの影響を受ける"]
+  markets: [JP, US]
+  review: {status: verified}
+
+M16:
+  formula: "DOE目標・配当性向目標・総還元方針の開示の有無と具体性"
+  inputs: [tdnet_disclosure, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "na（フラグ + 採点）"
+  missing_bias: "**東証改革の文脈で増加中**（上の (3)）。過去データの分布が将来と違う。"
+  correlated_with: [F13, F20, F22, F08, F09, M14]
+  economic_rationale: >-
+    **東証改革の文脈で増加中。F13 と併用。**
+    **F20（配当方針の変更）がイベント、M16 が状態。**
+    → **F13（資本コスト開示）/ M16（還元方針）/
+    F22（ROE-WACC ギャップ）は、
+    東証要請への対応の3段階**
+    — 開示する / 方針を出す / 実際に達成する。
+    **263AT の主戦場（スタンダード市場、開示率19%）では
+    まだ第1段階にすら至っていない企業が81%**なので、
+    **M16 が今後点灯する企業に再評価の余地がある。**
+  evidence_tier: T3
+  references: ["構造的判断。東証の資本コスト要請"]
+  markets: [JP]
+  review: {status: verified}
+
+M17:
+  formula: "決算資料・適時開示の英文提供の有無"
+  inputs: [disclosure, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "na（フラグ）"
+  missing_bias: >-
+    **2025年4月からプライム上場企業に英文開示が義務化された。**
+    → **プライムでは差が消え、スタンダード・グロースにのみ残る。**
+    M12 と同じ形式指標の劣化。
+  correlated_with: [K11, E17, T10, O02, O03, M16]
+  economic_rationale: >-
+    **日本の小型株。将来の外国人買いの前提条件。
+    今ないものが今後できると需給が変わる。**
+    → **E17（透明性）の説明で述べた通り、
+    英文開示が無い企業は外国人が買えないので
+    K11（外国人保有比率）が構造的に低い。**
+    **これは O カテゴリ（ネグレクト）の原因の一つ**で、
+    **「安いから放置されている」のではなく
+    「読めないから放置されている」。**
+    → **M17 が点灯した瞬間に需給が変わる**ので、
+    **M17 の変化（無→有）がカタリストになる。**
+    上の missing_bias により、**義務化の対象外である
+    スタンダード市場でこそ差が残る** — 263AT の主戦場と一致する。
+  evidence_tier: T3
+  references: ["東京証券取引所 英文開示の義務化（2025年4月、プライム）", "構造的判断"]
+  markets: [JP]
+  review: {status: verified}
+
+M18:
+  formula: "株式報酬 / 役員報酬総額"
+  inputs: [executive_compensation]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "**日本は1億円以上の個別開示のみ。総額は開示されるが内訳の粒度が企業で違う。**"
+  zero_denominator_policy: "役員報酬総額>0。"
+  missing_bias: "**日本は開示が粗い。米国は Proxy Statement で詳細に開示される。** 日米で精度が違う。"
+  correlated_with: [M19, M20, M01, F07, T22]
+  economic_rationale: >-
+    **利害一致。日本も開示が進んでいる。**
+    株式報酬の比率が高いほど、
+    **経営陣の報酬が株価に連動する。**
+    → **ただし M19（何を KPI にするか）の方が重要。**
+    **株式報酬でも、権利確定条件が売上目標なら
+    拡大インセンティブになる。**
+    **F07（株式報酬費用率）が株主側のコストを測るのに対し、
+    M18 は経営陣側のインセンティブを測る**ので、
+    **同じ株式報酬を2つの視点から見ている。**
+  evidence_tier: T3
+  references: ["構造的判断。M19 との併用が重要"]
+  markets: [JP, US]
+  review: {status: verified}
+
+M19:
+  formula: "業績連動報酬の KPI（ROE / TSR / 売上 / 利益額）の分類"
+  inputs: [executive_compensation, LLM]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "na（分類）"
+  missing_bias: "**KPI の記載を LLM が分類する。複数 KPI の加重が不明なことが多い。**"
+  correlated_with: [M18, M20, T41, C35, C10, B04]
+  economic_rationale: >-
+    **売上・規模連動は拡大インセンティブ = 価値破壊的 M&A の温床。
+    TSR / ROE 連動が望ましい。**
+    → **OQ-39 で記録した「資金を集めて資産を増やした企業は負ける」
+    という15本超の塊の、原因側にある変数。**
+    **なぜ企業は過剰投資するのか**に対する答えの一つが、
+    **報酬が規模に連動しているから。**
+    → **M19 は C35 / C30 / F26 の塊に対する
+    「なぜそうなるか」の説明変数**であり、
+    **結果ではなく原因を測る数少ないパラメータ。**
+    符号を context にしたのは KPI の種類で向きが変わるため。
+  evidence_tier: T3
+  references: ["構造的判断。OQ-39 の塊の原因側にある変数"]
+  markets: [JP, US]
+  review: {status: verified}
+
+M20:
+  formula: "役員報酬総額 / NI"
+  inputs: [executive_compensation, NI]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "M18 の開示粒度の問題を継承。"
+  zero_denominator_policy: "**NI>0。赤字企業では欠損だが、赤字なのに高額報酬こそ最大の赤旗**なので、絶対額でのフラグを別に持つ。"
+  missing_bias: "**赤字企業で欠損する。最も問題のある企業が落ちる**という D03 と同じ形の偏り。"
+  correlated_with: [M18, M19, K35, T22, W13, T28]
+  economic_rationale: >-
+    **小型株で過大な報酬は赤旗。**
+    利益10億円の企業で役員報酬が2億円なら、
+    **株主より経営陣が先に取っている。**
+    → **オーナー企業（M15/M22）では
+    報酬と配当の使い分けが恣意的**なので、
+    **M01（経営陣の持株比率）と併せて見ないと誤読する**
+    — 大株主でもある創業者の高報酬は
+    利害不一致とは限らない。
+    上の missing_bias に対処するため、
+    **赤字企業では絶対額でフラグを立てる。**
+    **T28（否定的チェックリスト）の項目。**
+  evidence_tier: T3
+  references: ["構造的判断。M01 との併用が必要"]
+  markets: [JP, US]
+  review: {status: verified}
+
+M22:
+  formula: "創業者 / 2代目 / 3代目以降 の分類"
+  inputs: [LLM]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "na（分類）"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: "M15 と同じ。**LLM の知識に依存し、無名企業で精度が落ちる**（OQ-34）。"
+  correlated_with: [M15, M01, M14, K35, T22, N13]
+  economic_rationale: >-
+    ∩型。**日本の中小型株で意味を持つ。M15 の細分化。**
+    **創業者は大胆だが独断的、
+    3代目以降は保守的で停滞しやすい。**
+    **2代目前後が均衡点**という仮説だが実証は無い。
+    → **日本では事業承継問題が深刻**で、
+    **後継者不在の企業は M&A（N13/P29）の対象になる。**
+    **M22 が高い（3代目以降）かつ M14 が長い企業は、
+    承継の限界に近い**ので、
+    **カタリストが起きる確率が高い**という読み方ができる。
+    **263AT の日本での優位性（TOB 期待）と繋がる。**
+  evidence_tier: T3
+  references: ["構造的判断。日本の事業承継問題と繋がる"]
+  markets: [JP]
+  review: {status: verified}
+
+M23:
+  formula: "政策保有先から自社も保有されているか（相互保有の検出）"
+  inputs: [cross_shareholdings, LLM]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "na（フラグ + 規模）"
+  missing_bias: >-
+    **有報の政策保有株一覧を相互に突合する必要がある。
+    上位銘柄しか開示されない**ので、小規模な持ち合いは見えない。
+  correlated_with: [K17, K36, A18, C40, M13, E28]
+  economic_rationale: >-
+    **相互保有は少数株主軽視のサイン。K17/K36 と連動。**
+    **お互いに株を持ち合って議決権を無効化する**構造で、
+    **経営陣が株主の監視を受けない。**
+    → **東証の要請（F13/LAW-47）が最も直接的に
+    崩そうとしている対象。**
+    **K17（政策保有の変化）/ A18（有価証券含み益）/
+    C40（長期投資の変化）/ E28（包括利益との差）が
+    すべて同じ持ち合い株を別の角度から測っている**ので、
+    **M23 はその構造を識別する入口。**
+    → **日本固有の、しかも今まさに解体されつつある構造。**
+  evidence_tier: T3
+  references: ["構造的判断。東証の政策保有解消要請の対象"]
+  markets: [JP]
+  review: {status: verified}
+
+M26:
+  formula: "社外取締役の兼任社数・専門性・在任年数の複合"
+  inputs: [board_composition, LLM]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "社外取締役が0名なら欠損。"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: "**兼任社数は有報から取れるが、専門性の判定は LLM 依存。**"
+  correlated_with: [M12, M27, W13, T22, E22, E23]
+  economic_rationale: >-
+    ∩型。**M12（比率）の質版。兼任過多は機能しない。**
+    5社も兼任している社外取締役は、
+    **各社の実態を把握できない。**
+    → **上の (1) の通り、形式指標（M12）が
+    制度の普及で情報量を失う一方、
+    実質指標（M26）は残る。**
+    **在任年数が長すぎると独立性が失われる**ので∩型。
+    **E22（監査意見）/ E23（KAM）が
+    監査人の側から同じガバナンスの実質を測る。**
+  evidence_tier: T3
+  references: ["構造的判断。形式指標の劣化に対する実質指標"]
+  markets: [JP, US]
+  review: {status: verified}
+
+M27:
+  formula: "取締役会の女性比率・外国人比率"
+  inputs: [board_composition]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "取締役総数>0。"
+  missing_bias: "**M12 と同じ形式指標の劣化。** 東証が数値目標を示しているので差が消えつつある。"
+  correlated_with: [M12, M26, K13, K26, W13]
+  economic_rationale: >-
+    **単独では弱いが、指数採用・ESG 需給に影響する。**
+    → **リターン予測としてではなく、
+    K13/K40（指数採用）や ESG ファンドの
+    組入基準として効く。**
+    **MSCI 等の ESG 指数は取締役会の多様性を
+    スクリーニング条件にしている**ので、
+    **M27 が閾値を超えると新たな買い手が現れる。**
+    → **M27 は需給変数（K カテゴリ）に近い性格**を持ち、
+    **ガバナンスの質そのものを測っているわけではない。**
+    ★1 で強く縮小されるのが妥当。
+  evidence_tier: T3
+  references: ["構造的判断。需給変数としての性格が強い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+M29:
+  formula: "従業員持株会の拠出額の変化"
+  inputs: [esop_contributions]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "前期の拠出額>0。"
+  missing_bias: "**拠出額を開示する企業は少ない。M07（保有比率）から推定することが多い。**"
+  correlated_with: [M07, M02, W06, W11, K36]
+  economic_rationale: >-
+    **内部者の弱いシグナル。M07 の変化版。**
+    **M07 の説明で述べた通り、持株会は自動買付が大半**だが、
+    **拠出額の変更は従業員の判断を反映する。**
+    → **M02（インサイダーの買い）の集合版**で、
+    **役員より従業員の方が現場を知っている**という
+    見方もできる。
+    ただし**従業員には自社株を買う制度的インセンティブ
+    （奨励金）がある**ので、判断の純度は低い。
+    **W06（離職率）/ W11（従業員クチコミ）と併せて
+    従業員の実際の評価を測る。**
+  evidence_tier: T3
+  references: ["構造的判断。シグナルとしては弱い"]
+  markets: [JP]
+  review: {status: verified}
+
+# =============================================================================
+# N（カタリスト・イベント）未検証 25件
+#
+# N カテゴリを貫く4つの事実:
+#
+#  (1) **263AT の設計上、N は A（バリュー）と対で必要。**
+#      §2 で整理した通り、割安なだけでは価格は動かない。
+#      **カタリストが無ければバリュートラップ。**
+#      → A15/A18/A19（隠れ資産型）は N43/M08/K18 と組んで初めて期待値になる。
+#
+#  (2) **N の多くは開示イベントなので、T12/T33（LLM による抽出と分類）が前提。**
+#      年間数万件の適時開示から拾い上げる仕組みが無ければ N は動かない。
+#
+#  (3) **アナリスト予想に依存する N（N02/N10/N11/N12/N47/N48）は、
+#      263AT の中核ユニバース（O01 カバレッジゼロ）で全滅する。**
+#      → **日本では K32/K33（四季報予想）だけが代替になる。**
+#
+#  (4) **N47/N48 は符号が直感と逆。** 高成長予想の銘柄も
+#      推奨が高い銘柄も劣後する。**アナリストの楽観は逆指標。**
+# =============================================================================
+
+N01:
+  formula: "次回決算発表予定日までの営業日数"
+  inputs: [earnings_calendar]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na（日数）"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: "**日本は決算発表予定日を開示する慣行があるが、変更されることがある。**"
+  correlated_with: [N05, N29, I22, I15, K43]
+  economic_rationale: >-
+    ∩型。**執行タイミングの調整に使う。決算直前の新規建ては避ける設計もあり得る。**
+    → **normalization: none で執行専用と明示する。**
+    **I22（決算日のボラティリティ）が高い銘柄では
+    決算がコイン投げになる**ので、
+    **保有 6ヶ月-5年 の戦略であっても
+    「決算の3日前に買う」のは避ける。**
+    **K43（自社株買いブラックアウト）と同じく、
+    数日スケールの執行制約。**
+  evidence_tier: T3
+  references: ["構造的判断。執行専用"]
+  markets: [JP, US]
+  review: {status: verified}
+
+N03:
+  formula: "売上ベースの SUE = (実績売上 - 予想売上) / sd(過去のサプライズ)"
+  inputs: [REV, consensus_revenue]
+  period_convention: FQ
+  consolidation: consolidated
+  accounting_standard_note: "**総額/純額基準（IFRS15）の変更で売上が不連続に変わる**と SUE が跳ねる。"
+  zero_denominator_policy: "**sd>0。8四半期以上の履歴が要る。**"
+  missing_bias: "**売上のコンセンサスは利益より提供が少ない。** 日本の小型株ではほぼ取れない（上の (3)）。"
+  correlated_with: [N02, N08, G37, C21, E20, C25]
+  economic_rationale: >-
+    **利益サプライズより操作されにくい。両方あると強い。**
+    → **E カテゴリの主題（利益は操作できる）が
+    サプライズにも当てはまる。**
+    **E14（利益調整でわずかに予想を超える）を
+    やっている企業は N02（利益 SUE）が常に僅差でプラス**になるが、
+    **売上は操作しにくいので N03 は追随しない。**
+    → **N02 と N03 の乖離が利益操作の証拠**になる。
+    **E26（異常アクルーアル）と独立な経路で
+    同じ結論に到達する。**
+  evidence_tier: T2
+  references: ["Jegadeesh-Livnat (JAE 2006) Revenue surprises and stock returns"]
+  markets: [US]
+  review: {status: verified}
+
+N05:
+  formula: "決算発表からの経過営業日数（60日程度まで有効）"
+  inputs: [earnings_date]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na（日数）"
+  missing_bias: "**決算発表日の正確な特定が要る。日本は引け後発表が多く翌営業日起算**（spec §1.5）。"
+  correlated_with: [N02, N08, N50, T30, G37]
+  economic_rationale: >-
+    **ドリフトが効く窓の管理。**
+    PEAD は決算後60営業日程度で消える。
+    → **N02/N08/N50 の減衰係数**であり、
+    **それ自体はスコアに入らない**（normalization: none）。
+    **T30（織り込み度）が材料一般の減衰を扱うのに対し、
+    N05 は決算という特定の材料の減衰を日数で機械的に扱う。**
+    → **機械的に扱える分だけ確実**で、
+    **LLM に頼らない減衰の実装。**
+  evidence_tier: T2
+  references: ["Bernard-Thomas (JAE 1990)", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+N09:
+  formula: "mean( 実績 / 期初会社予想, 過去5年 )"
+  inputs: [GUIDE_CO, actual]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "**期初予想>0。5年の履歴が要る。**"
+  missing_bias: >-
+    **会社予想を出さない企業（一部の IFRS 適用企業）で欠損。**
+    日本では大半が出すので欠損は少ない。**米国には会社予想の義務が無い**ので実質日本のパラメータ。
+  correlated_with: [K33, N31, T07, T11, E20, C19]
+  economic_rationale: >-
+    **日本企業は保守的な予想を出す傾向。
+    常に上振れる企業は予想を割り引いて読むべき。**
+    → **会社予想の開示義務は日本固有**で、
+    **「予想を出す」こと自体が制度的なプレッシャーを生む。**
+    **E20（期末集中売上）の説明で述べた通り、
+    予想達成のために期末に押し込む**という副作用がある。
+    → **N09 が高い（常に上振れる）企業は
+    保守的なだけかもしれないし、
+    達成のために無理をしているのかもしれない。**
+    **E20/B23（DSO）と併せて区別する。**
+    **T11（約束履行率）の定量版**でもある。
+  evidence_tier: T2
+  references: ["構造的判断。日本の会社予想開示義務に固有"]
+  markets: [JP]
+  review: {status: verified}
+
+N11:
+  formula: "アナリスト予想のばらつき（標準偏差 / 平均の絶対値）"
+  inputs: [EST]
+  period_convention: GUIDE_CONS
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "**アナリスト3名以上が要る。平均の絶対値>0。**"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: "**カバレッジのある銘柄のみ。263AT の中核ユニバースで全滅する**（上の (3)）。"
+  correlated_with: [N10, N12, O01, O07, I04, G34]
+  economic_rationale: >-
+    ∩型。**意見の割れ = 情報の非対称性 = 機会。ただしリスクも。**
+    **Diether-Malloy-Scherbina (JF 2002) は
+    予想のばらつきが大きい銘柄は将来リターンが低いと報告**
+    （空売り制約下で悲観論が価格に反映されないため）。
+    → **これは∩型ではなく単純な − の可能性がある。**
+    **K51（保有者の広がり）/ K52（空売り × 機関保有）が
+    同じ「空売り制約で悲観が織り込まれない」機構を
+    需給側から測る**ので、
+    **N11 と K51/K52 は同じ現象の別の顔。**
+    **G34（若い企業でモメンタムが強い）の
+    情報不確実性仮説とも繋がる。**
+  evidence_tier: T2
+  references: ["Diether-Malloy-Scherbina (JF 2002) Differences of Opinion and the Cross Section of Stock Returns"]
+  markets: [US]
+  review: {status: verified}
+
+N12:
+  formula: "コンセンサス目標株価 / PRICE - 1"
+  inputs: [EST, PRICE]
+  period_convention: GUIDE_CONS
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "PRICE>0。カバレッジが無ければ欠損。"
+  missing_bias: "**カバレッジのある銘柄のみ。しかもアナリストは楽観バイアスを持つ**ので、常に正の値になりやすい。"
+  correlated_with: [N10, N47, N48, N11, T26]
+  economic_rationale: >-
+    **弱い（アナリストは楽観バイアス）。変化率の方が使える。**
+    → **N48（コンセンサス推奨 t=3.2）が
+    「推奨が高い銘柄ほど劣後する」と言うのと同じ機構。**
+    **アナリストの絶対的な水準は逆指標に近い**が、
+    **変化（N10 のリビジョン）は情報を持つ。**
+    → **N カテゴリで「水準は逆、変化は順」という
+    構造が最も明確に現れる場所。**
+    A/C の原則の変種だが、**符号まで反転する**点が特殊。
+  evidence_tier: T3
+  references: ["構造的判断。N48（OSAP ConsRecomm）が同じ機構の実証"]
+  markets: [US]
+  review: {status: verified}
+
+N15:
+  formula: "事業売却・スピンオフの発表の有無と規模（対総資産）"
+  inputs: [tdnet_disclosure, sec_filing, LLM]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "TA>0。発表が無ければゼロ。"
+  missing_bias: "**T12/T33 による開示の抽出が前提**（上の (2)）。"
+  correlated_with: [B38, A36, V03, N43, M08, F13]
+  economic_rationale: >-
+    **コングロマリット・ディスカウントの解消。**
+    → **B38（セグメント収益性の分散）が「再編余地がある」を測り、
+    N15 が「実際に再編した」を測る。**
+    **A36/V03（事業別の合計価値 vs 時価総額）が
+    ディスカウントの大きさを測る。**
+    → **この3本（B38 / A36 / N15）が
+    「潜在 → 大きさ → 実現」の3段階**を構成する。
+    **東証の要請（F13）で日本では事業ポートフォリオの
+    見直しが増えている**ので、
+    **今後 N15 の発生頻度が上がる。**
+  evidence_tier: T2
+  references: ["構造的判断。B38/A36 と3段階を構成"]
+  markets: [JP, US]
+  review: {status: verified}
+
+N16:
+  formula: "大型受注・提携の発表金額 / 年間REV"
+  inputs: [tdnet_disclosure, LLM, REV]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "REV>0。発表が無ければゼロ。"
+  missing_bias: "**金額を開示しない発表が多い。** LLM 抽出の精度に依存。"
+  correlated_with: [C11, U21, T12, T33, N34, N17]
+  economic_rationale: >-
+    **金額を売上比で正規化しないと意味がない。LLM で抽出する。**
+    → **T12（開示文書から数値インパクトを抽出）の
+    最も直接的な適用先**で、
+    **T12 の精度がそのまま N16 の精度になる。**
+    **guard.clip_llm_value() で
+    「売上比が1を超える抽出は棄却」する**という
+    T12 の説明で述べた検算がここで効く。
+    **C11（受注残の成長）/ U21（受注残月数）が
+    決算で確認できる形**なので、
+    **N16（速報）→ C11/U21（確認）という
+    時間差の関係になる。**
+  evidence_tier: T3
+  references: ["構造的判断。T12 の適用先"]
+  markets: [JP, US]
+  review: {status: verified}
+
+N17:
+  formula: "新製品・新事業の発表 + LLM によるインパクト推定"
+  inputs: [tdnet_disclosure, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "na（採点）"
+  missing_bias: "**定量化が LLM 依存。過大評価しやすい**ので控えめな重みにする。"
+  correlated_with: [C24, X09, N16, T17, T39, B26]
+  economic_rationale: >-
+    **定量化は LLM 依存。過大評価しやすいので控えめな重み。**
+    → **OQ-34 の知名度バイアスに加え、
+    LLM の強気バイアス（T カテゴリ制約4）が直撃する。**
+    **T27/T42（反転思考・空売り理由）を対で走らせないと、
+    すべての新製品が有望に見える。**
+    **X09（商標出願）が発表の半年〜1年前に観測できる**ので、
+    **X09 → N17 → C24（新製品売上比率）という
+    3段階で追跡できる。**
+  evidence_tier: T3
+  references: ["構造的判断。LLM の強気バイアスに注意"]
+  markets: [JP, US]
+  review: {status: verified}
+
+N19:
+  formula: "規制・法改正の影響度を LLM が -5〜+5 で採点"
+  inputs: [LLM, regulatory_news]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "na（採点）"
+  missing_bias: "T20 と同一。**規制の影響は業種で逆向きになる。**"
+  correlated_with: [T20, U38, U45, P30, T08, E14]
+  economic_rationale: >-
+    T20 と同一の量。**医療・金融・エネルギーで特に重要。**
+    **U38（薬価改定）/ U45（規制産業の認可利回り）では
+    規制が利益そのものを決める。**
+    → **T21（真の競合）と組み合わせて
+    誰が得をして誰が損をするかを判定する**必要がある
+    — **同じ規制が既存企業のコストであり
+    同時に参入障壁でもある。**
+    **P30（税制・制度の変更）がマクロ側、
+    N19 が個別銘柄側**という役割分担。
+  evidence_tier: T3
+  references: ["構造的判断。T20 と同一量"]
+  markets: [JP, US]
+  review: {status: verified}
+
+N24:
+  formula: "IPO からの経過年数"
+  inputs: [listing_date]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "na（年数）"
+  missing_bias: >-
+    **上場日の正確な取得が要る。市場変更・再上場・持株会社化での
+    再上場をどう扱うかで値が変わる**（G34 と同じ問題）。
+  correlated_with: [G34, O10, F06, D15, C22, I02]
+  economic_rationale: >-
+    **LAW-48。IPO 後3年未満は減点。ロックアップ解除の需給悪化も含む。**
+    Ritter (1991) の IPO 長期アンダーパフォーマンス。
+    → **N24 は 263AT のあらゆる長期履歴依存パラメータの
+    欠損原因そのもの**でもある
+    — I02（252日ボラ）/ G26（60ヶ月移動平均）/
+    H01（5年リバーサル）/ B14/B15（10年安定性）/
+    G40/G41/G44（10-20年季節性）はすべて
+    **N24 が小さい銘柄で欠損する。**
+    → **「若い企業は減点され、かつデータも無い」**という
+    二重の不利がある。
+    **G34（若い企業でモメンタムが強い、t=7.2）だけが
+    逆向きなので、両者の正味を実測する必要がある。**
+  evidence_tier: T1
+  references: ["Ritter (1991) The Long-Run Performance of Initial Public Offerings", "https://www.openassetpricing.com/"]
+  markets: [JP, US]
+  review: {status: verified}
+
+N26:
+  formula: "株主総会議案（定款変更・買収防衛策・株主提案）の有無"
+  inputs: [tdnet_disclosure, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "na（フラグ）"
+  missing_bias: "**株主提案は日本では件数が少ないが増加中**（上の M (3) と同じ変化の途上）。"
+  correlated_with: [M08, M13, K48, M23, N15, F13]
+  economic_rationale: >-
+    符号は文脈依存。**株主提案の存在はアクティビスト圧力の傍証。**
+    → **M08（アクティビスト保有）/ K48（13D）が
+    保有の側から測るのに対し、
+    N26 は行動の側から測る。**
+    **買収防衛策の議案（M13）は逆向き**なので、
+    **同じ N26 に正負の材料が混在する** → context。
+    **T33（開示の重要度分類）で議案の性質を
+    分類しないと符号が定まらない。**
+  evidence_tier: T3
+  references: ["構造的判断。M08/K48 と対をなす"]
+  markets: [JP, US]
+  review: {status: verified}
+
+N27:
+  formula: "決算期変更・組織再編の発表フラグ"
+  inputs: [tdnet_disclosure]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "**決算期変更があると月数が12でない期が生じる**（spec §1.4）。"
+  zero_denominator_policy: "na（フラグ）"
+  missing_bias: "**イベントなので疎。**"
+  correlated_with: [C01, C03, B15, C22, D23, F09]
+  economic_rationale: >-
+    **決算期変更は比較可能性を壊す。データ処理上のバグ源でもある。**
+    → **spec §1.4 で「月数で年率化してから TTM に組み込む」
+    「Z06 でフラグを立て変更後2年間は成長系の信頼度を下げる」
+    と決めたことの、イベント側の検出。**
+    **無視すると成長率が +50% などの異常値になり、
+    ウィンザライズで静かに消される** — **消えるので気づけない。**
+    → **N27 は投資判断のパラメータというより、
+    データ品質のフラグ（Z カテゴリ）に近い。**
+    **C22/D23/F09（連続年数系）が
+    決算期変更で不当にリセットされる**のを防ぐためにも必要。
+  evidence_tier: T3
+  references: ["構造的判断。spec §1.4 と直結", "Z06 と連動"]
+  markets: [JP, US]
+  review: {status: verified}
+
+N29:
+  formula: "決算発表時刻（引け後 / 場中 / 寄り前）の分類"
+  inputs: [earnings_datetime]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  normalization: none
+  zero_denominator_policy: "na（分類）"
+  missing_bias: "**発表時刻を記録しているデータ源が限られる。**"
+  correlated_with: [N01, N05, I22, J11, G17]
+  economic_rationale: >-
+    符号は文脈依存。**執行設計に必要。場中発表は約定リスクが高い。**
+    → **spec §1.5 で「日本の引け後に出た米国の材料は
+    翌営業日に反映される」と決めたのと同じ論点。**
+    **場中発表では、保有中に価格が飛ぶ**ので、
+    **J11（ストップ高安）/ G17（ギャップ）と連動する。**
+    **日本は引け後発表が慣行**なので、
+    **N29 の分散は米国の方が大きい。**
+    **normalization: none で執行専用と明示する。**
+  evidence_tier: T3
+  references: ["構造的判断。spec §1.5 と同じ論点。執行専用"]
+  markets: [JP, US]
+  review: {status: verified}
+
+N30:
+  formula: "決算説明資料のページ数・KPI 開示の有無"
+  inputs: [tdnet_disclosure, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "**説明資料を出さない企業ではゼロ**（欠損ではない）。"
+  missing_bias: "**説明資料を出さないこと自体が情報**なので、ゼロと欠損を区別する。"
+  correlated_with: [O09, T10, E17, X13, M17, M16]
+  economic_rationale: >-
+    **O09/T10 と連動。無名企業の「発信意欲」の指標。**
+    → **E17（透明性）/ M17（英文開示）/ X13（サイト更新頻度）と
+    同じ「IR にどれだけ力を入れているか」の軸。**
+    **263AT の狙いは「発信しているのに見られていない企業」**
+    であって「発信していないから見られていない企業」ではない
+    （T10 の説明と対応）。
+    → **N30 が高く K22/K11（機関・外国人保有）が低い企業が
+    最も純粋なネグレクト。**
+    **N30 が今後上がる企業は M17 と同じく需給が変わる。**
+  evidence_tier: T3
+  references: ["構造的判断。O09/T10/E17/M17 と同じ軸"]
+  markets: [JP, US]
+  review: {status: verified}
+
+N32:
+  formula: "会社予想の開示形態（単一値 / レンジ / 未定）の分類"
+  inputs: [tdnet_disclosure]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "na（分類）"
+  missing_bias: "**日本固有。会社予想の開示義務がある市場でのみ意味を持つ。**"
+  correlated_with: [N09, K33, N31, T07, I22, N11]
+  economic_rationale: >-
+    **「未定」は不確実性が高い。コロナ後に増えた。**
+    → **予想を出せないということは、
+    経営陣自身が先を読めていない**ということ。
+    **N09（会社予想の保守性）が計算できなくなる**ので、
+    **N32 が「未定」の企業では N 系の予想依存パラメータが
+    連鎖的に欠損する。**
+    → **N11（アナリスト予想のばらつき）が
+    第三者の不確実性を測るのに対し、
+    N32 は経営陣自身の不確実性を測る。**
+    **レンジ開示は IFRS 適用企業に多い**ので、
+    会計基準との相関にも注意が要る。
+  evidence_tier: T3
+  references: ["構造的判断。日本の会社予想開示制度に固有"]
+  markets: [JP]
+  review: {status: verified}
+
+N33:
+  formula: "大型設備投資の発表額 / TA"
+  inputs: [tdnet_disclosure, LLM, TA]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "TA>0。発表が無ければゼロ。"
+  missing_bias: "**T12 による金額抽出が前提。**"
+  correlated_with: [C30, C31, C35, C39, B04, B32, M19]
+  economic_rationale: >-
+    符号は文脈依存。**B04（ROIC-WACC）が正なら買い、負なら売り。
+    交互作用が必須。**
+    → **OQ-39 で記録した15本超の塊（投資・資金調達・NOA）の
+    イベント側の入口。**
+    **C30/C31/C39 が決算後に確認できるのに対し、
+    N33 は発表時点で分かる**ので、
+    **最も速い。**
+    **M19（報酬の KPI が売上・規模連動か）が
+    「なぜ投資しすぎるか」の原因を示す**ので、
+    **N33 × M19 の交互作用が、
+    価値破壊的な投資を事前に識別する経路になる。**
+  evidence_tier: T3
+  references: ["構造的判断。OQ-39 の塊のイベント側"]
+  markets: [JP, US]
+  review: {status: verified}
+
+N34:
+  formula: "資本業務提携の発表の有無と相手先の規模"
+  inputs: [tdnet_disclosure, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "na（フラグ + 規模）"
+  missing_bias: "**相手先の規模を特定するには LLM が要る。非上場の相手先では規模が不明。**"
+  correlated_with: [N13, N16, K18, M08, P29, K41]
+  economic_rationale: >-
+    **将来の TOB（N13）の前段になることがある。**
+    → **資本参加 → 持分法適用 → 連結子会社化 → 完全子会社化
+    という段階を踏むことが日本では多い。**
+    **K18（親会社保有比率）が∪型で
+    「50-90% は完全子会社化の期待」としたのは
+    この経路の後段。**
+    → **N34 はその最初の一歩を捉える。**
+    **DF-01 の制約（TOB 銘柄が無料データから消える）が
+    N34 の検証にも及ぶ**ので、
+    **OQ-30 の対象に含まれる。**
+  evidence_tier: T3
+  references: ["構造的判断。K18/N13 と同じ経路の前段。OQ-30 の対象"]
+  markets: [JP, US]
+  review: {status: verified}
+
+N35:
+  formula: "工場・店舗の新設 / 閉鎖の発表と規模"
+  inputs: [tdnet_disclosure, LLM]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "na（フラグ + 規模）"
+  missing_bias: "**閉鎖の方が開示されやすい**（特別損失を伴うため）。新設は開示されないことがある。"
+  correlated_with: [U18, C14, N33, N43, B33, U23]
+  economic_rationale: >-
+    符号は文脈依存。**閉鎖は短期損失・中期の収益改善。**
+    → **同じイベントが時間軸で符号が変わる**という
+    N カテゴリで最も明確な例。
+    **B33（有形固定資産の平均年齢）が高い企業の閉鎖は
+    老朽設備の整理**なので前向きだが、
+    **稼働率（U23）が高い設備の閉鎖は需要減退。**
+    → **文脈を判定するには U23/B33 が要る。**
+    **N43（不動産売却）と重なることがあり、
+    工場閉鎖が含み益の顕在化（A19）を伴う**場合は
+    大きなプラスになる。
+  evidence_tier: T3
+  references: ["構造的判断。時間軸で符号が変わる"]
+  markets: [JP, US]
+  review: {status: verified}
+
+N40:
+  formula: "規制承認の見込み（医薬の承認確率、事業認可の取得）"
+  inputs: [LLM, regulatory_filings]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "na（確率）"
+  missing_bias: "**LLM の確率は較正されていない**（T44 が前提）。しかも承認は稀事象でサンプルが集まらない。"
+  correlated_with: [U34, U35, U38, N19, T16, T29]
+  economic_rationale: >-
+    **U34（パイプライン価値）と連携。**
+    **フェーズ別承認確率は業界統計が使える**
+    （フェーズ1で約10%、フェーズ3で約60%）が、
+    **疾患領域で大きく違う。**
+    → **U34 の説明で述べた通り、
+    点推定を信じず幅で持つ。**
+    **医薬では承認の可否が株価を数倍動かす**ので、
+    **263AT の設計（1/10 が全部を賄う）に
+    最も合致する非対称性を持つ業種。**
+    ただし**外れたときの下落も大きい**ので、
+    **サイジング（Q）で必ず制御する。**
+  evidence_tier: T3
+  references: ["構造的判断。U34 と連携。T44 の較正が前提"]
+  markets: [JP, US]
+  review: {status: verified}
+
+N42:
+  formula: "社名変更の実施フラグ"
+  inputs: [tdnet_disclosure]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "na（フラグ）"
+  missing_bias: "**極めて疎。持株会社化に伴う社名変更は別扱いにすべき。**"
+  correlated_with: [F18, N27, N23, O06, X05]
+  economic_rationale: >-
+    **事業実態の変化を伴わない社名変更はしばしば悪材料。**
+    → **F18（株式併合）と同じ構造**
+    — **経済的実体がないのに情報を持つのは、
+    なぜそれをやるかに情報があるから。**
+    **業績不振の企業がイメージ刷新のために
+    社名を変える**ことが多い。
+    **ドットコムバブル期に社名に .com を付けた企業が
+    株価を上げたという研究**があるが、
+    **それは投資家の錯覚を示す例であって
+    企業価値の向上ではない。**
+    → **O06（SNS 言及量）/ X05（検索ボリューム）が
+    一時的に上がる**ので、注目の過熱としても現れる。
+  evidence_tier: T3
+  references: ["Cooper-Dimitrov-Rau (JF 2001) A Rose.com by Any Other Name", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+N43:
+  formula: "本社移転・不動産売却の実施と規模"
+  inputs: [tdnet_disclosure, LLM]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: "**売却益は特別利益に計上される**ので、E06（特別損益の頻度）に影響する。"
+  zero_denominator_policy: "MCAP>0 で正規化。発表が無ければゼロ。"
+  missing_bias: "**T12 による規模の抽出が前提。**"
+  correlated_with: [A19, U13, A18, K17, M08, N15, B38]
+  economic_rationale: >-
+    **含み益の顕在化（A19 と対）。**
+    → **A19（不動産含み益）の説明で述べた
+    「顕在化しないと意味がない」の顕在化そのもの。**
+    **A19 が大きく N43 が起きた銘柄が、
+    隠れ資産型の完成形。**
+    **A15（NCAV）/ A18（有価証券含み益）/ B38（セグメント分散）も
+    同じく「潜在価値 → カタリスト」の構造を持ち、
+    それぞれ N43 / K17 / N15 が対応するカタリスト。**
+    → **N カテゴリと A カテゴリの対応関係が
+    263AT の設計の中核**（上の (1)）。
+    **東証の要請（F13）がこれらすべてを後押ししている。**
+  evidence_tier: T3
+  references: ["構造的判断。A19 の顕在化。§2（買売スコアの非対称）と直結"]
+  markets: [JP]
+  review: {status: verified}
+
+N47:
+  formula: "アナリストの5年 EPS 成長率予想"
+  inputs: [EST]
+  period_convention: GUIDE_CONS
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "**長期成長率予想を提供するアナリストがいる銘柄のみ。**"
+  missing_bias: "**カバレッジのある銘柄のみ。しかも長期予想は短期予想よりさらに提供が少ない。**"
+  correlated_with: [C26, C01, A13, N48, N12, T17]
+  economic_rationale: >-
+    **OSAP fgr5yrLag t=4.9。高成長予想の銘柄は劣後する（C26 平均回帰）。**
+    La Porta (JF 1996)。
+    → **C26（平均回帰調整済み成長率）が
+    「高成長は必ず減速する」と言うのと同じ現象を、
+    アナリスト予想の側から測る。**
+    **Chan-Karceski-Lakonishok (JF 2003) の
+    「長期の高成長が持続する確率は偶然と区別できない」**と
+    完全に整合する。
+    → **A13（PEG）が成長率を分子に置いて
+    「成長が高いほど良い」とするのと正反対**なので、
+    **A13 と N47 は符号が衝突する。**
+    **実証は N47（t=4.9）にあり A13（★1）には無い**ので、
+    **N47 を優先する。**
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "La Porta (JF 1996) Expectations and the Cross-Section of Stock Returns", "OSAP fgr5yrLag t=4.9"]
+  markets: [US]
+  review: {status: verified}
+
+N48:
+  formula: "アナリスト推奨の平均（買い=1 〜 売り=5）"
+  inputs: [EST]
+  period_convention: GUIDE_CONS
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "**アナリスト2名以上が要る。**"
+  missing_bias: >-
+    **カバレッジのある銘柄のみ。しかもアナリストは
+    投資銀行業務との利益相反で強気に偏る**（Reg AC / Global Settlement 後も残る）。
+  correlated_with: [N12, N47, N10, N11, O01, O07]
+  economic_rationale: >-
+    **OSAP ConsRecomm t=3.2。推奨が高い銘柄ほど劣後する（符号に注意）。**
+    Jegadeesh et al. (JF 2004)。
+    → **N12（目標株価乖離）の説明で述べた
+    「アナリストの水準は逆指標、変化は順指標」**が
+    実証で裏付けられた形。
+    **機構は上の missing_bias にある利益相反**に加え、
+    **推奨が高い銘柄は既に買われている**という需給。
+    → **263AT の中核戦略（カバレッジゼロ銘柄）から見ると、
+    N48 が存在すること自体が「既に見られている」証拠**なので、
+    **O01（カバレッジゼロ）と N48 は
+    同じ軸の両端を測っている。**
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "Jegadeesh-Kim-Krische-Lee (JF 2004) Analyzing the Analysts", "OSAP ConsRecomm t=3.2"]
+  markets: [US]
+  review: {status: verified}
+
+N50:
+  formula: "N04（決算発表日リターン） × (1 - z(O04 ニュース数))"
+  inputs: [N04, O04]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  zero_denominator_policy: "N04 と O04 の両方が要る。"
+  missing_bias: "**O04（ニュース数）はネグレクト銘柄でゼロになる**ので、その場合は N04 がそのまま残る（意図通り）。"
+  correlated_with: [N04, N06, O04, O01, T30, G12]
+  economic_rationale: >-
+    **v0.4 で追加。N06 の自己矛盾を回避する版。**
+    **N06 は SUE（コンセンサス予想）を必要とするので、
+    「カバレッジが無いほど効く」と言いながら
+    カバレッジが無いと計算できない**という自己矛盾があった。
+    → **N50 は N04（決算発表日の絶対リターン、
+    コンセンサス不要）を使うので、
+    カバレッジゼロ銘柄でも計算できる。**
+    **注目度は O04（ニュース数）で測る**ので、
+    **予想の有無に依存しない。**
+    → **263AT の中核ユニバースで実際に動く形の PEAD。**
+    **G12（Frog-in-the-pan）/ G34（若い企業）/ O カテゴリと
+    同じ「注意が向いていないほどドリフトが長い」機構。**
+  evidence_tier: T2
+  references: ["構造的判断。N06 の自己矛盾の解消版", "Hirshleifer-Lim-Teoh (JF 2009) Driven to Distraction"]
+  markets: [JP, US]
+  review: {status: verified}
