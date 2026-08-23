@@ -71,6 +71,8 @@
     normalization: default
     period_convention: override
     pit_lag_days: default
+    evidence_tier: override
+    references: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -78,8 +80,6 @@
     missing_bias: override
     correlated_with: override
     economic_rationale: override
-    evidence_tier: override
-    references: override
     markets: override
   review:
     status: verified
@@ -146,6 +146,8 @@
     normalization: default
     period_convention: override
     pit_lag_days: default
+    evidence_tier: override
+    references: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -153,8 +155,6 @@
     missing_bias: override
     correlated_with: override
     economic_rationale: override
-    evidence_tier: override
-    references: override
     markets: override
   review:
     status: verified
@@ -181,7 +181,7 @@
   - SEC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -198,7 +198,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ShareRepurchase — Ikenberry, Lakonishok, Vermaelen 1995, JFE（OSAP再現 t=1.9, 月次0.17%, 品質=3_distant, 予測力=2_likely）
   notes: 発表と実行は別物。F04 と必ずセット
   notes_extra: null
   provenance:
@@ -217,6 +220,8 @@
     normalization: default
     period_convention: default
     pit_lag_days: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -226,7 +231,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: F04
@@ -1426,7 +1430,7 @@
   - TD
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -1443,7 +1447,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP DivOmit — Michaely, Thaler and Womack 1995, JF（OSAP再現 t=6.3, 月次0.916666667%, 品質=2_fair, 予測力=1_clear）
   notes: 日本では特に嫌気される。個人株主の投げを誘発する
   notes_extra: null
   provenance:
@@ -1463,6 +1470,8 @@
     period_convention: default
     pit_lag_days: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -1471,7 +1480,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: F22
@@ -1541,5 +1549,654 @@
     - q09
     - q10
     - q11
+    - q12
+  version: 1
+- id: F23
+  name_ja: 複合負債発行
+  category: F
+  category_name: 資本政策・希薄化
+  subsection: null
+  definition: 5年間の負債簿価の増加率 - 5年間の株式リターン
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: main
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP CompositeDebtIssuance — Lyandres, Sun and Zhang 2008, RFS（OSAP再現 t=8.6, 月次0.523%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP CompositeDebtIssuance t=8.6。263AT は株式発行（F01/F02）しか見ていなかった。負債発行も同等以上に効く
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: F24
+  name_ja: 金融負債の変化
+  category: F
+  category_name: 資本政策・希薄化
+  subsection: null
+  definition: delta_金融負債 / 平均総資産
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: main
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP DelFINL — Richardson et al. 2005, JAE（OSAP再現 t=8.0, 月次nan%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP DelFINL t=8.0
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q05
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: F25
+  name_ja: 純負債調達
+  category: F
+  category_name: 資本政策・希薄化
+  subsection: null
+  definition: (負債の増加 - 負債の返済) / 平均総資産
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - FIN
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP NetDebtFinance — Bradshaw, Richardson, Sloan 2006, JAE（OSAP再現 t=6.9, 月次0.675%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP NetDebtFinance t=6.9
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q05
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: F26
+  name_ja: 純外部資金調達
+  category: F
+  category_name: 資本政策・希薄化
+  subsection: null
+  definition: 純株式調達 + 純負債調達（総資産で正規化）
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: main
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP XFIN — Bradshaw, Richardson, Sloan 2006, JAE（OSAP再現 t=5.7, 月次1.29%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP XFIN t=5.7。F01 と F23 を統合した本命指標
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: F27
+  name_ja: 複合株式発行
+  category: F
+  category_name: 資本政策・希薄化
+  subsection: null
+  definition: 5年間の時価総額増加率 - 5年間の株式リターン
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP CompEquIss — Daniel and Titman 2006, JF（OSAP再現 t=4.4, 月次nan%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP CompEquIss t=4.4。F02 の別定式化（株数でなく時価総額で測る）
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: F28
+  name_ja: 転換社債の有無
+  category: F
+  category_name: 資本政策・希薄化
+  subsection: null
+  definition: 転換社債を発行しているか
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - FIN
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ConvDebt — Valta 2016, JFQA（OSAP再現 t=4.5, 月次nan%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP ConvDebt t=4.5。F06 の潜在希薄化の中でも転換社債は特に強い負のシグナル
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: F29
+  name_ja: 配当開始
+  category: F
+  category_name: 資本政策・希薄化
+  subsection: null
+  definition: 無配から配当を開始したか
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: aux
+  gate_policy: null
+  horizon:
+    label: 6M-2Y
+    min_m: 6
+    max_m: 24
+  data_sources:
+  - TD
+  - FIN
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP DivInit — Michaely, Thaler and Womack 1995, JF（OSAP再現 t=3.4, 月次0.625%, 品質=2_fair, 予測力=1_clear）
+  notes: OSAP DivInit t=3.4。F20 の一形態だが独立したイベントとして持つ
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: F30
+  name_ja: 配当の季節性
+  category: F
+  category_name: 資本政策・希薄化
+  subsection: null
+  definition: 過去の同月に配当を出していたか（次月の配当確率）
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: aux
+  gate_policy: null
+  horizon:
+    label: 1M-3M
+    min_m: 1
+    max_m: 3
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP DivSeason — Hartzmark and Salomon 2013, JFE（OSAP再現 t=16.2, 月次0.36%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP DivSeason t=16.2。全 Predictor 中で最大の t 値。 ただし1ヶ月ホライズンなので本プロジェクトでは執行タイミング用
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: F31
+  name_ja: 純株式調達
+  category: F
+  category_name: 資本政策・希薄化
+  subsection: null
+  definition: (株式発行による収入 - 自社株買い - 配当) / 平均総資産
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - FIN
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP NetEquityFinance — Bradshaw, Richardson, Sloan 2006, JAE（OSAP再現 t=3.8, 月次0.93%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP NetEquityFinance t=3.8。F26（純外部資金調達）の株式側
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q05
+    - q06
+    - q09
+    - q10
     - q12
   version: 1

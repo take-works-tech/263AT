@@ -1227,7 +1227,7 @@
   - 手
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - US
   industries: null
@@ -1243,7 +1243,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ShortInterest — Dechow et al. 2001, JFE（OSAP再現 t=n/a, 月次0.35%, 品質=2_fair, 予測力=2_likely）
   notes: 月2回公表。極端な高水準はショートスクイズの燃料であり同時に赤信号
   notes_extra: null
   provenance:
@@ -1265,6 +1268,8 @@
     nonlinear: default
     accounting_standard_note: default
     markets: catalog
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -1273,7 +1278,6 @@
     - q08
     - q09
     - q10
-    - q11
   version: 1
 - id: K20
   name_ja: Days to Cover
@@ -1828,7 +1832,7 @@
   - OPT
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - US
   industries: null
@@ -1844,7 +1848,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP CPVolSpread — Bali and Hovakimian 2009, MS（OSAP再現 t=4.2, 月次1.045%, 品質=1_good, 予測力=1_clear）
   notes: 極端値が逆指標。個別銘柄では流動性が要る
   notes_extra: null
   provenance:
@@ -1867,6 +1874,8 @@
     accounting_standard_note: default
     zero_denominator_policy: default
     markets: catalog
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -1874,7 +1883,6 @@
     - q08
     - q09
     - q10
-    - q11
   version: 1
 - id: K29
   name_ja: オプション建玉の集中
@@ -1896,7 +1904,7 @@
   - OPT
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - US
   industries: null
@@ -1912,7 +1920,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP OptionVolume1 — Johnson and So 2012, JFE（OSAP再現 t=3.5, 月次0.916%, 品質=2_fair, 予測力=1_clear）
   notes: ガンマの引力。満期近辺の短期現象なので長期戦略では優先度低
   notes_extra: null
   provenance:
@@ -1934,13 +1945,14 @@
     accounting_standard_note: default
     zero_denominator_policy: default
     markets: catalog
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
     - q06
     - q09
     - q10
-    - q11
   version: 1
 - id: K30
   name_ja: 異常なオプション出来高
@@ -3336,4 +3348,564 @@
     - q09
     - q10
     - q11
+  version: 1
+- id: K51
+  name_ja: 保有者の広がりの変化
+  category: K
+  category_name: 需給・市場マイクロストラクチャ
+  subsection: 米国固有
+  definition: 保有する機関投資家数の四半期変化
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - SEC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_market
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP DelBreadth — Chen, Hong and Stein 2002, JFE（OSAP再現 t=4.0, 月次0.673333333%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP DelBreadth t=4.0。K24（保有機関数）は水準だけだった。変化が本体
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    markets: catalog
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+  version: 1
+- id: K52
+  name_ja: 空売り残高 × 機関保有
+  category: K
+  category_name: 需給・市場マイクロストラクチャ
+  subsection: 米国固有
+  definition: ShortInterest × 機関保有比率 の交互作用
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 1M-6M
+    min_m: 1
+    max_m: 6
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_market
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP IO_ShortInterest — Asquith Pathak and Ritter 2005, JFE（OSAP再現 t=n/a, 月次0.98%, 品質=1_good, 予測力=2_likely）
+  notes: OSAP IO_ShortInterest。空売りが多く機関保有も多い銘柄は特に劣後
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    markets: catalog
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+  version: 1
+- id: K53
+  name_ja: プット・コール IV スプレッド
+  category: K
+  category_name: 需給・市場マイクロストラクチャ
+  subsection: 米国固有
+  definition: Put IV - Call IV（オプション）
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: main
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 1M-3M
+    min_m: 1
+    max_m: 3
+  data_sources:
+  - OPT
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_market
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP SmileSlope — Yan 2011, JFE（OSAP再現 t=8.2, 月次1.8%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP SmileSlope t=8.2 / CPVolSpread t=4.2。オプション系で最強。K50 の精緻化
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    markets: catalog
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+  version: 1
+- id: K54
+  name_ja: プット・コール IV スプレッドの変化
+  category: K
+  category_name: 需給・市場マイクロストラクチャ
+  subsection: 米国固有
+  definition: delta_(Put IV - Call IV)
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: main
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 1M-3M
+    min_m: 1
+    max_m: 3
+  data_sources:
+  - OPT
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_market
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP dCPVolSpread — An, Ang, Bali, Cakici 2014, JF（OSAP再現 t=6.8, 月次-1.68%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP dCPVolSpread t=6.8。水準より変化
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    markets: catalog
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+  version: 1
+- id: K55
+  name_ja: 実現ボラ - IV スプレッド
+  category: K
+  category_name: 需給・市場マイクロストラクチャ
+  subsection: 米国固有
+  definition: 実現ボラ - インプライドボラ
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1M-3M
+    min_m: 1
+    max_m: 3
+  data_sources:
+  - OPT
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_market
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP RIVolSpread — Bali and Hovakimian 2009, MS（OSAP再現 t=2.9, 月次0.732%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP RIVolSpread t=2.9。I15 の符号を実証で確認できる
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    markets: catalog
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+  version: 1
+- id: K56
+  name_ja: オプション出来高 / 株式出来高
+  category: K
+  category_name: 需給・市場マイクロストラクチャ
+  subsection: 米国固有
+  definition: オプション出来高 / 株式出来高
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1M-3M
+    min_m: 1
+    max_m: 3
+  data_sources:
+  - OPT
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_market
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP OptionVolume1 — Johnson and So 2012, JFE（OSAP再現 t=3.5, 月次0.916%, 品質=2_fair, 予測力=1_clear）
+  notes: OSAP OptionVolume1 t=3.5 / OptionVolume2 t=2.5。K30 の定式化
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    markets: catalog
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q05
+    - q06
+    - q09
+    - q10
+  version: 1
+- id: K57
+  name_ja: コール IV の変化
+  category: K
+  category_name: 需給・市場マイクロストラクチャ
+  subsection: 米国固有
+  definition: delta_コールのインプライドボラ
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1M-3M
+    min_m: 1
+    max_m: 3
+  data_sources:
+  - OPT
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_market
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP dVolCall — An, Ang, Bali, Cakici 2014, JF（OSAP再現 t=3.5, 月次1.09%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP dVolCall t=3.5。情報を持つトレーダーはオプション市場に先に現れる
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    markets: catalog
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+  version: 1
+- id: K58
+  name_ja: プット IV の変化
+  category: K
+  category_name: 需給・市場マイクロストラクチャ
+  subsection: 米国固有
+  definition: delta_プットのインプライドボラ
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 1M-3M
+    min_m: 1
+    max_m: 3
+  data_sources:
+  - OPT
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_market
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP dVolPut — An, Ang, Bali, Cakici 2014, JF（OSAP再現 t=2.0, 月次0.42%, 品質=1_good, 予測力=2_likely）
+  notes: OSAP dVolPut t=2.0
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    markets: catalog
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
   version: 1

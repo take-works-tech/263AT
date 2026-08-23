@@ -1,0 +1,116 @@
+# 263AT パラメータ ↔ Open Source Asset Pricing シグナル の手動対応表
+#
+# 名前の類似度で機械的に当てると誤対応が出る（例: 263AT の「利益の現金化率」と
+# OSAP の CBOperProf は別物）。**確信が持てるものだけを手で書く。**
+# 対応がないことは欠陥ではない。日本固有パラメータや LLM 派生には対応が存在しない。
+#
+# v0.4 で追加した86件は、カタログの注意点欄に `OSAP \`Acronym\`` と書いてあるので
+# tools/crosswalk_oap.py が自動で拾う。ここに書くのは v0.3 までの既存パラメータ。
+
+# --- A バリュエーション -------------------------------------------------------
+A01: [EP]                     # 益回り
+A03: [BM, BMdec]              # B/P
+A04: [SP]                     # S/P
+A05: [cfp, CF]                # CF/P
+A06: [EntMult]                # EV/EBITDA の逆数 = Enterprise Multiple
+A10: [NetPayoutYield, PayoutYield]   # 総還元利回り
+A11: [DivYieldST]             # 配当利回り
+A14: [EBM]                    # EV/IC ≒ Enterprise component of BM
+A16: [Cash]                   # ネットキャッシュ比率 ≒ Cash to assets
+A26: [sfe]                    # 逆DCF ≒ Earnings forecast to price（近いが同一ではない）
+
+# --- B 収益性・クオリティ -----------------------------------------------------
+B01: [RoE]
+B02: [roaq]
+B06: [GP]                     # Gross Profitability（Novy-Marx）
+B09: [CBOperProf]             # FCFマージン ≒ Cash-based operating profitability
+B10: [OperProf]               # 利益の現金化率 ≒ operating profits（近い）
+B17: [PS]                     # Piotroski F-score
+B19: [OPLeverage]
+B22: [ChInv, InvGrowth]       # 在庫回転日数の変化 ≒ Inventory growth
+B25: [RD, RDcap]              # R&D集約度
+B26: [RDAbility]              # R&D生産性
+
+# --- C 成長性 -----------------------------------------------------------------
+C02: [MeanRankRevGrowth]
+C11: [OrderBacklog]
+C12: [DelDRC]                 # 前受収益 = Deferred Revenue
+C16: [ChNWC]                  # 顧客数成長は対応なし。運転資本変化を暫定対応（要再検討）
+
+# --- D 財務健全性 -------------------------------------------------------------
+D01: [BookLeverage]
+D03: [Leverage, NetDebtPrice]
+D09: [OScore]                 # Ohlson O-Score
+D18: [FR]                     # 退職給付債務の積立比率 = Pension Funding Status
+
+# --- E 会計品質 ---------------------------------------------------------------
+E01: [Accruals]               # Sloan の総アクルーアル
+E02: [ChNWC, DelCOA]          # 運転資本アクルーアル
+E03: [NOA, dNoa]              # 純営業資産
+E07: [ExclExp]                # 非GAAP調整 = Excluded Expenses
+
+# --- F 資本政策 ---------------------------------------------------------------
+F01: [ShareIss1Y]
+F02: [ShareIss5Y]
+F03: [ShareRepurchase]
+F21: [DivOmit]                # 減配・無配転落
+
+# --- G モメンタム -------------------------------------------------------------
+G01: [Mom12m]
+G02: [Mom6m]
+G04: [STreversal]             # 直近1ヶ月リターン（短期リバーサル）
+G07: [High52]                 # 52週高値近接度
+G10: [ResidualMomentum]
+G11: [IndMom]
+
+# --- H リバーサル -------------------------------------------------------------
+H01: [LRreversal]             # 長期リバーサル（3-5年）
+H05: [STreversal]
+
+# --- I ボラティリティ・リスク -------------------------------------------------
+I01: [RealizedVol]
+I04: [IdioVol3F, IdioVolAHT]
+I05: [Beta]
+I06: [MaxRet]
+I08: [ReturnSkew, ReturnSkew3F]
+
+# --- J 流動性 -----------------------------------------------------------------
+J01: [DolVol]                 # 平均売買代金
+J03: [Illiquidity]            # Amihud
+J04: [BidAskSpread]
+J05: [Size]
+J08: [std_turn, VolSD]        # 出来高の変動係数
+J09: [ShareVol]
+J10: [zerotrade1M, zerotrade6M, zerotrade12M]
+
+# --- K 需給 -------------------------------------------------------------------
+K19: [ShortInterest]          # Short Interest / Float（米国）
+K28: [CPVolSpread]            # Put/Call レシオ ≒ Call minus Put Vol（近い）
+K29: [OptionVolume1]          # オプション建玉の集中 ≒ Option to stock volume（近い）
+
+# --- M 株主構成・ガバナンス ---------------------------------------------------
+M08: [Activism2]              # アクティビスト保有 = Active shareholders
+M10: [Activism1]              # 標的スコア = Takeover vulnerability
+M12: [Governance]             # 社外取締役比率 ≒ Governance Index（同一ではない）
+
+# --- N カタリスト -------------------------------------------------------------
+N02: [EarningsSurprise]
+N03: [RevenueSurprise]
+N04: [AnnouncementReturn]
+N08: [NumEarnIncrease, EarningsConsistency]
+N10: [AnalystRevision, REV6]
+N11: [ForecastDispersion]
+N12: [AnalystValue, AOP]
+N15: [Spinoff]
+N22: [ExchSwitch]
+N24: [AgeIPO, IndIPO]
+
+# --- O ネグレクト -------------------------------------------------------------
+O05: [MomSeasonShort]         # 対応なし。誤対応を避けるためコメントアウト候補（要見直し）
+
+# --- X オルタナデータ ---------------------------------------------------------
+X07: [PatentsRD]
+X08: [CitationsRD]
+
+# --- Y ESG --------------------------------------------------------------------
+Y05: [sinAlgo]                # ダイベストメント対象 = Sin Stock

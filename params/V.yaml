@@ -830,3 +830,219 @@
     - q11
     - q12
   version: 1
+- id: V13
+  name_ja: 業種集中度（売上ベース）
+  category: V
+  category_name: セグメント・事業構成
+  subsection: null
+  definition: 所属業種の売上 HHI
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-5Y
+    min_m: 12
+    max_m: 60
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP Herf — Hou and Robinson 2006, JF（OSAP再現 t=2.1, 月次0.26%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP Herf t=2.1。集中した業種＝競争が緩い＝利益が守られる。T37（5フォース）の定量版
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: V14
+  name_ja: 業種集中度（資産ベース）
+  category: V
+  category_name: セグメント・事業構成
+  subsection: null
+  definition: 所属業種の資産 HHI
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-5Y
+    min_m: 12
+    max_m: 60
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP HerfAsset — Hou and Robinson 2006, JF（OSAP再現 t=2.1, 月次0.2%, 品質=1_good, 予測力=2_likely）
+  notes: OSAP HerfAsset t=2.1
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: V15
+  name_ja: 業種集中度（純資産ベース）
+  category: V
+  category_name: セグメント・事業構成
+  subsection: null
+  definition: 所属業種の自己資本 HHI
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-5Y
+    min_m: 12
+    max_m: 60
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP HerfBE — Hou and Robinson 2006, JF（OSAP再現 t=2.5, 月次0.24%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP HerfBE t=2.5
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1

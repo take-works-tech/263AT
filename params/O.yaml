@@ -295,7 +295,7 @@
   - 手
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -312,7 +312,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP MomSeasonShort — Heston and Sadka 2008, JFE（OSAP再現 t=7.6, 月次1.15%, 品質=1_good, 予測力=1_clear）
   notes: 急増は個人の飛び付き（過熱の逆指標）。LAW-74
   notes_extra: null
   provenance:
@@ -333,13 +336,14 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: O06
@@ -1219,5 +1223,431 @@
     - q09
     - q10
     - q11
+    - q12
+  version: 1
+- id: O19
+  name_ja: アナリスト・カバレッジの減少
+  category: O
+  category_name: アナリスト・注目度（ネグレクト）
+  subsection: null
+  definition: カバーするアナリスト数が減ったか
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: main
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - EST
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 1
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ChNAnalyst — Scherbina 2008, ROF（OSAP再現 t=3.3, 月次0.46%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP ChNAnalyst t=3.3。O02（新規開始）の逆。263AT は増加しか見ていなかったが、減少も予測力を持つ
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: O20
+  name_ja: 残差機関保有 × 簿価時価比
+  category: O
+  category_name: アナリスト・注目度（ネグレクト）
+  subsection: null
+  definition: 機関保有比率をサイズで調整した残差 × B/P
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP RIO_MB — Nagel 2005, JFE（OSAP再現 t=4.9, 月次1.07%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP RIO_MB t=4.9。O10 を「乗数として使う」という設計の実証的裏づけそのもの。ネグレクト × バリュー
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q05
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: O21
+  name_ja: 残差機関保有 × 特異ボラ
+  category: O
+  category_name: アナリスト・注目度（ネグレクト）
+  subsection: null
+  definition: 同上 × IVOL
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP RIO_Volatility — Nagel 2005, JFE（OSAP再現 t=4.4, 月次1.07%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP RIO_Volatility t=4.4
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: O22
+  name_ja: 残差機関保有 × 回転率
+  category: O
+  category_name: アナリスト・注目度（ネグレクト）
+  subsection: null
+  definition: 同上 × 回転率
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP RIO_Turnover — Nagel 2005, JFE（OSAP再現 t=2.7, 月次0.92%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP RIO_Turnover t=2.7
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: O23
+  name_ja: 残差機関保有 × 予想分散
+  category: O
+  category_name: アナリスト・注目度（ネグレクト）
+  subsection: null
+  definition: 同上 × アナリスト予想のばらつき
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP RIO_Disp — Nagel 2005, JFE（OSAP再現 t=2.5, 月次0.54%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP RIO_Disp t=2.5。N11 との交互作用
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: O24
+  name_ja: 企業年齢
+  category: O
+  category_name: アナリスト・注目度（ネグレクト）
+  subsection: null
+  definition: 上場からの経過年数（N24 と別に連続量で）
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: aux
+  gate_policy: null
+  horizon:
+    label: 1Y-5Y
+    min_m: 12
+    max_m: 60
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP FirmAge — Barry and Brown 1984, JFE（OSAP再現 t=2.5, 月次nan%, 品質=4_lack_data, 予測力=2_likely）
+  notes: OSAP FirmAge t=2.5。若い企業ほど情報が少なく、劣後する
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
     - q12
   version: 1

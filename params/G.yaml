@@ -75,14 +75,14 @@
     period_convention: override
     pit_lag_days: default
     accounting_standard_note: override
+    evidence_tier: override
+    references: override
     formula: override
     inputs: override
     zero_denominator_policy: override
     missing_bias: override
     correlated_with: override
     economic_rationale: override
-    evidence_tier: override
-    references: override
     markets: override
   review:
     status: verified
@@ -108,7 +108,7 @@
   - PX
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -125,7 +125,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP Mom6m — Jegadeesh and Titman 1993, JF（OSAP再現 t=2.4, 月次0.84%, 品質=1_good, 予測力=1_clear）
   notes: G01 より反応が速いがノイズも多い
   notes_extra: null
   provenance:
@@ -145,6 +148,8 @@
     period_convention: default
     pit_lag_days: default
     accounting_standard_note: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -152,7 +157,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: G03
@@ -242,7 +246,7 @@
   - PX
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -259,7 +263,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP STreversal — Jegadeesh 1990, JF（OSAP再現 t=12.4, 月次1.99%, 品質=1_good, 予測力=1_clear）
   notes: 短期リバーサル（LAW-37）。買いの執行を数日遅らせる判断のみに使う
   notes_extra: null
   provenance:
@@ -279,6 +286,8 @@
     period_convention: default
     pit_lag_days: default
     accounting_standard_note: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -286,7 +295,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: G05
@@ -445,7 +453,7 @@
   - PX
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -462,7 +470,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP High52 — George and Hwang 2004, JF（OSAP再現 t=2.0, 月次0.45%, 品質=1_good, 予測力=2_likely）
   notes: モメンタムより頑健という報告が多い。アンカリング由来。長期でも生きる数少ないテクニカル
   notes_extra: null
   provenance:
@@ -482,6 +493,8 @@
     period_convention: default
     pit_lag_days: default
     accounting_standard_note: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -489,7 +502,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: G08
@@ -648,7 +660,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -665,7 +677,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ResidualMomentum — Blitz, Huij and Martens 2011, JEmpFin（OSAP再現 t=8.2, 月次0.933333333%, 品質=1_good, 予測力=1_clear）
   notes: 素のモメンタムよりシャープが高い。業種の一時的な追い風を除去できる
   notes_extra: null
   provenance:
@@ -686,13 +701,14 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: G11
@@ -715,7 +731,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -732,7 +748,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP IndMom — Grinblatt and Moskowitz 1999, JF（OSAP再現 t=4.7, 月次0.43%, 品質=1_good, 予測力=1_clear）
   notes: G10 の簡易版
   notes_extra: null
   provenance:
@@ -753,13 +772,14 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: G12
@@ -2039,5 +2059,1070 @@
     - q09
     - q10
     - q11
+    - q12
+  version: 1
+- id: G31
+  name_ja: トレンド・ファクター
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: 複数期間の移動平均を横断回帰で合成した予測値
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1M-6M
+    min_m: 1
+    max_m: 6
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP TrendFactor — Han, Zhou, Zhu 2016, JFE（OSAP再現 t=15.0, 月次1.63%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP TrendFactor t=15.0。全 Predictor 中で最大級。G05/G06/G22 を個別に持つより合成した方が強い
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: G32
+  name_ja: 中間モメンタム
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: P_{t-147} / P_{t-252} - 1（7〜12ヶ月前の区間だけ）
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 6M-1Y
+    min_m: 6
+    max_m: 12
+  data_sources:
+  - PX
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP IntMom — Novy-Marx 2012, JFE（OSAP再現 t=5.8, 月次1.2%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP IntMom t=5.8。直近を除いた「中間期」の方が予測力が高い。G01 の分解
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q05
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: G33
+  name_ja: 出来高を伴うモメンタム
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: 12-1モメンタム × 1[出来高上位]
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP MomVol — Lee and Swaminathan 2000, JF（OSAP再現 t=5.8, 月次1.55%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP MomVol t=5.8。J09 との交互作用
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: G34
+  name_ja: 企業年齢調整モメンタム
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: 若い企業に限定したモメンタム
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP FirmAgeMom — Zhang 2006, JF（OSAP再現 t=7.2, 月次2.9%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP FirmAgeMom t=7.2。N24 との交互作用
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: G35
+  name_ja: 低クオリティ株のモメンタム
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: 6ヶ月モメンタム × 1[クオリティ下位]
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP Mom6mJunk — Avramov et al 2007, JF（OSAP再現 t=4.3, 月次2.12%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP Mom6mJunk t=4.3
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: G36
+  name_ja: 業種モメンタム
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: 所属業種の過去リターン
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP IndMom — Grinblatt and Moskowitz 1999, JF（OSAP再現 t=4.7, 月次0.43%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP IndMom t=4.7。G11（業種相対）とは逆で、業種そのものの動き
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: G37
+  name_ja: 収益サプライズの連続性
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: 連続してプラスサプライズを出した四半期数
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: main
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP EarningsStreak — Loh and Warachka 2012, MS（OSAP再現 t=9.5, 月次0.957%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP EarningsStreak t=9.5。N08 の四半期版で t が非常に高い
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: G38
+  name_ja: 季節性リターン（前年同月）
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: 前年の同じ月のリターン
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1M
+    min_m: 1
+    max_m: 1
+  data_sources:
+  - PX
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP MomSeasonShort — Heston and Sadka 2008, JFE（OSAP再現 t=7.6, 月次1.15%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP MomSeasonShort t=7.6。LAW-38 で季節性を「原則不採用」としたが、実証は強い。要再考
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: G39
+  name_ja: 季節性リターン（2〜5年前の同月）
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: 過去2〜5年の同月リターンの平均
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1M-1Y
+    min_m: 1
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP MomSeason — Heston and Sadka 2008, JFE（OSAP再現 t=5.3, 月次0.67%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP MomSeason t=5.3
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: G40
+  name_ja: 季節性リターン（6〜10年前の同月）
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: 過去6〜10年の同月リターンの平均
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1M-1Y
+    min_m: 1
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP MomSeason06YrPlus — Heston and Sadka 2008, JFE（OSAP再現 t=6.2, 月次0.68%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP MomSeason06YrPlus t=6.2。10年以上前の同月まで効くのは不気味だが、複数論文で再現されている
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: G41
+  name_ja: 季節性リターン（11〜15年前）
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: 同上
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: aux
+  gate_policy: null
+  horizon:
+    label: 1M-1Y
+    min_m: 1
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP MomSeason11YrPlus — Heston and Sadka 2008, JFE（OSAP再現 t=6.4, 月次0.66%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP MomSeason11YrPlus t=6.4
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: G42
+  name_ja: オフシーズン・モメンタム
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: 同月を除いた期間のリターン
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1M-1Y
+    min_m: 1
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP MomOffSeason — Heston and Sadka 2008, JFE（OSAP再現 t=5.6, 月次1.25%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP MomOffSeason t=5.6。G38-G41 の補集合で符号が逆になる
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: G43
+  name_ja: 季節性を除いたモメンタム
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: 12-1モメンタム - 季節性成分
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP Mom12mOffSeason — Heston and Sadka 2008, JFE（OSAP再現 t=4.2, 月次1.17%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP Mom12mOffSeason t=4.2
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: G44
+  name_ja: 季節性リターン（16〜20年前）
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: 過去16〜20年の同月リターン平均
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: aux
+  gate_policy: null
+  horizon:
+    label: 1M-1Y
+    min_m: 1
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP MomSeason16YrPlus — Heston and Sadka 2008, JFE（OSAP再現 t=4.6, 月次0.52%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP MomSeason16YrPlus t=4.6。20年前の同月が効くという結果は理屈がつかない。データマイニングを疑いつつ保持（OQ-25）
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: G45
+  name_ja: オフシーズン反転（6〜10年）
+  category: G
+  category_name: 価格モメンタム・トレンド
+  subsection: null
+  definition: 同月を除いた6〜10年前のリターン
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: aux
+  gate_policy: null
+  horizon:
+    label: 1M-1Y
+    min_m: 1
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP MomOffSeason06YrPlus — Heston and Sadka 2008, JFE（OSAP再現 t=4.6, 月次0.55%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP MomOffSeason06YrPlus t=4.6
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
     - q12
   version: 1

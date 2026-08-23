@@ -4,65 +4,69 @@ schema_version: 2
 generated_from:
 - docs/01_parameter_catalog.md
 - params/_defaults.yaml
+- params/_overrides_oap.yaml
 - params/_overrides.yaml
 generated_by: tools/build_registry.py
 generated_on: '2026-08-23'
-total_parameters: 661
+total_parameters: 769
 verified: 20
-draft: 641
+draft: 749
 open_questions_by_id:
-  q01: 225
-  q04: 225
-  q05: 242
-  q06: 641
-  q09: 641
-  q10: 641
-  q11: 641
-  q12: 591
+  q01: 272
+  q04: 272
+  q05: 277
+  q06: 749
+  q09: 749
+  q10: 749
+  q11: 581
+  q12: 691
   q08: 55
 categories:
 - letter: A
   name_ja: バリュエーション
-  count: 43
+  count: 48
 - letter: B
   name_ja: 収益性・クオリティ
-  count: 40
+  count: 47
 - letter: C
   name_ja: 成長性・再投資
-  count: 28
+  count: 41
 - letter: D
   name_ja: 財務健全性・破綻リスク
-  count: 25
+  count: 26
 - letter: E
   name_ja: 会計品質・不正検知
-  count: 25
+  count: 34
 - letter: F
   name_ja: 資本政策・希薄化
-  count: 22
+  count: 31
 - letter: G
   name_ja: 価格モメンタム・トレンド
-  count: 30
+  count: 45
 - letter: H
   name_ja: リバーサル・逆張り
-  count: 12
+  count: 18
 - letter: I
   name_ja: ボラティリティ・リスク
-  count: 25
+  count: 31
 - letter: J
   name_ja: 流動性・執行可能性
-  count: 20
+  count: 25
 - letter: K
   name_ja: 需給・市場マイクロストラクチャ
-  count: 50
+  count: 58
+- letter: L
+  name_ja: 情報伝播・リードラグ
+  count: 11
 - letter: M
   name_ja: 株主構成・ガバナンス
   count: 30
 - letter: N
   name_ja: カタリスト・イベント
-  count: 45
+  count: 49
 - letter: O
   name_ja: アナリスト・注目度（ネグレクト）
-  count: 18
+  count: 24
 - letter: P
   name_ja: マクロ・レジーム
   count: 30
@@ -83,7 +87,7 @@ categories:
   count: 45
 - letter: V
   name_ja: セグメント・事業構成
-  count: 12
+  count: 15
 - letter: W
   name_ja: 人的資本・組織
   count: 14

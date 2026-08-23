@@ -26,7 +26,7 @@
   - PX
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -43,7 +43,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP DolVol — Brennan, Chordia, Subra 1998, JFE（OSAP再現 t=2.9, 月次nan%, 品質=1_good, 予測力=1_clear）
   notes: 低いほど非効率＝チャンスだが、執行できなければ意味がない。∩ではなくゲート＋加点の二段構え
   notes_extra: null
   provenance:
@@ -64,6 +67,8 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
     gate_policy: override
   review:
     status: draft
@@ -71,7 +76,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: J02
@@ -162,7 +166,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -179,7 +183,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP Illiquidity — Amihud 2002, JFM（OSAP再現 t=6.6, 月次nan%, 品質=1_good, 予測力=1_clear）
   notes: 価格インパクトの実測。J01 より精度が高い
   notes_extra: null
   provenance:
@@ -199,6 +206,8 @@
     period_convention: default
     pit_lag_days: default
     accounting_standard_note: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -206,7 +215,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: J04
@@ -229,7 +237,7 @@
   - PX
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -246,7 +254,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP BidAskSpread — Amihud and Mendelson 1986, JFE（OSAP再現 t=n/a, 月次nan%, 品質=2_fair, 予測力=2_likely）
   notes: 往復コストの主成分。小型株では手数料より大きい
   notes_extra: null
   provenance:
@@ -266,6 +277,8 @@
     period_convention: default
     pit_lag_days: default
     accounting_standard_note: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -273,7 +286,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: J05
@@ -296,7 +308,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -313,7 +325,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP Size — Banz 1981, JFE（OSAP再現 t=3.1, 月次1.01%, 品質=1_good, 予測力=1_clear）
   notes: 小さいほどプレミアム（LAW-26）だが J02 とトレードオフ。rho で下限を制御（§1.6）
   notes_extra: null
   provenance:
@@ -334,13 +349,14 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: J06
@@ -500,7 +516,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -517,7 +533,11 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP std_turn — Chordia, Subra, Anshuman 2001, JFE（OSAP再現 t=3.7, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - OSAP VolSD — Chordia, Subra, Anshuman 2001, JFE（OSAP再現 t=3.6, 月次nan%, 品質=1_good, 予測力=1_clear）
   notes: 出来高が不安定な銘柄は執行計画が立たない
   notes_extra: null
   provenance:
@@ -537,6 +557,8 @@
     period_convention: default
     pit_lag_days: default
     accounting_standard_note: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -544,7 +566,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: J09
@@ -567,7 +588,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -584,7 +605,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ShareVol — Datar, Naik and Radcliffe 1998, JFM（OSAP再現 t=8.9, 月次nan%, 品質=1_good, 予測力=1_clear）
   notes: 何かが起きたサイン。方向は価格と組み合わせて判定（上昇+出来高増 = 買い、下落+出来高増 = 売り）
   notes_extra: null
   provenance:
@@ -604,6 +628,8 @@
     period_convention: default
     pit_lag_days: default
     accounting_standard_note: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -611,7 +637,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: J10
@@ -634,7 +659,7 @@
   - PX
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -651,7 +676,12 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP zerotrade1M — Liu 2006, JFE（OSAP再現 t=3.5, 月次0.56%, 品質=1_good, 予測力=1_clear）
+  - OSAP zerotrade6M — Liu 2006, JFE（OSAP再現 t=4.1, 月次0.806%, 品質=1_good, 予測力=1_clear）
+  - OSAP zerotrade12M — Liu 2006, JFE（OSAP再現 t=4.4, 月次0.846%, 品質=1_good, 予測力=1_clear）
   notes: 日本の超小型株に実在する。1日でもあれば強い警戒
   notes_extra: null
   provenance:
@@ -671,6 +701,8 @@
     period_convention: default
     pit_lag_days: default
     accounting_standard_note: default
+    evidence_tier: override
+    references: override
     gate_policy: override
   review:
     status: draft
@@ -679,7 +711,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: J11
@@ -1351,5 +1382,360 @@
     - q09
     - q10
     - q11
+    - q12
+  version: 1
+- id: J21
+  name_ja: 情報トレード確率 (PIN)
+  category: J
+  category_name: 流動性・執行可能性
+  subsection: null
+  definition: 売買の不均衡から推定する情報トレーダーの存在確率
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 6M-2Y
+    min_m: 6
+    max_m: 24
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ProbInformedTrading — Easley, Hvidkjaer and O'Hara 2002, JF（OSAP再現 t=2.5, 月次nan%, 品質=1_good, 予測力=2_likely）
+  notes: OSAP ProbInformedTrading t=2.5。情報の非対称性が大きい銘柄＝ネグレクト領域の裏づけ。O カテゴリと相乗
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: J22
+  name_ja: 出来高トレンド
+  category: J
+  category_name: 流動性・執行可能性
+  subsection: null
+  definition: 出来高の時系列トレンド（対数回帰の傾き）
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP VolumeTrend — Haugen and Baker 1996, JFE（OSAP再現 t=3.0, 月次nan%, 品質=2_fair, 予測力=2_likely）
+  notes: OSAP VolumeTrend t=3.0。J14 と符号が逆な点に注意（要検証）
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: J23
+  name_ja: 出来高 / 時価総額
+  category: J
+  category_name: 流動性・執行可能性
+  subsection: null
+  definition: 月間出来高 / 時価総額
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP VolMkt — Haugen and Baker 1996, JFE（OSAP再現 t=4.0, 月次nan%, 品質=2_fair, 予測力=2_likely）
+  notes: OSAP VolMkt t=4.0。回転率。過熱の指標でもある
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q05
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: J24
+  name_ja: 回転率のボラティリティ
+  category: J
+  category_name: 流動性・執行可能性
+  subsection: null
+  definition: sd(日次回転率, 過去60日)
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP std_turn — Chordia, Subra, Anshuman 2001, JFE（OSAP再現 t=3.7, 月次nan%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP std_turn t=3.7 / VolSD t=3.6
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: J25
+  name_ja: 株価水準
+  category: J
+  category_name: 流動性・執行可能性
+  subsection: null
+  definition: 株価の絶対水準（円/ドル）
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: aux
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - PX
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP Price — Blume and Husic 1973, JF（OSAP再現 t=2.9, 月次nan%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP Price t=2.9。低位株は劣後する。§1.8 の宝くじ回避と整合
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q05
+    - q06
+    - q09
+    - q10
     - q12
   version: 1

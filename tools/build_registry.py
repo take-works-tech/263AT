@@ -42,6 +42,7 @@ CATALOG = ROOT / "docs" / "01_parameter_catalog.md"
 OUTDIR = ROOT / "params"
 DEFAULTS_F = OUTDIR / "_defaults.yaml"
 OVERRIDES_F = OUTDIR / "_overrides.yaml"
+OVERRIDES_OAP_F = OUTDIR / "_overrides_oap.yaml"   # crosswalk_oap.py が生成（q11 のみ）
 
 SCHEMA_VERSION = 2
 GENERATED_ON = _dt.date(2026, 8, 23).isoformat()
@@ -313,6 +314,8 @@ def main():
     args = ap.parse_args()
 
     D = yaml.safe_load(DEFAULTS_F.read_text(encoding="utf-8"))
+    OV_OAP = (yaml.safe_load(OVERRIDES_OAP_F.read_text(encoding="utf-8"))
+              if OVERRIDES_OAP_F.exists() else {}) or {}
     OV = yaml.safe_load(OVERRIDES_F.read_text(encoding="utf-8")) or {}
     rows, anomalies = extract(CATALOG.read_text(encoding="utf-8"))
 
@@ -321,14 +324,16 @@ def main():
     for pid, cells, h3, h4, _ln in rows:
         e, unk = build_entry(pid, cells, h3, h4, D)
         unknown_all += unk
-        if pid in OV:
+        if pid in OV_OAP:                    # 機械生成（q11）
+            e = apply_override(e, OV_OAP[pid])
+        if pid in OV:                        # 人のレビューが最優先
             e = apply_override(e, OV[pid])
         compute_pending(e, D)
         by_cat.setdefault(pid[0], []).append(e)
         cat_names[pid[0]] = e["category_name"]
         seen_ids.add(pid)
 
-    stray = sorted(set(OV) - seen_ids)
+    stray = sorted((set(OV) | set(OV_OAP)) - seen_ids)
     if stray:
         print("OVERRIDES FOR UNKNOWN IDS:", stray)
     if anomalies:
@@ -356,7 +361,8 @@ def main():
 
     meta = collections.OrderedDict([
         ("schema_version", SCHEMA_VERSION),
-        ("generated_from", ["docs/01_parameter_catalog.md", "params/_defaults.yaml", "params/_overrides.yaml"]),
+        ("generated_from", ["docs/01_parameter_catalog.md", "params/_defaults.yaml",
+                            "params/_overrides_oap.yaml", "params/_overrides.yaml"]),
         ("generated_by", "tools/build_registry.py"),
         ("generated_on", GENERATED_ON),
         ("total_parameters", len(rows)),

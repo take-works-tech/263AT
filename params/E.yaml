@@ -74,6 +74,8 @@
     normalization: default
     period_convention: override
     pit_lag_days: default
+    evidence_tier: override
+    references: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -81,8 +83,6 @@
     missing_bias: override
     correlated_with: override
     economic_rationale: override
-    evidence_tier: override
-    references: override
     markets: override
   review:
     status: verified
@@ -108,7 +108,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -125,7 +125,11 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ChNWC — Soliman 2008, AR（OSAP再現 t=4.6, 月次nan%, 品質=1_good, 予測力=1_clear）
+  - OSAP DelCOA — Richardson et al. 2005, JAE（OSAP再現 t=8.7, 月次nan%, 品質=1_good, 予測力=1_clear）
   notes: E01 の分解版
   notes_extra: null
   provenance:
@@ -145,6 +149,8 @@
     period_convention: default
     pit_lag_days: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -153,7 +159,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: E03
@@ -176,7 +181,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -193,7 +198,11 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP NOA — Hirshleifer et al. 2004, JAE（OSAP再現 t=8.4, 月次1.48%, 品質=1_good, 予測力=1_clear）
+  - OSAP dNoa — Hirshleifer, Hou, Teoh, Zhang 2004, JAE（OSAP再現 t=8.8, 月次nan%, 品質=1_good, 予測力=1_clear）
   notes: E01 のストック版。投資ファクターでかなり説明される
   notes_extra: null
   provenance:
@@ -212,6 +221,8 @@
     normalization: default
     period_convention: default
     pit_lag_days: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -221,7 +232,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: E04
@@ -450,7 +460,7 @@
   - LLM
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -467,7 +477,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ExclExp — Doyle, Lundholm and Soliman 2003, RAS（OSAP再現 t=6.8, 月次nan%, 品質=1_good, 予測力=1_clear）
   notes: 米国テックで肥大化しやすい。SBC除外が主因なら特に減点
   notes_extra: null
   provenance:
@@ -486,6 +499,8 @@
     normalization: default
     period_convention: default
     pit_lag_days: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -495,7 +510,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: E08
@@ -1732,5 +1746,653 @@
     - q09
     - q10
     - q11
+    - q12
+  version: 1
+- id: E26
+  name_ja: 異常アクルーアル
+  category: E
+  category_name: 会計品質・不正検知
+  subsection: null
+  definition: 修正 Jones モデルの残差（売上変化と設備投資で説明できない部分）
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: main
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP AbnormalAccruals — Xie 2001, AR（OSAP再現 t=8.4, 月次0.916666667%, 品質=2_fair, 予測力=1_clear）
+  notes: OSAP AbnormalAccruals t=8.4。E01 の総アクルーアルより t が高い。裁量部分だけを取り出すため
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: E27
+  name_ja: パーセント・アクルーアル
+  category: E
+  category_name: 会計品質・不正検知
+  subsection: null
+  definition: (NI - CFO) / abs(NI)（総資産でなく利益で正規化）
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP PctAcc — Hafzalla, Lundholm, Van Winkle 2011, AR（OSAP再現 t=3.3, 月次0.97%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP PctAcc t=3.3 / PctTotAcc t=3.3。小型・低収益企業で E01 より安定する
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q05
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: E28
+  name_ja: 実質ダーティ・サープラス
+  category: E
+  category_name: 会計品質・不正検知
+  subsection: null
+  definition: 包括利益と純利益の差のうち、経常的に発生している部分
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP RDS — Landsman et al. 2011, AR（OSAP再現 t=5.8, 月次0.333333333%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP RDS t=5.8。損益計算書を迂回した損益。日本基準では「その他の包括利益」から取る
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: E29
+  name_ja: 税金費用の変化
+  category: E
+  category_name: 会計品質・不正検知
+  subsection: null
+  definition: delta_(法人税等 / 税引前利益) の異常度
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: main
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ChTax — Thomas and Zhang 2011, JAR（OSAP再現 t=11.3, 月次1.3%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP ChTax t=11.3。最上位クラス。E05 は水準の異常だけだったが、変化に情報がある（納税額は操作しにくい）
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q05
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: E30
+  name_ja: 課税所得 / 会計利益
+  category: E
+  category_name: 会計品質・不正検知
+  subsection: null
+  definition: 推定課税所得 / 純利益
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP Tax — Lev and Nissim 2004, AR（OSAP再現 t=3.9, 月次nan%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP Tax t=3.9。会計利益が税務利益より大きい企業は利益の質が低い
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q05
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: E31
+  name_ja: 総アクルーアル（BS法）
+  category: E
+  category_name: 会計品質・不正検知
+  subsection: null
+  definition: delta_運転資本 - 減価償却（貸借対照表から算出）
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: main
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP TotalAccruals — Richardson et al. 2005, JAE（OSAP再現 t=6.4, 月次nan%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP TotalAccruals t=6.4。E01 のCF法に対する別法。両方持って乖離を見ると開示の質が分かる
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: E32
+  name_ja: 純金融資産の変化
+  category: E
+  category_name: 会計品質・不正検知
+  subsection: null
+  definition: delta_(金融資産 - 金融負債) / 前期総資産
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP DelNetFin — Richardson et al. 2005, JAE（OSAP再現 t=5.8, 月次nan%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP DelNetFin t=5.8
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q05
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: E33
+  name_ja: 非流動営業資産の変化
+  category: E
+  category_name: 会計品質・不正検知
+  subsection: null
+  definition: delta_非流動営業資産 / 前期総資産
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ChNNCOA — Soliman 2008, AR（OSAP再現 t=5.3, 月次nan%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP ChNNCOA t=5.3。E03（NOA）の変化分解
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q05
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: E34
+  name_ja: 流動営業負債の変化
+  category: E
+  category_name: 会計品質・不正検知
+  subsection: null
+  definition: delta_流動営業負債 / 前期総資産
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP DelCOL — Richardson et al. 2005, JAE（OSAP再現 t=4.5, 月次nan%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP DelCOL t=4.5。符号が正（負債が増える＝運転資本が軽い）点に注意
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q05
+    - q06
+    - q09
+    - q10
     - q12
   version: 1

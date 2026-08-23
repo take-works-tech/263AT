@@ -52,6 +52,7 @@ normalization_by_category:
   I: rank_all         # ただし I01-I03 はサイジング専用 → _overrides で none
   J: rank_all         # 絶対額は円換算してから（spec §5、J19）
   K: rank_market      # 信用残・空売り規制・指数制度が市場ごとに違う
+  L: rank_all         # 情報伝播。日米間のリードラグ(L10)があるので市場内に閉じない
   M: rank_market      # 開示制度（EDINET / Form 4）が市場ごとに違う
   N: rank_all
   O: rank_all
@@ -81,6 +82,7 @@ period_convention_by_category:
   I: POINT
   J: POINT
   K: POINT
+  L: POINT
   M: POINT
   N: POINT
   O: POINT

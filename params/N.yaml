@@ -145,14 +145,14 @@
     period_convention: override
     pit_lag_days: default
     accounting_standard_note: override
+    evidence_tier: override
+    references: override
     formula: override
     inputs: override
     zero_denominator_policy: override
     missing_bias: override
     correlated_with: override
     economic_rationale: override
-    evidence_tier: override
-    references: override
     markets: override
   review:
     status: verified
@@ -178,7 +178,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -195,7 +195,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP RevenueSurprise — Jegadeesh and Livnat 2006, JAE（OSAP再現 t=n/a, 月次nan%, 品質=2_fair, 予測力=1_clear）
   notes: 利益サプライズより操作されにくい。両方あると強い
   notes_extra: null
   provenance:
@@ -216,13 +219,14 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: N04
@@ -245,7 +249,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -262,7 +266,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP AnnouncementReturn — Chan, Jegadeesh and Lakonishok 1996, JF（OSAP再現 t=9.2, 月次nan%, 品質=1_good, 予測力=1_clear）
   notes: 市場の初期反応そのものが最良の予想。SUEより頑健という報告あり
   notes_extra: null
   provenance:
@@ -283,13 +290,14 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: N05
@@ -513,7 +521,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -530,7 +538,11 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP EarningsConsistency — Alwathainani 2009, BAR（OSAP再現 t=2.7, 月次0.360833333%, 品質=2_fair, 予測力=1_clear）
+  - OSAP NumEarnIncrease — Loh and Warachka 2012, MS（OSAP再現 t=n/a, 月次nan%, 品質=3_distant, 予測力=2_likely）
   notes: LAW-29。上方修正した企業は次も上方修正しやすい
   notes_extra: null
   provenance:
@@ -551,13 +563,14 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: N09
@@ -693,14 +706,14 @@
     period_convention: override
     pit_lag_days: default
     accounting_standard_note: override
+    evidence_tier: override
+    references: override
     formula: override
     inputs: override
     zero_denominator_policy: override
     missing_bias: override
     correlated_with: override
     economic_rationale: override
-    evidence_tier: override
-    references: override
     markets: override
   review:
     status: verified
@@ -726,7 +739,7 @@
   - EST
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -743,7 +756,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ForecastDispersion — Diether, Malloy and Scherbina 2002, JF（OSAP再現 t=2.9, 月次0.79%, 品質=1_good, 予測力=1_clear）
   notes: 意見の割れ = 情報の非対称性 = 機会。ただしリスクも
   notes_extra: null
   provenance:
@@ -765,6 +781,8 @@
     nonlinear: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -772,7 +790,6 @@
     - q08
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: N12
@@ -795,7 +812,7 @@
   - EST
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -812,7 +829,11 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP AnalystValue — Frankel and Lee 1998, JAE（OSAP再現 t=n/a, 月次0.258333333%, 品質=2_fair, 予測力=2_likely）
+  - OSAP AOP — Frankel and Lee 1998, JAE（OSAP再現 t=n/a, 月次0.275%, 品質=2_fair, 予測力=2_likely）
   notes: 弱い（アナリストは楽観バイアス）。変化率の方が使える
   notes_extra: null
   provenance:
@@ -832,6 +853,8 @@
     period_convention: default
     pit_lag_days: default
     accounting_standard_note: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -839,7 +862,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: N13
@@ -1011,7 +1033,7 @@
   - SEC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T3
   markets:
   - JP
   - US
@@ -1028,7 +1050,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP Spinoff — Cusatis, Miles and Woolridge 1993, JFE（OSAP再現 t=2.4, 月次2.083333333%, 品質=4_lack_data, 予測力=2_likely）
   notes: コングロマリット・ディスカウントの解消
   notes_extra: null
   provenance:
@@ -1049,13 +1074,14 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: N16
@@ -1484,7 +1510,7 @@
   - TD
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -1501,7 +1527,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ExchSwitch — Dharan and Ikenberry 1995, JF（OSAP再現 t=3.6, 月次0.455%, 品質=2_fair, 予測力=1_clear）
   notes: 降格はパッシブ売り、昇格は買い
   notes_extra: null
   provenance:
@@ -1521,6 +1550,8 @@
     period_convention: default
     pit_lag_days: default
     accounting_standard_note: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -1528,7 +1559,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: N23
@@ -1619,7 +1649,7 @@
   - 手
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -1636,7 +1666,11 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP AgeIPO — Ritter 1991, JF（OSAP再現 t=n/a, 月次0.972222222%, 品質=2_fair, 予測力=2_likely）
+  - OSAP IndIPO — Ritter 1991, JF（OSAP再現 t=4.0, 月次0.8525%, 品質=2_fair, 予測力=1_clear）
   notes: LAW-48。IPO後3年未満は減点。ロックアップ解除の需給悪化も含む
   notes_extra: null
   provenance:
@@ -1657,13 +1691,14 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: N25
@@ -3086,5 +3121,289 @@
     - q09
     - q10
     - q11
+    - q12
+  version: 1
+- id: N46
+  name_ja: 長短予想の乖離
+  category: N
+  category_name: カタリスト・イベント
+  subsection: null
+  definition: 長期EPS成長率予想 - 短期EPS成長率予想
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: main
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 6M-2Y
+    min_m: 6
+    max_m: 24
+  data_sources:
+  - EST
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 1
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP EarningsForecastDisparity — Da and Warachka 2011, JFE（OSAP再現 t=5.1, 月次0.48%, 品質=2_fair, 予測力=1_clear）
+  notes: OSAP EarningsForecastDisparity t=5.1。長期だけ強気なのは実現しない期待の兆候
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: N47
+  name_ja: 長期成長率予想
+  category: N
+  category_name: カタリスト・イベント
+  subsection: null
+  definition: アナリストの5年 EPS 成長率予想
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - EST
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 1
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP fgr5yrLag — La Porta 1996, JF（OSAP再現 t=4.9, 月次nan%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP fgr5yrLag t=4.9。高成長予想の銘柄は劣後する（C26 平均回帰調整の実証的裏づけ）
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: N48
+  name_ja: コンセンサス推奨
+  category: N
+  category_name: カタリスト・イベント
+  subsection: null
+  definition: アナリスト推奨の平均（買い=1〜売り=5）
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - EST
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 1
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ConsRecomm — Barber et al. 2001, JF（OSAP再現 t=3.2, 月次0.79%, 品質=4_lack_data, 予測力=2_likely）
+  notes: OSAP ConsRecomm t=3.2。推奨が高い銘柄ほど劣後する（符号に注意）
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: N49
+  name_ja: 推奨 × 空売り残高
+  category: N
+  category_name: カタリスト・イベント
+  subsection: null
+  definition: コンセンサス推奨 × 空売り残高比率 の交互作用
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 1M-6M
+    min_m: 1
+    max_m: 6
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP Recomm_ShortInterest — Drake, Rees and Swanson 2011, AR（OSAP再現 t=4.1, 月次1.11%, 品質=4_lack_data, 予測力=1_clear）
+  notes: OSAP Recomm_ShortInterest t=4.1。アナリストが強気で空売りも多い銘柄は特に危険
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
     - q12
   version: 1

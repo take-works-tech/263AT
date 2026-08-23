@@ -26,7 +26,7 @@
   - PX
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -43,7 +43,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP LRreversal — De Bondt and Thaler 1985, JF（OSAP再現 t=3.3, 月次0.105%, 品質=1_good, 予測力=1_clear）
   notes: 本プロジェクトのホライズンに最も合致。バリューと強く相関するので二重計上に注意
   notes_extra: null
   provenance:
@@ -64,13 +67,14 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: H02
@@ -294,7 +298,7 @@
   - PX
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -311,7 +315,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP STreversal — Jegadeesh 1990, JF（OSAP再現 t=12.4, 月次1.99%, 品質=1_good, 予測力=1_clear）
   notes: 執行の日程調整のみ。数日待つだけで平均取得単価が改善する
   notes_extra: null
   provenance:
@@ -332,13 +339,14 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: H06
@@ -811,5 +819,431 @@
     - q09
     - q10
     - q11
+    - q12
+  version: 1
+- id: H13
+  name_ja: 無形リターン（BM基準）
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: 過去5年のリターンのうち、簿価純資産の変化で説明できない部分
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 2Y-5Y
+    min_m: 24
+    max_m: 60
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP IntanBM — Daniel and Titman 2006, JF（OSAP再現 t=4.0, 月次nan%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP IntanBM t=4.0。H01 の長期リバーサルを「ファンダメンタルで説明できない部分」に絞った版。本プロジェクトのホライズンに直撃
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: H14
+  name_ja: 無形リターン（CF/P基準）
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: 同上、営業CFの変化で説明できない部分
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 2Y-5Y
+    min_m: 24
+    max_m: 60
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP IntanCFP — Daniel and Titman 2006, JF（OSAP再現 t=4.9, 月次nan%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP IntanCFP t=4.9。Intan 系で最も強い
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: H15
+  name_ja: 無形リターン（E/P基準）
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: 同上、利益の変化で説明できない部分
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 2Y-5Y
+    min_m: 24
+    max_m: 60
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP IntanEP — Daniel and Titman 2006, JF（OSAP再現 t=4.6, 月次nan%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP IntanEP t=4.6
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: H16
+  name_ja: 無形リターン（S/P基準）
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: 同上、売上の変化で説明できない部分
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 2Y-5Y
+    min_m: 24
+    max_m: 60
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP IntanSP — Daniel and Titman 2006, JF（OSAP再現 t=4.2, 月次nan%, 品質=2_fair, 予測力=1_clear）
+  notes: OSAP IntanSP t=4.2
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: H17
+  name_ja: モメンタムと長期リバーサルの複合
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: 12-1モメンタム上位 かつ 5年リバーサル上位
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP MomRev — Chan and Ko 2006, JOIM（OSAP再現 t=4.3, 月次0.48%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP MomRev t=4.3。LAW-111（バリューとモメンタムをセットで持つ）の直接の実装形
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: H18
+  name_ja: 中期リバーサル
+  category: H
+  category_name: リバーサル・逆張り
+  subsection: null
+  definition: SUM r_{t-36..t-13}
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - PX
+  evidence_stars: 1
+  prior_scale: 0.15
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP MRreversal — De Bondt and Thaler 1985, JF（OSAP再現 t=n/a, 月次0.75%, 品質=3_distant, 予測力=2_likely）
+  notes: OSAP MRreversal。H01（3-5年）と G01（12ヶ月）の間を埋める
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
     - q12
   version: 1

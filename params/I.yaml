@@ -26,7 +26,7 @@
   - PX
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -43,7 +43,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP RealizedVol — Ang et al. 2006, JF（OSAP再現 t=2.9, 月次0.97%, 品質=1_good, 予測力=1_clear）
   notes: 主用途はサイジングの分母。選択の減点材料としては弱い
   notes_extra: サイジングの分母専用。断面ランクしない（catalog §4-I の中心思想）。
   provenance:
@@ -64,6 +67,8 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
     notes_extra: override
   review:
     status: draft
@@ -71,7 +76,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: I02
@@ -230,7 +234,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -247,7 +251,11 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP IdioVol3F — Ang et al. 2006, JF（OSAP再現 t=3.1, 月次1.06%, 品質=1_good, 予測力=1_clear）
+  - OSAP IdioVolAHT — Ali, Hwang, and Trombley 2003, JFE（OSAP再現 t=2.7, 月次nan%, 品質=1_good, 予測力=1_clear）
   notes: LAW-35。MAX（I06）を入れると符号が反転する報告あり。両方入れて交互作用を検証する
   notes_extra: null
   provenance:
@@ -268,13 +276,14 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: I05
@@ -297,7 +306,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -314,7 +323,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP Beta — Fama and MacBeth 1973, JPE（OSAP再現 t=2.6, 月次nan%, 品質=1_good, 予測力=2_likely）
   notes: BAB。生ベータは推定誤差が大きいので収縮推定を必ず入れる
   notes_extra: null
   provenance:
@@ -334,6 +346,8 @@
     period_convention: default
     pit_lag_days: default
     accounting_standard_note: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -341,7 +355,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: I06
@@ -409,13 +422,13 @@
     pit_lag_days: default
     accounting_standard_note: override
     zero_denominator_policy: override
+    evidence_tier: override
+    references: override
     formula: override
     inputs: override
     missing_bias: override
     correlated_with: override
     economic_rationale: override
-    evidence_tier: override
-    references: override
     markets: override
   review:
     status: verified
@@ -508,7 +521,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -525,7 +538,11 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ReturnSkew — Bali, Engle and Murray 2015, Book（OSAP再現 t=4.0, 月次0.47%, 品質=1_good, 予測力=1_clear）
+  - OSAP ReturnSkew3F — Bali, Engle and Murray 2015, Book（OSAP再現 t=4.3, 月次0.45%, 品質=1_good, 予測力=1_clear）
   notes: 正の歪度は将来リターンと負相関。直感の逆なので必ず符号を確認
   notes_extra: null
   provenance:
@@ -546,13 +563,14 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: I09
@@ -1698,5 +1716,431 @@
     - q09
     - q10
     - q11
+    - q12
+  version: 1
+- id: I26
+  name_ja: Frazzini-Pedersen ベータ
+  category: I
+  category_name: ボラティリティ・リスク
+  subsection: null
+  definition: 日次リターンの相関とボラを分けて推定した収縮ベータ
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 6M-2Y
+    min_m: 6
+    max_m: 24
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T3
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP BetaFP — Frazzini and Pedersen 2014, JFE（OSAP再現 t=7.1, 月次0.7%, 品質=3_distant, 予測力=2_likely）
+  notes: OSAP BetaFP t=7.1。BAB（LAW-36）の正式な推定法。I05 の素のベータより遥かに強い
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: I27
+  name_ja: 共歪度
+  category: I
+  category_name: ボラティリティ・リスク
+  subsection: null
+  definition: 市場リターンの2乗に対する感応度
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP Coskewness — Harvey and Siddique 2000, JF（OSAP再現 t=2.0, 月次0.3%, 品質=1_good, 予測力=2_likely）
+  notes: OSAP Coskewness t=2.0 / CoskewACX t=2.8。市場が大きく動くときに一緒に壊れるか
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: I28
+  name_ja: テールリスク・ベータ
+  category: I
+  category_name: ボラティリティ・リスク
+  subsection: null
+  definition: 市場のテールリスク指標への感応度
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP BetaTailRisk — Kelly and Jiang 2014, RFS（OSAP再現 t=2.5, 月次0.33%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP BetaTailRisk t=2.5。I16（CVaR）の断面版
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: I29
+  name_ja: 3ファクター残差歪度
+  category: I
+  category_name: ボラティリティ・リスク
+  subsection: null
+  definition: FF3 回帰残差の歪度
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 3M-1Y
+    min_m: 3
+    max_m: 12
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ReturnSkew3F — Bali, Engle and Murray 2015, Book（OSAP再現 t=4.3, 月次0.45%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP ReturnSkew3F t=4.3 / ReturnSkew t=4.0。I08 より高い t。§1.8 の宝くじ回避の主力
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: I30
+  name_ja: VIX 感応度
+  category: I
+  category_name: ボラティリティ・リスク
+  subsection: null
+  definition: beta( r_i ~ delta_VIX )
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 6M-2Y
+    min_m: 6
+    max_m: 24
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP betaVIX — Ang et al. 2006, JF（OSAP再現 t=3.9, 月次1.04%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP betaVIX t=3.9。P10 の銘柄別版
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: I31
+  name_ja: 実現ボラティリティ（総合）
+  category: I
+  category_name: ボラティリティ・リスク
+  subsection: null
+  definition: 日次リターンの標準偏差（ファクター調整なし）
+  formula: null
+  inputs: null
+  sign: negative
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1M-1Y
+    min_m: 1
+    max_m: 12
+  data_sources:
+  - PX
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: na
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_all
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP RealizedVol — Ang et al. 2006, JF（OSAP再現 t=2.9, 月次0.97%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP RealizedVol t=2.9。I01/I02 は「サイジング専用」としたが、断面でも予測力がある
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    accounting_standard_note: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q06
+    - q09
+    - q10
     - q12
   version: 1

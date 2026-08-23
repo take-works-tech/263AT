@@ -26,7 +26,7 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -43,7 +43,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP RoE — Haugen and Baker 1996, JFE（OSAP再現 t=4.5, 月次nan%, 品質=2_fair, 予測力=2_likely）
   notes: レバレッジで水増しできる。B05 で分解して確認
   notes_extra: null
   provenance:
@@ -62,6 +65,8 @@
     normalization: default
     period_convention: default
     pit_lag_days: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -71,7 +76,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: B02
@@ -94,7 +98,7 @@
   - FIN
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -111,7 +115,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP roaq — Balakrishnan, Bartov and Faurel 2010, JAE（OSAP再現 t=6.5, 月次0.841666667%, 品質=1_good, 予測力=1_clear）
   notes: 業種間比較には向かない
   notes_extra: null
   provenance:
@@ -130,6 +137,8 @@
     normalization: default
     period_convention: default
     pit_lag_days: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -139,7 +148,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: B03
@@ -413,6 +421,8 @@
     normalization: default
     period_convention: override
     pit_lag_days: default
+    evidence_tier: override
+    references: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -420,8 +430,6 @@
     missing_bias: override
     correlated_with: override
     economic_rationale: override
-    evidence_tier: override
-    references: override
     markets: override
   review:
     status: verified
@@ -583,7 +591,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -600,7 +608,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP CBOperProf — Ball et al. 2016, JFE（OSAP再現 t=3.2, 月次0.47%, 品質=1_good, 予測力=1_clear）
   notes: 現金を生む力そのもの
   notes_extra: null
   provenance:
@@ -619,6 +630,8 @@
     normalization: default
     period_convention: default
     pit_lag_days: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -628,7 +641,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: B10
@@ -697,6 +709,8 @@
     normalization: default
     period_convention: override
     pit_lag_days: default
+    evidence_tier: override
+    references: override
     formula: override
     inputs: override
     accounting_standard_note: override
@@ -704,8 +718,6 @@
     missing_bias: override
     correlated_with: override
     economic_rationale: override
-    evidence_tier: override
-    references: override
     markets: override
   review:
     status: verified
@@ -1164,7 +1176,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -1181,7 +1193,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP PS — Piotroski 2000, JAR（OSAP再現 t=5.6, 月次1.958333333%, 品質=2_fair, 予測力=1_clear）
   notes: 低PBR群に絞ってから使うと効果が最大。全体に適用すると薄まる
   notes_extra: null
   provenance:
@@ -1200,6 +1215,8 @@
     normalization: default
     period_convention: default
     pit_lag_days: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -1209,7 +1226,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: B18
@@ -1300,7 +1316,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -1317,7 +1333,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP OPLeverage — Novy-Marx 2011, ROF（OSAP再現 t=3.4, 月次0.51%, 品質=1_good, 予測力=1_clear）
   notes: 高いほど上振れも下振れも増幅。rho が高いなら加点、低いなら減点（交互作用）
   notes_extra: null
   provenance:
@@ -1337,6 +1356,8 @@
     period_convention: default
     pit_lag_days: default
     nonlinear: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -1347,7 +1368,6 @@
     - q08
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: B20
@@ -1506,7 +1526,7 @@
   - CALC
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -1523,7 +1543,11 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ChInv — Thomas and Zhang 2002, RAS（OSAP再現 t=n/a, 月次0.949166667%, 品質=1_good, 予測力=1_clear）
+  - OSAP InvGrowth — Belo and Lin 2012, RFS（OSAP再現 t=6.6, 月次0.89%, 品質=1_good, 予測力=1_clear）
   notes: 急増は需要減速か押し込み販売の早期警戒。売り判定で価値が高い
   notes_extra: null
   provenance:
@@ -1543,6 +1567,8 @@
     period_convention: default
     pit_lag_days: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -1551,7 +1577,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: B23
@@ -1710,7 +1735,7 @@
   - FIN
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -1727,7 +1752,11 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP RD — Chan, Lakonishok and Sougiannis 2001, JF（OSAP再現 t=n/a, 月次0.8875%, 品質=1_good, 予測力=1_clear）
+  - OSAP RDcap — Li 2011, RFS（OSAP再現 t=2.6, 月次0.69%, 品質=1_good, 予測力=1_clear）
   notes: 過小も過大も悪い。B26 と組で「投資の実り」を見る
   notes_extra: null
   provenance:
@@ -1747,6 +1776,8 @@
     period_convention: default
     pit_lag_days: default
     nonlinear: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -1757,7 +1788,6 @@
     - q08
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: B26
@@ -1780,7 +1810,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -1797,7 +1827,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP RDAbility — Cohen, Diether and Malloy 2013, RFS（OSAP再現 t=2.6, 月次1.35%, 品質=1_good, 予測力=1_clear）
   notes: 研究開発が実際に利益に転換しているか
   notes_extra: null
   provenance:
@@ -1816,6 +1849,8 @@
     normalization: default
     period_convention: default
     pit_lag_days: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -1825,7 +1860,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: B27
@@ -2781,5 +2815,509 @@
     - q09
     - q10
     - q11
+    - q12
+  version: 1
+- id: B41
+  name_ja: Mohanram G-score
+  category: B
+  category_name: 収益性・クオリティ
+  subsection: null
+  definition: 8項目の 0/1 合計（収益性・CF・成長の安定性・R&D/設備投資/広告の集約度）
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: main
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP MS — Mohanram 2005, RAS（OSAP再現 t=9.1, 月次1.575%, 品質=2_fair, 予測力=1_clear）
+  notes: OSAP MS t=9.1。B17 Piotroski が低PBR株向けなのに対し、G-score は高PBR（成長）株向け。両方持って使い分ける
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q05
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: B42
+  name_ja: キャッシュ生産性
+  category: B
+  category_name: 収益性・クオリティ
+  subsection: null
+  definition: (時価総額 + 負債 - 総資産) / 現金
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP CashProd — Chandrashekar and Rao 2009, WP（OSAP再現 t=3.6, 月次nan%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP CashProd t=3.6
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q05
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: B43
+  name_ja: 組織資本
+  category: B
+  category_name: 収益性・クオリティ
+  subsection: null
+  definition: 販管費を資本化して積み上げた無形の組織資産 / 総資産
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 3Y-5Y
+    min_m: 36
+    max_m: 60
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP OrgCap — Eisfeldt and Papanikolaou 2013, JF（OSAP再現 t=2.9, 月次0.385833333%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP OrgCap t=2.9。B27/A31（無形資産調整）の姉妹指標
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q05
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: B44
+  name_ja: 総資産回転率の変化
+  category: B
+  category_name: 収益性・クオリティ
+  subsection: null
+  definition: delta_(売上/総資産)
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: main
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 6M-2Y
+    min_m: 6
+    max_m: 24
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP ChAssetTurnover — Soliman 2008, AR（OSAP再現 t=5.1, 月次nan%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP ChAssetTurnover t=5.1。B11 は水準だけだった。変化の方が効く（B18/B29 と同じ構図）
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q05
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: B45
+  name_ja: 売上成長 / 在庫成長
+  category: B
+  category_name: 収益性・クオリティ
+  subsection: null
+  definition: 売上成長率 - 在庫成長率
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 6M-2Y
+    min_m: 6
+    max_m: 24
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP GrSaleToGrInv — Abarbanell and Bushee 1998, AR（OSAP再現 t=2.4, 月次nan%, 品質=1_good, 予測力=2_likely）
+  notes: OSAP GrSaleToGrInv t=2.4。在庫が売上より速く増えるのは需要減速のサイン。B22 の比率版
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: B46
+  name_ja: 売上成長 / 販管費成長
+  category: B
+  category_name: 収益性・クオリティ
+  subsection: null
+  definition: 売上成長率 - 販管費成長率
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: main
+  gate_policy: null
+  horizon:
+    label: 6M-2Y
+    min_m: 6
+    max_m: 24
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T2
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: na
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP GrSaleToGrOverhead — Abarbanell and Bushee 1998, AR（OSAP再現 t=2.1, 月次nan%, 品質=1_good, 予測力=2_likely）
+  notes: OSAP GrSaleToGrOverhead t=2.1。B31 の比率版
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    zero_denominator_policy: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q06
+    - q09
+    - q10
+    - q12
+  version: 1
+- id: B47
+  name_ja: 有形資産比率
+  category: B
+  category_name: 収益性・クオリティ
+  subsection: null
+  definition: (現金 + 0.715×売掛金 + 0.547×在庫 + 0.535×有形固定資産) / 総資産
+  formula: null
+  inputs: null
+  sign: positive
+  buy_class: useful
+  sell_class: useful
+  gate_policy: null
+  horizon:
+    label: 1Y-3Y
+    min_m: 12
+    max_m: 36
+  data_sources:
+  - CALC
+  evidence_stars: 2
+  prior_scale: 0.45
+  evidence_tier: T1
+  markets:
+  - JP
+  - US
+  industries: null
+  period_convention: TTM
+  consolidation: na
+  accounting_standard_note: null
+  pit_lag_days: 0
+  zero_denominator_policy: null
+  missing_policy: flag
+  missing_bias: null
+  normalization: rank_sector
+  nonlinear: null
+  winsorize: null
+  correlated_with: null
+  economic_rationale: null
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP tang — Hahn and Lee 2009, JF（OSAP再現 t=3.4, 月次nan%, 品質=1_good, 予測力=1_clear）
+  notes: OSAP tang t=3.4。担保価値。清算時の回収可能性でもあり D カテゴリとも関係する
+  notes_extra: null
+  provenance:
+    name_ja: catalog
+    definition: catalog
+    sign: catalog
+    buy_class: catalog
+    sell_class: catalog
+    horizon: catalog
+    data_sources: catalog
+    evidence_stars: catalog
+    notes: catalog
+    prior_scale: default
+    consolidation: default
+    missing_policy: default
+    normalization: default
+    period_convention: default
+    pit_lag_days: default
+    evidence_tier: override
+    references: override
+  review:
+    status: draft
+    pending:
+    - q01
+    - q04
+    - q05
+    - q06
+    - q09
+    - q10
     - q12
   version: 1

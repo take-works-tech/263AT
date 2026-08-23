@@ -500,7 +500,7 @@
   - EDI
   evidence_stars: 2
   prior_scale: 0.45
-  evidence_tier: null
+  evidence_tier: T2
   markets:
   - JP
   - US
@@ -517,7 +517,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP Activism2 — Cremers and Nair 2005, JF（OSAP再現 t=2.0, 月次0.661666667%, 品質=1_good, 予測力=2_likely）
   notes: LAW-44。日本株で特に有効。提出者リストを保持し、既知アクティビストとマッチング
   notes_extra: null
   provenance:
@@ -538,13 +541,14 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: M09
@@ -634,7 +638,7 @@
   - CALC
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -651,7 +655,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP Activism1 — Cremers and Nair 2005, JF（OSAP再現 t=3.1, 月次0.9025%, 品質=1_good, 予測力=1_clear）
   notes: 保有報告が出る「前」に先回りする。日本の中小型株で最も妙味がある設計
   notes_extra: null
   provenance:
@@ -672,13 +679,14 @@
     pit_lag_days: default
     accounting_standard_note: default
     zero_denominator_policy: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: M11
@@ -768,7 +776,7 @@
   - EDI
   evidence_stars: 1
   prior_scale: 0.15
-  evidence_tier: null
+  evidence_tier: T1
   markets:
   - JP
   - US
@@ -785,7 +793,10 @@
   winsorize: null
   correlated_with: null
   economic_rationale: null
-  references: []
+  references:
+  - https://www.openassetpricing.com/
+  - https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf
+  - OSAP Governance — Gompers, Ishii and Metrick 2003, QJE（OSAP再現 t=2.8, 月次0.72%, 品質=1_good, 予測力=1_clear）
   notes: 弱い。形式基準なので実質を伴わないことが多い
   notes_extra: null
   provenance:
@@ -805,6 +816,8 @@
     period_convention: default
     pit_lag_days: default
     accounting_standard_note: default
+    evidence_tier: override
+    references: override
   review:
     status: draft
     pending:
@@ -812,7 +825,6 @@
     - q06
     - q09
     - q10
-    - q11
     - q12
   version: 1
 - id: M13

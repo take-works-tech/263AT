@@ -50,3 +50,8 @@ desktop.ini
 # --- 再取得できる大きめの研究データ（tools/probe_data_sources.py で再取得） ---
 research/*.parquet
 research/*.zip
+
+# --- PIT データベース（再構築可能。tools/build_pit_fundamentals.py） ---
+data/pit/
+forward_log/*.jsonl
+research/oap_cache/
