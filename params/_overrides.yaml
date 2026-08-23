@@ -1,0 +1,605 @@
+# 263AT parameter registry — 人によるレビュー結果（上書き）
+#
+# tools/build_registry.py は docs/01_parameter_catalog.md から下書きを生成し、
+# params/_defaults.yaml の規約を当て、最後に **このファイルを上書き適用する。**
+# つまりカタログを再生成してもレビュー結果は失われない。
+#
+# 記法:
+#   - 部分上書きでよい（書いたキーだけが上書きされる）
+#   - review.status: verified を付けるのは、12問すべてに答えたものだけ。
+#     validator が pending 非空のまま verified になっていたら落とす。
+#
+# 規約（_defaults.yaml の補足）:
+#   - period_convention は **会計側**を指す。株価・時価総額は常に POINT。
+#   - formula の識別子は docs/02_definition_spec.md §2 の勘定コードを使う。
+#     接尾辞 _TTM / _FY / _FQ / _AVG で期間を明示する。
+#
+# 現状: ★★★（evidence_stars=3）の20件を verified 済み。残り641件は draft。
+
+# =============================================================================
+# A. バリュエーション
+# =============================================================================
+
+A01:
+  formula: "NI_TTM / MCAP"
+  inputs: [NI, MCAP]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    NI は親会社株主に帰属する当期純利益。日本基準はのれん償却後なので、M&A を多用する
+    IFRS 企業より小さく出る。基準が混在する母集団では A06/A07（EBITDA/EBIT ベース）を優先する。
+  zero_denominator_policy: >-
+    MCAP はゼロにならない。NI が負なら E/P も負になるが、それは正しい情報なのでそのまま保持する。
+    PER にすると赤字企業がプラス無限大に化けるため、必ず E/P の向きで持つ。
+  missing_bias: 特になし（全上場企業で計算可能）
+  correlated_with: [A02, A17, A21, A25, A32, A43]
+  economic_rationale: >-
+    同じ利益を安く買えるほど期待リターンが高い。ミスプライシング説（過度な悲観の平均回帰）と
+    リスク説（バリュー株は財務・オペレーティングレバレッジが高い）の両方が候補だが、どちらでも符号は正。
+  evidence_tier: T1
+  references:
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+    - "https://www.nber.org/system/files/working_papers/w23394/w23394.pdf"
+  markets: [JP, US]
+  review: {status: verified}
+
+A03:
+  formula: "EQ / MCAP"
+  inputs: [EQ, MCAP]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    EQ = 純資産 - 非支配株主持分 - 新株予約権。IFRS はのれんを償却せず資産に残すため、
+    買収を重ねた企業の EQ が日本基準より大きく出て B/P が高く（割安に）見える。A31（無形資産調整PBR）と併用する。
+  zero_denominator_policy: >-
+    債務超過（EQ<0）では B/P が負。D02/D08 のゲートで除外されるが、値自体は負のまま保持し欠損にしない。
+  missing_bias: 特になし
+  correlated_with: [A15, A16, A20, A25, A31, A32, A34]
+  economic_rationale: >-
+    簿価は清算価値の粗い下限であり、株価が簿価を下回るのは市場が将来 ROE を資本コスト未満と見ている状態。
+    その予想が過度に悲観なら平均回帰する。日本では東証の PBR1倍割れ改革（LAW-47）が回帰を制度的に後押ししている。
+  evidence_tier: T1
+  references:
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+    - "https://www.nber.org/system/files/working_papers/w23394/w23394.pdf"
+    - "https://corpgov.law.harvard.edu/2025/10/21/tokyo-stock-exchange-initiative-on-cost-of-capital-and-stock-price-conscious-management/"
+  markets: [JP, US]
+  review: {status: verified}
+
+A05:
+  formula: "CFO_TTM / MCAP"
+  inputs: [CFO, MCAP]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    IFRS は受取利息・支払利息・受取配当の CF 区分に選択の余地があるため、CFO の中身が企業間でずれる。
+    区分を確認し、必要なら営業CFを再構成する。
+  zero_denominator_policy: "CFO<0 は負のまま保持。構造的赤字か一時要因かは D23（営業CF連続黒字年数）で切り分ける。"
+  missing_bias: 四半期CF開示がない企業（日本の一部）は年次のみ。小型株にやや偏る。
+  correlated_with: [A01, A09, B10, E01]
+  economic_rationale: >-
+    営業CFは会計上の見積りが入りにくく、利益より操作が難しい。同じバリューでも E/P より頑健という報告が多い。
+    E01（アクルーアル）が負の情報を持つことの裏返しでもある。
+  evidence_tier: T1
+  references:
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+    - "https://www.nber.org/system/files/working_papers/w23394/w23394.pdf"
+  markets: [JP, US]
+  review: {status: verified}
+
+A06:
+  formula: "EBITDA_TTM / EV"
+  inputs: [EBITDA, EV]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    基準間比較の基準となる指標。のれん償却の有無を吸収するため、日本基準と IFRS の企業を同じ土俵に載せられる
+    数少ない指標。ただし IFRS16 / ASC842 でリース費用が EBITDA から抜けて押し上げられるので、
+    EV 側の IBD にリース負債を必ず含める（spec §2）。
+  zero_denominator_policy: >-
+    EBITDA<0 は負のまま保持。EV<0（ネットキャッシュが時価総額を超える）は稀にあり、欠損にせず A16/A17 で別途評価する。
+  missing_bias: 特になし
+  correlated_with: [A07, A09, A14, A32, A37]
+  economic_rationale: >-
+    資本構成の違いを吸収した事業価値ベースの益回り。負債の多寡で PER が歪むのを避ける。
+    Greenblatt の Magic Formula（LAW-42）の益回り側にあたる。
+  evidence_tier: T1
+  references:
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+    - "https://www.nber.org/system/files/working_papers/w23394/w23394.pdf"
+  markets: [JP, US]
+  review: {status: verified}
+
+A07:
+  formula: "EBIT_TTM / EV"
+  inputs: [EBIT, EV]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    A06 と違い減価償却を控除するので、日本基準のれん償却の影響が残る。基準混在時は A06 と併記して差を見る。
+  zero_denominator_policy: "EBIT<0 は負のまま保持。EV<0 は A06 と同じ扱い。"
+  missing_bias: 特になし
+  correlated_with: [A06, A14, A32, B03]
+  economic_rationale: >-
+    A06 より保守的。設備投資が重い業種では EBITDA が実力を過大評価するため、両方を持って乖離を見る。
+    Magic Formula の原典が使うのはこちら（EBIT/EV）。
+  evidence_tier: T1
+  references:
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+    - "https://www.nber.org/system/files/working_papers/w23394/w23394.pdf"
+  markets: [JP, US]
+  review: {status: verified}
+
+A09:
+  formula: "(CFO_TTM - CAPEX_TTM) / EV"
+  inputs: [CFO, CAPEX, EV]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    CAPEX は有形固定資産の取得による支出のみ。無形資産の取得・M&A は含めない（含める版は A30 で別に持つ）。
+    IFRS16 適用企業はリース料が CFO から財務CFへ移るため CFO が嵩上げされる。基準変更年（Z07）は不連続。
+  zero_denominator_policy: >-
+    FCF<0 は負のまま保持。成長投資由来か構造的赤字かは C07（再投資率）と B04（ROIC-WACC）で切り分ける。
+    ここを見ずに FCF 利回りだけで切ると、優良な成長企業を排除してしまう。
+  missing_bias: 四半期CF開示のない企業で欠損。日本の小型株にやや偏る。
+  correlated_with: [A05, A06, A30, A38, A39, B09]
+  economic_rationale: >-
+    会計上の利益ではなく、実際に株主に還元しうる現金の利回り。最も操作が難しいバリュー指標。
+  evidence_tier: T1
+  references:
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+    - "https://www.nber.org/system/files/working_papers/w23394/w23394.pdf"
+  markets: [JP, US]
+  review: {status: verified}
+
+A25:
+  formula: "mean( z_sector(A01), z_sector(A03), z_sector(A05), z_sector(A06), z_sector(A09) )"
+  inputs: [A01, A03, A05, A06, A09]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "構成指標の基準差を継承する。A06 の比重を上げるほど基準差に強くなる。"
+  zero_denominator_policy: >-
+    構成指標が欠損なら残りの平均を取る。計算できた構成指標が3個未満の場合は全体を欠損にする（Z10 と連動）。
+  missing_bias: 構成指標の欠損を継承するため、CF 開示の薄い小型株でやや欠損しやすい。
+  correlated_with: [A01, A03, A05, A06, A09, A32]
+  economic_rationale: >-
+    業種間の構造的なバリュエーション差（銀行の PBR が低いのは業種特性であって割安ではない）を除去する。
+    複合指標は単一指標より一貫して良い（LAW-120）。
+  evidence_tier: T1
+  references:
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+  markets: [JP, US]
+  review: {status: verified}
+
+A32:
+  formula: "mean( z_sector(A01), z_sector(A03), z_sector(A05), z_sector(A06), z_sector(A09), z_sector(A10) )"
+  inputs: [A01, A03, A05, A06, A09, A10]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "A25 と同じ。A10（総還元利回り）は自社株買いの実額を使うため、開示粒度の差が入る。"
+  zero_denominator_policy: "A25 と同じ（3個未満で欠損）。"
+  missing_bias: A10 の実額が取れない企業で構成が1つ減る。米国は 10-Q から取れるが日本は月次開示の集計が要る。
+  correlated_with: [A10, A25]
+  economic_rationale: >-
+    A25 に総還元利回りを加えた版。O'Shaughnessy の Value Composite に対応する。
+    総還元利回りは 1928-2009 で大型株を年1.18%上回り、自社株買いを加えるとさらに1.92%上乗せされたと報告されている（LAW-120）。
+    **A25 とほぼ同義だが、§1.9 の方針により統合せず両方残して縮小に任せる。**
+  evidence_tier: T1
+  references:
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+    - "https://mebfaber.com/wp-content/uploads/2023/05/Shareholder-Yield.pdf"
+  markets: [JP, US]
+  review: {status: verified}
+
+# =============================================================================
+# B. 収益性・クオリティ
+# =============================================================================
+
+B06:
+  formula: "GP_TTM / TA"
+  inputs: [GP, TA]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    売上原価と販管費の区分が企業・基準で異なる（物流費・人件費をどちらに入れるか）。
+    同一業種内の比較なら影響は小さいが、業種横断では歪む。rank_sector を既定にしている理由でもある。
+  zero_denominator_policy: "TA>0 なので通常問題なし。"
+  missing_bias: 売上原価を開示しない業種（金融）で欠損。U カテゴリで代替する。
+  correlated_with: [B01, B02, B03, B07, B16, B30]
+  economic_rationale: >-
+    粗利は損益計算書の最上流にあり、会計上の裁量が最も入りにくい収益性指標。
+    純利益ベースの収益性は一時損益・税・のれん償却で汚れる。Novy-Marx は GP/A が B/M と同等の予測力を持ち、
+    しかもバリューと負相関なので組み合わせ効果が大きいことを示した。
+  evidence_tier: T1
+  references:
+    - "https://mysimon.rochester.edu/novy-marx/research/OSoV.pdf"
+    - "https://www.nber.org/papers/w15940"
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+  markets: [JP, US]
+  review: {status: verified}
+
+B10:
+  formula: "CFO_TTM / OP_TTM"
+  inputs: [CFO, OP]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "IFRS の CFO 区分の選択で分子がずれる（A05 と同じ注意）。"
+  zero_denominator_policy: >-
+    OP<=0 のときは比率が無意味になるため欠損にし、代わりに E01（総資産で正規化したアクルーアル）を使う。
+    **これを欠損にせず負値で持つと、赤字企業が「現金化率が良い」と誤判定される。**
+  missing_bias: 赤字企業で欠損する。したがって欠損自体が弱いネガティブ情報を持つ（Z01 のフラグで拾う）。
+  correlated_with: [A05, B28, E01, E02, E10, E18]
+  economic_rationale: >-
+    利益が現金に変わっているか。1 を大きく下回る状態が続く企業は、売上計上が実態に先行しているか
+    運転資本が膨張している。E01 の実務的な表現であり、会計不正の初期兆候でもある。
+  evidence_tier: T1
+  references:
+    - "https://images.aqr.com/-/media/AQR/Documents/Insights/Journal-Article/The-Limits-to-Arbitrage-Revisited-The-Accrual-and-Asset-Growth-Anomalies.pdf"
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+  markets: [JP, US]
+  review: {status: verified}
+
+B16:
+  formula: "mean( z(Profitability), z(Growth), z(Safety), z(Payout) )"
+  inputs: [B01, B02, B03, B06, B09, B13, B14, B39, C02, F10, D02, D08, I01]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    4成分それぞれが基準差の影響を受ける。**まず原論文の定義を厳密に再現してから独自変更する**
+    （catalog §9 Phase 1-3 のベースライン再現）。自己流の QMJ を作ると比較対象を失う。
+  zero_denominator_policy: "各成分の方針に従う。3成分以上が欠損なら全体を欠損。"
+  missing_bias: Safety 成分がボラティリティ・レバレッジを使うため、上場後の履歴が短い銘柄で欠損。
+  correlated_with: [B01, B06, B13, B14, B17, B39, F10, I05]
+  economic_rationale: >-
+    Asness-Frazzini-Pedersen。収益性・成長・安全性・株主還元が高い企業は本来プレミアムで取引されるべきだが、
+    市場は十分に払っていない。Buffett の超過収益が QMJ と BAB でほぼ説明できる（LAW-119）ことから、
+    再現可能な実務テンプレートとしての価値が高い。
+  evidence_tier: T1
+  references:
+    - "http://www.econ.yale.edu/~shiller/behfin/2013_04-10/asness-frazzini-pedersen.pdf"
+    - "https://www.nber.org/system/files/working_papers/w19681/w19681.pdf"
+  markets: [JP, US]
+  review: {status: verified}
+
+# =============================================================================
+# E. 会計品質
+# =============================================================================
+
+E01:
+  formula: "(NI_TTM - CFO_TTM) / TA_AVG"
+  inputs: [NI, CFO, TA]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    分母 TA_AVG は期首期末平均。IFRS16 でリース資産が TA に乗ると分母が膨らむため、
+    基準変更年（Z07）は不連続になる。変更年は信頼度を下げる。
+  zero_denominator_policy: "TA>0 なので通常問題なし。"
+  missing_bias: 四半期CF開示のない企業で欠損。日本の小型株にやや偏る。
+  correlated_with: [B10, E02, E03, E10, E18]
+  economic_rationale: >-
+    利益のうち現金の裏付けがない部分。会計上の見積りに依存する利益は持続しにくいのに、
+    市場はその持続性の低さを織り込みきれない（Sloan 1996）。財務健全な企業でより強く効き、
+    財務悪化企業では消えるという交互作用が報告されている。
+  evidence_tier: T1
+  references:
+    - "https://images.aqr.com/-/media/AQR/Documents/Insights/Journal-Article/The-Limits-to-Arbitrage-Revisited-The-Accrual-and-Asset-Growth-Anomalies.pdf"
+    - "http://www.columbia.edu/~dn75/The%20Persistence%20of%20the%20Accruals%20Anomaly.pdf"
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+    - "原論文: Sloan (1996) The Accounting Review 71(3) 289-315（無料の一次PDFは未確認）"
+  markets: [JP, US]
+  review: {status: verified}
+
+# =============================================================================
+# F. 資本政策
+# =============================================================================
+
+F01:
+  formula: "SHARES[t] / SHARES[t-12m] - 1"
+  inputs: [SHARES]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na（株数は会計基準に依存しない）"
+  zero_denominator_policy: >-
+    SHARES>0 なので割り算自体は問題ない。ただし**株式分割・併合の調整漏れがあると ±50% 等の異常値になる**
+    （spec §9-4）。調整済み株数を使い、Z09 の異常値フラグで監視する。
+  missing_bias: 上場後1年未満で欠損。IPO 直後の銘柄が抜ける（N24 と方向が一致するので実害は小さい）。
+  correlated_with: [F02, F03, F05, F06, F14]
+  economic_rationale: >-
+    経営陣は自社株が割高か割安かを最もよく知っている。割高なら発行し、割安なら買い戻す。
+    したがって株数の増加は「経営陣が割高と考えている」サイン。
+    **効果は発行側（悪材料）に大きく偏り、買戻し側は弱い**ため、符号を対称に扱うと過大評価になる。
+  evidence_tier: T1
+  references:
+    - "https://www.sciencedirect.com/science/article/abs/pii/S0304405X09001007"
+    - "https://www.acadian-asset.com/investment-insights/owenomics/firms-are-the-smart-money"
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+  markets: [JP, US]
+  review: {status: verified}
+
+F02:
+  formula: "(SHARES[t] / SHARES[t-60m])^(1/5) - 1"
+  inputs: [SHARES]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "F01 と同じ。5年分の調整済み株数が必要。"
+  missing_bias: 上場後5年未満で欠損。**IPO 後の若い企業が丸ごと抜けるため、ユニバースが暗黙に成熟企業へ偏る（Z03 で監視）。**
+  correlated_with: [F01, F06]
+  economic_rationale: >-
+    F01 の長期版。単年のノイズを除き、希薄化体質そのものを捉える。
+    保有期間 6M〜5Y という本プロジェクトのホライズンに直接対応する。
+  evidence_tier: T1
+  references:
+    - "https://www.sciencedirect.com/science/article/abs/pii/S0304405X09001007"
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+  markets: [JP, US]
+  review: {status: verified}
+
+F05:
+  formula: "1 if any(equity_offering_disclosure, window=90d) else 0"
+  inputs: [TD_disclosure, SEC_filing]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: 開示分類の網羅性に依存。T33（適時開示の重要度分類）の精度が直接効く。
+  gate_policy: >-
+    公表から90日間は新規建てを禁止（Gate=0）。既存保有は売りスコアに強く加点する（即時売却はしない）。
+    ライツオファリング・株式報酬など希薄化を伴わない、または軽微なものは T33 で除外する。
+  correlated_with: [D15, F01, F06, F17]
+  economic_rationale: >-
+    F01 のイベント版。増資は (a) 経営陣が株価を割高と見ている、(b) 資金繰りが逼迫している、
+    のどちらかを意味し、どちらも悪材料。小型グロース株の最大の下落要因であり、
+    D15（増資リスクスコア）で事前予測を試みる価値がある。
+  evidence_tier: T1
+  references:
+    - "https://www.sciencedirect.com/science/article/abs/pii/S0304405X09001007"
+    - "https://www.acadian-asset.com/investment-insights/owenomics/firms-are-the-smart-money"
+  markets: [JP, US]
+  review: {status: verified}
+
+# =============================================================================
+# G. モメンタム
+# =============================================================================
+
+G01:
+  formula: "P_adj[t-21] / P_adj[t-252] - 1"
+  inputs: [PRICE_adj]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "P>0 なので問題なし。上場後252営業日未満は欠損。"
+  missing_bias: 上場後1年未満で欠損（N24 と方向が一致）。
+  correlated_with: [G02, G03, G07, G10, G11, G13, G16, G27]
+  economic_rationale: >-
+    情報の緩やかな織り込みと投資家の過小反応。直近1ヶ月を除くのは短期リバーサル（LAW-37）を避けるため。
+    **ただし日本では単独でほぼ機能しない（LAW-110、シャープ 0.03）。**
+    バリューと組んで初めてシステムとして機能する（LAW-111）ので、単独因子として銘柄選択に使わない。
+    本プロジェクトのホライズン（6M〜5Y）でも主軸ではなく、執行タイミングと G18 の入力に使う。
+  evidence_tier: T1
+  references:
+    - "https://images.aqr.com/-/media/AQR/Documents/Journal-Articles/JPM-Momentum-in-Japan---The-Exception-That-Proves-the-Rule.pdf"
+    - "https://link.springer.com/article/10.1007/s11408-022-00417-8"
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+  markets: [JP, US]
+  review: {status: verified}
+
+# =============================================================================
+# I. ボラティリティ・リスク
+# =============================================================================
+
+I01:
+  normalization: none
+  notes_extra: "サイジングの分母専用。断面ランクしない（catalog §4-I の中心思想）。"
+I02:
+  normalization: none
+  notes_extra: "サイジングの分母専用。断面ランクしない。"
+I03:
+  normalization: none
+  notes_extra: "Kelly の分母。選択には一切使わない。"
+
+I06:
+  formula: "max( r_d for d in last 21 trading days )"
+  inputs: [RETURN_daily]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na"
+  missing_bias: 上場後21営業日未満で欠損。売買停止日は欠損として扱い、日数から除外する（spec §3）。
+  correlated_with: [G04, I04, I07, I08]
+  economic_rationale: >-
+    個人投資家の宝くじ選好により、直近に大きく跳ねた銘柄は買われすぎている（Bali-Cakici-Whitelaw）。
+    上位decileは下位decileより月次1%超劣後する。
+    **263AT では加点ではなく減点として使い、§1.8 の罠（宝くじ銘柄を非対称ペイオフと誤認する）を構造的に防ぐ。**
+    LAW-93（個人は注目銘柄を買い越す）の裏を取る位置づけでもある。
+  evidence_tier: T1
+  references:
+    - "https://pages.stern.nyu.edu/~rwhitela/papers/max%20jfe.pdf"
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+  markets: [JP, US]
+  review: {status: verified}
+
+# =============================================================================
+# N. カタリスト・イベント
+# =============================================================================
+
+N02:
+  formula: "(EPS_actual_FQ - EPS_expected) / sd(surprise, last 8 quarters)"
+  inputs: [EPS_actual, EPS_expected, surprise_history]
+  period_convention: GUIDE_CONS
+  consolidation: consolidated
+  accounting_standard_note: >-
+    予想の出所で別物になる。**GUIDE_CONS 版（コンセンサス）と GUIDE_CO 版（会社予想）を別 ID として持つべきだが、
+    現状は本 ID に GUIDE_CONS を割り当てている。日本の小型株はコンセンサスが存在しないため、
+    実質的には GUIDE_CO 版か K32（四季報予想）版が必要（未作成: OQ-22）。**
+  zero_denominator_policy: >-
+    過去8期のサプライズ標準偏差が 0 に近い（＝常に予想通り）銘柄では発散する。
+    分母に下限（株価の 0.5% 相当）を置く。8期分の履歴がない場合は欠損。
+  missing_bias: >-
+    **欠損はランダムでない。** コンセンサスが存在しない日本の小型株（無カバー62%）で丸ごと欠損する。
+    これはユニバースの中核（O カテゴリ）と重なるため、GUIDE_CO 版の整備が実質的に必須。
+  correlated_with: [N03, N04, N05, N06, N10, G18]
+  economic_rationale: >-
+    投資家は決算情報を過小評価し、時間をかけて修正する（アンカリングと調整）。日本市場でも確認されており、
+    **注目度が低いほどドリフトが長く強い**ため、N06（注目度調整PEAD）として O カテゴリと交互作用させる価値が高い。
+  evidence_tier: T1
+  references:
+    - "https://www2.econ.osaka-u.ac.jp/econ_society/dp/2125.pdf"
+    - "https://www.jstage.jst.go.jp/article/jbef/3/0/3_0_1/_pdf/-char/ja"
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+  markets: [JP, US]
+  review: {status: verified}
+
+N10:
+  formula: "(ConsensusEPS[t] - ConsensusEPS[t-63]) / max(abs(ConsensusEPS[t-63]), 0.01 * PRICE)"
+  inputs: [ConsensusEPS, PRICE]
+  period_convention: GUIDE_CONS
+  consolidation: consolidated
+  accounting_standard_note: "ベンダーごとに調整後EPSの定義が違う。単一ベンダーに固定し、途中で変えない。"
+  zero_denominator_policy: >-
+    前期コンセンサスが 0 近傍だと発散するため、分母に下限（株価の1%）を置く。
+    符号反転（赤字→黒字予想）は比率が意味を失うので、別途フラグで持つ。
+  missing_bias: >-
+    **N02 と同じ致命的な偏り。** 日本の小型株の62%は無カバーで計算できない。
+    K32/K33（会社四季報予想）が唯一の代替手段になる。
+  correlated_with: [N02, N08, N11, N12, G18]
+  economic_rationale: >-
+    アナリスト予想の改定は情報の織り込み過程そのもので、改定は一方向に続きやすい（アンカリングと調整）。
+    G18（業績モメンタムと価格モメンタムの一致）の入力として使うと強い。
+  evidence_tier: T1
+  references:
+    - "https://www.federalreserve.gov/econres/feds/files/2021-037pap.pdf"
+    - "https://www.nber.org/system/files/working_papers/w23394/w23394.pdf"
+  markets: [JP, US]
+  review: {status: verified}
+
+N13:
+  formula: "1 if TOB/MBO 公表あり else 0"
+  inputs: [TD_disclosure, SEC_filing]
+  period_convention: POINT
+  consolidation: na
+  accounting_standard_note: "na"
+  zero_denominator_policy: "na（ブール値）"
+  missing_bias: 開示分類の網羅性に依存（T33）。
+  gate_policy: >-
+    公表後は裁定領域なので**新規建てはしない**（買いスコア対象外）。
+    保有中の場合は自動売却せず、TOB価格と現値の乖離・不成立リスク・対抗TOBの可能性を評価して個別判断する。
+  correlated_with: [K18, M08, M10, N14, N34]
+  economic_rationale: >-
+    **本プロジェクトの狙いは発表『前』の予測（M10 / N14）であって、発表後の裁定ではない。**
+    発表後のイベントドリブンは機関投資家の土俵で、個人の優位性がない。
+    このパラメータは「もう遅い」ことを検出するためのゲートとして機能する。
+  evidence_tier: T1
+  references:
+    - "https://www.nri.com/jp/media/column/osaki/20230509.html"
+    - "https://www.nikkei.com/article/DGXZQOTG139ZP0T11C24A2000000/"
+  markets: [JP, US]
+  review: {status: verified}
+
+# =============================================================================
+# ゲート方針（buy_class または sell_class が gate のもの）
+#
+# ゲートは加算ではなく掛け算（catalog §1.3）なので、閾値を決めないと実装できない。
+# **以下の閾値は初期提案であり、Phase 1 で必ず較正する（OQ-23）。**
+# ただし D13 / E12 / E22 / E24 / F17 / N23 のような「例外なし」系は、
+# 較正の対象ではなく方針そのものである。
+# =============================================================================
+
+D01:
+  gate_policy: >-
+    ND/EBITDA > 5.0 で除外。業種調整として不動産・リース・電力・鉄道・海運は 8.0 を閾値とする。
+    EBITDA <= 0 かつ ND > 0 も除外。金利上昇局面（P02 が過去3ヶ月で +0.5%超）では閾値を1段厳しくする。
+D02:
+  gate_policy: >-
+    業種内パーセンタイル下位5%を除外。金融・不動産を除く一般事業会社では絶対値10%未満も除外。
+    債務超過（EQ<0）は無条件で除外。
+D04:
+  gate_policy: >-
+    EBIT/支払利息 < 2.0 で除外。実質無借金（支払利息が営業利益の1%未満）は分母が小さすぎるため
+    この判定を適用せず、D01/D07 で判断する。
+D07:
+  gate_policy: >-
+    現金/1年内返済有利子負債 < 0.5 で除外。0.5〜1.0 はサイズを半減し、D15（増資リスク）を必ず併記する。
+D08:
+  gate_policy: >-
+    製造業版 Z < 1.8、非製造業版 Z'' < 1.1 で除外。**業種版を必ず使い分ける**（間違えると無意味）。
+    日本企業への適用は係数の再推定が望ましく、それまでは D09 との合議を優先する。
+D09:
+  gate_policy: >-
+    推定倒産確率 > 10% で除外。D08 と結論が食い違う場合は保守側（厳しい方）を採用する。
+D13:
+  gate_policy: >-
+    継続企業の前提に関する注記または重要事象等の記載があれば即除外。**例外なし。**
+    保有中に発生した場合は売りスコアを最大にし、流動性の許す範囲で速やかに処分する。
+D22:
+  gate_policy: >-
+    資金繰り余力 < 6ヶ月で除外。6〜12ヶ月はサイズを半減する。
+    黒字企業には適用せず、営業CF が直近2期連続で負の企業にのみ適用する。
+E04:
+  gate_policy: >-
+    **M > -1.78 だけでは除外しない**（偽陽性が多い）。
+    M > -1.78 かつ 次のいずれかを満たす場合に除外する:
+    (a) E01 総アクルーアルが断面上位20%、(b) E10 売上とCFの乖離が2期連続で拡大、
+    (c) E08 監査法人変更、(d) E20 期末集中売上が対過去で異常。
+E08:
+  gate_policy: >-
+    大手監査法人から中小への変更は即除外。大手間・中小間の変更は減点（サイズ半減）に留める。
+    法人の合併・名称変更による形式的な変更は T33 で判定して除外対象から外す。
+E12:
+  gate_policy: >-
+    訂正報告書の提出があれば即除外。**例外なし。** 訂正後2期分の決算を確認するまで再参入しない。
+E22:
+  gate_policy: >-
+    監査意見が無限定適正以外（限定付適正・不適正・意見不表明）なら即除外。**例外なし。**
+E24:
+  gate_policy: >-
+    内部統制報告書に「開示すべき重要な不備」があれば即除外。是正確認後2期は再参入しない。
+F17:
+  gate_policy: >-
+    行使価額修正条項付新株予約権（MSワラント）・MSCB の発行中は即除外。
+    全て行使または取得消却されるまで再参入しない。**下落を前提に設計された商品なので例外を作らない。**
+J01:
+  gate_policy: >-
+    20日平均売買代金 < 600万円で除外（UNIVERSE 定義。spec §6）。
+    この閾値は「60万円の建玉を参加率10%で3日以内に処分できる」という条件から逆算している。
+    資金規模を変えたら必ず再計算する。
+J02:
+  gate_policy: >-
+    想定建玉 / (日次売買代金 × 参加率上限10%) > 3営業日で除外。
+    1.5〜3営業日はサイズを日数で割り引く（w を 3/日数 倍にする）。
+J10:
+  gate_policy: >-
+    過去60営業日に出来高ゼロの日が1日でもあれば除外。**例外なし。**
+J13:
+  gate_policy: >-
+    想定取得日数 > 5営業日で除外。建てるのに時間がかかりすぎる銘柄は、
+    建てている最中に価格が動いて想定エントリー価格が崩れる。
+K44:
+  gate_policy: >-
+    Reg SHO threshold list 掲載中は除外。掲載解除後30日間は再参入しない。
+K45:
+  gate_policy: >-
+    空売り機関のレポート公表後は即座に新規建てを停止する。72時間以内に内容を精査し、
+    (a) 事実に基づく重大な指摘 → 除外を継続、(b) 既知情報の再構成にすぎない → 復帰、を判定する。
+    **判定できない場合は除外を維持する**（分からないものは持たない: LAW-61）。
+N23:
+  gate_policy: >-
+    整理銘柄・監理銘柄に指定されたら即除外。改善期間中も新規建てしない。**例外なし。**
+N44:
+  gate_policy: >-
+    流通株式時価総額・流通株式比率・株主数のいずれかが上場維持基準の1.2倍未満なら除外。
+    **抵触してから（N23）では遅いので、余裕度で先に手を引く。**
+T13:
+  gate_policy: >-
+    LLM が (a) 事業を3文で説明できない、または (b) 収益ドライバーを3つ特定できない場合は除外。
+    加えて、**LLM が説明できても人間が読んで納得できない場合は除外する**（LAW-61 Munger）。
+    このゲートだけは自動化を完了させず、人間の確認を残す。
+U08:
+  gate_policy: >-
+    ソルベンシー・マージン比率 200% 未満で除外（規制介入水準）。保険業にのみ適用し、他業種では欠損。
+Z14:
+  gate_policy: >-
+    これはゲートというより検証機構である。available_at > t のデータ参照を検出したら、
+    その銘柄・パラメータをスコア計算から除外するだけでなく、**パイプラインのバグとしてエラーを上げ、
+    検出された期間を含むバックテスト結果全体を無効とする。**
+    1件でも通したら、他のすべての検証結果が信用できなくなる（catalog §8-1）。

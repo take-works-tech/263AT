@@ -1,0 +1,156 @@
+# 263AT parameter registry — プロジェクト全体の規約（既定値）
+#
+# ここに書いてあるのは「推測」ではなく **決定した規約** である。
+# 出典は docs/02_definition_spec.md。個別パラメータで上書きしたい場合は
+# params/_overrides.yaml に書く（そちらが優先される）。
+#
+# 規約で決まる項目は review.pending から外れる。
+# 外れないのは、パラメータごとに人が判断しないと決まらない項目だけ。
+
+meta:
+  spec: docs/02_definition_spec.md
+  applies_to: すべてのパラメータ（_overrides.yaml で上書き可）
+
+# --- q03 連結/単体 -----------------------------------------------------------
+consolidation:
+  rule: 財務データ源（FIN / EDI / SEC）を使うものは consolidated、それ以外は na
+  value_when_financial: consolidated
+  value_otherwise: na
+  rationale: |
+    263AT は連結ベースで統一する（spec §2）。単体決算しか出さない企業は
+    連結＝単体として扱い、Z05（ソース間不一致）で検出する。
+
+# --- q06 欠損の扱い ----------------------------------------------------------
+missing_policy:
+  default: flag
+  rationale: |
+    中央値補完はしない。z=0（中立）+ 欠損フラグを別特徴量として持つ（spec §4）。
+    中央値で埋めると「データのない小型株」が「平均的な大型株」に化け、
+    ユニバースが暗黙に大型株へ偏る（Z03）。
+
+# --- ウィンザライズ ----------------------------------------------------------
+winsorize:
+  default: null
+  rationale: ランク→正規スコア変換を標準とするため原則不要（spec §4）。生値を使う場合のみ 1%/99%。
+
+# --- q07 断面正規化の母集団 --------------------------------------------------
+# rank_all           : 日米統合ユニバース全体でランク
+# rank_sector        : GICS セクター内でランク（日米統合。GICS は国跨ぎ比較を想定した分類）
+# rank_market        : 市場（JP / US）内でランク。制度が市場ごとに違うもの
+# rank_industry      : 該当業種内のみ。非該当は欠損（U カテゴリ）
+# self_history       : 自分自身の過去分布内でのパーセンタイル
+# none               : 断面ランクしない（サイジング・ポートフォリオ文脈・保有状態）
+normalization_by_category:
+  A: rank_sector      # 業種で PER/PBR の水準が構造的に違う
+  B: rank_sector
+  C: rank_sector
+  D: rank_sector      # レバレッジ許容度は業種依存
+  E: rank_sector
+  F: rank_all         # 希薄化は業種に依らない
+  G: rank_all
+  H: rank_all
+  I: rank_all         # ただし I01-I03 はサイジング専用 → _overrides で none
+  J: rank_all         # 絶対額は円換算してから（spec §5、J19）
+  K: rank_market      # 信用残・空売り規制・指数制度が市場ごとに違う
+  M: rank_market      # 開示制度（EDINET / Form 4）が市場ごとに違う
+  N: rank_all
+  O: rank_all
+  P: none             # マクロは銘柄横断の量ではない
+  Q: none             # ポートフォリオ文脈
+  R: none             # 保有状態（保有銘柄内でのみ意味を持つ）
+  S: none
+  T: rank_all
+  U: rank_industry    # 業種横断のランクは意味を持たない（catalog §4-U の注）
+  V: rank_sector
+  W: rank_sector
+  X: rank_all
+  Y: rank_all
+  Z: none             # メタ。信頼度と縮小強度の制御に使う
+
+# --- q01 参照する会計期間 ----------------------------------------------------
+# 判断が残るカテゴリ（TTM / FY / AVG が項目ごとに変わる）は pending に残す。
+period_convention_by_category:
+  A: TTM
+  B: TTM
+  C: TTM
+  D: TTM
+  E: TTM
+  F: TTM
+  G: POINT
+  H: POINT
+  I: POINT
+  J: POINT
+  K: POINT
+  M: POINT
+  N: POINT
+  O: POINT
+  P: POINT
+  Q: POINT
+  R: POINT
+  S: POINT
+  T: POINT
+  U: TTM
+  V: TTM
+  W: FY               # 有報でのみ開示（平均年収・勤続年数・年齢）
+  X: POINT
+  Y: FY
+  Z: POINT
+period_convention_still_pending_for:
+  categories: [A, B, C, D, E, F, U, V]
+  reason: |
+    同じカテゴリ内でも TTM / FY / AVG が項目ごとに変わる。
+    例: ROE の分母は AVG（期首期末平均）、益回りの分子は TTM、
+    有報のみの項目は FY。個別に確定させる必要がある。
+
+# --- q02 available_at（追加のパイプライン遅延） ------------------------------
+# 開示ラグそのものは disclosure_date を使うことで自動的に反映される（spec §1.1）。
+# ここで指定するのは「開示されてから自分のシステムが使えるまで」の追加日数。
+pit_lag_days_by_source:
+  PX: 0        # 日次バーは当日引け後に確定
+  JQ: 1        # J-Quants の配信を翌営業日バッチで取得
+  TD: 0        # 適時開示は即時
+  SEC: 0       # EDGAR 掲載時刻をそのまま使う
+  EDI: 0       # EDINET 掲載時刻をそのまま使う
+  FIN: 0       # 財務は disclosure_date（決算発表日）を使うので追加ラグなし
+  EST: 1       # ベンダー配信のタイムスタンプが不明瞭。保守的に1日
+  NEWS: 0
+  OPT: 0
+  MACRO: 1     # 統計は公表日の翌営業日に取得
+  CALC: 0      # 派生値。入力側のラグが伝播する
+  LLM: 0       # 生成時刻＝available_at
+  SELF: 0      # 自分の口座状態
+  手: 3        # 手動取得・スクレイピングはバッチ遅延を見込む
+pit_lag_rule: 複数ソースを使う場合は max を取る（最も遅いソースに律速される）
+
+# --- q08 非線形変換（∩ / ∪ 型） ---------------------------------------------
+nonlinear_default_for_cap: "abs_dev(x_star=sector_median)"
+nonlinear_default_for_cup: "abs_dev(x_star=sector_median, invert=true)"
+nonlinear_note: |
+  spec SP-06 の暫定既定。x* を「業種内中央値」とし、-abs(x - x*) に変換してからランク化する。
+  ただし理論値が明確なもの（例: B32 設備投資/減価償却の x*=1、U06 コンバインドレシオの x*=1.0）は
+  個別に上書きすべきなので、∩/∪ の q08 は pending に残す。
+
+# --- q04 会計基準の比較可能性 ------------------------------------------------
+accounting_standard_pending_for:
+  categories: [A, B, C, D, E, F, U, V]
+  reason: |
+    のれん償却（日本基準は償却、IFRS/US GAAP は非償却）、リース（IFRS16 / ASC842）、
+    非GAAP の3点で基準間の非対称が出る（spec §2.1）。
+    財務諸表由来のパラメータは個別に判定が要る。
+  value_otherwise: na
+
+# --- q05 分母がゼロ・負の場合 ------------------------------------------------
+zero_denominator:
+  pending_when: definition に除算（/）を含む
+  value_otherwise: na
+  common_policies:
+    - drop: 欠損にする（Z01 の欠損フラグへ）
+    - invert: 逆数で持つ（E/P のように分子分母を入れ替えて符号を保つ）
+    - clip: 下限でクリップ
+    - sign_preserve: 符号を保つ変換を別途定義
+
+# --- 常に人の判断が要る項目（規約では決まらない） ----------------------------
+always_pending:
+  - q09   # 相関する既存パラメータと、それでも残す理由（データを見ないと分からない）
+  - q10   # なぜ効くと考えるか（経済的な理由。書けないものは採用しない: catalog §6.6）
+  - q11   # 実証度 T1〜T4 と一次文献 URL

@@ -295,7 +295,7 @@ version: 1
 
 | # | 項目 | 状況 |
 |---|---|---|
-| SP-01 | `params/*.yaml` の実体 | **未着手。661 個分を作るのが次の大仕事**。カタログの表から半自動生成し、12問チェックで人が埋める |
+| SP-01 | `params/*.yaml` の実体 | **着手済み。** 661件を `tools/build_registry.py` で生成し、`params/_defaults.yaml`（規約）と `params/_overrides.yaml`（レビュー結果）の3層構造にした。`tools/validate_registry.py` が検証と進捗を出す。**verified は 20/661**（★★★の全件）、ゲート方針は 25/25 記述済み。詳細は [params/README.md](../params/README.md) |
 | SP-02 | 日本基準 / IFRS / US GAAP の勘定科目マッピング表 | §2 は概念レベル。**実際の XBRL タグ名への写像表が別途必要** |
 | SP-03 | GICS 分類の日本株への付与 | 無料で全銘柄分を得る方法が未調査。東証33業種からの近似マッピングで代替するか要検討 |
 | SP-04 | U カテゴリの業種判定ロジック | どの銘柄にどの業種KPIを適用するかの判定基準 |
