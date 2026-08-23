@@ -12959,3 +12959,1404 @@ P30:
   references: ["構造的判断。NISA 制度、金融所得課税の動向"]
   markets: [JP]
   review: {status: verified}
+
+# =============================================================================
+# A（バリュエーション）未検証 24件
+#
+# 既に verified の A01-A03/A05-A07 等で確認済みの共通事項は繰り返さない。
+# ここで扱うのは「主流でないバリュー指標」で、次の3類型に分かれる:
+#
+#  (a) **赤字・低収益企業でも作れる指標**（A04 S/P, A08 EV/S, A44 A/M）
+#      → 利益がゼロや負でも分母が壊れないので、
+#        A01（益回り）が欠損する銘柄群を救う。**欠損の埋め合わせに価値がある。**
+#  (b) **隠れ資産型**（A15 NCAV, A18 有価証券, A19 不動産, A29 清算価値, A37）
+#      → **日本の小型株に実在する。米国ではほぼ絶滅した。**
+#        ただし顕在化しないと意味がないので、必ずカタリスト（N/M/K17）と組む。
+#  (c) **調整・複合型**（A31 無形資産調整, A46 フロンティア, A48 分解）
+#      → 「PBR が壊れている業種で PBR の意味を回復させる」類。
+#
+# 全体の注意: **A カテゴリは業種内（rank_sector）で正規化する。**
+# 業種横断のバリュー比較は U39（資源）の説明の通り最も誤導的になる。
+# =============================================================================
+
+A04:
+  formula: "REV_TTM / SHARES / PRICE"
+  inputs: [REV, SHARES, PRICE]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **総額基準 / 純額基準の差が直撃する**（spec §2）。商社・EC・広告代理店は
+    同じ実態でも売上が数倍変わる。**IFRS15 で純額に寄った企業は不連続。**
+  zero_denominator_policy: "PRICE>0。REV=0（開発段階のバイオ等）は欠損。"
+  missing_bias: "**売上ゼロ企業で欠損。** 赤字企業は救えるが無収益企業は救えない。"
+  correlated_with: [A08, A01, A03, A44, B08, C01]
+  economic_rationale: >-
+    **赤字成長企業の唯一の物差し。** 利益が負でも売上は正なので分母が壊れない。
+    → **A01（益回り）が欠損する銘柄群を救うのが本来の役割。**
+    ただし**利益率が違う業種間の比較は無意味**
+    （粗利率5%の卸と70%のソフトは同じ PSR でも全く違う）。
+    → **rank_sector が必須で、rank_all にすると業種構成を測るだけになる。**
+    **B08（営業利益率）との交互作用で持つのが正しい形**
+    — 「同じ PSR なら利益率が高い方が割安」。
+  evidence_tier: T2
+  references: ["https://www.openassetpricing.com/", "OSAP は複数の売上ベース指標を収録"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A08:
+  formula: "REV_TTM / EV"
+  inputs: [REV, EV]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "A04 の総額/純額の問題に加え、EV の定義幅（spec §2 で1つに固定済み）。"
+  zero_denominator_policy: "EV>0。**ネットキャッシュが時価総額を超える企業では EV が負になり欠損。**"
+  missing_bias: >-
+    **EV<0 の企業で欠損する。ところが EV<0 は日本の小型株で実在し、
+    しかもそれは極端な割安を意味する。** → **最も割安な銘柄が
+    欠損で消えるという最悪の形の偏り。**
+    → **A15（NCAV）や A29（清算価値）で必ず補完する。**
+  correlated_with: [A04, A06, A14, A37, D07]
+  economic_rationale: >-
+    **A04（S/P）の資本構成調整版。** 負債を含むので、
+    **同じ PSR でも借金まみれの企業は A08 で正しく割高に出る。**
+    赤字・低収益期の企業評価用。
+    上の missing_bias が A カテゴリで最も注意すべき点で、
+    **「EV が負だから欠損」を放置すると、
+    263AT が狙うネットキャッシュ小型株が体系的に落ちる。**
+  evidence_tier: T2
+  references: ["構造的判断。A04 の資本構成調整"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A11:
+  formula: "DPS_TTM / PRICE"
+  inputs: [dividends, SHARES, PRICE]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "PRICE>0。無配はゼロ（欠損にしない）。"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: "**無配企業をゼロとして扱うので、成長企業が一律に低評価される。** 分布が0に山を持つ二峰形。"
+  correlated_with: [F08, F09, F21, A12, K15, F30, S16]
+  economic_rationale: >-
+    ∩型に変換する。**高すぎる利回りは減配前兆**
+    — 株価が先に下がったから利回りが高く見えているだけで、
+    F21（減配）が控えている。
+    → **A11 単独は罠が多い。F08（配当性向）と D22（資金繰り）で
+    「その配当が続くか」を判定して初めて使える。**
+    **S16（税）を通すと日本の配当は約20%目減りする**ので、
+    **税引後で見ると自社株買い（F03）の方が有利**という
+    263AT に固有の含意がある。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "Fama-French (JFE 1993)"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A12:
+  formula: "A01（益回り） - 10年国債利回り"
+  inputs: [A01, MACRO_10y]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "A01 を継承。"
+  normalization: rank_market
+  zero_denominator_policy: "A01 が欠損なら欠損。"
+  missing_bias: "**日米で別の国債を使うので統合ランクは取らない**（→ rank_market）。"
+  correlated_with: [A01, A38, P01, P02, U11, U14]
+  economic_rationale: >-
+    **金利レジームを跨いだ比較を可能にする。**
+    PER 15倍は金利0%なら割安、金利6%なら割高。
+    **263AT のバックテストは金利がゼロだった期間を大量に含む**ので、
+    **A01 の生値で学習すると金利正常化後（P05）に通用しない。**
+    → **P05（日本の金利正常化）が進行中である以上、
+    A12 は A01 より重要になる。**
+    U11（キャップレートスプレッド）と U14（REIT）が
+    同じ構造を不動産で持つ。
+  evidence_tier: T2
+  references: ["構造的判断。P05（金利正常化）との整合"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A13:
+  formula: "成長率(%) / PER。実績成長率版と予想成長率版の2本"
+  inputs: [C01, A01, GUIDE_CO]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "A01 を継承。"
+  zero_denominator_policy: "**PER<=0（赤字）なら欠損。成長率が負なら欠損**（比が意味を失う）。"
+  missing_bias: "**赤字企業と減益企業が両方落ちるので、欠損が非常に多い。** 順調な企業だけが残る。"
+  correlated_with: [A01, C01, C19, K32, T17]
+  economic_rationale: >-
+    **Lynch の PEG。成長率の推定が甘いと簡単に騙される。**
+    → **過去実績と予想の両方で作る**と決めたのは、
+    予想成長率は経営陣（GUIDE_CO）やアナリストの
+    楽観を含むから。**両者が乖離する銘柄は要注意。**
+    上の missing_bias の通り**欠損が多く、
+    しかも欠損が「うまくいっていない企業」に偏る**ので、
+    A13 だけを見ると生存者バイアスに似た歪みが入る。
+    実証が弱い（★1）のは、成長率の定義次第でいくらでも変わるため。
+  evidence_tier: T3
+  references: ["Lynch, One Up on Wall Street", "構造的判断。実証は弱い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A14:
+  formula: "EV / IC"
+  inputs: [EV, IC]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: "IC の定義（spec §2 で「IBD + EQ - CASH」に固定、超過現金のみ控除版も併存）。"
+  zero_denominator_policy: "IC>0。**IC<=0 の企業（現金過多）は欠損。** A08 と同じ問題。"
+  missing_bias: "A08 と同じくネットキャッシュ企業で欠損する。"
+  correlated_with: [A03, A48, B03, B04, B12, A08]
+  economic_rationale: >-
+    **EV/IC と ROIC/WACC の散布図が価値創造マップになる。**
+    理論的には EV/IC ≈ (ROIC - g) / (WACC - g) なので、
+    **同じ ROIC なら EV/IC が低い方が割安、
+    同じ EV/IC なら ROIC が高い方が良い。**
+    → **A14 と B04（ROIC-WACC）は必ずセットで使う。**
+    **A48（B/P のレバレッジ成分）と対で持つと
+    B/P の中身が事業価値とレバレッジに分解できる**
+    ので、この3本は一組。
+  evidence_tier: T2
+  references: ["構造的判断。Penman の残余利益モデルと整合", "https://www.openassetpricing.com/"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A15:
+  formula: "(流動資産 - 総負債) / MCAP"
+  inputs: [current_assets, total_liabilities, MCAP]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: "流動資産の区分は基準で概ね一致するが、**IFRS は流動/非流動の分類が企業判断に委ねられる部分がある。**"
+  zero_denominator_policy: "MCAP>0。**値が負になるのが通常**（欠損にしない）。"
+  missing_bias: "**ほぼ全銘柄で計算できる。1を超える銘柄が極めて稀**という分布の偏りがある。"
+  correlated_with: [A29, A03, A18, D07, K35, M08]
+  economic_rationale: >-
+    **Graham のネットネット。日本の小型株にまだ実在する。1超は極端な割安**
+    （流動資産だけで全負債を返してなお時価総額を上回る）。
+    米国ではほぼ絶滅した。
+    **日本に残っているのは、政策保有（K17/K36）と
+    安定株主の存在で株価が動かないから**であり、
+    **東証の資本コスト要請（F13/LAW-47）はまさにこれを
+    崩そうとしている。**
+    → **A15 は 263AT の日本での優位性を最も直接的に表す指標。**
+    ただし**顕在化にはカタリストが要る**ので、
+    M08（アクティビスト）/ K18（親会社）/ N43（資産売却）と必ず組む。
+  evidence_tier: T2
+  references: ["Graham-Dodd, Security Analysis", "Oppenheimer (FAJ 1986) Ben Graham's Net Current Asset Values"]
+  markets: [JP]
+  review: {status: verified}
+
+A18:
+  formula: "(投資有価証券の時価 - 簿価) / MCAP"
+  inputs: [investment_securities, MCAP]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **日本基準・IFRS ともに時価評価だが、その他有価証券の評価差額の
+    扱い（純資産直入か P/L か）が違う。** 簿価との差を取るには注記が要る。
+  zero_denominator_policy: "MCAP>0。保有が無ければゼロ。"
+  missing_bias: "**有報の注記が要るので年1回、3ヶ月遅れ**（K11/K17 と同じ鮮度問題）。"
+  correlated_with: [K17, K36, A19, A37, A15, N43]
+  economic_rationale: >-
+    **日本の政策保有株解消で顕在化しやすい隠れ資産。**
+    **K17（政策保有の変化）が「動いているか」を測るのに対し、
+    A18 は「どれだけ眠っているか」を測る。**
+    → **A18 が大きく K17 が動き始めた銘柄が最も期待値が高い。**
+    ただし**含み益は税引後で評価する**必要がある
+    — 売却益に課税されるので、額面の約70%が実質価値。
+    A37（実質事業EV/EBIT）の入力でもある。
+  evidence_tier: T3
+  references: ["構造的判断。東証の政策保有解消要請と直結"]
+  markets: [JP]
+  review: {status: verified}
+
+A19:
+  formula: "(土地・建物の時価 - 簿価) / MCAP"
+  inputs: [real_estate_disclosure, MCAP, LLM]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **日本は賃貸等不動産の時価が注記で開示される**（企業会計基準第20号）が、
+    **事業用不動産は開示されない。** 米国は原価主義で時価開示がほぼ無い。
+  zero_denominator_policy: "MCAP>0。時価注記が無ければ欠損。"
+  missing_bias: >-
+    **賃貸等不動産のみ開示され、自社利用の土地は開示されない。**
+    → **老舗製造業が本社・工場として持つ都心の土地は見えない。**
+    最も大きな隠れ資産が最も見えにくいという構造。
+  correlated_with: [U13, U09, A18, A29, A37, N43]
+  economic_rationale: >-
+    **有報の注記から。老舗企業に眠る。顕在化しないと意味がないので
+    カタリストと併用。**
+    U13（不動産業の含み益）を全業種に広げたもの。
+    上の missing_bias が最大の制約で、
+    **開示される分だけを見ると過小評価になる。**
+    → **LLM に有報の固定資産明細と所在地から
+    推定させる**という補完が要るが、精度は低い。
+    **A19 は「大きければ確実に隠れ資産がある」が
+    「小さくても無いとは限らない」という非対称な読み方をする。**
+  evidence_tier: T3
+  references: ["企業会計基準第20号（賃貸等不動産の時価等の開示）", "構造的判断"]
+  markets: [JP]
+  review: {status: verified}
+
+A20:
+  formula: "再調達価値 / EV"
+  inputs: [replacement_cost, EV]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: "**再調達価値の推定に標準的な方法がない。** 簿価に物価指数を掛ける等の近似に頼る。"
+  zero_denominator_policy: "EV>0。再調達価値が推定できなければ欠損。"
+  missing_bias: "**推定手法に依存するので、値そのものより手法の一貫性が問題。**"
+  correlated_with: [A03, A14, A29, C35, B32]
+  economic_rationale: >-
+    **Tobin q の逆数。推定が難しい。実務では A03（B/P）の代理で足りることが多い。**
+    理論的には**q < 1 なら新規参入より買収の方が安い**ので
+    M&A の対象になりやすい。
+    → **N13/N14（買収）や P29（M&A活動水準）と繋がる。**
+    ただし**A03 との相関が極めて高いはず**で、
+    Z12 で冗長と出る可能性が高い。★1 のまま強く縮小される。
+  evidence_tier: T3
+  references: ["Tobin (1969)", "構造的判断。A03 と冗長な可能性"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A21:
+  formula: "PER * PBR"
+  inputs: [A01, A03]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "A01/A03 を継承。"
+  zero_denominator_policy: "**PER または PBR が負なら欠損。** 赤字・債務超過企業は落ちる。"
+  missing_bias: "赤字企業で欠損。"
+  correlated_with: [A01, A03, A32, A46, A21]
+  economic_rationale: >-
+    **Graham の古典（22.5未満で割安）。
+    単純だがバックテストのベースラインとして有用。**
+    → **263AT の複雑な複合スコアが、
+    この単純な指標に勝てなければ意味がない**という
+    **基準線としての価値**が本質。
+    A32/A46（複合バリュー）と比較する対象。
+    **閾値22.5 に理論的根拠は無い**（Graham の経験則）ので、
+    水準ではなく断面ランクで使う。
+  evidence_tier: T3
+  references: ["Graham, The Intelligent Investor", "構造的判断。ベースラインとしての価値"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A24:
+  formula: "percentile( 現 EV/EBITDA, 過去5年の自己分布 )"
+  inputs: [A06]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "EBITDA は基準間で比較可能（spec §2.1）なので、A22（PER版）より頑健。"
+  normalization: self_history
+  zero_denominator_policy: "5年の履歴と EBITDA>0 が要る。"
+  missing_bias: "**5年の履歴が要るので若い企業で欠損。** G26/F23 と同じ偏り。"
+  correlated_with: [A22, A23, A06, C26, U39, G26]
+  economic_rationale: >-
+    **A22（自己バリュエーション位置、PER版）の EBITDA 版。**
+    **断面でなく自分の過去と比べる**（→ normalization: self_history）。
+    **U39 の説明で述べた「資源株はピーク PER が最安値」という
+    罠を回避する主要な手段。**
+    EBITDA は のれん償却の差（日本基準 vs IFRS）を受けないので、
+    **A22 より基準間で頑健。**
+    → **A22 と A24 の両方を持ち、
+    乖離する銘柄では会計基準の影響を疑う。**
+  evidence_tier: T2
+  references: ["構造的判断。U39（資源株の罠）への対処"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A29:
+  formula: "清算価値（資産を掛け目で評価し負債を控除） / MCAP"
+  inputs: [balance_sheet, MCAP]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: "**掛け目（現金100%、売掛80%、在庫50%、固定資産30%等）は慣行であって基準ではない。**"
+  zero_denominator_policy: "MCAP>0。"
+  missing_bias: "**掛け目の設定が恣意的。** B47（有形資産比率）が同じことを実証的な係数で行う。"
+  correlated_with: [A15, B47, D07, D08, A19, A18]
+  economic_rationale: >-
+    **下限価値。Gate の一部として「最悪でもここまで」の推定に使う。**
+    A15（NCAV）が流動資産だけを見るのに対し、
+    A29 は固定資産も掛け目付きで含める。
+    → **A15 より緩く、A03（PBR）より厳しい中間の指標。**
+    **B47（OSAP tang t=3.4）が同じ発想を
+    実証で較正された係数（0.715 / 0.547 / 0.535）で行う**ので、
+    **A29 の掛け目は B47 の係数を使うべき。**
+    → **A29 と B47 は統合すべき候補。**
+  evidence_tier: T3
+  references: ["構造的判断。B47（OSAP tang）の係数を使うべき"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A30:
+  formula: "(NI + DA - 維持設備投資) / MCAP。維持設備投資は DA で代用"
+  inputs: [NI, DA, CAPEX, MCAP]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "**DA に のれん償却を含めるかで日本基準と IFRS が乖離する**（spec §2 の DA 定義に従う）。"
+  zero_denominator_policy: "MCAP>0。"
+  missing_bias: "**維持設備投資を DA で代用すると、成長企業では過大、衰退企業では過小になる。**"
+  correlated_with: [A38, A39, B09, B10, B32, F26]
+  economic_rationale: >-
+    **Buffett の owner earnings。**
+    「事業を今の規模で維持するのに必要な投資を引いた後、
+    株主が自由に使える現金」。
+    → **維持設備投資の推定が要工夫（減価償却で代用）**という
+    近似が最大の弱点で、**B32（設備投資/減価償却）が
+    1から大きく離れる企業では代用が破綻する。**
+    → **A30 と B32 は必ずセットで見る。**
+    A39（維持FCF利回り）が同じ発想を NOPAT ベースで行う。
+  evidence_tier: T3
+  references: ["Buffett, Berkshire Hathaway 1986 Annual Report", "構造的判断"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A31:
+  formula: "R&D・広告費を資本化して純資産を再計算した PBR の逆数"
+  inputs: [RD, advertising, EQ, MCAP]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **R&D の資本化は基準で扱いが違う。IFRS は開発費の一部を資産計上できるが、
+    日本基準と US GAAP は原則費用。** → **既に資産計上されている分の
+    二重計上を避ける処理が要る。**
+  zero_denominator_policy: "MCAP>0。調整後純資産<=0 なら欠損。"
+  missing_bias: "**R&D も広告費も開示しない企業がある**（日本の小型株では販管費に含めて非開示）。"
+  correlated_with: [A03, B27, B43, B25, U37, X07]
+  economic_rationale: >-
+    **LAW-49。ソフトウェア・製薬・ブランド企業で PBR の意味を回復させる。**
+    R&D を費用処理すると、**実際には価値を生んでいる投資が
+    純資産から消える**ので、これらの業種の PBR は構造的に高く出る。
+    → **A03（素の PBR）で業種横断ランクを取ると、
+    無形資産集約型の業種が一律に割高判定される**という
+    **A カテゴリ最大の歪み。**
+    Eisfeldt-Papanikolaou の組織資本（B43）、
+    B27（無形資産調整 ROIC）と同じ思想。
+    **rank_sector にしていても、業種内の企業間で
+    R&D 集約度が違えば同じ歪みが残る**ので、A31 は必要。
+  evidence_tier: T2
+  references: ["Lev-Srivastava (2019) Explaining the Recent Failure of Value Investing", "Eisfeldt-Papanikolaou (JF 2013) Organization Capital"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A35:
+  formula: "ゴードン成長モデル D/(r-g) / PRICE"
+  inputs: [dividends, discount_rate, growth_rate]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "**r<=g なら発散するので欠損。** 無配企業も欠損。"
+  missing_bias: >-
+    **安定配当企業のみ有効。成長企業には使えない。**
+    しかも**r と g の推定に極めて敏感**（r-g が 0.02 か 0.03 かで
+    価値が5割変わる）。
+  correlated_with: [A11, A27, A28, F09, F20, U07]
+  economic_rationale: >-
+    **A27（DCF）と同じく仮定に敏感なので、点推定を信じない。**
+    → **幅で持ち、r-g を複数値で計算して分布として扱う。**
+    使える範囲が狭い（安定配当・低成長）が、
+    **その範囲では最も理論的に正当な評価法。**
+    U07（生保の EV）や U14（REIT）と同じく、
+    **キャッシュフローの性質が単純な対象でのみ有効。**
+  evidence_tier: T3
+  references: ["Gordon (1959)", "構造的判断。仮定への感応度が極めて高い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A37:
+  formula: "(EV - 投資有価証券時価 - 遊休不動産時価) / EBIT"
+  inputs: [EV, investment_securities, real_estate, EBIT]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "EV と EBIT の定義（spec §2）。**持分法投資損益の扱いが EBIT に効く。**"
+  zero_denominator_policy: "**EBIT>0。調整後 EV<=0 なら「事業がタダ以下」** — 欠損ではなく極値として扱う。"
+  missing_bias: "A18/A19 を継承。**時価の注記が無ければ調整できない。**"
+  correlated_with: [A18, A19, A16, A06, A14, V03]
+  economic_rationale: >-
+    **A16/A18/A19 を反映した事業単体の倍率。**
+    投資有価証券と遊休不動産を抱えた企業は、
+    **素の EV/EBIT では割高に見えるが、
+    非事業資産を除くと事業は極めて安い**ことがある。
+    → **日本の老舗企業に典型的な形**で、
+    **A37 が A16（素の EV/EBIT）より大幅に低い銘柄が
+    「隠れ資産型」の本命。**
+    **調整後 EV が負になる銘柄（事業がタダ以下）は
+    欠損にせず極値として残す**のが要点
+    — A08 で述べた「最も割安な銘柄が欠損で消える」失敗を繰り返さない。
+  evidence_tier: T3
+  references: ["構造的判断。A18/A19 の統合"]
+  markets: [JP]
+  review: {status: verified}
+
+A39:
+  formula: "(NOPAT - 維持設備投資) / EV。維持設備投資は DA で代用"
+  inputs: [NOPAT, DA, EV]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "NOPAT は TAXR に依存（spec §2 で clip 済み）。DA の定義も継承。"
+  zero_denominator_policy: "EV>0。A08 と同じくネットキャッシュ企業で欠損。"
+  missing_bias: "A30 と同じ代用の問題。**B32 が1から離れる企業で破綻する。**"
+  correlated_with: [A30, A38, B09, B10, B32, C07]
+  economic_rationale: >-
+    **成長投資を戻した「今の稼ぐ力」。**
+    A30（オーナー利益）の EV 版・税調整版。
+    **成長投資をしている企業は FCF（B09）が低く見えるが、
+    それは投資しているだけで稼ぐ力がないわけではない。**
+    → **A38（FCF利回り）と A39 の差が「成長投資の規模」**を表す。
+    **C07（再投資率）と B04（ROIC-WACC）で
+    その投資が価値を生むかを判定する**という連鎖になる。
+  evidence_tier: T3
+  references: ["構造的判断。A30 の EV 版"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A40:
+  formula: "予想配当利回り - 実績配当利回り"
+  inputs: [GUIDE_CO, dividends, PRICE]
+  period_convention: GUIDE_CO
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "PRICE>0。**予想配当を開示しない企業では欠損。**"
+  missing_bias: >-
+    **日本は会社予想配当が義務的に開示されるので取れる。
+    米国は予想配当の開示が無いので、アナリスト予想に頼る。**
+    → 日本優位の項目。
+  correlated_with: [A11, F09, F20, F29, N09, K33]
+  economic_rationale: >-
+    **市場が増配をどれだけ織り込んでいるか。**
+    正なら増配が予定されている。
+    **F20（配当方針の変更）や F29（配当開始）が
+    イベントとして起きる前に、
+    会社予想の数字として先に現れる。**
+    → **日本の会社予想開示義務が生む、
+    米国には無い先行情報。**
+    T30（織り込み度）の配当版でもある。
+  evidence_tier: T3
+  references: ["構造的判断。日本の会社予想配当の開示義務"]
+  markets: [JP]
+  review: {status: verified}
+
+A43:
+  formula: "mean(E/P, 5y) - k * sd(E/P, 5y)"
+  inputs: [A01]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "A01 を継承。"
+  zero_denominator_policy: "5年の履歴が要る。**赤字年を含むと E/P が負になり平均が歪む。**"
+  missing_bias: "**5年の履歴が要るので若い企業で欠損。** G26/A24/F23 と同じ偏り。"
+  correlated_with: [A01, A24, B14, B39, C26, E20]
+  economic_rationale: >-
+    **一時的な利益で見かけ上安く見える銘柄を排除する。**
+    今期だけ特別利益で E/P が高い企業は、
+    5年平均を取れば平凡に戻る。
+    → **U39（資源株のピーク PER 罠）への対処であり、
+    C26（利益の平均回帰）を A に持ち込んだ形。**
+    **B14（利益率の安定性）/ B39（赤字回数）と
+    同じ「安定性」の軸をバリュエーションで測る。**
+    k の値（1 か 0.5 か）は較正が要る — **OQ に近い未確定要素。**
+  evidence_tier: T3
+  references: ["構造的判断。Graham の平均利益の発想", "Campbell-Shiller の CAPE と同じ思想"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A44:
+  formula: "TA / MCAP"
+  inputs: [TA, MCAP]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: "**総資産はリース（IFRS16 / ASC842）で不連続に増える。** spec §2.1 の論点が直撃する。"
+  zero_denominator_policy: "MCAP>0。"
+  missing_bias: "**ほぼ全銘柄で計算できる。A カテゴリで最も欠損が少ない。**"
+  correlated_with: [A03, A48, A14, D01, B47, B11]
+  economic_rationale: >-
+    **OSAP AM t=5.7。A03（B/P）より頑健という報告。**
+    純資産でなく総資産を使うので、
+    **債務超過や純資産が小さい企業でも壊れない。**
+    → **A03 が欠損する銘柄を救う**という点で、
+    A04/A08 と同じ「欠損の埋め合わせ」の役割を持つ。
+    **負債を含むぶん資産の再評価余地を捉える**が、
+    **同時にレバレッジの高い企業を割安と誤判定する**危険もある。
+    → **D01（レバレッジ）と必ず併用し、
+    A48（B/P のレバレッジ成分）で分解する。**
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "Hahn-Lee (JF 2009)", "OSAP AM t=5.7"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A45:
+  formula: "配当・利益の期待到来時期を加重平均した年数（エクイティ・デュレーション）"
+  inputs: [dividends, NI, growth_rate, discount_rate]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: na
+  zero_denominator_policy: "推定に成長率と割引率の仮定が要る。"
+  missing_bias: "**仮定依存。A27/A35 と同じ問題。** 無配・赤字企業では定義が曖昧になる。"
+  correlated_with: [P01, P02, A35, A27, C01, U11]
+  economic_rationale: >-
+    **OSAP EquityDuration t=4.4。長いほど金利感応度が高く、期待リターンは低い。**
+    Dechow-Sloan-Soliman (RAST 2004)。
+    **グロース株は本質的に長デュレーション**なので、
+    **P01/P02（金利）の効果はこの経路で効いている。**
+    → **A45 は「グロース vs バリュー」を
+    金利感応度という物理的な量で表現し直したもの**で、
+    **P02（金利変化）との交互作用が本質。**
+    **U11（不動産のキャップレート）が同じ機構を業種で持つ。**
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "Dechow-Sloan-Soliman (RAST 2004) Implied Equity Duration", "OSAP EquityDuration t=4.4"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A46:
+  formula: "複数のバリュー指標を包絡分析（DEA）で1本化した相対割安度"
+  inputs: [A01, A03, A04, A06, A11]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "構成指標を継承。"
+  zero_denominator_policy: "構成指標のいずれかが欠損すれば、欠損として扱うか残りで計算するかを決める必要がある。"
+  missing_bias: "**欠損の扱いで結果が大きく変わる。** 構成指標が多いほど、どれかが欠損する確率が上がる。"
+  correlated_with: [A32, A21, A01, A03, A04]
+  economic_rationale: >-
+    **OSAP Frontier t=4.9。A32 の代替手法。複合バリューの作り方の別解。**
+    DEA は「どの指標を重視するかを銘柄ごとに最も有利に選ぶ」
+    という発想なので、**縮小（§1.9）とは正反対の思想。**
+    → **263AT は縮小を採る以上、A46 を主軸にはしない。**
+    **A32（等加重の複合バリュー）と A46（DEA）を
+    比較することで、「合成の仕方」がどれだけ結果を変えるかを
+    測れる**という点に価値がある。
+    → **OQ-24（組み合わせ方の検証）の A カテゴリ版。**
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "OSAP Frontier t=4.9"]
+  markets: [JP, US]
+  review: {status: verified}
+
+A48:
+  formula: "B/P をエンタープライズ成分（A14 の逆数）とレバレッジ成分に分解した後者"
+  inputs: [A03, A14, IBD, EQ]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: "IBD のリース扱い（spec §2）を継承。"
+  zero_denominator_policy: "A03/A14 が計算できなければ欠損。"
+  missing_bias: "A14 と同じくネットキャッシュ企業で欠損。"
+  correlated_with: [A03, A14, A44, D01, D02, B05]
+  economic_rationale: >-
+    **OSAP BPEBM t=4.1。A14 と対で持つと B/P の中身が分かる。**
+    **B/P が高い理由は2つある** —
+    (a) 事業が安く評価されている（A14 が低い）
+    (b) 負債が多い（レバレッジ成分が大きい）。
+    **(a) は買う理由になるが (b) はならない。**
+    → **A03 を単独で使うと、
+    ただ借金が多いだけの企業をバリューと誤認する。**
+    **B05（デュポン分解）が ROE で同じことをする**のと
+    完全に対応する構造 — **どちらも「レバレッジ由来の
+    見かけの良さ」を分離するための分解。**
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "Penman-Richardson-Tuna (JAR 2007) The Book-to-Price Effect in Stock Returns", "OSAP BPEBM t=4.1"]
+  markets: [JP, US]
+  review: {status: verified}
+
+# =============================================================================
+# B（収益性・質）未検証 32件
+#
+# B カテゴリで既に確定している共通事項（繰り返さない）:
+#   正規化は rank_sector（業種で収益性の水準が構造的に違う）、
+#   period_convention は原則 TTM、B/S を伴う比率は AVG（期首期末平均）。
+#
+# 未検証分を貫く3つの論点:
+#
+#  (1) **「水準」より「変化」と「安定性」。** B02/B07/B08/B11 のような
+#      水準の指標は業種特性が支配的で、業種内でも平均回帰する。
+#      一方 B22/B23/B31/B35/B45/B46（変化）と
+#      B14/B15/B39（安定性）は独立した情報を持つ。
+#      → **同じ ROE でも「10年安定して15%」と「今年だけ15%」は別物。**
+#
+#  (2) **無形資産の資本化（B27/B43/A31、LAW-49）。**
+#      R&D と販管費を費用処理すると、無形集約型企業の IC が過小になり
+#      ROIC が過大に出る。**ソフトウェア企業の ROIC は調整しないと嘘。**
+#
+#  (3) **早期警戒指標としての B。** B22（在庫日数の急増）、
+#      B23（DSO の悪化）、B35（運転資本効率）は
+#      **売り判定で最も価値が高い。** 決算の数字が悪化する前に
+#      B/S に現れるので、E カテゴリ（会計品質）の初期兆候でもある。
+# =============================================================================
+
+B02:
+  formula: "NI_TTM / TA_AVG"
+  inputs: [NI, TA]
+  period_convention: AVG
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **のれん償却（日本基準は償却）が NI を押し下げ、
+    リース（IFRS16）が TA を押し上げる。両方が B02 を歪める。**
+  zero_denominator_policy: "TA_AVG>0。"
+  missing_bias: "**金融業では総資産の意味が全く違う**（U01-U08 を使う）。"
+  correlated_with: [B01, B03, B05, B11, B12, A44]
+  economic_rationale: >-
+    **業種間比較には向かない。** 銀行の ROA 0.5% と
+    ソフトウェアの ROA 20% を並べても意味がない。
+    → **rank_sector が必須。**
+    B03（ROIC）と違って**負債で調達した資産も分母に入る**ので、
+    **レバレッジを上げても改善しない**という利点がある
+    — B01（ROE）が抱える問題を持たない。
+    → **B01 と B02 の差がレバレッジの寄与**で、
+    B05（デュポン分解）がそれを明示的に分解する。
+  evidence_tier: T2
+  references: ["https://www.openassetpricing.com/", "Fama-French (JFE 2015) five-factor model の収益性因子"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B05:
+  formula: "ROE を 純利益率 × 総資産回転率 × 財務レバレッジ に分解"
+  inputs: [NI, REV, TA, EQ]
+  period_convention: AVG
+  consolidation: consolidated
+  accounting_standard_note: "各構成要素を継承。"
+  zero_denominator_policy: "REV>0、TA_AVG>0、EQ_AVG>0。**債務超過では定義できない。**"
+  missing_bias: "債務超過企業で欠損。"
+  correlated_with: [B01, B02, B08, B11, D01, A48]
+  economic_rationale: >-
+    **3成分を別パラメータとして持つ。レバレッジ由来の ROE は減点する。**
+    符号を context にしたのは、**分解全体としては符号が定まらない**から
+    — 利益率と回転率は +、レバレッジは −。
+    → **A48（B/P のレバレッジ成分の分離）と完全に対応する構造。**
+    **どちらも「レバレッジ由来の見かけの良さ」を
+    分離するための分解**であり、
+    **A と B で同じ思想が独立に現れている**のは偶然ではない。
+    **東証の資本コスト要請（F13）で ROE を上げようとする企業が
+    増えているが、自社株買いでレバレッジを上げただけの ROE 改善は
+    価値を生まない。** B05 はそれを見抜く。
+  evidence_tier: T2
+  references: ["構造的判断。A48 と同じ思想", "DuPont analysis の古典"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B07:
+  formula: "GP / REV"
+  inputs: [GP, REV]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **COGS と SGA の区分が企業判断に委ねられる**（spec §2）。
+    物流費を COGS に入れるか SGA に入れるかで粗利率が数%動く。
+  zero_denominator_policy: "REV>0。"
+  missing_bias: "**COGS を開示しない企業（一部のサービス業・金融）で欠損。**"
+  correlated_with: [B06, B08, B18, B36, T14, U16]
+  economic_rationale: >-
+    **価格決定力の代理変数。堀の定量的な証拠。**
+    Novy-Marx (JFE 2013) の gross profitability は
+    **粗利を総資産で割った B06 だが、
+    B07（売上比）は「1単位売るごとにいくら残るか」を測る。**
+    → **B06 は資産効率、B07 は価格決定力**と役割が違う。
+    **T14（LLM が判定する堀）と突合する定量アンカー**であり、
+    LLM が「堀がある」と言うのに B07 が業種平均なら、その物語は疑わしい。
+    B36（価格転嫁力）はこの変化を原材料価格で説明する。
+  evidence_tier: T1
+  references: ["Novy-Marx (JFE 2013) The other side of value", "https://www.openassetpricing.com/"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B08:
+  formula: "OP / REV"
+  inputs: [OP, REV]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **日本基準はのれんを償却、IFRS は非償却**（spec §2.1）。
+    **OP ベースの指標は基準間で比較不能。** EBITDA ベース（B10）を優先する。
+  zero_denominator_policy: "REV>0。**OP<0 は欠損にせず負値として残す。**"
+  missing_bias: "**赤字企業を欠損にすると生存者バイアスが入る**ので、負値のまま扱う。"
+  correlated_with: [B07, B10, B19, B31, A04, U27]
+  economic_rationale: >-
+    **業種内比較で使う。**
+    B07（粗利率）から販管費を引いた後なので、
+    **価格決定力（B07）と費用管理（B31）の両方を含む。**
+    → **B07 と B08 の差が販管費率**で、
+    **B31（販管費率のトレンド）がその変化を測る。**
+    上の accounting_standard_note が重要で、
+    **日本基準企業と IFRS 企業を同じ列に入れると
+    のれん償却の分だけ日本基準企業が不利に出る。**
+    → **Z07 でフラグを立て、A06/B10（EBITDA ベース）を優先する。**
+    A04（S/P）との交互作用が本質（「同じ PSR なら利益率が高い方が割安」）。
+  evidence_tier: T2
+  references: ["構造的判断。spec §2.1 の会計基準差"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B11:
+  formula: "REV_TTM / TA_AVG"
+  inputs: [REV, TA]
+  period_convention: AVG
+  consolidation: consolidated
+  accounting_standard_note: "**リース（IFRS16）で TA が増えるので回転率が下がる。移行年は不連続。**"
+  zero_denominator_policy: "TA_AVG>0。"
+  missing_bias: "金融業では意味を持たない。"
+  correlated_with: [B02, B05, B34, U17, C35, A44]
+  economic_rationale: >-
+    **業種特性が支配的。** 卸売は回転率が高く、
+    不動産・電力は低い。**業種内でのみ意味を持つ。**
+    → B05 の分解の一成分であり、**単独より分解の文脈で使う。**
+    **U17（小売の坪効率）が同じことを物理的な資産で測る。**
+    **C35（資産成長アノマリー）と関係が深い**
+    — 資産を増やしても売上が増えなければ B11 が下がる。
+    → **B11 の低下は C35 の効果が発現する経路そのもの。**
+  evidence_tier: T3
+  references: ["構造的判断。B05 の分解成分"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B14:
+  formula: "-sd( 営業利益率, 過去10年 )"
+  inputs: [OP, REV]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "10年間の会計基準変更（IFRS 移行）をまたぐと不連続。**Z07 でフラグ。**"
+  zero_denominator_policy: "10年の履歴が要る。"
+  missing_bias: >-
+    **10年の履歴が要るので若い企業で欠損。しかも「10年上場し続けた」
+    こと自体が生存者バイアス**（I18/G44 と同じ構造）。
+  correlated_with: [B15, B39, B40, A43, I01, D08]
+  economic_rationale: >-
+    **QMJ（Asness-Frazzini-Pedersen）の Safety 成分。**
+    利益が安定している企業は、**将来の予測が立つので
+    割引率が低くてよい**にもかかわらず、
+    市場は十分に評価しない。
+    → **A43（益回りの安定性）が同じ軸をバリュエーションで測る。**
+    **B14/B15/B39 の3本は「安定性」という単一の概念を
+    利益率・売上・赤字回数で測ったもの**なので、
+    **Z12 で一塊になるはず。**
+  evidence_tier: T1
+  references: ["Asness-Frazzini-Pedersen (RAST 2019) Quality Minus Junk"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B15:
+  formula: "-sd( 売上成長率, 過去10年 )"
+  inputs: [REV]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "**決算期変更（spec §1.4）があると成長率が異常値になる。Z06 のフラグで検出する。**"
+  zero_denominator_policy: "10年の履歴が要る。"
+  missing_bias: "B14 と同じ。"
+  correlated_with: [B14, B39, B40, U42, P19, I18]
+  economic_rationale: >-
+    **循環株の判別に使う。**
+    **U39（資源）/ U41（海運）/ U22（半導体）のような
+    シクリカル業種は B15 が構造的に低い。**
+    → **U42（長期契約比率）が高い企業は同じ業種でも B15 が高い**
+    ので、**業種ダミーでは捉えられない企業間の差を測れる。**
+    P19（業種の景気感応度）が業種間、B15 が企業間の差を担う。
+  evidence_tier: T2
+  references: ["Asness-Frazzini-Pedersen (RAST 2019) QMJ の Safety 成分"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B19:
+  formula: "delta OP(%) / delta REV(%)"
+  inputs: [OP, REV]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "B08 を継承。"
+  zero_denominator_policy: "**delta REV が0に近いと発散するので、abs(delta REV) < 2% なら欠損。**"
+  nonlinear: "abs_dev(x_star=sector_median)"
+  missing_bias: "**売上がほぼ横ばいの企業で欠損する。** 安定企業が落ちるという逆向きの偏り。"
+  correlated_with: [B20, B08, B31, U23, I01, P19]
+  economic_rationale: >-
+    ∩型。**高いほど上振れも下振れも増幅する。**
+    → **rho（§1.6 のリスク許容度ダイヤル）が高いなら加点、
+    低いなら減点という交互作用**にすべきで、
+    **単純な∩型は近似にすぎない。**
+    **263AT の設計（1/10 が全部を賄う）から見ると、
+    高い営業レバレッジは求めるべき性質**である
+    — 上振れの大きさこそが目的だから。
+    → **I20（上方/下方ボラの非対称）と同じ論点**で、
+    OQ-35 の枠組みで扱うべき。
+    U23（稼働率）が装置産業でこれの物理的な裏付けを与える。
+  evidence_tier: T3
+  references: ["構造的判断。§1.6 の rho ダイヤルと交互作用"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B20:
+  formula: "固定費 / 限界利益"
+  inputs: [OP, REV, cost_structure]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "**固定費・変動費の区分は開示されない。** 売上と営業利益の回帰から推定する。"
+  zero_denominator_policy: "限界利益>0。**推定に複数期のデータが要る。**"
+  missing_bias: "**日本の開示では推定が必要。** 推定手法（回帰の窓長）で値が変わる。"
+  correlated_with: [B19, B08, U23, D08, P15]
+  economic_rationale: >-
+    B19 の水準版。**損益分岐点に近い企業は、
+    売上が少し落ちただけで赤字になる。**
+    → **D08（倒産確率）や B39（赤字回数）と繋がる。**
+    **U23（稼働率）が高い装置産業では
+    B20 を超えた瞬間に利益が急増する**ので、
+    **B19（レバレッジ）と B20（分岐点までの距離）を
+    組み合わせて初めて「今どこにいるか」が分かる。**
+    推定に頼るので★1。
+  evidence_tier: T3
+  references: ["構造的判断。推定精度が低い"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B21:
+  formula: "DSO + DIO - DPO"
+  inputs: [receivables, inventory, payables, REV, COGS]
+  period_convention: AVG
+  consolidation: consolidated
+  accounting_standard_note: "**債権流動化（ファクタリング）を使うと DSO が人為的に下がる。** 注記で確認が要る。"
+  zero_denominator_policy: "REV>0、COGS>0。"
+  missing_bias: "**サービス業では在庫がゼロなので DIO が意味を持たない。** 業種で解釈が違う。"
+  correlated_with: [B22, B23, B34, B35, D22, U19]
+  economic_rationale: >-
+    **負の CCC（前受金モデル）は強い競争優位のサイン。**
+    顧客が先に払い、仕入先には後で払うということは、
+    **取引先に対して交渉力を持っている**ということ。
+    → **T14（堀）/ T37（5フォース）の
+    「買い手・売り手の交渉力」の定量的な証拠。**
+    しかも**成長するほど現金が増える**ので、
+    D22（資金繰り余力）が構造的に強い。
+    上の accounting_standard_note が罠で、
+    **債権流動化で見かけの CCC を短縮できる**
+    — E カテゴリ（会計品質）と併せて見る。
+  evidence_tier: T2
+  references: ["構造的判断。T14/T37 の定量アンカー"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B22:
+  formula: "delta( 在庫回転日数 ), YoY"
+  inputs: [inventory, COGS]
+  period_convention: AVG
+  consolidation: consolidated
+  accounting_standard_note: "**在庫の評価方法（低価法の適用）が企業で違う。** 評価損を計上すると在庫が減り、見かけ上改善する。"
+  zero_denominator_policy: "COGS>0。**在庫がゼロのサービス業では欠損。**"
+  missing_bias: "サービス業・金融業で欠損。"
+  correlated_with: [B23, B35, B45, U19, U25, E10, R07]
+  economic_rationale: >-
+    **急増は需要減速か押し込み販売の早期警戒。売り判定で価値が高い。**
+    在庫は売上より先に動く — **売れなくなれば在庫が積み上がり、
+    それは決算の売上が落ちる前に B/S に現れる。**
+    → **B カテゴリの中で最も「早期警戒指標」としての性格が強い。**
+    **U19（商材の陳腐化速度）を掛けると、
+    同じ在庫日数増でも生鮮とアパレルで危険度が違う**ことを表現できる。
+    **E10（会計不正の兆候）と組で見ると、
+    押し込み販売（channel stuffing）を検出できる。**
+  evidence_tier: T1
+  references: ["Thomas-Zhang (RAST 2002) Inventory Changes and Future Returns", "https://www.openassetpricing.com/"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B23:
+  formula: "delta( DSO ), YoY"
+  inputs: [receivables, REV]
+  period_convention: AVG
+  consolidation: consolidated
+  accounting_standard_note: "B21 と同じ債権流動化の問題。"
+  zero_denominator_policy: "REV>0。"
+  missing_bias: "**期末に押し込み販売すると DSO が跳ねる**ので、四半期末の水準に注意。"
+  correlated_with: [B22, B35, B21, E01, E10, E14]
+  economic_rationale: >-
+    **B22 と同じ早期警戒。E10 と組で会計不正の初期兆候になる。**
+    売掛金が売上より速く増えているのは、
+    **(a) 回収できていない、(b) 実態のない売上を計上している、
+    (c) 販売条件を緩めて無理に売った**のいずれか。
+    **どれも悪い。**
+    → **E01（アクルーアル）の構成要素そのもの**で、
+    **Sloan (1996) のアクルーアル・アノマリーが
+    効く経路の一つが B23。**
+    **売掛金の増加は最も操作しやすい利益の水増し手段。**
+  evidence_tier: T1
+  references: ["Sloan (1996) Do Stock Prices Fully Reflect Information in Accruals", "https://www.openassetpricing.com/"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B24:
+  formula: "OP / 従業員数"
+  inputs: [OP, employees]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **従業員数の定義が企業で違う**（連結か単体か、
+    派遣・パートを含むか）。**日本は有報で平均臨時雇用人員が別掲される。**
+  zero_denominator_policy: "従業員数>0。"
+  missing_bias: "**従業員数を開示しない企業がある。連結従業員数が無く単体のみの企業も多い。**"
+  correlated_with: [B37, W02, W03, C32, T39, B11]
+  economic_rationale: >-
+    **人的資本の生産性。労働集約型の判別に。**
+    **T39（生成AIによる代替リスク）と直接関係する**
+    — 労働集約型ほど代替リスクが高い一方、
+    **代替が成功すれば B24 が跳ね上がる。**
+    → **T39 と B24 の交互作用は、符号が両方向にありうる**
+    という珍しい構造。
+    W02（平均年収）と組むと、
+    **「高給だが生産性も高い」企業と
+    「安いだけの企業」を区別できる。**
+  evidence_tier: T3
+  references: ["構造的判断。T39/W02 との交互作用"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B25:
+  formula: "RD / REV"
+  inputs: [RD, REV]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **IFRS は開発費の一部を資産計上できるが、日本基準と US GAAP は原則費用。**
+    → **IFRS 企業の R&D 費用は過小に出る。** A31/B27 の調整が要る。
+  zero_denominator_policy: "REV>0。**R&D を開示しない企業はゼロではなく欠損。**"
+  missing_bias: >-
+    **R&D を行わない企業（ゼロ）と開示しない企業（欠損）の
+    区別がつきにくい。** 日本の小型株は販管費に含めて非開示のことがある。
+  nonlinear: "abs_dev(x_star=sector_median)"
+  correlated_with: [B26, B27, A31, U37, X07, X08]
+  economic_rationale: >-
+    ∩型。**過小も過大も悪い。B26 と組で「投資の実り」を見る。**
+    → **B25 は投入、B26 は産出、X07/X08 は中間産出（特許）。**
+    3段階で見ることで、**「金は使うが何も生まない」企業を識別できる。**
+    **U37（医薬の新薬承認生産性）が業種特化版。**
+    上の accounting_standard_note により
+    **IFRS 企業と日本基準企業で R&D 費用の水準が違う**ので、
+    rank_sector でも歪みが残る。**Z07 でフラグ。**
+  evidence_tier: T2
+  references: ["Chan-Lakonishok-Sougiannis (JF 2001) The Stock Market Valuation of R&D Expenditures"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B26:
+  formula: "delta GP(3y) / 累計RD(3年前まで)"
+  inputs: [GP, RD]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "B25 を継承。"
+  zero_denominator_policy: "累計RD>0。**6年の履歴が要る**（3年の粗利変化 + 3年前までの累計R&D）。"
+  missing_bias: "**6年の履歴が要るので欠損が多い。** B25 より狭い。"
+  correlated_with: [B25, B12, U37, X07, X08, T14]
+  economic_rationale: >-
+    **研究開発が実際に利益に転換しているか。**
+    B25（投入）だけでは「R&D を多く使う企業が良い」という
+    誤った結論になる。**C カテゴリで整理した
+    「アウトプット成長 vs インプット成長」の符号分岐が
+    ここでも同じ形で現れる** — R&D はインプット、粗利増はアウトプット。
+    → **B26 は両者の比なので、C08（ROIC × 再投資率）と同じ構造。**
+    **X08（特許の被引用数）が質の側面を補う。**
+  evidence_tier: T3
+  references: ["構造的判断。catalog §4-C の符号整理と同じ論理"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B27:
+  formula: "R&D・広告を資本化して IC を再計算した ROIC"
+  inputs: [NOPAT, IC, RD, advertising]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "A31 と同じく、IFRS で既に資産計上されている分の二重計上を避ける処理が要る。"
+  zero_denominator_policy: "調整後 IC>0。"
+  missing_bias: "B25 を継承。R&D・広告費の開示に依存。"
+  correlated_with: [B03, B04, A31, B43, B25, T14]
+  economic_rationale: >-
+    **LAW-49。ソフトウェア企業の ROIC は調整しないと過大に出る。**
+    R&D を費用処理すると分子（NOPAT）が減り分母（IC）も減るが、
+    **分母の減り方の方が大きいので ROIC が過大になる。**
+    → **調整しない ROIC で業種横断ランクを取ると、
+    無形集約型が一律に高収益と判定される。**
+    **A31（無形資産調整 PBR）と対をなす**
+    — A31 はバリュエーション、B27 は収益性で同じ調整を行う。
+    **両方を使って初めて「無形資産を正しく扱った価値と質」になる。**
+    B43（組織資本）が販管費側の同じ調整。
+  evidence_tier: T2
+  references: ["Lev-Srivastava (2019)", "Peters-Taylor (JFE 2017) Intangible capital and the investment-q relation"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B30:
+  formula: "(GP_t / GP_{t-3})^(1/3) - 1"
+  inputs: [GP]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "B07 を継承。"
+  zero_denominator_policy: "**GP_{t-3}>0。3年の履歴が要る。**"
+  missing_bias: "3年の履歴が要る。"
+  correlated_with: [B06, B07, C01, C02, B46]
+  economic_rationale: >-
+    **利益率と規模の両方を含む。**
+    B07（粗利率）は率だけ、C01（売上成長）は規模だけを見るが、
+    **粗利の絶対額成長は両方を含む。**
+    → **「利益率を落として売上を伸ばす」成長と
+    「利益率を保って伸びる」成長を区別できる。**
+    **Novy-Marx の gross profitability（B06）を
+    成長率で見た版**であり、
+    **B46（売上成長 - 販管費成長）と同じ
+    「良い成長」の判定軸にある。**
+  evidence_tier: T3
+  references: ["構造的判断。B06 の成長版"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B31:
+  formula: "delta( SGA / REV )"
+  inputs: [SGA, REV]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "**COGS と SGA の区分（B07 と同じ）。区分変更があると B31 が跳ねる。**"
+  zero_denominator_policy: "REV>0。"
+  missing_bias: "**SGA を開示しない企業で欠損。**"
+  correlated_with: [B08, B19, B46, U04, F07, C32]
+  economic_rationale: >-
+    **オペレーティングレバレッジの実現。改善方向は強い。**
+    売上が伸びても販管費が伸びなければ、
+    **差額がそのまま営業利益になる。**
+    → **B19（営業レバレッジ）が「増幅率」を測るのに対し、
+    B31 は「実際に増幅が起きているか」を測る。**
+    **B46（OSAP GrSaleToGrOverhead t=2.1）が
+    同じことを成長率の差で測る**ので、
+    **B31 と B46 は実質同一。** Z12 で確認。
+    U04（銀行の経費率）が業種特化版。
+  evidence_tier: T2
+  references: ["https://www.openassetpricing.com/", "OSAP GrSaleToGrOverhead が同一機構"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B32:
+  formula: "CAPEX / DA"
+  inputs: [CAPEX, DA]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "**DA にのれん償却を含めると（spec §2 の定義）、日本基準企業で分母が大きくなり B32 が低く出る。**"
+  zero_denominator_policy: "DA>0。"
+  nonlinear: "abs_dev(x_star=1.0)"
+  missing_bias: "**資産を持たない企業（サービス業）では両方が小さく、比が不安定。**"
+  correlated_with: [B33, A30, A39, C07, C35, B04]
+  economic_rationale: >-
+    ∩型、**x*=1.0（理論値が明確な数少ない例）。**
+    **1未満は縮小均衡**（設備が減っている＝事業が縮む）、
+    **2超は積極投資**（C35 の資産成長アノマリーで減点対象）。
+    → **B04（ROIC-WACC）との交互作用で解釈する**
+    — ROIC が WACC を上回る企業の積極投資は良い、下回る企業のは悪い。
+    **C カテゴリの符号分岐と全く同じ構造。**
+    **A30/A39（維持設備投資を DA で代用）の
+    近似が成り立つかを判定する**役割も持つ
+    — B32 が1から大きく離れる企業では代用が破綻する。
+  evidence_tier: T3
+  references: ["構造的判断。x*=1 は理論値。_defaults の sector_median を上書き"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B33:
+  formula: "減価償却累計額 / 当期減価償却費"
+  inputs: [accumulated_depreciation, DA]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "**償却方法（定額法 / 定率法）が企業で違うと年齢の推定が歪む。日本は定率法が多い。**"
+  zero_denominator_policy: "DA>0。"
+  missing_bias: "**減価償却累計額の開示が要る。IFRS では注記に含まれる。**"
+  correlated_with: [B32, A03, A19, C35, U23]
+  economic_rationale: >-
+    **老朽化＝将来の設備投資負担。簿価が低く見える理由でもある。**
+    → **A03（PBR）が低い企業の一部は、
+    単に設備が古くて簿価が償却されているだけ。**
+    **これは「割安」ではなく「これから金がかかる」。**
+    → **A カテゴリのバリュートラップの一形態**を
+    B/S の側から識別する。
+    **A19（不動産含み益）とは逆向き**
+    — 土地は償却されないので含み益が乗るが、
+    建物・機械は償却されて簿価が下がるだけ。
+  evidence_tier: T3
+  references: ["構造的判断。バリュートラップの識別"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B34:
+  formula: "(売上債権 + 棚卸資産 - 仕入債務) / REV"
+  inputs: [receivables, inventory, payables, REV]
+  period_convention: AVG
+  consolidation: consolidated
+  accounting_standard_note: "B21 と同じ債権流動化の問題。"
+  zero_denominator_policy: "REV>0。**負値は正常**（前受金モデル）。"
+  missing_bias: "サービス業では在庫がゼロ。"
+  correlated_with: [B21, B35, C01, D22, B11]
+  economic_rationale: >-
+    **成長に要する資金。低いほど成長のコストが安い。**
+    B21（CCC）を日数でなく売上比で測った版。
+    → **売上が2倍になるとき、運転資本も2倍必要になる**ので、
+    **B34 が高い企業は成長するほど現金が減る。**
+    **U31（SaaS の CAC 回収期間）が同じ問題を
+    別の形で表現している** — どちらも「成長の資金負担」。
+    → **急成長企業が資金ショートする機構**であり、
+    D22（資金繰り余力）と必ず併せて見る。
+  evidence_tier: T2
+  references: ["構造的判断。B21 の売上比版"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B35:
+  formula: "delta( 運転資本 / REV )"
+  inputs: [B34]
+  period_convention: AVG
+  consolidation: consolidated
+  accounting_standard_note: "B34 を継承。"
+  zero_denominator_policy: "B34 が2期分必要。"
+  missing_bias: "B34 を継承。"
+  correlated_with: [B22, B23, B34, E01, E10, R07]
+  economic_rationale: >-
+    **悪化は成長の質の低下。B22/B23 の統合版。**
+    在庫（B22）と売掛（B23）を別々に見ると
+    片方だけの悪化を見逃すことがあるが、
+    **B35 は運転資本全体で捉える。**
+    → **E01（アクルーアル）とほぼ同じものを測っている**
+    — アクルーアルの主要成分が運転資本の変化だから。
+    **Z12 で E01 との相関を必ず確認する。**
+    **売り判定（R07）で B22/B23/B35 の3本が
+    同時に悪化していれば、それは強い売りシグナル。**
+  evidence_tier: T1
+  references: ["Sloan (1996)", "https://www.openassetpricing.com/"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B36:
+  formula: "delta 粗利率 / delta 原材料価格指数"
+  inputs: [B07, commodity_index]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "B07 を継承。"
+  zero_denominator_policy: "**原材料価格の変化が小さい期間では発散する。** 推定に20四半期以上を使う。"
+  missing_bias: "**主要原材料の特定が要る。LLM 推定に頼るので誤りが入る**（U24 と同じ）。"
+  correlated_with: [U24, P20, B07, B18, T14, U16]
+  economic_rationale: >-
+    **インフレ局面での堀の実測。W03（賃上げ余力）と相関する。**
+    → **P20（株価から推定した CPI 感応度）/
+    U24（業種特化版）と併せて三点測量になる**
+    （I/P のコミットで整理した通り）。
+    **3つの独立な経路が一致すれば、
+    価格決定力の推定として信頼できる。**
+    **T14（LLM が判定する堀）の定量アンカーの一つ**でもあり、
+    B07（粗利率の水準）が静的な証拠、
+    B36 が動的な証拠を与える。
+  evidence_tier: T3
+  references: ["構造的判断。U24/P20 との三点測量"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B37:
+  formula: "delta( REV / 従業員数 )"
+  inputs: [REV, employees]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "B24 と同じ従業員数の定義問題。"
+  zero_denominator_policy: "従業員数>0。2期分が必要。"
+  missing_bias: "B24 を継承。"
+  correlated_with: [B24, C32, W02, W09, T39, B31]
+  economic_rationale: >-
+    **生産性改善。W カテゴリと連携。**
+    **C32（従業員数の成長は劣後する）というアノマリーと
+    直接繋がる** — 人を増やさずに売上を伸ばす企業が良い。
+    → **W09/X06（求人掲載数）が増えているのに
+    B37 が改善していない企業は、
+    「成長のための採用」ではなく
+    「離職の補充」をしている**可能性が高い。
+    **W06（離職率）と組んで判別する**という
+    W カテゴリの検証で整理した論点がここに繋がる。
+  evidence_tier: T3
+  references: ["構造的判断。C32/W09 との連携"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B38:
+  formula: "最高ROICセグメントと最低ROICセグメントの差"
+  inputs: [segment_data]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: >-
+    **セグメント情報の粒度が企業判断（マネジメント・アプローチ）。
+    セグメント区分を変更されると時系列が切れる。**
+  zero_denominator_policy: "**2セグメント以上の開示が要る。単一セグメント企業では欠損。**"
+  missing_bias: "**単一セグメント企業で欠損。しかも日本の小型株は単一セグメントが多い。**"
+  correlated_with: [A36, V03, V02, N43, M08, T41]
+  economic_rationale: >-
+    **大きいほど再編余地。A36/V03 と対。**
+    低収益セグメントを切り離せば、
+    **全社の ROIC が上がり再評価される。**
+    → **N43（資産売却）/ M08（アクティビスト）という
+    カタリストと組んで初めて期待値になる。**
+    **A15/A18/A19（隠れ資産）と同じ構造**
+    — 潜在的な価値があっても顕在化しなければ動かない。
+    **東証の資本コスト要請（F13）が
+    事業ポートフォリオの見直しを促している**ので、
+    日本では今後カタリストが起きやすい。
+  evidence_tier: T3
+  references: ["構造的判断。F13（東証要請）がカタリスト"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B39:
+  formula: "過去10年の営業赤字回数"
+  inputs: [OP]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "B08 を継承。**のれん償却で赤字になる日本基準企業がある**点に注意。"
+  zero_denominator_policy: "10年の履歴が要る。"
+  missing_bias: "B14/B15 と同じ生存者バイアス。**10年生き延びた企業だけが値を持つ。**"
+  correlated_with: [B14, B15, D08, D13, I16, A43]
+  economic_rationale: >-
+    **QMJ の Safety 成分。赤字を出さない企業は破綻確率が桁違いに低い。**
+    B14（利益率の分散）が連続量なのに対し、
+    **B39 は「一線を越えたか」というカウント**なので、
+    **テールの情報を持つ。**
+    → **D08（Altman Z）/ D13（継続企業の前提）と同じ軸**だが、
+    **10年の実績という最も直接的な証拠。**
+    **263AT の設計（9つが負けても1つで賄う）では
+    「破綻しない」ことがサイジングの前提**なので、
+    B39 はゲート的な使い方に近い。
+  evidence_tier: T2
+  references: ["Asness-Frazzini-Pedersen (RAST 2019) QMJ"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B40:
+  formula: "5年前に高ROE分位だった企業が今も高い確率（業種別に推定）"
+  inputs: [B01, industry]
+  period_convention: FY
+  consolidation: consolidated
+  accounting_standard_note: "B01 を継承。"
+  normalization: rank_sector
+  zero_denominator_policy: "**業種内で5年の履歴を持つ企業が30社以上必要。**"
+  missing_bias: "**業種単位の推定量なので、小業種では推定できない。** 日本の33業種は粗いので推定しやすい面がある。"
+  correlated_with: [B13, B14, B39, C26, T14, U45]
+  economic_rationale: >-
+    **平均回帰の強さを業種別に測る。高ROEが続く業種と続かない業種を区別する。**
+    → **B13（実測 ROIC 持続性）が銘柄単位なのに対し、
+    B40 は業種単位の基準線を与える。**
+    **同じ ROE 20% でも、平均回帰が強い業種（U39 資源）と
+    弱い業種（ブランド・規制産業 U45）では意味が全く違う。**
+    → **T14（LLM が判定する堀）を業種の事前確率で
+    較正するのに使える**
+    — 平均回帰が強い業種で「堀がある」という主張は、
+    より強い証拠を要求すべき。
+    **C26（利益の平均回帰）の業種版。**
+  evidence_tier: T3
+  references: ["構造的判断。B13/C26 の業種版", "Nissim-Penman (RAST 2001) Ratio Analysis and Equity Valuation"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B42:
+  formula: "(MCAP + 負債 - TA) / CASH"
+  inputs: [MCAP, total_liabilities, TA, CASH]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: "TA はリース（IFRS16）で不連続に増える。"
+  zero_denominator_policy: "CASH>0。**現金がゼロに近い企業で発散する。**"
+  missing_bias: "**現金が極小の企業で不安定。** 分母が小さいと値が飛ぶ。"
+  correlated_with: [A03, A44, D07, B03, A14]
+  economic_rationale: >-
+    **OSAP CashProd t=3.6。**
+    分子は「市場が付けた企業価値のうち、
+    帳簿上の資産で説明できない部分」＝無形の価値。
+    それを現金で割る。
+    → **「現金1単位あたり、市場はどれだけの
+    見えない価値を認めているか」**という解釈になる。
+    **A31/B27/B43（無形資産の調整）と同じ問題意識**を、
+    調整せずに市場評価から逆算する形。
+    **推定に頼らないのが利点**だが、
+    上の missing_bias の通り現金が小さい企業で不安定。
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "Chandrashekar-Rao (2009) The Productivity of Corporate Cash Holdings", "OSAP CashProd t=3.6"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B43:
+  formula: "販管費を資本化して積み上げた組織資本 / TA"
+  inputs: [SGA, TA]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "B31 と同じ SGA の区分問題。**償却率（原論文は15%）の設定が必要。**"
+  zero_denominator_policy: "TA>0。SGA の開示が要る。"
+  missing_bias: "B31 を継承。**日本の小型株は SGA の内訳を開示しないことがある。**"
+  correlated_with: [A31, B27, B25, T14, X07, B42]
+  economic_rationale: >-
+    **OSAP OrgCap t=2.9。B27/A31（無形資産調整）の姉妹指標。**
+    Eisfeldt-Papanikolaou (JF 2013)。
+    **R&D（A31/B27）が技術の蓄積を捉えるのに対し、
+    B43 は販売網・ブランド・人材・業務プロセスの蓄積を捉える。**
+    → **R&D を行わない業種（小売・サービス）でも
+    無形資産の調整ができる**という点で、
+    A31/B27 の適用範囲を補完する。
+    **T14（堀の5類型）のうち
+    「無形資産」と「コスト優位」に対応する定量アンカー。**
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "Eisfeldt-Papanikolaou (JF 2013) Organization Capital and the Cross-Section of Expected Returns", "OSAP OrgCap t=2.9"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B45:
+  formula: "売上成長率 - 在庫成長率"
+  inputs: [REV, inventory]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "B22 と同じ在庫評価の問題。"
+  zero_denominator_policy: "前期の売上・在庫>0。**在庫がゼロのサービス業では欠損。**"
+  missing_bias: "B22 を継承。"
+  correlated_with: [B22, B35, B46, U19, U25, C01]
+  economic_rationale: >-
+    **OSAP GrSaleToGrInv t=2.4。在庫が売上より速く増えるのは需要減速のサイン。**
+    B22（在庫日数の変化）とほぼ同じものを
+    成長率の差で測る。
+    → **B22 が水準の変化、B45 が成長率の差**という違いだが、
+    **数学的にはほぼ同値。** Z12 で高い相関が出るはず。
+    **両方持つのは §1.9 の方針**だが、
+    **統合候補として明確。**
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "Abarbanell-Bushee (TAR 1998) Abnormal Returns to a Fundamental Analysis Strategy", "OSAP GrSaleToGrInv t=2.4"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B46:
+  formula: "売上成長率 - 販管費成長率"
+  inputs: [REV, SGA]
+  period_convention: TTM
+  consolidation: consolidated
+  accounting_standard_note: "B31 と同じ SGA の区分問題。"
+  zero_denominator_policy: "前期の売上・販管費>0。"
+  missing_bias: "B31 を継承。"
+  correlated_with: [B31, B45, B30, B19, B08]
+  economic_rationale: >-
+    **OSAP GrSaleToGrOverhead t=2.1。B31 の比率版。**
+    B31 の説明の通り**実質同一**で、
+    **B31（販管費率の変化）と B46（成長率の差）は
+    ほぼ同じことを測っている。**
+    → **B45/B22 と同じく統合候補。**
+    **B45（在庫）と B46（販管費）は
+    Abarbanell-Bushee の fundamental signals の系譜**で、
+    **「売上の伸びに対して何が速く増えているか」を
+    項目別に見る**という一つの発想の変奏。
+    → **この系列（B22/B23/B31/B35/B45/B46）は
+    Z12 で最も明確な塊になるはず。**
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "Abarbanell-Bushee (TAR 1998)", "OSAP GrSaleToGrOverhead t=2.1"]
+  markets: [JP, US]
+  review: {status: verified}
+
+B47:
+  formula: "(CASH + 0.715*売掛金 + 0.547*在庫 + 0.535*有形固定資産) / TA"
+  inputs: [CASH, receivables, inventory, PPE, TA]
+  period_convention: POINT
+  consolidation: consolidated
+  accounting_standard_note: "**リース資産を有形固定資産に含めるかで値が変わる**（IFRS16 移行の影響）。"
+  zero_denominator_policy: "TA>0。"
+  missing_bias: "**ほぼ全銘柄で計算できる。**"
+  correlated_with: [A29, D01, D07, D08, A03, A44]
+  economic_rationale: >-
+    **OSAP tang t=3.4。担保価値。清算時の回収可能性でもあり D カテゴリとも関係する。**
+    Almeida-Campello (RFS 2007) の係数
+    （0.715 / 0.547 / 0.535）は**実際の清算価値の実証から得られたもの。**
+    → **A29（清算価値倍率）の掛け目を恣意的に決めるより、
+    B47 の実証係数を使うべき**（A29 の説明と対応）。
+    **担保価値が高い企業は資金調達制約が緩い**ので、
+    **D22（資金繰り余力）や F25（負債調達）と繋がる。**
+    → **B（質）に置いているが、実質は D（財務健全性）の性格を持つ。**
+  evidence_tier: T1
+  references: ["https://www.openassetpricing.com/", "Almeida-Campello (RFS 2007) Financial Constraints, Asset Tangibility, and Corporate Investment", "OSAP tang t=3.4"]
+  markets: [JP, US]
+  review: {status: verified}
