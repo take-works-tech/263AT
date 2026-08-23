@@ -57,6 +57,8 @@ CACHE = ROOT / "data" / "panel"
 
 # 符号（カタログの sign）。**生の値は歪めず、ここで掛ける**
 # **符号はカタログの符号列そのまま。** ここで推測しない。
+LOOKBACK_YEARS = 3    # latest_period が最大400日遡るので3年で足りる
+
 SIGN = {"E29": +1, "B22": -1, "E03": -1, "F24": -1, "E01": -1,
         "B02": +1, "B06": +1, "A04": +1, "A03": +1, "A06": +1,
         # 価格系（Phase 0、src/params_px.py）
@@ -190,11 +192,20 @@ def main() -> int:
     series = PR.load(cached)
     by_ticker = {r.ticker: r for r in LS.fetch_us(use_cache=True)}
     sic_asof = LS.SicAsOf.from_dera()
-    asof = FA.AsOf(FA.load())
     bars_by_ticker = {t: BR.adjust(s.bars) for t, s in series.items()}
     print("価格 %d 銘柄" % len(series))
 
+    # **勘定データは年ごとに窓を切って読む。**
+    # 69四半期を一度に持つと 2,462万ファクトになり、
+    # Python オブジェクトで数GBに達する（読み込みだけで2分超）。
+    # `latest_period` が最大400日遡るので、**3年ぶんあれば足りる。**
+    def quarters_for(year: int) -> list[str]:
+        return ["%dq%d" % (y, q)
+                for y in range(year - LOOKBACK_YEARS, year + 1)
+                for q in (1, 2, 3, 4)]
+
     total = 0
+    cur_year, asof = None, None
     for t in month_ends(args.start, args.end):
         f = CACHE / ("%s_h%d.json" % (t, args.horizon_days))
         if f.exists() and not args.rebuild:
@@ -202,6 +213,14 @@ def main() -> int:
             print("  %s  キャッシュ %d 行" % (t, n))
             total += n
             continue
+        y = int(t[:4])
+        if y != cur_year:
+            qs = quarters_for(y)
+            fs = FA.load(qs)
+            asof = FA.AsOf(fs)
+            cur_year = y
+            print("  --- %d年: 勘定 %d 件（%s 〜 %s）"
+                  % (y, len(fs), qs[0], qs[-1]))
         rows = build_one(t, series, by_ticker, sic_asof, asof,
                          bars_by_ticker, args.horizon_days)
         f.write_text(json.dumps(rows), encoding="utf-8")
