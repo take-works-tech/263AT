@@ -485,7 +485,7 @@
   inputs:
   - PRICE_adj
   sign: positive
-  buy_class: main
+  buy_class: useful
   sell_class: useful
   gate_policy: null
   horizon:
@@ -517,11 +517,11 @@
   - G19
   - G31
   - O12
-  economic_rationale: '**アンカリング。投資家が52週高値を心理的な基準にするため、 そこに近い銘柄は「高すぎる」と感じて売られ、good news への反応が遅れる。** George-Hwang (JF 2004) はこれがモメンタムより頑健と報告。 **理由が明確に書けるテクニカルは稀**（LAW-25）で、 多くの G パラメータが T3 に留まる中でこれは T1。'
+  economic_rationale: '**アンカリング。投資家が52週高値を心理的な基準にするため、 そこに近い銘柄は「高すぎる」と感じて売られ、good news への反応が遅れる。** George-Hwang (JF 2004) はこれがモメンタムより頑健と報告した。 **【実測 2026-08-23 で訂正】等加重デシル L/S では原論文の期間ですら t=1.52、 公表後は t=0.58（53%減衰）。しかも G01（12-1モメンタム）を控除すると alpha は -0.535%（t=-3.64）、サイズ・株価水準・スプレッドも加えると -0.024%（t=-0.23）で完全に消える。** → **「モメンタムより頑健」「G01 と独立」という主張は取り下げる。** 実証度 T1 は維持する（OSAP 収録 + 一次文献があるのは事実で、 T1-T4 は証拠の質の格付けであって効くかどうかではない）が、 **買いスコアの分類を main から useful に格下げした。** 理由が書けることと効くことは別である（§1.9.6）。'
   references:
   - George-Hwang (JF 2004) The 52-Week High and Momentum Investing
   - https://www.openassetpricing.com/
-  notes: モメンタムより頑健という報告が多い。アンカリング由来。長期でも生きる数少ないテクニカル（LAW-25）
+  notes: アンカリング由来（LAW-25）。モメンタムより頑健 【実測 2026-08-23】G01 を控除すると alpha が消える。買 ◎→○ に格下げ（§1.9.6）
   notes_extra: null
   provenance:
     name_ja: catalog
