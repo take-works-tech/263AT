@@ -70,9 +70,20 @@ def main() -> int:
     ap.add_argument("--batch", type=int, default=40)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--tickers", nargs="*")
+    ap.add_argument("--from-sec", action="store_true",
+                    help="SEC の登録銘柄すべてを対象にする（未取得を埋める）")
     args = ap.parse_args()
 
-    ts = args.tickers or cached_tickers()
+    if args.from_sec:
+        # **SEC の登録銘柄すべて。** 「公開されているすべての個別株を
+        # 対象とする」という設計要件に、キャッシュ済みの 1,383 銘柄では
+        # 届かない（実測で SEC 登録の **13.3%**）。
+        import json
+        f = ROOT / "data" / "listing" / "company_tickers.json"
+        j = json.loads(f.read_text(encoding="utf-8"))
+        ts = sorted({v["ticker"] for v in j.values()})
+    else:
+        ts = args.tickers or cached_tickers()
     todo = [t for t in ts if n_bars(t) < args.only_short]
     if args.limit:
         todo = todo[: args.limit]
