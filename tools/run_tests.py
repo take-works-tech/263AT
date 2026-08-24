@@ -24,6 +24,14 @@ if hasattr(sys.stdout, "reconfigure"):
         pass
 
 
+def check_prereg():
+    """**事前登録が凍結時のままか。** 測定の後の書き換えを見逃さない。"""
+    import subprocess
+    r=subprocess.run([sys.executable, str(ROOT/"tools"/"freeze_prereg.py")],
+                     capture_output=True, text=True, encoding="utf-8", errors="replace")
+    return r.returncode==0, (r.stdout or "").strip().splitlines()[:1]
+
+
 def main() -> int:
     bad = []
     for m in MODULES:
