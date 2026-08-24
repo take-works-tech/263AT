@@ -38,6 +38,12 @@ from __future__ import annotations
 
 import dataclasses
 import enum
+import pathlib
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+
+import security_type as _sectype   # type: ignore  # noqa: E402
 
 
 class Exclusion(enum.Enum):
@@ -52,6 +58,8 @@ class Exclusion(enum.Enum):
     GOING_CONCERN = "継続企業の前提に関する注記（D13）"
     AUDIT_OPINION = "監査意見が無限定適正でない（E22）"
     LOW_PRICE = "株価が低すぎる（板の刻みに対して比が大きく、往復コストが実現不能）"
+    NOT_COMMON = "普通株ではない（社債・優先株・ETF・ユニット・新株予約権）"
+    NOT_PRIMARY = "同一発行体の主銘柄ではない（売買代金が最大でない）"
     MISSING_DATA = "判定に必要なデータが欠損"
 
 
@@ -169,6 +177,18 @@ class Candidate:
     audit_clean: bool | None         # 無限定適正なら True。None は未取得
     price_local: float | None = None   # **現地通貨の株価**（円換算しない）
     market: str = "US"
+    #: 証券種別（`security_type.Kind` の名前）。**既定は UNKNOWN。**
+    #:
+    #: **COMMON を既定にしてはいけない。** 索引が読めていないときに
+    #: 全銘柄が「普通株」として通ってしまう。UNKNOWN なら
+    #: `is_excluded` が False を返すので**現状と同じ挙動**になり、
+    #: かつ「判定していない」ことが値として残る。
+    security_kind: str = "UNKNOWN"
+    #: 同一発行体（CIK）の中で主銘柄か。
+    #: **これは断面での比較が要る**ので、`judge` では決められない。
+    #: 呼び出し側（`build_panel.py`）が `security_type.primary_by_issuer`
+    #: で決めて渡す。None は「判定していない」＝落とさない。
+    is_primary: bool | None = None
 
 
 def judge(c: Candidate, th: Thresholds) -> list[Exclusion]:
@@ -181,6 +201,13 @@ def judge(c: Candidate, th: Thresholds) -> list[Exclusion]:
     out: list[Exclusion] = []
     if not c.listed:
         out.append(Exclusion.NOT_LISTED)
+    # **普通株でないものを外す。** 2026-08-25 に追加（docs/10）。
+    # 社債・優先株は発行体の CIK を共有するので**財務指標がそのまま付き**、
+    # ボラが株式の 1/8 なので **Kelly が 8 倍の比率を与えていた。**
+    if _sectype.is_excluded(_sectype.Kind[c.security_kind]):
+        out.append(Exclusion.NOT_COMMON)
+    if c.is_primary is False:
+        out.append(Exclusion.NOT_PRIMARY)
     if th.require_age:
         if c.months_listed is None:
             out.append(Exclusion.MISSING_DATA)
@@ -294,6 +321,26 @@ def _test() -> int:
     check("継続企業の前提の注記があれば落ちる（D13）",
           Exclusion.GOING_CONCERN in judge(_ok(going_concern_note=True), th))
 
+    # --- 証券種別（2026-08-25 に発注内容を作って踏んだ）--------------------
+    check("**社債は落ちる**（ATLCL が 12% を占めていた）",
+          Exclusion.NOT_COMMON in judge(_ok(security_kind="NOTE"), th))
+    check("**優先株は落ちる**",
+          Exclusion.NOT_COMMON in judge(_ok(security_kind="PREFERRED"), th))
+    check("ETF・ETN は落ちる",
+          Exclusion.NOT_COMMON in judge(_ok(security_kind="FUND"), th))
+    check("普通株は通る",
+          Exclusion.NOT_COMMON not in judge(_ok(security_kind="COMMON"), th))
+    check("**判定できていないものは落とさない**（生存者バイアスを増やさない）",
+          Exclusion.NOT_COMMON not in judge(_ok(security_kind="UNKNOWN"), th))
+    check("**既定は UNKNOWN**（索引が無いとき全部を普通株にしない）",
+          Candidate.__dataclass_fields__["security_kind"].default == "UNKNOWN")
+    check("**主銘柄でなければ落ちる**（同一発行体の重複）",
+          Exclusion.NOT_PRIMARY in judge(_ok(is_primary=False), th))
+    check("主銘柄なら通る",
+          Exclusion.NOT_PRIMARY not in judge(_ok(is_primary=True), th))
+    check("**判定していない（None）なら落とさない**",
+          Exclusion.NOT_PRIMARY not in judge(_ok(is_primary=None), th))
+
     # --- 最低株価（2026-08-23 に実データで踏んだ） -------------------------
     check("**米国のサブペニー株を落とす**",
           Exclusion.LOW_PRICE in judge(
@@ -358,7 +405,7 @@ def _test() -> int:
     check("report が読める形を出す", "UNIVERSE(t)" in report([_ok("A")]))
 
     print("-" * 70)
-    declared = 31
+    declared = 40
     if len(ran) != declared:
         fails.append("**検査の本数が宣言と違う（宣言 %d / 実際 %d）**"
                      % (declared, len(ran)))

@@ -54,6 +54,7 @@ import params_sue as PS    # noqa: E402
 import prior as PRIOR      # noqa: E402
 import portfolio as PF     # noqa: E402
 import prices as PR        # noqa: E402
+import security_type as ST # noqa: E402
 import universe as UV      # noqa: E402
 
 FX = 150.0
@@ -66,6 +67,11 @@ CACHE = ROOT / "data" / "panel"
 # **データが無いことを健全と取り違える**ことになる。
 # build_panel が起動時に有無をはっきり表示する。
 GC_INDEX: dict[int, list[str]] = {}
+
+# 証券種別の索引。**空なら種別ゲートは効かない**（GC_INDEX と同じ扱い）。
+# 2026-08-25 に追加。発注内容を作ったところ、上位4銘柄のうち
+# **3本が社債、1本が優先株**で、合計 41% を占めていた（docs/10）。
+SEC_KINDS: dict[str, str] = {}
 
 LOOKBACK_YEARS = 3    # latest_period が最大400日遡るので3年で足りる
 
@@ -219,7 +225,10 @@ def build_one(t: str, scan_t: dict, by_ticker, sic_asof, asof,
             # **最低株価のゲート。** 現地通貨（米国株なのでドル）で渡す。
             # 円換算すると、日本の 200円 と米国の $1.3 が同じ扱いになる。
             # **調整後ではなく、その時点の実際の株価で判定する**
-            price_local=d["px_true"], market="US")
+            price_local=d["px_true"], market="US",
+            # **証券種別（規則1・2）。** 索引が無ければ UNKNOWN＝落とさない。
+            # 規則3（1発行体1銘柄）は断面での比較が要るので、この下でやる。
+            security_kind=SEC_KINDS.get(tk, "UNKNOWN"))
         if UV.judge(cand, th):
             continue
         v = PU.compute(asof, cik, t, mcap)
@@ -233,7 +242,32 @@ def build_one(t: str, scan_t: dict, by_ticker, sic_asof, asof,
             continue
         raw.append({"ticker": tk, "sector": ff49.industry(sic_asof.get(cik, t)),
                     "vals": vals, "adv_jpy": cand.adv_jpy, "mcap": mcap,
-                    "fwd": d["fwd"].get(horizon)})
+                    "cik": cik, "fwd": d["fwd"].get(horizon)})
+    if not raw:
+        return []
+
+    # --- 規則3: **1発行体につき1銘柄** -------------------------------------
+    # ここでやるのは、**この断面の売買代金を比べる必要がある**から。
+    # `judge` は1銘柄しか見ないので決められない。
+    #
+    # **業種レベルのパラメータより前にやる。** 後だと、同一発行体の
+    # 重複が「業種の構成員」に数えられ、L01/L02 の平均が歪む。
+    if SEC_KINDS:
+        by_cik: dict[int, list[dict]] = {}
+        for r in raw:
+            by_cik.setdefault(r["cik"], []).append(r)
+        kept = []
+        for c, mem in by_cik.items():
+            if len(mem) == 1:
+                kept.append(mem[0])
+                continue
+            pick = ST.primary_by_issuer(
+                [{"ticker": m["ticker"], "adv": m["adv_jpy"],
+                  "kind": ST.Kind[SEC_KINDS.get(m["ticker"], "UNKNOWN")]}
+                 for m in mem])
+            # **決められなければ全部落とす。** 当て推量で1本選ばない
+            kept.extend(m for m in mem if m["ticker"] == pick)
+        raw = kept
     if not raw:
         return []
 
@@ -316,6 +350,18 @@ def main() -> int:
     else:
         print("**継続企業の前提の索引が無い。D13 ゲートは効かない。**")
         print("  tools/build_gc.py を先に実行する")
+    st_path = ROOT / "data" / "security_types.json"
+    if st_path.exists():
+        SEC_KINDS.update(
+            json.loads(st_path.read_text(encoding="utf-8"))["kinds"])
+        n_ex = sum(1 for v in SEC_KINDS.values()
+                   if ST.is_excluded(ST.Kind[v]))
+        print("証券種別の索引: **%d 銘柄**（うち普通株以外 **%d**）"
+              % (len(SEC_KINDS), n_ex))
+    else:
+        # **空を「全部普通株」と取り違えない。** はっきり表示する
+        print("**証券種別の索引が無い。社債・優先株・ETF が混ざる。**")
+        print("  tools/build_sectypes.py を先に実行する")
     by_ticker = {r.ticker: r for r in LS.fetch_us(use_cache=True)}
     sic_asof = LS.SicAsOf.from_dera()
     mes = month_ends(args.start, args.end)
