@@ -60,6 +60,12 @@ CACHE = ROOT / "data" / "panel"
 
 # 符号（カタログの sign）。**生の値は歪めず、ここで掛ける**
 # **符号はカタログの符号列そのまま。** ここで推測しない。
+# 継続企業の前提（D13）の索引。**空なら D13 は効かない。**
+# 空のまま「疑義なし」として通すのは、
+# **データが無いことを健全と取り違える**ことになる。
+# build_panel が起動時に有無をはっきり表示する。
+GC_INDEX: dict[int, list[str]] = {}
+
 LOOKBACK_YEARS = 3    # latest_period が最大400日遡るので3年で足りる
 
 SIGN = {"E29": +1, "B22": -1, "E03": -1, "F24": -1, "E01": -1,
@@ -201,7 +207,13 @@ def build_one(t: str, scan_t: dict, by_ticker, sic_asof, asof,
         cand = UV.Candidate(
             ticker=tk, listed=True, months_listed=None,
             adv_jpy=d["adv20"] * FX, zero_volume_days=d["zero60"],
-            mcap_jpy=mcap, supervised=False, going_concern_note=False,
+            mcap_jpy=mcap, supervised=False,
+            # **継続企業の前提（D13）。** EDGAR 全文検索で埋める。
+            # 索引が空なら False（＝ゲートが効かない）になるが、
+            # **それは build_panel が起動時にはっきり表示する。**
+            # **データが無いことを「健全」と取り違えないため。**
+            going_concern_note=(
+                FT.has_doubt(GC_INDEX, cik, t) if GC_INDEX else False),
             audit_clean=True,
             # **最低株価のゲート。** 現地通貨（米国株なのでドル）で渡す。
             # 円換算すると、日本の 200円 と米国の $1.3 が同じ扱いになる。
@@ -295,6 +307,14 @@ def main() -> int:
     args = ap.parse_args()
 
     base = CACHE          # モジュール定数をそのまま使う（再代入しない）
+    gc_path = ROOT / "data" / "going_concern.json"
+    if gc_path.exists():
+        GC_INDEX.update({int(k): v for k, v in
+                         json.loads(gc_path.read_text(encoding="utf-8")).items()})
+        print("継続企業の前提の索引: **%d 社**" % len(GC_INDEX))
+    else:
+        print("**継続企業の前提の索引が無い。D13 ゲートは効かない。**")
+        print("  tools/build_gc.py を先に実行する")
     by_ticker = {r.ticker: r for r in LS.fetch_us(use_cache=True)}
     sic_asof = LS.SicAsOf.from_dera()
     mes = month_ends(args.start, args.end)
