@@ -142,6 +142,52 @@ def _get(url: str, timeout: int = 45) -> dict:
 CT_BASE = "https://clinicaltrials.gov/api/v2/studies"
 
 
+def trials_raw(sponsor: str, page_size: int = 200,
+               max_pages: int = 10) -> list[dict]:
+    """**1件ごとの登録日と相**を返す。集計しない。
+
+    なぜ集計して保存してはいけないか（2026-08-24 に踏みかけた）:
+    「今日時点の相ごとの件数」を保存して過去の時点で使うと、
+    **2015年に、2020年に登録された試験を数えることになる。**
+    **日付つきの生データを保存すれば、どの基準日でも後から作れる。**
+
+    保存するのは登録日と相だけ。**成否は取らない**（PIT_UNSAFE）。
+    """
+    out: list[dict] = []
+    token = None
+    for _ in range(max_pages):
+        q = {"query.spons": sponsor, "pageSize": str(page_size),
+             "fields": "NCTId,Phase,StudyFirstSubmitDate"}
+        if token:
+            q["pageToken"] = token
+        d = _get(CT_BASE + "?" + urllib.parse.urlencode(q))
+        studies = d.get("studies") or []
+        if not studies:
+            break
+        for s in studies:
+            ps = s.get("protocolSection") or {}
+            sub = (ps.get("statusModule") or {}).get("studyFirstSubmitDate")
+            if not sub:
+                continue
+            ph = (ps.get("designModule") or {}).get("phases") or ["NA"]
+            out.append({"submit": sub, "phase": "/".join(ph)})
+        token = d.get("nextPageToken")
+        if not token:
+            break
+    return out
+
+
+def count_asof(rows: list[dict], asof: str) -> dict:
+    """生データから**その日までの**件数を作る。`trials_raw` の結果を渡す。"""
+    out = {"total": 0, "by_phase": {}}
+    for r in rows:
+        if r["submit"] > asof:
+            continue
+        out["total"] += 1
+        out["by_phase"][r["phase"]] = out["by_phase"].get(r["phase"], 0) + 1
+    return out
+
+
 def trials_asof(sponsor: str, asof: str, page_size: int = 200,
                 max_pages: int = 10) -> dict:
     """**その日までに登録された**臨床試験を、相ごとに数える。

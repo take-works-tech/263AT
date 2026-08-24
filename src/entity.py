@@ -120,10 +120,30 @@ def similarity(a: str, b: str) -> float:
     return j
 
 
-def _get(url: str, timeout: int = 45) -> dict:
-    req = urllib.request.Request(url, headers=UA)
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return json.loads(r.read())
+def _get(url: str, timeout: int = 45, retries: int = 5) -> dict:
+    """**429（レート制限）は待って再試行する。**
+
+    最初の一括取得で **3,734件中 3,663件が 429** になり、
+    論文データがほぼ全滅した（2026-08-24）。
+    しかも**失敗した記録をキャッシュ済みとして保存していた**ので、
+    再実行しても飛ばされる状態だった。
+
+    **待てば通るものを、失敗として確定させてはいけない。**
+    """
+    import time as _t
+    import urllib.error as _e
+    delay = 1.0
+    for k in range(retries):
+        try:
+            req = urllib.request.Request(url, headers=UA)
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return json.loads(r.read())
+        except _e.HTTPError as ex:
+            if ex.code not in (429, 503) or k == retries - 1:
+                raise
+            _t.sleep(delay)
+            delay = min(delay * 2, 30.0)
+    raise RuntimeError("再試行を使い切った")
 
 
 def openalex_candidates(name: str, per_page: int = 20) -> list[dict]:

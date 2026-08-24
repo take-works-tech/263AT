@@ -59,16 +59,24 @@ def cache_path(tk: str) -> pathlib.Path:
     return OUT / (safe + ".json")
 
 
-def fetch_one(tk: str, legal: str, sleep: float = 0.15) -> dict:
+def fetch_one(tk: str, legal: str, sleep: float = 0.15,
+              trials_only: bool = False, prev: dict | None = None) -> dict:
     """1銘柄ぶん取る。**失敗した源は None にして、残りは残す。**
 
     片方が落ちたときに全部捨てると、**再実行のたびに全部取り直し**になる。
     """
     rec = {"ticker": tk, "legal_name": legal, "rors": [], "papers_by_year": {},
            "trials": [], "errors": []}
+    if trials_only and prev:
+        # **既に取れている論文の結果を捨てない。**
+        for k in ("rors", "matched", "papers_by_year"):
+            if prev.get(k):
+                rec[k] = prev[k]
 
     # --- 論文（機関IDに解決してから、年次系列を1回で） ---------------------
     try:
+        if trials_only:
+            raise StopIteration
         r = EN.resolve_openalex(legal)
         rec["rors"] = r["rors"]
         rec["matched"] = [c["name"] for c in r["matched"]]
@@ -81,9 +89,12 @@ def fetch_one(tk: str, legal: str, sleep: float = 0.15) -> dict:
             rec["papers_by_year"] = {
                 x["key"]: x["count"] for x in (d.get("group_by") or [])
                 if str(x.get("key", "")).isdigit()}
+    except StopIteration:
+        pass                      # 論文は取らない指定
     except Exception as e:
         rec["errors"].append("openalex: %s" % str(e)[:90])
-    time.sleep(sleep)
+    if not trials_only:
+        time.sleep(sleep)
 
     # --- 臨床試験（**登録日と相だけ**。成否は取らない） --------------------
     try:
@@ -91,13 +102,13 @@ def fetch_one(tk: str, legal: str, sleep: float = 0.15) -> dict:
         # SEC のマスタは "VERTEX PHARMACEUTICALS INC / MA" のような形で、
         # そのまま ClinicalTrials に渡すと **0件になる**（実際にそうなった）。
         sponsor = EN.normalize(legal) or legal
-        t = EX.trials_asof(sponsor, "2100-01-01", page_size=200, max_pages=6)
+        # **1件ごとの登録日と相を保存する。集計しない。**
+        # 集計して保存すると「今日時点の件数」になり、
+        # **2015年に2020年の試験を数えることになる。**
+        rows = EX.trials_raw(sponsor, page_size=200, max_pages=6)
         rec["trials_sponsor"] = sponsor
-        rec["trials"] = [{"phase": k, "n": v} for k, v in
-                         sorted(t["by_phase"].items())]
-        rec["trials_total"] = t["total"]
-        # 年次にしたいので、もう一度だけ日付つきで取る必要がある場合に備え
-        rec["trials_latest"] = t.get("latest_submit")
+        rec["trials_rows"] = rows
+        rec["trials_total"] = len(rows)
     except Exception as e:
         rec["errors"].append("trials: %s" % str(e)[:90])
     time.sleep(sleep)
@@ -127,8 +138,13 @@ def main() -> int:
     ap.add_argument("--from-panel", action="store_true")
     ap.add_argument("--panel", default="gate")
     ap.add_argument("--limit", type=int, default=0)
-    ap.add_argument("--sleep", type=float, default=0.15)
+    ap.add_argument("--sleep", type=float, default=0.6)
     ap.add_argument("--refresh", action="store_true")
+    ap.add_argument("--trials-only", action="store_true",
+                    help="**臨床試験だけ取り直す。** OpenAlex は1日 $0.10 の"
+                         "上限があり、規模を上げると使えない")
+    ap.add_argument("--only-missing-rows", action="store_true",
+                    help="時点別に使える形（trials_rows）を持たないものだけ")
     a = ap.parse_args()
 
     if a.from_panel:
@@ -146,7 +162,33 @@ def main() -> int:
 
     by = {r.ticker: r for r in LS.fetch_us(use_cache=True)}
     OUT.mkdir(parents=True, exist_ok=True)
-    todo = [t for t in ts if a.refresh or not cache_path(t).exists()]
+    def done(tk: str) -> bool:
+        """**失敗した記録を「取得済み」と数えない。**
+        最初の一括取得では 429 で失敗した記録もファイルとして残り、
+        再実行で飛ばされていた。**失敗はキャッシュではない。**
+        """
+        f = cache_path(tk)
+        if not f.exists():
+            return False
+        try:
+            r = json.loads(f.read_text(encoding="utf-8"))
+        except Exception:
+            return False
+        return not r.get("errors")
+
+    todo = [t for t in ts if a.refresh or not done(t)]
+    if a.only_missing_rows:
+        def needs(tk):
+            f = cache_path(tk)
+            if not f.exists():
+                return True
+            try:
+                r = json.loads(f.read_text(encoding="utf-8"))
+            except Exception:
+                return True
+            # **試験を持つのに時点別の形が無いものだけ取り直す**
+            return bool(r.get("trials_total")) and not r.get("trials_rows")
+        todo = [t for t in ts if needs(t)]
     if a.limit:
         todo = todo[: a.limit]
 
@@ -158,8 +200,14 @@ def main() -> int:
         legal = getattr(m, "name", None) if m else None
         if not legal:
             legal = tk
+        prev = None
+        if cache_path(tk).exists():
+            try:
+                prev = json.loads(cache_path(tk).read_text(encoding="utf-8"))
+            except Exception:
+                prev = None
         try:
-            rec = fetch_one(tk, legal, a.sleep)
+            rec = fetch_one(tk, legal, a.sleep, a.trials_only, prev)
         except Exception as e:
             print("    NG %s: %s" % (tk, str(e)[:70]))
             err += 1
