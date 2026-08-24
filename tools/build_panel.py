@@ -42,6 +42,7 @@ if hasattr(sys.stdout, "reconfigure"):
         pass
 
 import bars as BR          # noqa: E402
+import edgar_fts as FT     # noqa: E402
 import facts as FA         # noqa: E402
 import ff49                # noqa: E402
 import listing as LS       # noqa: E402
