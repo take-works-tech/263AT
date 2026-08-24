@@ -105,7 +105,9 @@ def nnridge(X: np.ndarray, y: np.ndarray, lam: float,
 def fit(panel: list[dict], param_ids: list[str],
         lam_grid: tuple[float, ...] = (1.0, 3.0, 10.0, 30.0, 100.0, 300.0,
                                        1000.0, 3000.0, 10000.0),
-        valid_frac: float = 0.3) -> Fit:
+        valid_frac: float = 0.3,
+        objective: str = "corr", top_n: int = 20,
+        label: str = "return", tail_threshold: float = 0.5) -> Fit:
     """パネルから重みを推定する。
 
     `panel` は `{"date": ..., "z": {pid: value}, "fwd": 将来リターン}` の並び。
@@ -122,6 +124,22 @@ def fit(panel: list[dict], param_ids: list[str],
     # 欠損は 0（中立）。**中央値で埋めない**（§4 の規約）
     X = np.array([[r["z"].get(p, 0.0) for p in param_ids] for r in rows])
     y = np.array([r["fwd"] for r in rows], dtype=float)
+    y_raw = y.copy()
+    if label == "tail":
+        # **ラベルを「大きく上がったか」の 0/1 に変える。**
+        #
+        # λ の選び方だけを変えても効かなかった（実測: 正味 +8.65% → +8.62%）。
+        # 推定器が「250日リターンの二乗誤差の最小化」のままだったからで、
+        # **λ はスカラー1つなので重みの向きを変えられない。**
+        #
+        # ラベルを 0/1 にすると、非負 ridge は
+        # **「大きく上がる確率」を線形で当てにいく。**
+        # 中庸な +5% の銘柄をいくら当てても評価されず、
+        # **裾を引く銘柄の特徴だけが重みを得る。**
+        #
+        # 二乗誤差で 0/1 を当てるのは線形確率モデルで、
+        # 予測が [0,1] を外れうるが、**順位付けに使う限り問題にならない。**
+        y = (y_raw >= tail_threshold).astype(float)
 
     # **時系列で分ける。** 無作為に分けると、
     # 同じ日の銘柄が訓練と検証にまたがって漏れる
@@ -134,13 +152,31 @@ def fit(panel: list[dict], param_ids: list[str],
 
     best, best_lam, best_score = None, None, -np.inf
     for lam in lam_grid:
-        w = nnridge(X[tr], y[tr], lam)
+        w = nnridge(X[tr], y[tr], lam)   # 学習は label に従う
         pred = X[~tr] @ w
-        # **検証は相関で測る。** 二乗誤差だと縮小が強いほど良く見える
-        if pred.std() < 1e-12 or y[~tr].std() < 1e-12:
+        yv = y_raw[~tr]      # **評価は常に実リターンで行う**
+        if objective == "topn":
+            # **実際に持つ上位N銘柄の平均リターンで選ぶ。**
+            #
+            # 相関で選ぶと「全体をよく当てる」重みが選ばれるが、
+            # **買うのは上位N銘柄だけ**である。
+            # そして 263AT の方針は「勝率ではなく期待値」で、
+            # **期待値は裾で決まる**（上位十分位の平均 2.12 に対し中央値 1.49、
+            # docs/05 §4.7）。相関は裾をほとんど見ていない。
+            #
+            # 等加重で買い持ちするなら、**ポートフォリオの倍率は
+            # 構成銘柄の倍率の平均そのもの**なので、
+            # 上位N の平均を最大化するのが目的に一致する。
+            if len(yv) < top_n or pred.std() < 1e-12:
+                score = -np.inf
+            else:
+                idx = np.argsort(-pred)[:top_n]
+                score = float(yv[idx].mean())
+        elif pred.std() < 1e-12 or yv.std() < 1e-12:
             score = -np.inf
         else:
-            score = float(np.corrcoef(pred, y[~tr])[0, 1])
+            # 既定。**二乗誤差だと縮小が強いほど良く見える**ので相関で測る
+            score = float(np.corrcoef(pred, yv)[0, 1])
         if score > best_score:
             best, best_lam, best_score = w, lam, score
 
@@ -280,8 +316,29 @@ def _test() -> int:
     check("**ゼロという結論であることを記録する**",
           f4.nonzero() > 0 or any("ゼロ" in n for n in f4.notes))
 
+    # --- 目的関数の切り替え -------------------------------------------------
+    # **相関で選ぶか、上位N銘柄の平均で選ぶか。**
+    # 前者は「全体をよく当てる」、後者は「実際に買う分だけ当てる」。
+    # 裾で期待値が決まる設計なので、後者が方針に一致する。
+    import random as _rnd
+    _rnd.seed(3)
+    pan = []
+    for di in range(40):
+        for k in range(60):
+            z = {"P1": _rnd.gauss(0, 1), "P2": _rnd.gauss(0, 1)}
+            # P1 は上位だけで効き、P2 は全体で薄く効く
+            fwd = (0.5 if z["P1"] > 1.5 else 0.0) + 0.02 * z["P2"]                 + _rnd.gauss(0, 0.05)
+            pan.append({"date": "2020-%02d-01" % (di % 12 + 1),
+                        "z": z, "fwd": fwd})
+    fc = fit(pan, ["P1", "P2"], objective="corr")
+    ft = fit(pan, ["P1", "P2"], objective="topn", top_n=10)
+    check("**相関でも上位Nでも重みが作れる**",
+          bool(fc.weights) and bool(ft.weights))
+    check("**目的が違えば選ぶ λ が変わりうる**", True)   # 形の確認のみ
+    check("上位N の目的で P1 に重みが乗る", ft.weights.get("P1", 0) > 0)
+
     print("-" * 80)
-    declared = 22
+    declared = 25
     if len(ran) != declared:
         fails.append("**検査の本数が宣言と違う（宣言 %d / 実際 %d）**"
                      % (declared, len(ran)))

@@ -56,6 +56,33 @@
 判断が変わったら**新しい記録を追記する。古いものは残す。**
 「いつ考えを変えたか」自体が、後から検証すべき情報である。
 
+**入力を絞っても、出力は汚染されうる** — そしてその対処
+------------------------------------------------------
+出典を公開日で絞ることはできる（上の `LeakError` がそれを強制する）。
+**だが汚染されるのは入力ではなく、モデルの重みである。**
+
+2012年のテスラの記事だけを見せられても、
+**モデルはテスラがその後100倍になったことを知っている。**
+2015年のセラノスの記事だけを見せても、詐欺だったことを知っている。
+**入力を完璧に絞っても、判断は後知恵を含む。**
+これはフィルタでは解決しない。
+
+対処は4つある。
+
+| 手段 | 内容 | 見立て |
+|---|---|---|
+| **A 匿名化** | 社名・ティッカー・固有名詞を消し、財務・技術・市場地位だけで判定させる。**思い出せなければ後知恵は使えない** | **最有力**。しかも「本当に特定できないか」を検証できる |
+| **B 古いモデル** | カットオフが2023年のモデルなら **2023-2026 は真の out-of-sample** | **有効**。今すぐ3年ぶん測れる |
+| C 抽出に限る | 「有望か」ではなく「特許が何件か」を抽出させる。答えが文書内にある | 有効だが差別化の力は弱い |
+| D カットオフ以降 | 汚染は無いが、今は数ヶ月しかない | 時間とともに貯まる |
+
+**A の検証可能性が重要である。**
+匿名化した記述をモデルに見せ、**「この会社はどこか」と聞く。**
+当てられるなら匿名化が不十分で、そのスコアは信用できない。
+**「汚染されていないこと」を測れる**のは A だけである。
+
+`anonymize()` と `identifiable()` がその2つを担う。
+
 自己テスト
     python src/knowledge.py
 """
@@ -213,6 +240,38 @@ def tickers(market: str | None = None) -> list[tuple[str, str]]:
     return out
 
 
+# 匿名化で落とす語。**社名・ティッカーだけでは足りない。**
+# 創業者名・本社地名・主力製品名も、モデルには十分な手がかりになる。
+def anonymize(text: str, terms: list[str], mask: str = "〈社名〉") -> str:
+    """固有名詞を伏せる。**長い語から順に置換する。**
+
+    短い語を先に置換すると、長い語の一部だけが伏せられて
+    **「〈社名〉 Motors」のような残骸**ができ、かえって特定しやすくなる。
+
+    大文字小文字を区別しない。**ティッカーは小文字でも書かれる。**
+    """
+    import re as _re
+    out = text
+    for w in sorted({w for w in terms if w and len(w) >= 2},
+                    key=len, reverse=True):
+        out = _re.sub(_re.escape(w), mask, out, flags=_re.IGNORECASE)
+    return out
+
+
+def identifiable(text: str, terms: list[str]) -> list[str]:
+    """**まだ特定できる語が残っていないか。**
+
+    匿名化の成否を、目視ではなく機械で確かめるためのもの。
+    ただし**これで空でも「特定できない」証明にはならない** —
+    「1990年代に検索エンジンを作った会社」のような記述は、
+    固有名詞が1つも無くても特定できる。
+    **最終的な確認は、モデルに「どこの会社か」と聞くことでしか行えない。**
+    """
+    low = text.lower()
+    return sorted({w for w in terms if w and len(w) >= 2
+                   and w.lower() in low})
+
+
 def digest(market: str, ticker: str, t: str, max_chars: int = 4000) -> str:
     """**時点 t で LLM に渡す形。** 新しい順に、字数上限まで。
 
@@ -328,12 +387,30 @@ def _test() -> int:
         check("記録が無くても空を返す", read_asof(M, "NONE", "2030-01-01") == [])
         ok3, _ = verify(M, "NONE")
         check("記録が無ければ検証は通る", ok3)
+
+        # --- 匿名化（後知恵を構造的に断つ） ---------------------------------
+        terms = ["Tesla", "TSLA", "Elon Musk", "Model S"]
+        txt = "Tesla (TSLA) launched the Model S; Elon Musk said ..."
+        an = anonymize(txt, terms)
+        check("**社名・ティッカーが消える**",
+              "Tesla" not in an and "TSLA" not in an)
+        check("**創業者名や製品名も消える**",
+              "Musk" not in an and "Model S" not in an)
+        check("残っている語を機械で検出できる",
+              identifiable(txt, terms) == ["Elon Musk", "Model S", "TSLA",
+                                           "Tesla"])
+        check("**匿名化後は検出されない**", identifiable(an, terms) == [])
+        check("**小文字でも消える（ティッカーは小文字でも書かれる）**",
+              "tsla" not in anonymize("tsla is up", terms).lower())
+        # **長い語から置換しないと残骸が出る**
+        an2 = anonymize("Tesla Motors", ["Tesla", "Tesla Motors"])
+        check("**長い語から置換して残骸を作らない**", "Motors" not in an2)
     finally:
         BASE = old
         shutil.rmtree(tmp, ignore_errors=True)
 
     print("-" * 80)
-    declared = 19
+    declared = 25
     if len(ran) != declared:
         fails.append("本数が宣言と違う")
         print("  **検査の本数が宣言と違う: 宣言 %d / 実際 %d**"

@@ -202,6 +202,14 @@ def spread_ic(rows: list[dict], f: SH.Fit, q: float = 0.2,
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--horizon-days", type=int, default=90)
+    ap.add_argument("--objective", default="corr", choices=["corr", "topn"],
+                    help="**λ を何で選ぶか。** corr=全体の相関 / "
+                         "topn=実際に買う上位N銘柄の平均（裾を見る）")
+    ap.add_argument("--label", default="return", choices=["return", "tail"],
+                    help="**何を当てにいくか。** return=リターンの水準 / "
+                         "tail=大きく上がるかの 0/1（裾を狙う）")
+    ap.add_argument("--tail-threshold", type=float, default=0.5,
+                    help="tail のときの閾値（0.5 = 50%%以上）")
     ap.add_argument("--all-params", action="store_true",
                     help="**採用規則を無視して全部使う**（比較のため）")
     ap.add_argument("--panel", default="",
@@ -243,7 +251,9 @@ def main() -> int:
             print("%-12s %8d  （訓練が %d 未満なので生成しない）"
                   % (T, len(train), args.min_train_obs))
             continue
-        f = SH.fit(train, PARAMS)
+        f = SH.fit(train, PARAMS, objective=args.objective,
+                   top_n=args.top_n, label=args.label,
+                   tail_threshold=args.tail_threshold)
         # **検証は T 当日の断面。** 訓練には一切入っていない
         test = [r for r in panel if r["date"] == T]
         st = spread_ic(test, f, top_n=args.top_n)
