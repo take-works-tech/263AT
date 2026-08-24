@@ -32,6 +32,26 @@ def check_prereg():
     return r.returncode==0, (r.stdout or "").strip().splitlines()[:1]
 
 
+def _verify_generations() -> None:
+    """**前向き記録の連鎖を検証する。**
+
+    過去の記録を1件でも書き換えたら落ちる。
+    **5年後の自分が「あの銘柄は入れていたはず」と直せる状態では、
+    証拠にならない。** だから毎回のコミットで確認する。
+    """
+    import subprocess as _sp
+    f = ROOT / "tools" / "record_generation.py"
+    if not f.exists() or not (ROOT / "data" / "generations.jsonl").exists():
+        return
+    r = _sp.run([sys.executable, str(f), "--verify"], capture_output=True,
+                text=True, encoding="utf-8", errors="replace")
+    print("  %-16s %s  %s" % ("前向き記録",
+                              "OK" if r.returncode == 0 else "**FAIL**",
+                              (r.stdout or "").strip()[:60]))
+    if r.returncode != 0:
+        raise SystemExit(1)
+
+
 def main() -> int:
     bad = []
     for m in MODULES:
@@ -52,6 +72,7 @@ def main() -> int:
             print((r.stderr or "")[-800:])
     print("-" * 50)
     print("%d/%d モジュールが通過" % (len(MODULES) - len(bad), len(MODULES)))
+    _verify_generations()
     return 1 if bad else 0
 
 
