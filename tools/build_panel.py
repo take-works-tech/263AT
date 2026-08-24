@@ -48,6 +48,7 @@ import listing as LS       # noqa: E402
 import normalize as NZ     # noqa: E402
 import params_us as PU     # noqa: E402
 import params_px as PX     # noqa: E402
+import params_ind as PI    # noqa: E402
 import prior as PRIOR      # noqa: E402
 import portfolio as PF     # noqa: E402
 import prices as PR        # noqa: E402
@@ -77,6 +78,13 @@ SIGN = {"E29": +1, "B22": -1, "E03": -1, "F24": -1, "E01": -1,
 # **その規則が効いているかどうかは、比べないと分からない。**
 # パネルに両方入れておけば、同じデータで両方を測れる。
 _NOT_ADOPTED = sorted(set(SIGN) - set(PRIOR.ADOPTED))
+
+# **業種レベルのパラメータ。** 業種内では一定なので、
+# 業種内で順位を付けると全員 z=0 になって消える（実測で確認）。
+# → **市場全体で順位を付ける。** normalize.py は変更しない。
+#   呼び出し側が group を揃えるだけでよい。
+SIGN.update({"L01": +1})
+MARKET_SCOPE = set(PI.PARAMS)      # この集合だけ市場全体で正規化する
 
 # **J01（平均売買代金）はここに入れない。**
 # カタログの符号が `?` のまま解決していない。**推測で符号を付けると、
@@ -204,19 +212,36 @@ def build_one(t: str, scan_t: dict, by_ticker, sic_asof, asof,
         if len(vals) < 3:
             continue
         raw.append({"ticker": tk, "sector": ff49.industry(sic_asof.get(cik, t)),
-                    "vals": vals, "adv_jpy": cand.adv_jpy,
+                    "vals": vals, "adv_jpy": cand.adv_jpy, "mcap": mcap,
                     "fwd": d["fwd"].get(horizon)})
     if not raw:
         return []
 
-    # 業種内で正規化して符号を掛ける
+    # --- 業種レベルのパラメータ（**同じ業種の全員が同じ値**）----------------
+    by_sec: dict[str, list[dict]] = {}
+    for r in raw:
+        if r["sector"]:
+            by_sec.setdefault(r["sector"], []).append(
+                {"mcap": r.get("mcap"), "ret": r["vals"].get("G04")})
+    ind = PI.compute(by_sec)
+    for r in raw:
+        got = ind.get(r["sector"] or "")
+        if got:
+            for pid, x in got.items():
+                if x.value is not None:
+                    r["vals"][pid] = x.value
+
+    # 正規化して符号を掛ける
     zs = {r["ticker"]: {} for r in raw}
     for pid in SIGN:
         idx = [i for i, r in enumerate(raw) if pid in r["vals"]]
         if len(idx) < NZ.MIN_GROUP:
             continue
-        res = NZ.normalize([raw[i]["vals"][pid] for i in idx],
-                           [raw[i]["sector"] for i in idx],
+        # **業種レベルのものは市場全体で順位を付ける。**
+        # 業種内で付けると全員 z=0 になり、情報が完全に消える。
+        grp = (["ALL"] * len(idx) if pid in MARKET_SCOPE
+               else [raw[i]["sector"] for i in idx])
+        res = NZ.normalize([raw[i]["vals"][pid] for i in idx], grp,
                            market=["US"] * len(idx))
         for k, i in enumerate(idx):
             if not res.missing[k]:

@@ -68,6 +68,15 @@ ADOPTED = (
     "G38", "G39", "G40", "G41", "G42", "G43", "G44", "G45",
     "I04", "I08", "I27",
     "J22", "J25",
+    # 2026-08-24 追加。**成績を見た変更ではない。**
+    # L01（同業大型株のリターン）を新たに実装したので、
+    # 既存の規則（他者の再現 t >= 3.0）に当てはめた結果として入る。
+    # **再現 t = 9.93** で、L カテゴリ最強。
+    #
+    # 凍結の趣旨は「**結果を見て集合を変えない**」ことであって、
+    # 「新しく実装したものを規則に当てはめない」ことではない。
+    # 規則は変えていない。**当てはめる対象が増えただけ。**
+    "L01",
 )
 
 # 実装済みだが見送ったもの。**理由を残す**（消すと再発する）
@@ -101,7 +110,8 @@ def derive() -> tuple[list[str], list[str], list[str]]:
     import params_us as PU      # type: ignore
     import params_px as PX      # type: ignore
     import params_fx as FX      # type: ignore
-    impl = set(PU.REGISTRY) | set(PX.PARAMS) | set(FX.PARAMS)
+    import params_ind as PI     # type: ignore
+    impl = set(PU.REGISTRY) | set(PX.PARAMS) | set(FX.PARAMS) | set(PI.PARAMS)
 
     adopted, deferred, gates = [], [], []
     for e in entries:
@@ -162,7 +172,7 @@ def _test() -> int:
                   % sorted(set(adopted) - set(ADOPTED)))
         check("見送りの一覧も一致する", sorted(DEFERRED) == deferred)
         check("ゲートの一覧も一致する", sorted(AS_GATE) == gates)
-        check("**採用は 28 本**", len(adopted) == 28)
+        check("**採用は 29 本**", len(adopted) == 29)
 
     # 取り違えの記録が残っていること（**消すと再発する**）
     check("**I26 の取り違えを記録している**", "1.19" in DEFERRED.get("I26", ""))
