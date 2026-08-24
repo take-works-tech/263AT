@@ -151,8 +151,15 @@ def scan_one(tk: str, mes: list[str], horizons: list[int]) -> dict:
             continue
         vals = {k: x.value for k, x in PX.compute_all(rows, i).items()
                 if x.value is not None and k in SIGN}
+        # **その時点で実際に付いていた株価。** 調整後ではない。
+        # 調整後を使うと「その後に大きく分割した銘柄＝勝ち馬」が
+        # 低位株に見え、ゲートと J25 の両方が未来を見ることになる。
+        px_true = rows[i]["close"] * PR.unadjust_factor(ser, t)
+        if "J25" in SIGN:
+            vals["J25"] = px_true
         out[t] = {
             "close": rows[i]["close"],
+            "px_true": px_true,
             "adv20": sum(x["turnover"] for x in rows[i - 19: i + 1]) / 20.0,
             "zero60": sum(1 for x in rows[i - 59: i + 1] if x["volume"] <= 0),
             "vals": vals,
@@ -187,7 +194,8 @@ def build_one(t: str, scan_t: dict, by_ticker, sic_asof, asof,
             audit_clean=True,
             # **最低株価のゲート。** 現地通貨（米国株なのでドル）で渡す。
             # 円換算すると、日本の 200円 と米国の $1.3 が同じ扱いになる。
-            price_local=d["close"], market="US")
+            # **調整後ではなく、その時点の実際の株価で判定する**
+            price_local=d["px_true"], market="US")
         if UV.judge(cand, th):
             continue
         v = PU.compute(asof, cik, t, mcap)
