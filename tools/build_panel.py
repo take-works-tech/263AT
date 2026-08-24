@@ -49,6 +49,7 @@ import normalize as NZ     # noqa: E402
 import params_us as PU     # noqa: E402
 import params_px as PX     # noqa: E402
 import params_ind as PI    # noqa: E402
+import params_sue as PS    # noqa: E402
 import prior as PRIOR      # noqa: E402
 import portfolio as PF     # noqa: E402
 import prices as PR        # noqa: E402
@@ -83,8 +84,10 @@ _NOT_ADOPTED = sorted(set(SIGN) - set(PRIOR.ADOPTED))
 # 業種内で順位を付けると全員 z=0 になって消える（実測で確認）。
 # → **市場全体で順位を付ける。** normalize.py は変更しない。
 #   呼び出し側が group を揃えるだけでよい。
-SIGN.update({"L01": +1})
-MARKET_SCOPE = set(PI.PARAMS)      # この集合だけ市場全体で正規化する
+SIGN.update({"L01": +1, "N02": +1, "L02": +1})
+# **市場全体で正規化するのは、業種内で一定になるものだけ。**
+# N02（SUE）は銘柄ごとに違う値なので、業種内で正規化する。
+MARKET_SCOPE = set(PI.PARAMS) | set(PS.MARKET_SCOPE)
 
 # **J01（平均売買代金）はここに入れない。**
 # カタログの符号が `?` のまま解決していない。**推測で符号を付けると、
@@ -208,6 +211,10 @@ def build_one(t: str, scan_t: dict, by_ticker, sic_asof, asof,
             continue
         v = PU.compute(asof, cik, t, mcap)
         vals = {k: x.value for k, x in v.items() if x.value is not None}
+        # **決算サプライズ（N02、再現 t=9.32）。** L02 の入力にもなる
+        x = PS.n02(asof, cik, t)
+        if x.value is not None:
+            vals["N02"] = x.value
         vals.update(d["vals"])
         if len(vals) < 3:
             continue
@@ -230,6 +237,20 @@ def build_one(t: str, scan_t: dict, by_ticker, sic_asof, asof,
             for pid, x in got.items():
                 if x.value is not None:
                     r["vals"][pid] = x.value
+
+    # **同業大型株の決算サプライズ（L02、再現 t=3.21）。**
+    # N02 を集計するので、N02 の後でなければ作れない。
+    by_sue: dict[str, list[dict]] = {}
+    for r in raw:
+        if r["sector"]:
+            by_sue.setdefault(r["sector"], []).append(
+                {"mcap": r.get("mcap"), "sue": r["vals"].get("N02")})
+    for sec, x in PS.compute_l02(by_sue).items():
+        if x.value is None:
+            continue
+        for r in raw:
+            if r["sector"] == sec:
+                r["vals"]["L02"] = x.value
 
     # 正規化して符号を掛ける
     zs = {r["ticker"]: {} for r in raw}

@@ -77,6 +77,11 @@ ADOPTED = (
     # 「新しく実装したものを規則に当てはめない」ことではない。
     # 規則は変えていない。**当てはめる対象が増えただけ。**
     "L01",
+    # 2026-08-24 追加。**成績を見た変更ではない。**
+    # N02（決算サプライズ、**再現 t=9.32** — 実装済みで最強クラス）と
+    # L02（同業大型株の SUE、再現 t=3.21）を実装したので、
+    # 既存の規則に当てはめた結果として入る。
+    "N02", "L02",
 )
 
 # 実装済みだが見送ったもの。**理由を残す**（消すと再発する）
@@ -111,7 +116,9 @@ def derive() -> tuple[list[str], list[str], list[str]]:
     import params_px as PX      # type: ignore
     import params_fx as FX      # type: ignore
     import params_ind as PI     # type: ignore
-    impl = set(PU.REGISTRY) | set(PX.PARAMS) | set(FX.PARAMS) | set(PI.PARAMS)
+    import params_sue as PS     # type: ignore
+    impl = (set(PU.REGISTRY) | set(PX.PARAMS) | set(FX.PARAMS)
+            | set(PI.PARAMS) | set(PS.PARAMS))
 
     adopted, deferred, gates = [], [], []
     for e in entries:
@@ -172,7 +179,7 @@ def _test() -> int:
                   % sorted(set(adopted) - set(ADOPTED)))
         check("見送りの一覧も一致する", sorted(DEFERRED) == deferred)
         check("ゲートの一覧も一致する", sorted(AS_GATE) == gates)
-        check("**採用は 29 本**", len(adopted) == 29)
+        check("**採用は 31 本**", len(adopted) == 31)
 
     # 取り違えの記録が残っていること（**消すと再発する**）
     check("**I26 の取り違えを記録している**", "1.19" in DEFERRED.get("I26", ""))

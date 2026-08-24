@@ -13,7 +13,7 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-MODULES = ["guard.py", "bars.py", "universe.py", "normalize.py", "listing.py", "ff49.py", "facts.py", "periods.py", "prices.py", "params_us.py", "params_px.py", "factors.py", "params_fx.py", "prior.py", "knowledge.py", "extern.py", "entity.py", "params_ex.py", "ppi.py", "params_ind.py", "pipeline.py",
+MODULES = ["guard.py", "bars.py", "universe.py", "normalize.py", "listing.py", "ff49.py", "facts.py", "periods.py", "prices.py", "params_us.py", "params_px.py", "factors.py", "params_fx.py", "prior.py", "knowledge.py", "extern.py", "entity.py", "params_ex.py", "ppi.py", "params_ind.py", "params_sue.py", "pipeline.py",
            "sell.py", "sizing.py", "backtest.py", "portfolio.py", "shrink.py",
            "credentials.py", "jquants.py", "edinet.py"]
 
