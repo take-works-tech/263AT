@@ -107,6 +107,8 @@ def main() -> int:
     ap.add_argument("--min-trade-frac", type=float, default=0.005,
                     help="**この比率未満の調整はしない。** 回転率＝コストの主因")
     ap.add_argument("--all-params", action="store_true")
+    ap.add_argument("--max-invested", type=float, default=0.90,
+                    help="投資比率の目標かつ上限。**残りは現金**")
     ap.add_argument("--max-names", type=int, default=0,
                     help="保有銘柄数の上限（0 で無制限）。**集中度の効果を測る**")
     ap.add_argument("--benchmark", default="",
@@ -144,8 +146,12 @@ def main() -> int:
     store = BarStore()
     rules = SL.SellRules(stop_loss=a.stop_loss, trailing_stop=a.trailing,
                          max_hold_years=a.max_hold_years)
-    limits = (SZ.RiskLimits(max_names=a.max_names) if a.max_names
-              else SZ.RiskLimits())
+    # **投資比率を振れるようにする。**（2026-08-25、docs/11 §4.2）
+    # 47% の現金は誰も選んでいなかった。**選んだ値にするための引数。**
+    kw = {"max_invested": a.max_invested}
+    if a.max_names:
+        kw["max_names"] = a.max_names
+    limits = SZ.RiskLimits(**kw)
     costs = PF.Costs(spread_bps=a.spread_bps)
     pf = PF.Portfolio(cash=a.capital)
 

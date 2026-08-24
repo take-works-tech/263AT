@@ -106,6 +106,72 @@ def kelly_weights(cands: list[Candidate], fraction: float = 0.25,
     return {k: v / tot for k, v in raw.items()}
 
 
+def _cap(w: dict[str, float], sector: dict[str, str | None],
+         limits: "RiskLimits") -> dict[str, float]:
+    """銘柄上限と業種上限を満たすまで**下げる。上げはしない。**
+
+    **1つずつ適用すると順序で結果が変わる**ので、収束するまで繰り返す。
+    銘柄上限で切ると業種合計も下がり、業種上限で縮めると
+    銘柄上限を再び満たすので、通常は2〜3周で収束する。
+    """
+    w = dict(w)
+    for _ in range(50):
+        changed = False
+        for k, v in list(w.items()):
+            if v > limits.max_per_name + 1e-12:
+                w[k] = limits.max_per_name
+                changed = True
+        by_sec: dict[str | None, float] = {}
+        for k, v in w.items():
+            by_sec[sector.get(k)] = by_sec.get(sector.get(k), 0.0) + v
+        for sec, tot in by_sec.items():
+            if tot > limits.max_per_sector + 1e-12:
+                scale = limits.max_per_sector / tot
+                for k in w:
+                    if sector.get(k) == sec:
+                        w[k] *= scale
+                changed = True
+        if not changed:
+            break
+    return w
+
+
+def _fill(w: dict[str, float], sector: dict[str, str | None],
+          limits: "RiskLimits") -> dict[str, float]:
+    """**上限を守りつつ、投資比率を `max_invested` まで埋める。**
+
+    `max_invested` は**上限であって目標でもある。**
+    2026-08-25 まで「超えたら縮める」だけだったので、
+    段1・段2 が削った分が戻らず、**合計は 90% に一度も届かなかった。**
+
+    やり方は素朴な不動点反復である。
+
+        合計が目標に足りない → 全体を目標/合計 倍する
+        → 上限を超えたものを抑える（`_cap`）
+        → まだ足りなければ繰り返す
+
+    **上限に達した銘柄は抑えられ、余力のある銘柄が余りを吸う。**
+    全員が上限に達したら合計が増えなくなるので、そこで止める。
+    **上限の組み合わせで 90% に届かないなら、届かないままでよい。**
+    """
+    w = _cap(w, sector, limits)
+    for _ in range(100):
+        tot = sum(w.values())
+        if tot <= 0:
+            return w
+        if tot > limits.max_invested + 1e-12:
+            return {k: v * limits.max_invested / tot for k, v in w.items()}
+        if tot >= limits.max_invested - 1e-9:
+            return w
+        nxt = _cap({k: v * limits.max_invested / tot for k, v in w.items()},
+                   sector, limits)
+        # **増えなくなったら止める。** 全員が上限に張り付いている
+        if sum(nxt.values()) - tot < 1e-9:
+            return nxt
+        w = nxt
+    return w
+
+
 def apply_limits(weights: dict[str, float], cands: list[Candidate],
                  limits: RiskLimits) -> tuple[dict[str, float], list[str]]:
     """すべての上限を**同時に**満たすよう調整する。
@@ -120,53 +186,50 @@ def apply_limits(weights: dict[str, float], cands: list[Candidate],
     w = dict(weights)
     notes = []
 
-    for _ in range(50):                    # 収束しなければ打ち切る
-        changed = False
+    w = _fill(w, sector, limits)
 
-        # 1) 銘柄上限
-        for k, v in list(w.items()):
-            if v > limits.max_per_name:
-                w[k] = limits.max_per_name
-                changed = True
-        # 2) 業種上限
-        by_sec: dict[str | None, float] = {}
-        for k, v in w.items():
-            by_sec[sector.get(k)] = by_sec.get(sector.get(k), 0.0) + v
-        for sec, tot in by_sec.items():
-            if tot > limits.max_per_sector + 1e-12:
-                scale = limits.max_per_sector / tot
-                for k in w:
-                    if sector.get(k) == sec:
-                        w[k] *= scale
-                changed = True
-        # 3) 投資比率の上限（現金比率の下限）
-        tot = sum(w.values())
-        if tot > limits.max_invested + 1e-12:
-            for k in w:
-                w[k] *= limits.max_invested / tot
-            changed = True
-
-        if not changed:
+    # 4) **小さすぎるポジションを落とし、空いた分を配り直す。**
+    #
+    # **2026-08-25 まで、落とした分を配り直していなかった。**
+    # 段1（銘柄上限）と段2（業種上限）も減らすだけだったので、
+    # 合計は 1.00 から一方的に減り、**投資上限 90% には一度も届かなかった。**
+    # 13.5年の実測で **投資比率の中央値は 53%** だった（docs/11）。
+    #
+    # 「配り直すと上限を再び超えるので現金として残す」と書いていたが、
+    # **上限を超えたらまた抑えて、増えなくなるまで繰り返せばよい。**
+    # `_fill` がそれをやる。
+    #
+    # **一度に全部落とさない。** 同一業種20銘柄が各 1.75% で全員が
+    # 最小 2% を下回るとき、全部落とすと**空のポートフォリオ**になるが、
+    # **17銘柄なら各 2.06% で成立する**（業種上限 35% ÷ 2%）。
+    # → **一番小さいものから1つずつ落として、そのつど配り直す。**
+    #
+    # **まず、構造的に入りきらない本数を一気に落とす。**
+    # 投資上限 90% ÷ 最小 2% = **45銘柄が絶対の上限**である。
+    # 600銘柄を1つずつ落とすと 555 回まわることになり、
+    # **反復上限で打ち切られて「最小未満が残る」不変条件違反が出た**
+    # （2026-08-25、実際にこの実装で踏んだ）。
+    n_dropped = 0
+    max_fit = int(limits.max_invested / limits.min_position)
+    if len(w) > max_fit:
+        keep = sorted(w, key=lambda k: -w[k])[:max_fit]
+        n_dropped += len(w) - len(keep)
+        w = {k: w[k] for k in keep}
+        w = _fill(w, sector, limits)
+    # 残りは業種上限が絡むので、**1つずつ落として そのつど配り直す。**
+    for _ in range(len(w) + 5):
+        small = [k for k, v in w.items() if v < limits.min_position]
+        if not small:
             break
-    else:
-        notes.append("**上限の適用が収束しなかった。** 上限の組み合わせが矛盾している可能性")
-
-    # 4) 小さすぎるポジションを落とす。**落とした分は配り直さない**
-    #    配り直すと上限を再び超えるので、現金として残す
-    #
-    # **ここで「上限の組み合わせが何も持てない解を生む」ことがある。**
-    # 業種上限 35% ÷ 最小ポジション 2% = **同一業種に17銘柄が構造的な上限。**
-    # それを超える候補が同じ業種に並ぶと、按分後に全員が最小を下回って全滅する。
-    # 自己テストで実際に踏んだ（同一業種20銘柄 → 各 1.75% → 全部消える）。
-    #
-    # **黙って空のポートフォリオを返してはいけない。** 必ず警告する。
-    n_before = len(w)
-    dropped = [k for k, v in w.items() if v < limits.min_position]
-    for k in dropped:
-        del w[k]
-    if dropped:
-        notes.append("最小ポジション未満で除外: %d 銘柄" % len(dropped))
-    if n_before and not w:
+        w.pop(min(small, key=lambda k: w[k]))
+        n_dropped += 1
+        if not w:
+            break
+        w = _fill(w, sector, limits)
+    if n_dropped:
+        notes.append("最小ポジション未満で除外: %d 銘柄（**残りに配り直した**）"
+                     % n_dropped)
+    if n_dropped and not w:
         notes.append(
             "**上限の組み合わせで全銘柄が除外された。**"
             " 業種上限 %.0f%% ÷ 最小ポジション %.0f%% = 同一業種 %d 銘柄が構造的な上限。"
@@ -311,9 +374,16 @@ def _test() -> int:
     # 業種上限 35% ÷ 最小 2% = 同一業種17銘柄が構造的な上限
     too_many = [_c("T%02d" % i, "X", 1.0) for i in range(20)]
     w3b, n3b = apply_limits(kelly_weights(too_many), too_many, L)
-    check("**同一業種20銘柄では按分後に全員が最小を下回る**", w3b == {})
-    check("**空になったことを黙らない（警告する）**",
-          any("全銘柄が除外" in x for x in n3b))
+    # **2026-08-25 まで、ここは空の辞書を返していた。**
+    # 20銘柄を按分すると各 1.75% で全員が最小 2% を下回るので、
+    # **全部落として何も持たなかった。**
+    # 3銘柄だけ落とせば **17銘柄が各 2.06% で成立する**（35% ÷ 2% = 17.5）。
+    check("**17銘柄が残る（全滅させない）**", len(w3b) == 17)
+    check("**残った分に配り直して業種上限まで使う**",
+          abs(sum(w3b.values()) - 0.35) < 1e-6)
+    check("**全員が最小ポジション以上**",
+          all(v >= L.min_position - 1e-12 for v in w3b.values()))
+    check("落としたことを記録する", any("最小ポジション" in x for x in n3b))
 
     mixed = [_c("A", "X", 3.0), _c("B", "Y", 1.0), _c("C", "Z", 1.0)]
     w4, _ = apply_limits(kelly_weights(mixed), mixed, L)
@@ -326,9 +396,15 @@ def _test() -> int:
 
     tiny = [_c("A", "X", 100.0)] + [_c("T%02d" % i, "S%d" % i, 0.01) for i in range(20)]
     w6, n6 = apply_limits(kelly_weights(tiny), tiny, L)
-    check("**最小ポジション未満は落とす**", all(v >= L.min_position for v in w6.values()))
-    check("落としたことを記録する", any("最小ポジション" in x for x in n6))
-    check("**落とした分は配り直さない（現金にする）**", sum(w6.values()) < L.max_invested)
+    check("**最小ポジション未満は落とす**",
+          all(v >= L.min_position - 1e-12 for v in w6.values()))
+    # **2026-08-25 に方針を変えた。** 以前は「落とした分は配り直さない」で、
+    # その結果 13.5年の実測で **投資比率の中央値が 53%** だった（docs/11）。
+    # 段1・段2 も減らすだけだったので、**投資上限 90% に一度も届かなかった。**
+    check("**落とした分を配り直して投資上限まで使う**",
+          abs(sum(w6.values()) - L.max_invested) < 1e-6)
+    check("**スコアが桁違いに小さくても、上限に達した分は次点が吸う**",
+          w6["A"] <= L.max_per_name + 1e-9 and len(w6) > 1)
 
     lim_n = RiskLimits(max_names=5)
     w7, n7 = apply_limits(kelly_weights(diverse), diverse, lim_n)
@@ -383,11 +459,19 @@ def _test() -> int:
 
     check("候補が空なら空を返す", target_positions([], 3_000_000, L)[0] == {})
 
-    # **上位 N 本の選択。** これが無いと最小ポジションで全滅する
+    # **上位 N 本の選択。**
+    #
+    # 2026-08-25 の修正前は、これが無いと**全滅**していた（600銘柄が
+    # 各 0.15% になり、全員が最小 2% を下回って空になる）。
+    # 修正後は **投資上限 90% ÷ 最小 2% = 45銘柄**に自動で収まるので
+    # 全滅はしない。だが**スコアの低い銘柄まで入る**ので、
+    # **select_top で先に絞る意味は残る。**
     huge = [_c("T%03d" % i, "S%d" % (i % 30), 1.0 + i * 0.001) for i in range(600)]
     w_no = apply_limits(kelly_weights(huge), huge, L)
-    check("**600銘柄にそのまま配ると最小ポジションでほぼ全滅する**",
-          len(w_no[0]) < 20)
+    check("**600銘柄でも全滅せず、構造上限の45銘柄に収まる**",
+          0 < len(w_no[0]) <= int(L.max_invested / L.min_position))
+    check("**そのときも投資上限を使い切る**",
+          abs(sum(w_no[0].values()) - L.max_invested) < 1e-6)
     w_top, n_top = target_positions(huge, 3_000_000, L)
     check("**上位 N を選べば実際に保有できる本数になる**", 20 <= len(w_top) <= 45)
     check("選んだことを記録する", any("上位" in x for x in n_top))
@@ -402,7 +486,7 @@ def _test() -> int:
           all(c.score > 0 for c in select_top(huge + [_c("X", "S", -1.0)], 999)))
 
     print("-" * 78)
-    declared = 35
+    declared = 38
     if len(ran) != declared:
         fails.append("**検査の本数が宣言と違う（宣言 %d / 実際 %d）**"
                      % (declared, len(ran)))
