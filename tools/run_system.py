@@ -107,6 +107,14 @@ def main() -> int:
     ap.add_argument("--min-trade-frac", type=float, default=0.005,
                     help="**この比率未満の調整はしない。** 回転率＝コストの主因")
     ap.add_argument("--all-params", action="store_true")
+    ap.add_argument("--max-names", type=int, default=0,
+                    help="保有銘柄数の上限（0 で無制限）。**集中度の効果を測る**")
+    ap.add_argument("--benchmark", default="",
+                    choices=["", "random"],
+                    help="**スコアを使わない対照。** random は銘柄名から決まる"
+                         "疑似乱数で選ぶ（同じゲート・同じサイジング・同じコスト）")
+    ap.add_argument("--dump", default="",
+                    help="評価額の推移を書き出す（年ごとのばらつきを見るため）")
     a = ap.parse_args()
 
     panel = load_panel(a.panel, a.horizon)
@@ -136,7 +144,8 @@ def main() -> int:
     store = BarStore()
     rules = SL.SellRules(stop_loss=a.stop_loss, trailing_stop=a.trailing,
                          max_hold_years=a.max_hold_years)
-    limits = SZ.RiskLimits()
+    limits = (SZ.RiskLimits(max_names=a.max_names) if a.max_names
+              else SZ.RiskLimits())
     costs = PF.Costs(spread_bps=a.spread_bps)
     pf = PF.Portfolio(cash=a.capital)
 
@@ -170,7 +179,15 @@ def main() -> int:
             tk = r["ticker"]
             if tk in forced:
                 continue                  # **売ると決めた銘柄は買い直さない**
-            s = SH.score(r["z"], fit)
+            if a.benchmark == "random":
+                # **スコアを使わない対照。**
+                # 「+8%/年」がスコアの力なのか、
+                # **ユニバースとゲートとサイジングの力なのか**を分ける。
+                # 銘柄名と日付から決まるので再現する（乱数の種に依存しない）。
+                import hashlib
+                s = int(hashlib.md5((tk + T).encode()).hexdigest()[:8], 16)                     / float(0xFFFFFFFF)
+            else:
+                s = SH.score(r["z"], fit)
             if s is None or s <= 0:
                 continue
             b = store.upto(tk, T)
@@ -257,6 +274,14 @@ def main() -> int:
         if peak > 0 and (v / peak - 1.0) < mdd:
             mdd, mdd_at = v / peak - 1.0, d
     print("  **最大ドローダウン  %.1f%%**（%s）" % (100 * mdd, mdd_at))
+    if a.dump:
+        # **平均だけでは「どれくらい振れるか」が分からない。**
+        # 年ごとの推移を残して、最悪年・最良年を測れるようにする。
+        pathlib.Path(a.dump).write_text(
+            json.dumps([{"date": d, "value": v} for d, v in equity]
+                       + [{"date": dates[-1], "value": final}]),
+            encoding="utf-8")
+        print("  → 評価額の推移を %s に書き出した" % a.dump)
 
     print()
     print("  売りの内訳:")

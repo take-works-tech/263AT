@@ -176,9 +176,26 @@ def apply_limits(weights: dict[str, float], cands: list[Candidate],
 
     # 5) 銘柄数の上限。**スコアではなく重みの大きい順に残す**
     if limits.max_names is not None and len(w) > limits.max_names:
+        before = sum(w.values())
         keep = sorted(w, key=lambda k: -w[k])[:limits.max_names]
         w = {k: w[k] for k in keep}
-        notes.append("銘柄数の上限 %d に切り詰めた" % limits.max_names)
+        # **切り詰めたら投資比率を戻す。**
+        #
+        # 戻さないと、上限5銘柄で「各2%×5 = 10%だけ投資、90%は現金」になる。
+        # 実測でそれが起きた（2026-08-24）: 上限を 5/10/20/30 と振ったら
+        # CAGR が +1.67/+4.91/+7.83/+8.09% と単調に増え、
+        # **「集中は不利」という結論が出かけた。**
+        # 実際に測っていたのは集中度ではなく**現金比率**だった。
+        #
+        # 1銘柄あたりの上限（max_per_name）は超えない。
+        # 超える場合は投資比率が戻りきらないが、**それは上限の意味そのもの。**
+        after = sum(w.values())
+        if after > 0 and before > after:
+            scale = min(before / after,
+                        limits.max_per_name / max(w.values()))
+            w = {k: v * scale for k, v in w.items()}
+        notes.append("銘柄数の上限 %d に切り詰め、投資比率を %.0f%% に戻した"
+                     % (limits.max_names, 100 * sum(w.values())))
 
     if sum(w.values()) > 0:
         by_sec2: dict[str | None, float] = {}
@@ -317,6 +334,16 @@ def _test() -> int:
     w7, n7 = apply_limits(kelly_weights(diverse), diverse, lim_n)
     check("銘柄数の上限が効く", len(w7) == 5)
     check("上限を記録する", any("銘柄数の上限" in x for x in n7))
+    # **切り詰めた後に投資比率が戻ること。**
+    # 戻さないと「上限5銘柄 = 10%だけ投資、90%現金」になり、
+    # 集中度ではなく現金比率を測ることになる（2026-08-24 に実際に踏んだ）。
+    w7b, _ = apply_limits(kelly_weights(diverse), diverse,
+                          RiskLimits(max_names=None))
+    check("**切り詰めても投資比率が落ちない**",
+          sum(w7.values()) >= sum(w7b.values()) - 1e-9
+          or max(w7.values()) >= lim_n.max_per_name - 1e-9)
+    check("**1銘柄あたりの上限は超えない**",
+          all(v <= lim_n.max_per_name + 1e-9 for v in w7.values()))
 
     # 流動性
     thin = [_c("A", "X", 1.0, adv=1e6)]      # 平均売買代金 100万円
@@ -375,7 +402,7 @@ def _test() -> int:
           all(c.score > 0 for c in select_top(huge + [_c("X", "S", -1.0)], 999)))
 
     print("-" * 78)
-    declared = 33
+    declared = 35
     if len(ran) != declared:
         fails.append("**検査の本数が宣言と違う（宣言 %d / 実際 %d）**"
                      % (declared, len(ran)))
