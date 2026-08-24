@@ -100,16 +100,21 @@ def n02(asof, cik: int, t: str) -> Value:
     株数で割ると、自社株買いや増資が「サプライズ」に化ける。
     **標準化するので水準は問わない**（分子と分母の両方に効くだけ）。
     """
-    q = PE.quarter_series(asof, cik, "NI", t)
-    if not q or len(q.periods) < MIN_HISTORY + 4:
-        return Value("N02", None, "四半期利益が %d 期に満たない"
-                     % (MIN_HISTORY + 4))
-    rows = [(p.ddate, p.value) for p in q.periods]
+    # **quarter_series は list[Fact] を新しい順で返す。**
+    # 最初 `q.periods` と書いて AttributeError で落ちた。
+    # **戻り値の形を確認せずに書いたのが原因。**
+    n = MIN_HISTORY + 4
+    q = PE.quarter_series(asof, cik, "NI", t, n=n)
+    if not q or len(q) < n:
+        return Value("N02", None, "四半期利益が %d 期に満たない（%d 期）"
+                     % (n, len(q) if q else 0))
+    rows = [(f.ddate, f.value) for f in q]
     v = sue(rows)
     if v is None:
         return Value("N02", None,
                      "サプライズの標準偏差がゼロ、または履歴が足りない")
-    return Value("N02", float(v), derived_q4=getattr(q, "derived_q4", False))
+    return Value("N02", float(v),
+                 derived_q4=any(getattr(f, "derived_q4", False) for f in q))
 
 
 def l02(members: list[dict]) -> float | None:
@@ -214,8 +219,33 @@ def _test() -> int:
           "N02" not in MARKET_SCOPE)
     check("分母に使う四半期数は8", MIN_HISTORY == 8)
 
+    # **n02 は AsOf を要る。だから最初テストに含めず、そこが壊れた。**
+    # `quarter_series` の戻り値を Composed だと思い込み `q.periods` と書いて
+    # AttributeError で落ちた（自己テストは 17/17 通っていた）。
+    # **検査していない部分が壊れる。** 最小の偽物で経路だけでも通す。
+    class _F:
+        def __init__(self, d, v): self.ddate, self.value = d, v
+
+    class _AsOf:
+        pass
+
+    import types as _t
+    real = PE.quarter_series
+    PE.quarter_series = lambda a, c, code, t, n=8: [
+        _F(d, v) for d, v in reversed(rows)][:n]
+    try:
+        got = n02(_AsOf(), 1, "2020-12-31")
+        check("**n02 が list[Fact] を受け取れる（形を取り違えない）**",
+              got.value is not None or "標準偏差" in got.reason)
+        PE.quarter_series = lambda a, c, code, t, n=8: []
+        got2 = n02(_AsOf(), 1, "2020-12-31")
+        check("**四半期が無ければ理由つきで None**",
+              got2.value is None and "満たない" in got2.reason)
+    finally:
+        PE.quarter_series = real
+
     print("-" * 80)
-    declared = 17
+    declared = 19
     if len(ran) != declared:
         fails.append("本数が宣言と違う")
         print("  **検査の本数が宣言と違う: 宣言 %d / 実際 %d**"
