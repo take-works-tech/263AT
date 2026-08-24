@@ -151,6 +151,8 @@ def main() -> int:
 
     reasons: collections.Counter = collections.Counter()
     equity: list[tuple[str, float]] = []
+    #: (月末, 投資比率, 保有銘柄数, 候補数)。**現金比率を後で見るため。**
+    invested: list[tuple[str, float, int, int]] = []
     n_gen = 0
 
 
@@ -197,6 +199,18 @@ def main() -> int:
             cands.append(SZ.Candidate(ticker=tk, sector=r["sector"], score=s,
                                       volatility=vol, adv_jpy=r["adv_jpy"]))
         w, _ = SZ.target_positions(cands, pf.value(px) or a.capital, limits)
+        # **どれだけ現金で寝ているかを記録する。**
+        #
+        # 目標は投資上限 90% だが、**実際にはそこまで届かない。**
+        # Kelly の重みが最小ポジション(2%)を下回った銘柄は落とされ、
+        # **落とした分は配り直されない**ので現金として残る。
+        #
+        # 2026-08-25 に発注内容を作って気づいた: 上位30銘柄のうち
+        # **15銘柄が最小ポジション未満で落ち、元本の 29% が現金だった。**
+        #
+        # これを記録しないと、成績が「銘柄選別の結果」なのか
+        # **「3割を現金で持っていた結果」なのかが区別できない。**
+        invested.append((T, sum(w.values()), len(w), len(cands)))
         for tk in forced:
             w[tk] = 0.0
 
@@ -274,6 +288,24 @@ def main() -> int:
         if peak > 0 and (v / peak - 1.0) < mdd:
             mdd, mdd_at = v / peak - 1.0, d
     print("  **最大ドローダウン  %.1f%%**（%s）" % (100 * mdd, mdd_at))
+
+    # --- 現金比率（**成績の解釈に要る**）------------------------------------
+    if invested:
+        fr = sorted(x[1] for x in invested)
+        med = fr[len(fr) // 2]
+        nn = sorted(x[2] for x in invested)
+        print("  **投資比率 中央値 %.0f%%**（最小 %.0f%% / 最大 %.0f%%）"
+              % (100 * med, 100 * fr[0], 100 * fr[-1]))
+        print("  **保有銘柄数 中央値 %d**（最小 %d / 最大 %d）"
+              % (nn[len(nn) // 2], nn[0], nn[-1]))
+        if med < 0.80:
+            print("  " + "!" * 60)
+            print("  **投資比率の中央値が %.0f%% しかない。** 上限は 90%% である。"
+                  % (100 * med))
+            print("  この成績には **%.0f%% の現金**が混ざっている。"
+                  % (100 * (1 - med)))
+            print("  **銘柄選別の成績と、現金で薄めた成績が区別できていない。**")
+            print("  " + "!" * 60)
     if a.dump:
         # **平均だけでは「どれくらい振れるか」が分からない。**
         # 年ごとの推移を残して、最悪年・最良年を測れるようにする。

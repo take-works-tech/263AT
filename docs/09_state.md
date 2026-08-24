@@ -73,6 +73,9 @@
 # 継続企業の前提（10分）
 .venv/Scripts/python.exe tools/build_gc.py
 
+# 証券種別（1分）※ **これが無いと社債・優先株・ETF が混ざる**
+.venv/Scripts/python.exe tools/build_sectypes.py
+
 # パネル（40分）※ **| head で切らない。SIGPIPE で黙って止まる**
 .venv/Scripts/python.exe tools/build_panel.py \
     --start 2012-01-31 --end 2026-05-31 --horizons 250 --gates on --rebuild
@@ -82,8 +85,20 @@
 
 ```
 .venv/Scripts/python.exe tools/run_shrink_wf.py --panel gate --horizon-days 250
-.venv/Scripts/python.exe tools/run_system.py    --panel gate --horizon 250
+.venv/Scripts/python.exe tools/run_system.py    --panel gate --horizon 250     --dump data/eq_gate.json
+
+# **転がり窓。「マイナスにしない」が壊れていないか毎回見る**
+.venv/Scripts/python.exe tools/measure_windows.py data/eq_gate.json     --compare data/eq_d13.json
 ```
+
+### **発注内容を見る（実運用の判断に要る）**
+
+```
+.venv/Scripts/python.exe tools/make_orders.py
+```
+
+**これを作って初めて、上位3銘柄が社債だと分かった**（docs/10）。
+順位とスコアだけ見ていては気づけない。
 
 ### **記録する（最重要・年1回）**
 

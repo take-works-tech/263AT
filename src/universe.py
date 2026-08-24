@@ -203,7 +203,8 @@ def judge(c: Candidate, th: Thresholds) -> list[Exclusion]:
         out.append(Exclusion.NOT_LISTED)
     # **普通株でないものを外す。** 2026-08-25 に追加（docs/10）。
     # 社債・優先株は発行体の CIK を共有するので**財務指標がそのまま付き**、
-    # ボラが株式の 1/8 なので **Kelly が 8 倍の比率を与えていた。**
+    # ボラが 1/6（実測 7.5% 対 45.0%）なので
+    # **Kelly が 6 倍の比率を与えていた。**
     if _sectype.is_excluded(_sectype.Kind[c.security_kind]):
         out.append(Exclusion.NOT_COMMON)
     if c.is_primary is False:

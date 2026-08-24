@@ -24,8 +24,16 @@
      普通株の数字が社債の「スコア」になっていた。
 
   2. **Kelly サイジングはボラティリティで割る。**
-     社債は額面 $25 の近くで動くのでボラが株式の 1/8 程度。
-     → **同じスコアなら 8 倍の比率が付く。**
+     社債は額面 $25 の近くで動くので、ボラがそもそも小さい。
+
+     **実測（2026-05-31 まで252日、年率）:**
+
+         社債・優先株 6本   中央値 **7.5%**（ATLCL 5.5 / ATLCZ 5.2 / BAC-PB 5.0）
+         選ばれた普通株 8本  中央値 **45.0%**（SNEX 41.7 / AYTU 64.0）
+         同一発行体の普通株  中央値 23.5%（ATLC は **51.1%**）
+
+     → **同じスコアなら社債に 6.0 倍の比率が付く。**
+     Atlanticus 1社で見れば ATLC 51.1% 対 ATLCL 5.5% で **9.3 倍**である。
 
 **「スコアが高いから上に来た」のではない。「ボラが低いから上に来た」。**
 設計方針は「9割が負けても1割が何十倍」である。
@@ -119,7 +127,7 @@ NAME_RULES: tuple[tuple[Kind, str], ...] = (
                      r"|\bdepositary sh"),
     (Kind.NOTE, r"\bnotes?\b|\bdebenture|\bbonds?\b|capital securities"),
     (Kind.COMMON, r"\bcommon stock\b|\bordinary share|\bcommon share"
-                  r"|\bclass [a-z]\b|american depositary"),
+                  r"|\bclass [a-z]\b"),
 )
 
 #: ティッカーの形の判定。**`-` の後ろだけを見る。**
