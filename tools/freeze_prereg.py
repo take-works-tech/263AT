@@ -17,8 +17,16 @@ from __future__ import annotations
 import hashlib, json, pathlib, sys, datetime
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-DOC = ROOT / "docs" / "07_preregistration.md"
-LOCK = ROOT / "docs" / "07_preregistration.lock.json"
+def _paths():
+    """**複数の事前登録を扱う。** --doc で指定、既定は第1回。"""
+    d = "docs/07_preregistration.md"
+    if "--doc" in sys.argv:
+        d = sys.argv[sys.argv.index("--doc") + 1]
+    doc = ROOT / d
+    return doc, doc.with_suffix(".lock.json")
+
+
+DOC, LOCK = _paths()
 
 if hasattr(sys.stdout, "reconfigure"):
     try:
