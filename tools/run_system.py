@@ -153,6 +153,12 @@ def hysteresis_targets(pf, cands, cur_w, limits, entry_weight,
 
     slots = max(0, n_target - len(keep))
     budget = limits.max_invested - sum(tw.values())
+    # **枠数は「予算が最小ポジション何枠ぶんあるか」で切り詰める。**
+    # 本数の空きだけで1枠の大きさを決めると、継続保有が値上がりして
+    # 予算が僅かに縮んだだけで per が床を割り、**参入が全滅する**
+    # （実測: 予算54.1%を28枠に割ると1.93% < 2% → 参入ゼロが続き、
+    # 保有が1銘柄まで痩せて投資比率6%になった。2026-08-29）
+    slots = min(slots, int(budget / limits.min_position + 1e-9))
     entered = 0
     if slots and budget > limits.min_position:
         pool = [c for c in ranked if c.ticker not in held][: 3 * slots]
