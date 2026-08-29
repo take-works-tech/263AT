@@ -40,6 +40,7 @@ if hasattr(sys.stdout, "reconfigure"):
         pass
 
 import bars as BR             # noqa: E402
+import portfolio as PF        # noqa: E402
 import prices as PR           # noqa: E402
 import security_type as ST    # noqa: E402
 import sizing as SZ           # noqa: E402
@@ -54,8 +55,15 @@ def main() -> int:
     ap.add_argument("--capital", type=float, default=3_000_000.0,
                     help="個別株に配分する円")
     ap.add_argument("--fx", type=float, default=150.0, help="USD/JPY")
-    ap.add_argument("--fee-bps", type=float, default=25.0,
-                    help="片道の手数料+スプレッド（bps）")
+    ap.add_argument("--fee-bps", type=float, default=0.0,
+                    help="片道コストを bps で固定する（0 で実費モデル）。"
+                         "**既定は実費**: 手数料 min(0.495%%,$22) + 銘柄別"
+                         "スプレッド（Corwin-Schultz、ティック下限）+ 売りTAF")
+    ap.add_argument("--min-position", type=float, default=0.015,
+                    help="最小ポジション。**最終構成は 1.5%%**（docs/14 §4）")
+    ap.add_argument("--entry-weight", default="equal",
+                    choices=["equal", "kelly"],
+                    help="**最終構成は等加重**（docs/14 §1 L6）")
     a = ap.parse_args()
 
     if not LOG.exists():
@@ -104,7 +112,26 @@ def main() -> int:
         print("  **価格が取れなかった: %s**" % ", ".join(miss))
         print()
 
-    w, notes = SZ.target_positions(cands, a.capital, SZ.RiskLimits())
+    limits = SZ.RiskLimits(min_position=a.min_position)
+    if a.entry_weight == "equal":
+        # **等加重**（docs/14 §1 L6）。score/vol は同スコアの高ボラ銘柄＝
+        # 裾の候補を系統的に排除する。社債事故と同じ機構である。
+        # 実運用の新規建ては全銘柄が「参入」なので、参入規則をそのまま使う。
+        n_fit = min(len(cands), int(limits.max_invested / limits.min_position))
+        top = sorted(cands, key=lambda c: -c.score)[:n_fit]
+        per = limits.max_invested / max(len(top), 1)
+        w, notes = {}, []
+        sec_sum: dict[str | None, float] = {}
+        for c in top:
+            if per > limits.max_per_name:
+                per = limits.max_per_name
+            if sec_sum.get(c.sector, 0.0) + per > limits.max_per_sector:
+                notes.append("%s: 業種上限で見送り" % c.ticker)
+                continue
+            w[c.ticker] = per
+            sec_sum[c.sector] = sec_sum.get(c.sector, 0.0) + per
+    else:
+        w, notes = SZ.target_positions(cands, a.capital, limits)
     if not w:
         print("  **配分が作れなかった。**")
         for n in notes:
@@ -126,7 +153,15 @@ def main() -> int:
         shares = int(amt / (px * a.fx))
         real = shares * px * a.fx
         total += real
-        fee += real * a.fee_bps / 10000.0
+        if a.fee_bps > 0:
+            fee += real * a.fee_bps / 10000.0
+        else:
+            # **実費**（docs/14 §2.1 COST-1/2）。銘柄ごとに違う
+            s = PR.load([tk]).get(tk)
+            hs = (PF.half_spread_frac([x for x in BR.adjust(s.bars)
+                                       if x["date"] <= T], T) if s else 0.0125)
+            fee += real * PF.Costs(real=True, fx_jpy_usd=a.fx).one_way_real(
+                real, "buy", hs)
         note = ""
         if shares == 0:
             note = "**1株も買えない**"
@@ -188,10 +223,11 @@ def main() -> int:
     print()
     print("  " + "!" * 60)
     print("  **この表は発注ではない。** 判断のための材料である。")
-    print("  過去13.5年の測定では年率 +21.8%（SPY +13.7%）だが、")
+    print("  過去13.7年の測定では年率 +24.1%（実費込み・税引前）だが、")
     print("  **これを「指数に勝つ証拠」と受け取ってはいけない。**")
-    print("  生存者バイアス（価格データに上場廃止銘柄が1本も無い）と")
-    print("  カタログ自体のルックアヘッドは、**何も解決していない。**")
+    print("  上振れ交絡は**3つ**残っている（docs/14 §5）:")
+    print("    生存者バイアス / カタログのルックアヘッド / **同一パネル上の構造選択**")
+    print("  日次の最大ドローダウンは **-40.0%**（月末値の -30% より 10pp 深い）。")
     print("  **交絡のない証拠は前向き記録だけで、初回評価は 2027-02-05 である。**")
     lo = [x for x in lines if x[2] < 2.0]
     if lo:
