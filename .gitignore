@@ -58,3 +58,6 @@ research/z12_correlation.csv
 research/implementation_priority.csv
 research/us_cross_section.csv
 data/panel/
+
+# 研究CSVは追跡しない（外部データ由来の素材は公開リポジトリに置かない。docs/13）
+research/*.csv
