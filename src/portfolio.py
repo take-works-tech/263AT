@@ -44,14 +44,79 @@ class Costs:
     `spread_bps` は**実効スプレッドの半分**（片道で払う分）。
     `commission_bps` は手数料。SBI の現物は現在ほぼゼロだが、
     **ゼロを既定にしない** — 将来変わるし、米国株には為替コストがある。
+
+    実費モデル（事前登録 第5回 L4、COST-1/COST-2）
+    ------------------------------------------------
+    `real=True` のとき、一律 bps をやめて**この口座の実費**を使う:
+
+    - 手数料 = min(0.495% × 約定代金, $22)/片道（SBI 米株現物）。
+      この口座の玉（~$775）では上限に届かず、**ほぼ常に 49.5bps**
+    - スプレッド = 銘柄別に高値安値から推定（Corwin-Schultz 2012）。
+      下限は **ティックの半分**（$2未満の低位株では 25-44bps になる）
+    - 売りにのみ SEC/TAF ≈ 1bp
     """
 
     spread_bps: float = 25.0        # 片道 0.25%。小型株の実測に近い保守的な値
     commission_bps: float = 5.0     # 片道 0.05%
     slippage_bps: float = 0.0       # 追加の滑り（感度分析用）
+    real: bool = False              # True で実費モデル
+    commission_pct: float = 0.495   # SBI 米株の片道手数料（%）
+    commission_cap_usd: float = 22.0
+    sec_taf_bps: float = 1.0        # 売りのみ
+    fx_jpy_usd: float = 150.0
 
     def one_way(self) -> float:
         return (self.spread_bps + self.commission_bps + self.slippage_bps) / 10000.0
+
+    def one_way_real(self, notional_jpy: float, side: str,
+                     half_spread: float) -> float:
+        """実費モデルの片道コスト（約定代金に対する率）。"""
+        if notional_jpy <= 0:
+            return 0.0
+        comm = min(self.commission_pct / 100.0,
+                   self.commission_cap_usd * self.fx_jpy_usd / notional_jpy)
+        taf = (self.sec_taf_bps / 10000.0) if side == "sell" else 0.0
+        return comm + half_spread + taf + self.slippage_bps / 10000.0
+
+
+def half_spread_frac(bars: list[dict], upto: str) -> float:
+    """**銘柄別の片道スプレッド**を高値安値から推定する（Corwin-Schultz 2012）。
+
+    実測（2026-08-29 監査）: 前向き記録第2号の30銘柄で
+    **全スプレッドの中央値 158bps（片道79bps）**。一律25bpsの約3倍。
+    $2未満の6銘柄はティック下限だけで片道44bps以上になる。
+
+    - 直近60営業日の出来高のあるバーで推定
+    - 下限 = **ティック($0.01)の半分 ÷ 株価**（1ティック幅の板でも払う分）
+    - 推定不能なほど薄い銘柄は保守的に 125bps
+    - 上限 500bps（推定の暴走を止める）
+    """
+    b = [x for x in bars if x["date"] <= upto and x.get("volume", 0) > 0
+         and x.get("high", 0) > 0 and x.get("low", 0) > 0][-61:]
+    if len(b) < 20:
+        return 0.0125
+    import math as _m
+    k = 3.0 - 2.0 * _m.sqrt(2.0)
+    ss = []
+    for p, c in zip(b, b[1:]):
+        try:
+            beta = (_m.log(p["high"] / p["low"]) ** 2
+                    + _m.log(c["high"] / c["low"]) ** 2)
+            hi = max(p["high"], c["high"])
+            lo = min(p["low"], c["low"])
+            gamma = _m.log(hi / lo) ** 2
+        except (ValueError, ZeroDivisionError):
+            continue
+        alpha = ((_m.sqrt(2.0 * beta) - _m.sqrt(beta)) / k
+                 - _m.sqrt(gamma / k))
+        s = 2.0 * (_m.exp(alpha) - 1.0) / (1.0 + _m.exp(alpha))
+        ss.append(max(s, 0.0))
+    if not ss:
+        return 0.0125
+    full = sum(ss) / len(ss)
+    px = b[-1]["close"]
+    tick_floor = 0.5 * 0.01 / px if px > 0 else 0.0
+    return min(max(full / 2.0, tick_floor, 0.0005), 0.05)
 
 
 @dataclasses.dataclass
@@ -75,6 +140,10 @@ class Portfolio:
     cash: float
     positions: dict[str, SL.Position] = dataclasses.field(default_factory=dict)
     fills: list[Fill] = dataclasses.field(default_factory=list)
+    #: 売りの実現損益 (日付, 金額)。**税の計算に要る**（事前登録 第5回 R-11）
+    realized: list[tuple[str, float]] = dataclasses.field(default_factory=list)
+    #: 受け取った配当 (日付, 金額)。**2026-08-29 まで存在しなかった**（DIV-1）
+    divs: list[tuple[str, float]] = dataclasses.field(default_factory=list)
 
     def value(self, prices: dict[str, float]) -> float:
         v = self.cash
@@ -111,7 +180,10 @@ def next_open(bars: list[dict], signal_date: str) -> tuple[str, float] | None:
             if carried > MAX_CARRY:
                 return None
             continue
-        if b.get("open") is None or b["open"] <= 0:
+        # **出来高ゼロの日には約定しない**（事前登録 第5回 EXE-1）。
+        # yfinance 経路では halted フラグは常に False なので、
+        # 出来高で見なければ「誰も取引していない幻の価格」で約定できてしまう。
+        if b.get("open") is None or b["open"] <= 0 or b.get("volume", 0) <= 0:
             carried += 1
             if carried > MAX_CARRY:
                 return None
@@ -122,11 +194,21 @@ def next_open(bars: list[dict], signal_date: str) -> tuple[str, float] | None:
 
 def execute(pf: Portfolio, target_w: dict[str, float],
             bars_by_ticker: dict[str, list[dict]], signal_date: str,
-            costs: Costs, min_trade_frac: float = 0.005) -> list[str]:
+            costs: Costs, min_trade_frac: float = 0.005,
+            force: frozenset[str] | set[str] = frozenset()) -> list[str]:
     """目標ウェイトに向けて売買する。**約定は翌取引日の始値。**
 
     `min_trade_frac` 未満の調整は**行わない** —
     **回転率を無駄に上げない**（コストが効く）。
+
+    **売りを全部処理してから買う**（事前登録 第5回 PM-2）。
+    2026-08-29 までアルファベット順の一巡だったため、売りより
+    辞書順で先の買いが現金不足で黙って切り詰められていた
+    （165ヶ月中26ヶ月で発生）。
+
+    `force` の銘柄は min_trade_frac を迂回する（V6）。
+    強制売り（ゲート違反・損切り）が「差が小さいから」という理由で
+    素通りしてはいけない。
 
     Returns
     -------
@@ -146,11 +228,17 @@ def execute(pf: Portfolio, target_w: dict[str, float],
     cur_w = pf.weights(px_close)
     tickers = set(target_w) | set(cur_w)
 
-    for t in sorted(tickers):
+    # **売りを先に、買いを後に。** 各グループの中は辞書順（再現性のため）
+    sells = sorted(t for t in tickers
+                   if target_w.get(t, 0.0) < cur_w.get(t, 0.0))
+    buys = sorted(t for t in tickers
+                  if target_w.get(t, 0.0) >= cur_w.get(t, 0.0))
+
+    for t in sells + buys:
         want = target_w.get(t, 0.0)
         have = cur_w.get(t, 0.0)
         diff = want - have
-        if abs(diff) < min_trade_frac:
+        if abs(diff) < min_trade_frac and t not in force:
             continue
         bars = bars_by_ticker.get(t)
         if not bars:
@@ -163,10 +251,14 @@ def execute(pf: Portfolio, target_w: dict[str, float],
         fill_date, gross = nx
         side = "buy" if diff > 0 else "sell"
         amt = abs(diff) * total
-        c = costs.one_way()
+        if costs.real:
+            c = costs.one_way_real(amt, side,
+                                   half_spread_frac(bars, signal_date))
+        else:
+            c = costs.one_way()
         eff = gross * (1 + c) if side == "buy" else gross * (1 - c)
         shares = amt / eff if eff > 0 else 0.0
-        if shares <= 0:
+        if shares <= 0 and t not in force:
             continue
 
         if side == "buy":
@@ -209,6 +301,9 @@ def execute(pf: Portfolio, target_w: dict[str, float],
             else:
                 shares = min(shares, old.shares)
             pf.cash += shares * eff
+            # **実現損益**（取得価格はコスト込みの加重平均）。税の計算に要る
+            pf.realized.append((fill_date,
+                                shares * (eff - old.entry_price)))
             rest = old.shares - shares
             if rest <= 1e-12:
                 del pf.positions[t]
@@ -234,6 +329,43 @@ def mark_to_market(pf: Portfolio, bars_by_ticker: dict[str, list[dict]],
         px[t] = c
         pf.positions[t] = pf.positions[t].update(c)
     return px
+
+
+def credit_dividends(pf: Portfolio, bars_by_ticker: dict[str, list[dict]],
+                     upto: str, marks: dict[str, str]) -> float:
+    """保有銘柄の配当を現金計上する（事前登録 第5回 L2、DIV-1）。
+
+    **2026-08-29 まで、このシステムに配当は存在しなかった。**
+    価格は配当未調整（yfinance auto_adjust=False）なのに、
+    配当を現金に入れる場所がどこにも無かった。ゲート後断面の
+    45-58% が配当を払う（平均利回り 1.6-2.0%）のに、である。
+
+    `marks[ticker]` = 前回計上した日（その日を含まない）。
+    - 新規建ての銘柄は約定日を起点にする（**約定日の配当は受け取れない**
+      — ex-date の始値で買った人に当日の配当は付かない）
+    - 同じ日に2回呼んでも二重計上しない（marks が進むので冪等）
+    """
+    got = 0.0
+    for t, pos in pf.positions.items():
+        last = marks.get(t)
+        if last is None:
+            last = pos.entry_date
+            marks[t] = last
+        if upto <= last:
+            continue
+        bars = bars_by_ticker.get(t) or []
+        amt = sum(x.get("dividend", 0.0) for x in bars
+                  if last < x["date"] <= upto) * pos.shares
+        if amt > 0:
+            pf.cash += amt
+            pf.divs.append((upto, amt))
+            got += amt
+        marks[t] = upto
+    # 手放した銘柄の印は消す（同銘柄を買い直したとき、
+    # 空白期間の配当を受け取ってしまわないため）
+    for t in [k for k in marks if k not in pf.positions]:
+        del marks[t]
+    return got
 
 
 def turnover(pf: Portfolio, total_value: float) -> float:

@@ -128,12 +128,23 @@ def log_return(rows: Sequence[dict]) -> list[float | None]:
     0 を入れるとボラティリティが過小評価され、
     Kelly の分母が小さくなってポジションが過大になる（§1.8）。
     """
+    # **基準は「最後に取引が成立した終値」**（事前登録 第5回 EXE-1）。
+    # 出来高ゼロの日の終値は「誰も取引していない値」であり、
+    # そこを基準にしたリターンは実在しない（ACRG: v=0 の $0.08 から
+    # 翌日 $1.65 で +303% に見えた。ボラ推定と fwd を汚す）。
+    # 停止・出来高ゼロを**跨いで**、直前に取引のあった終値から計算する
+    # — 停止明けの値動きを捨てると、こんどはボラが過小になる。
     out: list[float | None] = [None]
-    for prev, cur in zip(rows, rows[1:]):
-        if cur["halted"] or cur["volume"] <= 0 or prev["close"] <= 0 or cur["close"] <= 0:
+    last: float | None = (rows[0]["close"]
+                          if rows and not rows[0]["halted"]
+                          and rows[0]["volume"] > 0
+                          and rows[0]["close"] > 0 else None)
+    for cur in rows[1:]:
+        if cur["halted"] or cur["volume"] <= 0 or cur["close"] <= 0:
             out.append(None)
-        else:
-            out.append(math.log(cur["close"] / prev["close"]))
+            continue
+        out.append(math.log(cur["close"] / last) if last else None)
+        last = cur["close"]
     return out
 
 

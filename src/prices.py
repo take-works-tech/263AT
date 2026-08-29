@@ -274,8 +274,13 @@ def load(tickers: list[str]) -> dict[str, Series]:
         if not f.exists():
             continue
         d = json.loads(f.read_text(encoding="utf-8"))
+        # **Bar が知らないキーは捨てる。** clean_price_glitches.py が
+        # 清掃の印（glitch）を足すので、素通しの ** 展開だと落ちる
+        fields = {fl.name for fl in dataclasses.fields(B.Bar)}
         out[t] = Series(
-            ticker=d["ticker"], bars=[B.Bar(**b) for b in d["bars"]],
+            ticker=d["ticker"],
+            bars=[B.Bar(**{k: v for k, v in b.items() if k in fields})
+                  for b in d["bars"]],
             splits=[tuple(x) for x in d["splits"]], source=d["source"],
             source_pre_adjusted=d["source_pre_adjusted"], note=d.get("note", ""))
     return out

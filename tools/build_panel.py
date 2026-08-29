@@ -75,6 +75,9 @@ SEC_KINDS: dict[str, str] = {}
 
 LOOKBACK_YEARS = 3    # latest_period が最大400日遡るので3年で足りる
 
+# 分配殻ゲート（DIV-2）で除外した延べ銘柄数。main が最後に表示する
+_SHELL_EXCLUDED = 0
+
 SIGN = {"E29": +1, "B22": -1, "E03": -1, "F24": -1, "E01": -1,
         "B02": +1, "B06": +1, "A04": +1, "A03": +1, "A06": +1,
         # 価格系（Phase 0、src/params_px.py）
@@ -133,10 +136,15 @@ def month_ends(lo: str, hi: str) -> list[str]:
 
 
 def forward_return(bars: list[dict], t: str, horizon_days: int) -> float | None:
-    """**t+1 の始値で買って、t+H の始値で売った**リターン。
+    """**t+1 の始値で買って、t+H の始値で売った**リターン。**配当込み。**
 
     執行の規約（spec §1.5）と一致させる。
     **終値→終値にすると、実際には取れない値を学習する。**
+
+    配当を足すのは事前登録 第5回 L3（DIV-1）。
+    価格のみのラベルは配当を払う銘柄を系統的に不利に学習させ、
+    **清算分配（ELME の $14.67）を −84% の暴落として学習していた。**
+    保有期間中（約定日の翌日〜手仕舞い日）の1株あたり配当を出口価格に足す。
     """
     entry = PF.next_open(bars, t)
     if entry is None:
@@ -146,7 +154,11 @@ def forward_return(bars: list[dict], t: str, horizon_days: int) -> float | None:
     ex = PF.next_open(bars, exit_after)
     if ex is None:
         return None
-    return ex[1] / entry[1] - 1.0 if entry[1] > 0 else None
+    if entry[1] <= 0:
+        return None
+    divs = sum(b.get("dividend", 0.0) for b in bars
+               if entry[0] < b["date"] <= ex[0])
+    return (ex[1] + divs) / entry[1] - 1.0
 
 
 def scan_one(tk: str, mes: list[str], horizons: list[int]) -> dict:
@@ -181,9 +193,21 @@ def scan_one(tk: str, mes: list[str], horizons: list[int]) -> dict:
         px_true = rows[i]["close"] * PR.unadjust_factor(ser, t)
         if "J25" in SIGN:
             vals["J25"] = px_true
+        # **直近365日の1株あたり分配の合計 ÷ 株価**（調整後どうしで基準が揃う）。
+        # 清算分配・特別分配の後は「財務は分配前・価格は分配後」になり、
+        # A03/A04 などの割安指標が壊れる（DIV-2、ELME で実際に踏んだ）。
+        d0 = (dt.date.fromisoformat(t) - dt.timedelta(days=365)).isoformat()
+        div12 = sum(x.get("dividend", 0.0) for x in rows[: i + 1]
+                    if x["date"] > d0)
         out[t] = {
             "close": rows[i]["close"],
             "px_true": px_true,
+            "div12_frac": (div12 / rows[i]["close"]
+                           if rows[i]["close"] > 0 else 0.0),
+            # **時点 t までに起きた分割**（(日付, 比率)）。
+            # 報告時点の株数を t の株数基準に直すのに使う（LA-1）。
+            # t より後の分割は含めない — それは未来の情報である。
+            "splits_upto": [[sd, f] for sd, f in ser.splits if sd <= t],
             "adv20": sum(x["turnover"] for x in rows[i - 19: i + 1]) / 20.0,
             "zero60": sum(1 for x in rows[i - 59: i + 1] if x["volume"] <= 0),
             "vals": vals,
@@ -209,8 +233,32 @@ def build_one(t: str, scan_t: dict, by_ticker, sic_asof, asof,
         if not m or not m.cik:
             continue
         cik = int(m.cik)
+        # **分配殻ゲート（DIV-2、事前登録 第5回 L3）。**
+        # 直近365日の分配合計が株価の20%を超える銘柄は、
+        # 「財務が記述する資産を、もう株主に配ってしまった」状態にある。
+        # 割安指標（分配前の財務 ÷ 分配後の価格）が壊れるので除外する。
+        # 閾値 20% は事前に固定した値で、掃引しない
+        # （通常の高配当は REIT でも 15% に届かない）。
+        if d.get("div12_frac", 0.0) > 0.20:
+            global _SHELL_EXCLUDED
+            _SHELL_EXCLUDED += 1
+            continue
         sh = asof.latest_period(cik, "SHARES", 0, t, max_lag_days=400)
-        mcap = sh.value * d["close"] * FX if sh else None
+        # **時価総額は「その時点の実際の株価 × その時点の株数」**（LA-1）。
+        # 2026-08-29 まで調整後終値を使っていた。調整後終値が低いことは
+        # 「その後に大きく分割した ＝ その後に大きく上がった」という
+        # 未来の情報そのものである（69ea889 の修正が mcap には
+        # 適用されていなかった。2015-06 断面で 24% の銘柄が影響）。
+        #
+        # 株数は報告時点（sh.filed）の株数なので、報告から t までに
+        # 分割があれば その比率を掛けて t の株数基準に直す。
+        mcap = None
+        if sh:
+            sfac = 1.0
+            for sd, f in d.get("splits_upto", ()):
+                if sh.filed < sd <= t and f > 0:
+                    sfac *= f
+            mcap = sh.value * sfac * d["px_true"] * FX
         cand = UV.Candidate(
             ticker=tk, listed=True, months_listed=None,
             adv_jpy=d["adv20"] * FX, zero_volume_days=d["zero60"],
@@ -242,7 +290,8 @@ def build_one(t: str, scan_t: dict, by_ticker, sic_asof, asof,
             continue
         raw.append({"ticker": tk, "sector": ff49.industry(sic_asof.get(cik, t)),
                     "vals": vals, "adv_jpy": cand.adv_jpy, "mcap": mcap,
-                    "cik": cik, "fwd": d["fwd"].get(horizon)})
+                    "cik": cik, "fwd": d["fwd"].get(horizon),
+                    "px": d["px_true"]})
     if not raw:
         return []
 
@@ -321,7 +370,10 @@ def build_one(t: str, scan_t: dict, by_ticker, sic_asof, asof,
         if not z:
             continue
         out.append({"date": t, "ticker": r["ticker"], "sector": r["sector"],
-                    "z": z, "fwd": r["fwd"], "adv_jpy": r["adv_jpy"]})
+                    "z": z, "fwd": r["fwd"], "adv_jpy": r["adv_jpy"],
+                    # **その時点の実際の株価。** 実行側の最低株価の掃引と、
+                    # 実コストモデル（ティック下限）に使う。
+                    "px": r.get("px")})
     return out
 
 
@@ -339,6 +391,9 @@ def main() -> int:
                     choices=["on", "off", "both"],
                     help="最低株価のゲート。**both は対照実験**"
                          "（同じ走査結果から有無だけを変えた2本を作る）")
+    ap.add_argument("--suffix", default="",
+                    help="出力ディレクトリの接尾辞（例 _v2 → data/panel/gate_v2）。"
+                         "**旧パネルを上書きせずに比較を残すため**")
     args = ap.parse_args()
 
     base = CACHE          # モジュール定数をそのまま使う（再代入しない）
@@ -371,6 +426,7 @@ def main() -> int:
     conds = ([("gate", True), ("nogate", False)] if args.gates == "both"
              else [("gate", True)] if args.gates == "on"
              else [("nogate", False)])
+    conds = [(name + args.suffix, gate) for name, gate in conds]
 
     # --- 第1段: 価格を触る処理を全部済ませる ------------------------------
     # **1銘柄ずつ読んで捨てる。** 同時にメモリにあるのは1銘柄ぶんだけ。
@@ -433,6 +489,8 @@ def main() -> int:
         print("  %s  %s" % (t, "  ".join(line)))
         scan[t] = {}          # **使い終わった月は捨てる**
     print("合計 %d 行 → %s" % (total, CACHE.relative_to(ROOT)))
+    if _SHELL_EXCLUDED:
+        print("**分配殻ゲート（DIV-2）で除外: 延べ %d 銘柄**" % _SHELL_EXCLUDED)
     return 0
 
 
