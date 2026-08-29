@@ -25,6 +25,7 @@
 from __future__ import annotations
 
 import argparse
+import bisect
 import dataclasses
 import datetime as dt
 import json
@@ -180,6 +181,11 @@ def scan_one(tk: str, mes: list[str], horizons: list[int]) -> dict:
     if ser is None or len(ser.bars) < 60:
         return {}
     rows = BR.adjust(ser.bars)
+    # 配当の累積和（div12_frac 用）。銘柄ごとに1回だけ作る
+    dates_of = [x["date"] for x in rows]
+    cumdiv = [0.0]
+    for x in rows:
+        cumdiv.append(cumdiv[-1] + x.get("dividend", 0.0))
     out = {}
     for t in mes:
         i = _index_at(rows, t)
@@ -196,9 +202,11 @@ def scan_one(tk: str, mes: list[str], horizons: list[int]) -> dict:
         # **直近365日の1株あたり分配の合計 ÷ 株価**（調整後どうしで基準が揃う）。
         # 清算分配・特別分配の後は「財務は分配前・価格は分配後」になり、
         # A03/A04 などの割安指標が壊れる（DIV-2、ELME で実際に踏んだ）。
+        # 累積和で O(log n)。**素朴に毎月スライスすると全体が二次になる**
+        # （9,631銘柄 × 175月 × 数千バー — 最初の実装はこれで沈んだ）。
         d0 = (dt.date.fromisoformat(t) - dt.timedelta(days=365)).isoformat()
-        div12 = sum(x.get("dividend", 0.0) for x in rows[: i + 1]
-                    if x["date"] > d0)
+        j = bisect.bisect_right(dates_of, d0)
+        div12 = cumdiv[i + 1] - cumdiv[j]
         out[t] = {
             "close": rows[i]["close"],
             "px_true": px_true,
