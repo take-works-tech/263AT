@@ -188,6 +188,18 @@ def cmd_record(a) -> int:
         "picks": [{"rank": i + 1, "ticker": tk, "sector": sec,
                    "score": round(s, 6)}
                   for i, (s, tk, sec) in enumerate(scored[:a.top_n])],
+        # **同条件のランダム対照**（監査 STAT-7、docs/12 §2 決定5）。
+        # 前向き評価を「対 指数」でなく「対 対照」の**ペア差**にすると、
+        # 判定の所要が 44年 → 3〜5年に縮む（追跡誤差 10%/年 → 4.7pp/年）。
+        # 銘柄名と基準日から決まる疑似乱数なので後から誰でも再現できる。
+        # run_system --benchmark random と同じ式である。
+        "control_random": sorted(
+            (tk for _, tk, _ in scored),
+            key=lambda tk: -int(hashlib.md5(
+                (tk + T).encode()).hexdigest()[:8], 16))[:a.top_n],
+        # **ユニバース全体の銘柄一覧。** 等加重対照を後から再現するために
+        # 記録を自己完結にする（外部の断面ファイルに依存しない）
+        "universe_tickers": sorted(tk for _, tk, _ in scored),
         # **記録時は必ず null。** 値が入っていたらルックアヘッド
         "realized": None,
         "prev": prev_rows[-1]["sha"] if prev_rows else GENESIS,
@@ -241,29 +253,55 @@ def cmd_evaluate(a) -> int:
     print("=" * 78)
     today = dt.date.today().isoformat()
     n_done = 0
+
+    def ret_of(tickers: list[str], asof: str, end: str) -> list[float]:
+        """**配当込み**の実現リターン（asof 翌始値 → end 翌始値）。
+
+        価格のみのリターンは配当を払う銘柄を系統的に過小評価し、
+        清算分配を暴落と取り違える（DIV-1/2）。評価も配当込みで行う。
+        """
+        out = []
+        for tk in tickers:
+            s = PR.load([tk]).get(tk)
+            if not s:
+                continue
+            b = BR.adjust(s.bars)
+            a1 = [x for x in b if x["date"] > asof]
+            a2 = [x for x in b if x["date"] > end]
+            if a1 and a2 and a1[0]["open"] > 0:
+                divs = sum(x.get("dividend", 0.0) for x in b
+                           if a1[0]["date"] < x["date"] <= a2[0]["date"])
+                out.append((a2[0]["open"] + divs) / a1[0]["open"] - 1.0)
+        return out
+
+    import statistics as st
     for r in rows:
         end = (dt.date.fromisoformat(r["asof"])
                + dt.timedelta(days=r["horizon_days"])).isoformat()
         if end > today:
             print("  %s  **まだ評価できない**（%s 以降）" % (r["asof"], end))
             continue
-        rets = []
-        for p in r["picks"]:
-            s = PR.load([p["ticker"]]).get(p["ticker"])
-            if not s:
-                continue
-            b = BR.adjust(s.bars)
-            a1 = [x for x in b if x["date"] > r["asof"]]
-            a2 = [x for x in b if x["date"] > end]
-            if a1 and a2 and a1[0]["open"] > 0:
-                rets.append(a2[0]["open"] / a1[0]["open"] - 1.0)
+        rets = ret_of([p["ticker"] for p in r["picks"]], r["asof"], end)
         if not rets:
             print("  %s  価格が取れない" % r["asof"])
             continue
         n_done += 1
-        import statistics as st
-        print("  %s  上位%d銘柄の平均 **%+.2f%%**（%d 銘柄で計測）"
+        print("  %s  上位%d銘柄の平均 **%+.2f%%**（%d 銘柄で計測、配当込み）"
               % (r["asof"], len(r["picks"]), 100 * st.fmean(rets), len(rets)))
+        # **ペア差**（同条件のランダム対照・等加重ユニバース）。
+        # 第3号以降の記録にだけ入っている。無い記録では黙って飛ばさず表示する
+        if r.get("control_random"):
+            c = ret_of(r["control_random"], r["asof"], end)
+            if c:
+                print("       ランダム対照 %+.2f%% → **ペア差 %+.2f%%**"
+                      % (100 * st.fmean(c), 100 * (st.fmean(rets) - st.fmean(c))))
+        else:
+            print("       （この記録には対照が無い — 第3号より前の形式）")
+        if r.get("universe_tickers"):
+            u = ret_of(r["universe_tickers"], r["asof"], end)
+            if u:
+                print("       等加重ユニバース %+.2f%%（%d 銘柄）"
+                      % (100 * st.fmean(u), len(u)))
     print()
     if n_done == 0:
         print("  **評価できる記録はまだ無い。** これは正常である —")
